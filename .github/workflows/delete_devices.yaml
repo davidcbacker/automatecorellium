@@ -42,7 +42,7 @@ jobs:
             echo "Checking instance ${device}"
             if [[ ! " ${authorized_instances[@]} " =~ " ${device} " ]]; then
               echo "Deleting unauthorized instance ${device}"
-              echo 'THIS IS A TEST' || corellium instance delete "${device}" --wait
+              echo 'DELETE COMMAND' || corellium instance delete "${device}" --wait
             else
               echo "Instance ${device} is authorized"
             fi

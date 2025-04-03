@@ -34,15 +34,14 @@ jobs:
             'c764cf80-a897-47bf-952e-6ed046e777c0'
             'c79235e5-e4cf-4c3f-99d3-ee88c1265a3b'
           )
-          echo "Authorized instances array: ${authorized_instances[@]}"
-          echo 'Listing Corellium devices'
           corellium_devices=($(corellium list | jq -r '.[].id'))
-          echo "Corellium devices: ${corellium_devices[@]}"
+          echo "DEBUG authorized instances array: ${authorized_instances[@]}"
+          echo 'DEBUG listing Corellium devices'
+          echo "DEBUG corellium devices: ${corellium_devices[@]}"
           for device in "${corellium_devices[@]}"; do
-            echo "Checking instance ${device}"
             if [[ ! " ${authorized_instances[@]} " =~ " ${device} " ]]; then
               echo "Deleting unauthorized instance ${device}"
-              echo 'DELETE COMMAND' || corellium instance delete "${device}" --wait
+              corellium instance delete "${device}" --wait
             else
               echo "Instance ${device} is authorized"
             fi

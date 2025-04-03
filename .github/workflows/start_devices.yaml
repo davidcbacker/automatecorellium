@@ -1,4 +1,4 @@
-name: Corellium
+name: Start Corellium devices
 
 on:
   - workflow_dispatch

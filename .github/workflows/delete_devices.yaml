@@ -18,7 +18,7 @@ jobs:
           cache: 'npm'
           node-version: 22
       - name: Install Corellium CLI
-        run: npm install @corellium/corellium-cli
+        run: npm install -g @corellium/corellium-cli
       - name: Login to Corellium
         run: |
           corellium login \

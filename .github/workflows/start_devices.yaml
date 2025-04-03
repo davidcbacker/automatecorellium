@@ -28,6 +28,7 @@ jobs:
             '0314d2b5-d229-4c34-a7d6-45025a6742fd'
           )
           echo "Instances array: ${instances[@]}"
-          for instance in "{instances[@]}"; do
+          for instance in "${instances[@]}"; do
+            echo "Starting instance ${instance}"
             corellium instance start "${instance}" --wait
           done

@@ -36,7 +36,7 @@ jobs:
           )
           echo "Authorized instances array: ${authorized_instances[@]}"
           echo 'Listing Corellium devices'
-          corellium_devices=($(corellium list | awk '{print $1}')) # Assuming the first column contains the instance IDs
+          corellium_devices=($(corellium list | jq -r '.[].id'))
           echo "Corellium devices: ${corellium_devices[@]}"
           for device in "${corellium_devices[@]}"; do
             echo "Checking instance ${device}"

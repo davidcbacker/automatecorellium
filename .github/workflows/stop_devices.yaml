@@ -1,7 +1,9 @@
 name: Stop Corellium devices
 
 on:
-  - workflow_dispatch
+  schedule:
+    - cron: '2 23 * * 1-5'
+  workflow_dispatch:
 
 jobs:
   corellium-start:

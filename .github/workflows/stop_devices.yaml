@@ -1,0 +1,36 @@
+name: Stop Corellium devices
+
+on:
+  - workflow_dispatch
+
+jobs:
+  corellium-start:
+    name: Stop
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull the latest code
+        uses: actions/checkout@v4
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          node-version: 22
+      - name: Install Corellium CLI
+        run: npm install -g @corellium/corellium-cli
+      - name: Login to Corellium
+        run: |
+          readonly CORELLIUM_API_ENDPOINT='https://corelliumsales.enterprise.corellium.com'
+          corellium login --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} --endpoint "${CORELLIUM_API_ENDPOINT}"
+      - name: Start Corellium virtual devices
+        run: |
+          instances=(
+            '16a2d66b-5420-4146-b482-ee0a65ea46a2'
+            '03cb199c-c3c2-4cb3-acff-67bdc0dee84f'
+            '0314d2b5-d229-4c34-a7d6-45025a6742fd'
+            '5de77a68-24e6-41e1-bd88-09840a37d8a8'
+          )
+          echo "Instances array: ${instances[@]}"
+          for instance in "${instances[@]}"; do
+            echo "Stopping instance ${instance}"
+            corellium instance stop "${instance}" --wait || true
+          done

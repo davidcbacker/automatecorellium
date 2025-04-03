@@ -1,0 +1,31 @@
+name: Corellium
+
+on:
+  - workflow_dispatch
+
+jobs:
+  corellium:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull the latest code
+        uses: actions/checkout@v4
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          node-version: 22
+      - name: Install Corellium CLI
+        run: npm install -g @corellium/corellium-cli
+      - name: Login to Corellium
+        run: corellium login --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} --endpoint https://app.corellium.com
+      - name: Start Corellium virtual devices
+        run: |
+          instances=(
+            '16a2d66b-5420-4146-b482-ee0a65ea46a2'
+            '03cb199c-c3c2-4cb3-acff-67bdc0dee84f'
+            '0314d2b5-d229-4c34-a7d6-45025a6742fd'
+          )
+          echo "Instances array: ${instances[@]}"
+          for instance in "{instances[@]}"; do
+            corellium instance start "${instance}" --wait
+          done

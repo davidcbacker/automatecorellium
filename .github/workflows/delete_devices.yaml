@@ -34,7 +34,7 @@ jobs:
           for device in "${corellium_devices[@]}"; do
             if [[ ! " ${authorized_instances[@]} " =~ " ${device} " ]]; then
               echo "Deleting unauthorized instance ${device}"
-              corellium instance delete "${device}" --wait
+              echo "TEST DELETE ${device}" || corellium instance delete "${device}" --wait
             else
               echo "Found an authorized instance."
             fi

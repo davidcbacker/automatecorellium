@@ -4,7 +4,8 @@ on:
   - workflow_dispatch
 
 jobs:
-  corellium:
+  corellium-start:
+    name: Start
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code

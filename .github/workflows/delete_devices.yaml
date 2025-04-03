@@ -27,7 +27,10 @@ jobs:
       - name: Delete Corellium virtual devices
         run: |
           echo "DEBUG env var is ${{ vars.AUTHORIZED_INSTANCES }}"
-          IFS=$'\n' read -r -a authorized_instances <<< "${{ vars.AUTHORIZED_INSTANCES }}"
+          authorized_instances=()
+          while IFS= read -r line; do
+            authorized_instances+=("$line")
+          done <<< "${{ vars.AUTHORIZED_INSTANCES }}"
           corellium_devices=($(corellium list | jq -r '.[].id'))
           echo "DEBUG authorized instances array: ${authorized_instances[@]}"
           echo 'DEBUG listing Corellium devices'

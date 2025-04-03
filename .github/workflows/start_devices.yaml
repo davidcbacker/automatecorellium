@@ -17,7 +17,9 @@ jobs:
       - name: Install Corellium CLI
         run: npm install -g @corellium/corellium-cli
       - name: Login to Corellium
-        run: corellium login --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} --endpoint https://app.corellium.com
+        run: |
+          readonly CORELLIUM_API_ENDPOINT='https://corelliumsales.enterprise.corellium.com'
+          corellium login --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} --endpoint "${CORELLIUM_API_ENDPOINT}"
       - name: Start Corellium virtual devices
         run: |
           instances=(

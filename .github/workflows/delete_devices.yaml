@@ -35,7 +35,7 @@ jobs:
           echo "DEBUG authorized instances array: ${authorized_instances[@]}"
           echo 'DEBUG listing Corellium devices'
           echo "DEBUG corellium devices: ${corellium_devices[@]}"
-          for device in "${authorized_instances[@]}"; do
+          for device in "${corellium_devices[@]}"; do
             if [[ ! " ${authorized_instances[@]} " =~ " ${device} " ]]; then
               echo "Deleting unauthorized instance ${device}"
               echo "TEST DELETE ${device}" || corellium instance delete "${device}" --wait

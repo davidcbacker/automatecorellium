@@ -18,11 +18,12 @@ jobs:
           cache: 'npm'
           node-version: 22
       - name: Install Corellium CLI
-        run: npm install -g @corellium/corellium-cli
+        run: npm install @corellium/corellium-cli
       - name: Login to Corellium
         run: |
-          readonly CORELLIUM_API_ENDPOINT='https://corelliumsales.enterprise.corellium.com'
-          corellium login --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} --endpoint "${CORELLIUM_API_ENDPOINT}"
+          corellium login \
+            --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
+            --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Delete Corellium virtual devices
         run: |
           authorized_instances=(

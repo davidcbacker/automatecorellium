@@ -19,7 +19,7 @@ jobs:
           node-version: 22
       - name: Install Corellium CLI
         run: npm install -g @corellium/corellium-cli
-      - name: Login to Corellium
+      - name: Log in to Corellium
         run: |
           corellium login \
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
@@ -36,10 +36,16 @@ jobs:
           echo 'DEBUG listing Corellium devices'
           echo "DEBUG corellium devices: ${corellium_devices[@]}"
           for device in "${corellium_devices[@]}"; do
-            if [[ ! " ${authorized_instances[@]} " =~ " ${device} " ]]; then
+            is_authorized='false'
+            for authorized_device in "${authorized_instances[@]}"; do
+              if [[ "$device" == "$authorized_device" ]]; then
+                echo "Found an authorized instance."
+                is_authorized='true'
+                break
+              fi
+            done
+            if [[ "${is_authorized}" == 'false' ]]; then
               echo "Deleting unauthorized instance ${device}"
               echo "TEST DELETE ${device}" || corellium instance delete "${device}" --wait
-            else
-              echo "Found an authorized instance."
             fi
           done

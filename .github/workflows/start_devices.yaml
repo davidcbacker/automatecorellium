@@ -7,7 +7,7 @@ on:
 
 jobs:
   corellium-start:
-    name: Start
+    name: Start devices
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code
@@ -19,10 +19,11 @@ jobs:
           node-version: 22
       - name: Install Corellium CLI
         run: npm install -g @corellium/corellium-cli
-      - name: Login to Corellium
+      - name: Log in to Corellium
         run: |
-          readonly CORELLIUM_API_ENDPOINT='https://corelliumsales.enterprise.corellium.com'
-          corellium login --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} --endpoint "${CORELLIUM_API_ENDPOINT}"
+          corellium login \
+            --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
+            --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Start Corellium virtual devices
         run: |
           echo "DEBUG env var is ${{ vars.START_INSTANCES }}"

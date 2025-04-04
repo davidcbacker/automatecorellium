@@ -26,7 +26,6 @@ jobs:
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Stop Corellium virtual devices
         run: |
-          echo "DEBUG env var is ${{ vars.STOP_INSTANCES }}"
           stop_instances=()
           while IFS= read -r line; do
             stop_instances+=("$(echo "${line}" | tr -d '\r\n')")

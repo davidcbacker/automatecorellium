@@ -25,13 +25,12 @@ jobs:
           corellium login --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} --endpoint "${CORELLIUM_API_ENDPOINT}"
       - name: Start Corellium virtual devices
         run: |
-          instances=(
-            '16a2d66b-5420-4146-b482-ee0a65ea46a2'
-            '03cb199c-c3c2-4cb3-acff-67bdc0dee84f'
-            '0314d2b5-d229-4c34-a7d6-45025a6742fd'
-          )
-          echo "Instances array: ${instances[@]}"
-          for instance in "${instances[@]}"; do
+          echo "DEBUG env var is ${{ vars.START_INSTANCES }}"
+          start_instances=()
+          while IFS= read -r line; do
+            start_instances+=("$(echo "${line}" | tr -d '\r\n')")
+          done <<< "${{ vars.START_INSTANCES }}"
+          for instance in "${start_instances[@]}"; do
             echo "Starting instance ${instance}"
             corellium instance start "${instance}" --wait || true
           done

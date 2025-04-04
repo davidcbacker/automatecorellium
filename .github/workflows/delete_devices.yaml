@@ -35,7 +35,6 @@ jobs:
             is_authorized='false'
             for authorized_device in "${authorized_instances[@]}"; do
               if [ "${device}" = "${authorized_device}" ]; then
-                echo "Found an authorized instance."
                 is_authorized='true'
                 break
               fi

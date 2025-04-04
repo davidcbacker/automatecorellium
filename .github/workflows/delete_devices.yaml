@@ -26,14 +26,11 @@ jobs:
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Delete Corellium virtual devices
         run: |
-          echo "DEBUG env var is ${{ vars.AUTHORIZED_INSTANCES }}"
           authorized_instances=()
           while IFS= read -r line; do
             authorized_instances+=("$(echo "${line}" | tr -d '\r\n')")
           done <<< "${{ vars.AUTHORIZED_INSTANCES }}"
           corellium_devices=($(corellium list | jq -r '.[].id'))
-          echo "DEBUG authorized instances array: ${authorized_instances[@]}"
-          echo "DEBUG corellium devices: ${corellium_devices[@]}"
           for device in "${corellium_devices[@]}"; do
             is_authorized='false'
             for authorized_device in "${authorized_instances[@]}"; do

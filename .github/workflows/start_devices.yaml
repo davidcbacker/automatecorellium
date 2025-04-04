@@ -26,7 +26,6 @@ jobs:
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Start Corellium virtual devices
         run: |
-          echo "DEBUG env var is ${{ vars.START_INSTANCES }}"
           start_instances=()
           while IFS= read -r line; do
             start_instances+=("$(echo "${line}" | tr -d '\r\n')")

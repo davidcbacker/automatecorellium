@@ -29,7 +29,7 @@ jobs:
           echo "DEBUG env var is ${{ vars.AUTHORIZED_INSTANCES }}"
           authorized_instances=()
           while IFS= read -r line; do
-            authorized_instances+=("$(echo "${line}" | tr -d '\n')")
+            authorized_instances+=("$(echo "${line}" | tr -d '\r\n')")
           done <<< "${{ vars.AUTHORIZED_INSTANCES }}"
           corellium_devices=($(corellium list | jq -r '.[].id'))
           echo "DEBUG authorized instances array: ${authorized_instances[@]}"

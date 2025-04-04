@@ -37,9 +37,9 @@ jobs:
           echo "DEBUG corellium devices: ${corellium_devices[@]}"
           for device in "${corellium_devices[@]}"; do
             is_authorized='false'
-            echo "DEBUG device is '${device}' and authorized_device is '${authorized_device}'"
             for authorized_device in "${authorized_instances[@]}"; do
-              if [ "$device" == "$authorized_device" ]; then
+              echo "DEBUG device is '${device}' and authorized_device is '${authorized_device}'"
+              if [ "${device}" = "${authorized_device}" ]; then
                 echo "Found an authorized instance."
                 is_authorized='true'
                 break

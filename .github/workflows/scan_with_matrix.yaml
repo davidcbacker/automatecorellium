@@ -20,11 +20,11 @@ jobs:
       - name: Log in to Corellium
         run: |
           corellium login \
-            --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
-            --endpoint ${{ secrets.CORELLIUM_API_ENDPOINT }}
+            --apitoken "${{ secrets.CORELLIUM_API_TOKEN }}" \
+            --endpoint "${{ secrets.CORELLIUM_API_ENDPOINT }}"
       - name: Start Corellium virtual device
         run: |
-          echo "Starting instance "${{ vars.MATRIX_INSTANCE }}""
+          echo "Starting instance "${{ vars.MATRIX_INSTANCE }}"
           corellium instance start "${{ vars.MATRIX_INSTANCE }}" --wait || true
       - name: Wait for device agent to be ready
         run: |
@@ -34,7 +34,7 @@ jobs:
           while [ "${ready_status}" = 'false' ]; do
             echo "Agent is not ready yet. Checking again in ${SLEEP_TIME} seconds."
             sleep "${SLEEP_TIME}"
-            ready_status="$(corellium ready --instance "${{ vars.MATRIX_INSTANCE })" --project "${MATRIX_PROJECT}" | jq -r '.ready')"
+            ready_status="$(corellium ready --instance "${{ vars.MATRIX_INSTANCE }}" --project "${MATRIX_PROJECT}" | jq -r '.ready')"
           done
       - name: Install Corellium Cafe app
         run: |

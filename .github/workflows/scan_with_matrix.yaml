@@ -30,7 +30,7 @@ jobs:
         run: |
           readonly SLEEP_TIME='30'
           readonly MATRIX_PROJECT="$(corellium instance get --instance b1af4d8b-b364-4f94-bac7-30f9ae45c98c | jq -r '.project')"
-          ready_status="$(corellium ready --instance "${{ vars.MATRIX_INSTANCE })" --project "${MATRIX_PROJECT}" | jq -r '.ready')"
+          ready_status="$(corellium ready --instance "${{ vars.MATRIX_INSTANCE }}" --project "${MATRIX_PROJECT}" | jq -r '.ready')"
           while [ "${ready_status}" = 'false' ]; do
             echo "Agent is not ready yet. Checking again in ${SLEEP_TIME} seconds."
             sleep "${SLEEP_TIME}"

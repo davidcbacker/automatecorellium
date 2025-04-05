@@ -42,7 +42,7 @@ jobs:
           readonly CORELLIUM_CAFE_IPA_FILENAME="$(basename "${CORELLIUM_CAFE_IPA_URL}")"
           readonly MATRIX_PROJECT="$(corellium instance get --instance b1af4d8b-b364-4f94-bac7-30f9ae45c98c | jq -r '.project')"
           echo "Downloading ${CORELLIUM_CAFE_IPA_FILENAME}"
-          wget "${CORELLIUM_CAFE_IPA_URL}"
+          wget --quiet "${CORELLIUM_CAFE_IPA_URL}"
           echo "Installing ${CORELLIUM_CAFE_IPA_FILENAME}"
           corellium apps install \
             --instance "${{ vars.MATRIX_INSTANCE }}" \

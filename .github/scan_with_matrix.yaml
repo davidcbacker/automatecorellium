@@ -1,0 +1,55 @@
+name: Scan with Corellium MATRIX
+
+on:
+  workflow_dispatch:
+
+jobs:
+  corellium-matrixscan:
+    name: Scan with MATRIX
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull the latest code
+        uses: actions/checkout@v4
+      - name: Install Node
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          node-version: 22
+      - name: Install Corellium CLI
+        run: npm install -g @corellium/corellium-cli
+      - name: Log in to Corellium
+        run: |
+          corellium login \
+            --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
+            --endpoint ${{ secrets.CORELLIUM_API_ENDPOINT }}
+      - name: Start Corellium virtual device
+        run: |
+          echo "Starting instance "${{ vars.MATRIX_INSTANCE }}""
+          corellium instance start "${{ vars.MATRIX_INSTANCE }}" --wait || true
+      - name: Wait for device agent to be ready
+        run: |
+          readonly SLEEP_TIME='30'
+          readonly MATRIX_PROJECT="$(corellium instance get --instance b1af4d8b-b364-4f94-bac7-30f9ae45c98c | jq -r '.project')"
+          ready_status="$(corellium ready --instance "${{ vars.MATRIX_INSTANCE })" --project "${MATRIX_PROJECT}" | jq -r '.ready')"
+          while [ "${ready_status}" = 'false' ]; do
+            echo "Agent is not ready yet. Checking again in ${SLEEP_TIME} seconds."
+            sleep "${SLEEP_TIME}"
+            ready_status="$(corellium ready --instance "${{ vars.MATRIX_INSTANCE })" --project "${MATRIX_PROJECT}" | jq -r '.ready')"
+          done
+      - name: Install Corellium Cafe app
+        run: |
+          readonly CORELLIUM_CAFE_IPA_URL='https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
+          readonly CORELLIUM_CAFE_IPA_FILENAME="$(basename "${CORELLIUM_CAFE_IPA_URL}")"
+          readonly MATRIX_PROJECT="$(corellium instance get --instance b1af4d8b-b364-4f94-bac7-30f9ae45c98c | jq -r '.project')"
+          echo "Downloading Corellium Cafe"
+          wget "${CORELLIUM_CAFE_IPA_URL}"
+          echo "Installing ${CORELLIUM_CAFE_IPA_FILENAME}"
+          corellium apps install \
+            --instance "${{ vars.MATRIX_INSTANCE }}" \
+            --project "${MATRIX_PROJECT}" \
+            --app "${CORELLIUM_CAFE_IPA_FILENAME}"
+          if [ "$?" -gt 0 ]; then
+            echo "Error installing app" >&2
+            exit 1
+          fi
+          echo "Successfully installed ${CORELLIUM_CAFE_IPA_FILENAME}"

@@ -24,7 +24,7 @@ jobs:
             --endpoint "${{ secrets.CORELLIUM_API_ENDPOINT }}"
       - name: Start Corellium virtual device
         run: |
-          echo "Starting instance "${{ vars.MATRIX_INSTANCE }}"
+          echo "Starting instance ${{ vars.MATRIX_INSTANCE }}"
           corellium instance start "${{ vars.MATRIX_INSTANCE }}" --wait || true
       - name: Wait for device agent to be ready
         run: |
@@ -41,7 +41,7 @@ jobs:
           readonly CORELLIUM_CAFE_IPA_URL='https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
           readonly CORELLIUM_CAFE_IPA_FILENAME="$(basename "${CORELLIUM_CAFE_IPA_URL}")"
           readonly MATRIX_PROJECT="$(corellium instance get --instance b1af4d8b-b364-4f94-bac7-30f9ae45c98c | jq -r '.project')"
-          echo "Downloading Corellium Cafe"
+          echo "Downloading ${CORELLIUM_CAFE_IPA_FILENAME}"
           wget "${CORELLIUM_CAFE_IPA_URL}"
           echo "Installing ${CORELLIUM_CAFE_IPA_FILENAME}"
           corellium apps install \

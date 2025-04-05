@@ -1,4 +1,4 @@
-name: Scan app with Corellium MATRIX
+name: Scan with Corellium MATRIX
 
 on:
   workflow_dispatch:

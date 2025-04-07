@@ -53,3 +53,5 @@ jobs:
             exit 1
           fi
           echo "Successfully installed ${CORELLIUM_CAFE_IPA_FILENAME}"
+      - name: Run MATRIX
+        run: echo 'TODO'

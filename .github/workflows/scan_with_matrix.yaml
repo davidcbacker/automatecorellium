@@ -128,14 +128,12 @@ jobs:
           corellium matrix download-report \
               --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
               --assessment "${assessment_id}" \
-              --format json
+              --format json \
               > "matrix_report_${report_id}.json"
 
           echo "TROUBLESHOOTING THE PATH"
           echo "CURRENT WORKING DIRECTORY IS $(pwd)"
-          find / -name "matrix_report_*.html" 2> /dev/null
-          find / -name "matrix_report_*.json" 2> /dev/null
-
+          ls -la
       - name: Upload MATRIX artifacts
         uses: actions/upload-artifact@v4
         with:

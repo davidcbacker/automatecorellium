@@ -67,6 +67,9 @@ jobs:
             --instance "${{ vars.MATRIX_INSTANCE }}" \
             --assessment "${assessment_id}"
 
+          # TODO: check status after star
+          sleep 30
+
           echo "Stopping MATRIX monitoring"
           corellium matrix stop-monitor \
             --instance "${{ vars.MATRIX_INSTANCE }}" \

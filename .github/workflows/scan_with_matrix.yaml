@@ -67,33 +67,39 @@ jobs:
             --instance "${{ vars.MATRIX_INSTANCE }}" \
             --assessment "${assessment_id}"
 
-          # TODO: check status after start
-          corellium matrix get-assessment \
-            --instance "${{ vars.MATRIX_INSTANCE }}" \
+          echo "Waiting for monitoring to start"
+          assessment_status="$(corellium matrix get-assessment \
+              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
               --assessment "${assessment_id}" \
-              | jq -r '.status'
-          sleep 15
-          corellium matrix get-assessment \
-            --instance "${{ vars.MATRIX_INSTANCE }}" \
+              | jq -r '.status')"
+          while [ "${assessment_status}" = 'startMonitoring' ]; do
+            echo "Current assessment status is ${assessment_status}"
+            sleep 5
+            assessment_status="$(corellium matrix get-assessment \
+              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
               --assessment "${assessment_id}" \
-              | jq -r '.status'
+              | jq -r '.status')"
+          done
 
           echo "Stopping MATRIX monitoring"
           corellium matrix stop-monitor \
             --instance "${{ vars.MATRIX_INSTANCE }}" \
             --assessment "${assessment_id}"
 
-          # TODO: check status after stop
-          corellium matrix get-assessment \
-            --instance "${{ vars.MATRIX_INSTANCE }}" \
+          echo "Waiting for monitoring to stop"
+          assessment_status="$(corellium matrix get-assessment \
+              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
               --assessment "${assessment_id}" \
-              | jq -r '.status'
-          sleep 15
-          corellium matrix get-assessment \
-            --instance "${{ vars.MATRIX_INSTANCE }}" \
+              | jq -r '.status')"
+          while [ "${assessment_status}" = 'stopMonitoring' ]; do
+            echo "Current assessment status is ${assessment_status}"
+            sleep 5
+            assessment_status="$(corellium matrix get-assessment \
+              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
               --assessment "${assessment_id}" \
-              | jq -r '.status'
-
+              | jq -r '.status')"
+          done
+          
           echo "Running MATRIX test"
           corellium matrix test \
             --instance "${{ vars.MATRIX_INSTANCE }}" \

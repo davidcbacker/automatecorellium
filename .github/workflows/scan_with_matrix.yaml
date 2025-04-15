@@ -73,14 +73,14 @@ jobs:
 
           echo "Waiting for monitoring to start"
           assessment_status="$(corellium matrix get-assessment \
-              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
-              --assessment "${assessment_id}" \
-              | jq -r '.status')"
+            --instance "${{ vars.MATRIX_INSTANCE }}" \
+            --assessment "${assessment_id}" \
+            | jq -r '.status')"
           while [ "${assessment_status}" != 'monitoring' ]; do
             echo "Current assessment status is ${assessment_status}"
             sleep 5
             assessment_status="$(corellium matrix get-assessment \
-              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
+              --instance "${{ vars.MATRIX_INSTANCE }}" \
               --assessment "${assessment_id}" \
               | jq -r '.status')"
           done
@@ -92,14 +92,14 @@ jobs:
 
           echo "Waiting for monitoring to stop"
           assessment_status="$(corellium matrix get-assessment \
-              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
-              --assessment "${assessment_id}" \
-              | jq -r '.status')"
+            --instance "${{ vars.MATRIX_INSTANCE }}" \
+            --assessment "${assessment_id}" \
+            | jq -r '.status')"
           while [ "${assessment_status}" != 'readyForTesting' ]; do
             echo "Current assessment status is ${assessment_status}"
             sleep 5
             assessment_status="$(corellium matrix get-assessment \
-              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
+              --instance "${{ vars.MATRIX_INSTANCE }}" \
               --assessment "${assessment_id}" \
               | jq -r '.status')"
           done
@@ -111,32 +111,32 @@ jobs:
 
           echo "Waiting for test to complete"
           assessment_status="$(corellium matrix get-assessment \
-              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
-              --assessment "${assessment_id}" \
-              | jq -r '.status')"
+            --instance "${{ vars.MATRIX_INSTANCE }}" \
+            --assessment "${assessment_id}" \
+            | jq -r '.status')"
           while [ "${assessment_status}" != 'complete' ]; do
             echo "Current assessment status is ${assessment_status}"
             sleep 30
             assessment_status="$(corellium matrix get-assessment \
-              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
+              --instance "${{ vars.MATRIX_INSTANCE }}" \
               --assessment "${assessment_id}" \
               | jq -r '.status')"
           done
 
           readonly report_id="$(corellium matrix get-assessment \
-              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
+              --instance "${{ vars.MATRIX_INSTANCE }}" \
               --assessment "${assessment_id}" \
               | jq -r '.reportId')"
 
           echo "Downloading MATRIX report ${report_id} as HTML"
           corellium matrix download-report \
-              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
+              --instance "${{ vars.MATRIX_INSTANCE }}" \
               --assessment "${assessment_id}" \
               > "matrix_report_${report_id}.html"
 
           echo "Downloading MATRIX report ${report_id} as JSON"
           corellium matrix download-report \
-              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
+              --instance "${{ vars.MATRIX_INSTANCE }}" \
               --assessment "${assessment_id}" \
               --format json \
               > "matrix_report_${report_id}.json"

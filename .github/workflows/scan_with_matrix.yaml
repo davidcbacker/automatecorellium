@@ -60,6 +60,10 @@ jobs:
             --instance "${{ vars.MATRIX_INSTANCE }}" \
             --bundle com.corellium.Cafe \
             | jq -r '.id')"
+          if [ -z "${assessment_id}" ]; then
+            echo "Failed to create assessment" >&2
+            exit 1
+          fi
           echo "Created MATRIX assessment ${assessment_id}"
 
           echo "Starting MATRIX monitoring"

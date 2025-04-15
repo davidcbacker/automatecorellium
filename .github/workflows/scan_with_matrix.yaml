@@ -67,13 +67,32 @@ jobs:
             --instance "${{ vars.MATRIX_INSTANCE }}" \
             --assessment "${assessment_id}"
 
-          # TODO: check status after star
+          # TODO: check status after start
+          corellium matrix get-assessment \
+            --instance "${{ vars.MATRIX_INSTANCE }}" \
+              --assessment "${assessment_id}" \
+              | jq -r '.status'
           sleep 30
+          corellium matrix get-assessment \
+            --instance "${{ vars.MATRIX_INSTANCE }}" \
+              --assessment "${assessment_id}" \
+              | jq -r '.status'
 
           echo "Stopping MATRIX monitoring"
           corellium matrix stop-monitor \
             --instance "${{ vars.MATRIX_INSTANCE }}" \
             --assessment "${assessment_id}"
+
+          # TODO: check status after stop
+          corellium matrix get-assessment \
+            --instance "${{ vars.MATRIX_INSTANCE }}" \
+              --assessment "${assessment_id}" \
+              | jq -r '.status'
+          sleep 30
+          corellium matrix get-assessment \
+            --instance "${{ vars.MATRIX_INSTANCE }}" \
+              --assessment "${assessment_id}" \
+              | jq -r '.status'
 
           echo "Running MATRIX test"
           corellium matrix test \

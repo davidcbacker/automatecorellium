@@ -108,7 +108,7 @@ jobs:
           )
       
           for input_file in "${ordered_inputs[@]}"; do
-            full_path="${input_dir}/${input_file}"
+            full_path="./${input_dir}/${input_file}"
             if [[ -f "${full_path}" ]]; then
               corellium input "$instance_id" "$full_path"
               echo "Executed input ${input_file}"

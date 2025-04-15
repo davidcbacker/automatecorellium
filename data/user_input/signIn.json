@@ -9,7 +9,7 @@
         "wait": 100
     },
     {
-        "text": "Scott@corellium.com"
+        "text": "Username123"
     },
     {
         "buttons": ["finger"],
@@ -21,7 +21,7 @@
         "wait": 100
     },
     {
-        "text": "test1234"
+        "text": "Password123"
     },
     {
         "buttons": ["finger"],

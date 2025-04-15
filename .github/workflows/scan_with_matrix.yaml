@@ -54,4 +54,100 @@ jobs:
           fi
           echo "Successfully installed ${CORELLIUM_CAFE_IPA_FILENAME}"
       - name: Run MATRIX
-        run: echo 'TODO'
+        run: |
+          echo "Creating MATRIX assessment"
+          readonly assessment_id="$(corellium matrix create-assessment \
+            --instance "${{ vars.MATRIX_INSTANCE }}" \
+            --bundle com.corellium.Cafe \
+            | jq -r '.id')"
+          if [ -z "${assessment_id}" ]; then
+            echo "Failed to create assessment" >&2
+            exit 1
+          fi
+          echo "Created MATRIX assessment ${assessment_id}"
+
+          echo "Starting MATRIX monitoring"
+          corellium matrix start-monitor \
+            --instance "${{ vars.MATRIX_INSTANCE }}" \
+            --assessment "${assessment_id}"
+
+          echo "Waiting for monitoring to start"
+          assessment_status="$(corellium matrix get-assessment \
+              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
+              --assessment "${assessment_id}" \
+              | jq -r '.status')"
+          while [ "${assessment_status}" != 'monitoring' ]; do
+            echo "Current assessment status is ${assessment_status}"
+            sleep 5
+            assessment_status="$(corellium matrix get-assessment \
+              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
+              --assessment "${assessment_id}" \
+              | jq -r '.status')"
+          done
+
+          echo "Stopping MATRIX monitoring"
+          corellium matrix stop-monitor \
+            --instance "${{ vars.MATRIX_INSTANCE }}" \
+            --assessment "${assessment_id}"
+
+          echo "Waiting for monitoring to stop"
+          assessment_status="$(corellium matrix get-assessment \
+              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
+              --assessment "${assessment_id}" \
+              | jq -r '.status')"
+          while [ "${assessment_status}" != 'readyForTesting' ]; do
+            echo "Current assessment status is ${assessment_status}"
+            sleep 5
+            assessment_status="$(corellium matrix get-assessment \
+              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
+              --assessment "${assessment_id}" \
+              | jq -r '.status')"
+          done
+          
+          echo "Running MATRIX test"
+          corellium matrix test \
+            --instance "${{ vars.MATRIX_INSTANCE }}" \
+            --assessment "${assessment_id}"
+
+          echo "Waiting for test to complete"
+          assessment_status="$(corellium matrix get-assessment \
+              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
+              --assessment "${assessment_id}" \
+              | jq -r '.status')"
+          while [ "${assessment_status}" != 'complete' ]; do
+            echo "Current assessment status is ${assessment_status}"
+            sleep 30
+            assessment_status="$(corellium matrix get-assessment \
+              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
+              --assessment "${assessment_id}" \
+              | jq -r '.status')"
+          done
+
+          readonly report_id="$(corellium matrix get-assessment \
+              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
+              --assessment "${assessment_id}" \
+              | jq -r '.reportId')"
+
+          echo "Downloading MATRIX report ${report_id} as HTML"
+          corellium matrix download-report \
+              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
+              --assessment "${assessment_id}" \
+              > "matrix_report_${report_id}.html"
+
+          echo "Downloading MATRIX report ${report_id} as JSON"
+          corellium matrix download-report \
+              --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
+              --assessment "${assessment_id}" \
+              --format json \
+              > "matrix_report_${report_id}.json"
+
+          echo "TROUBLESHOOTING THE PATH"
+          echo "CURRENT WORKING DIRECTORY IS $(pwd)"
+          ls -la
+      - name: Upload MATRIX artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: matrix-reports
+          path: |
+            matrix_report_*.html
+            matrix_report_*.json

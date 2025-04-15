@@ -95,7 +95,7 @@ jobs:
               --instance 5561db5d-9dec-4914-9bdb-950ce9eaad80 \
               --assessment "${assessment_id}" \
               | jq -r '.status')"
-          while [ "${assessment_status}" = 'stopMonitoring' ]; do
+          while [ "${assessment_status}" != 'readyForTesting' ]; do
             echo "Current assessment status is ${assessment_status}"
             sleep 5
             assessment_status="$(corellium matrix get-assessment \

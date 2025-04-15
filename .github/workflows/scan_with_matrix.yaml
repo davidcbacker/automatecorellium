@@ -85,6 +85,29 @@ jobs:
               | jq -r '.status')"
           done
 
+          echo "Interacting with the app"
+          readonly input_dir='data/user_input'
+          readonly ordered_inputs=(
+            'signIn.json'
+            'dismiss.json'
+            'dismiss.json'
+            'order.json'
+            'checkout.json'
+            'placeOrder.json'
+            'dismiss.json'
+          )
+      
+          for input_file in "${ordered_inputs[@]}"; do
+            full_path="${input_dir}/${input_file}"
+            if [[ -f "${full_path}" ]]; then
+              corellium input "$instance_id" "$full_path"
+              echo "Executed input ${input_file}"
+              sleep 30
+            else
+              echo "Skipping input file not found ${full_path}"
+            fi
+          done
+
           echo "Stopping MATRIX monitoring"
           corellium matrix stop-monitor \
             --instance "${{ vars.MATRIX_INSTANCE }}" \

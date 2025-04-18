@@ -1,12 +1,12 @@
 [
     {
         "buttons": ["finger"],
-        "position": [[726, 2333]],
+        "position": [[720, 2280]],
         "wait": 0
     },
     {
         "buttons": [],
-        "wait": 100
+        "wait": 300
     },
     {
         "buttons": ["finger"],

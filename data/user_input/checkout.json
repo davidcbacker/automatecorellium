@@ -1,143 +1,87 @@
 [
     {
-        "buttons": [
-            "finger"
-        ],
-        "position": [
-            [
-                1013,
-                2339
-            ]
-        ],
+        "buttons": ["finger"],
+        "position": [[1013, 2339]],
         "wait": 0
     },
     {
         "buttons": [],
-        "wait": 100
-    },
-    {
-        "buttons": [
-            "finger"
-        ],
-        "position": [
-            [
-                590,
-                1145
-            ]
-        ],
-        "wait": 500
-    },
-    {
-        "buttons": [],
-        "wait": 700
-    },
-    {
-        "buttons": [
-            "finger"
-        ],
-        "position": [
-            [
-                290,
-                1034
-            ]
-        ],
         "wait": 1000
     },
     {
+        "buttons": ["finger"],
+        "position": [[590, 1145]],
+        "wait": 0
+    },
+    {
         "buttons": [],
-        "wait": 1050
+        "wait": 1000
+    },
+    {
+        "buttons": ["finger"],
+        "position": [[290, 1034]],
+        "wait": 0
+    },
+    {
+        "buttons": [],
+        "wait": 300
     },
     {
         "text": "Myfirstname"
     },
     {
-        "buttons": [
-            "finger"
-        ],
-        "position": [
-            [
-                798,
-                1034
-            ]
-        ],
-        "wait": 2000
+        "buttons": ["finger"],
+        "position": [[798, 1034]],
+        "wait": 0
     },
     {
         "buttons": [],
-        "wait": 2050
+        "wait": 300
     },
     {
         "text": "Mylastname"
     }
     ,
     {
-        "buttons": [
-            "finger"
-        ],
-        "position": [
-            [
-                567,
-                1197
-            ]
-        ],
-        "wait": 3000
+        "buttons": ["finger"],
+        "position": [[567, 1197]],
+        "wait": 0
     },
     {
         "buttons": [],
-        "wait": 3050
+        "wait": 300
     },
     {
         "text": "2345678901234567"
     },
     {
-        "buttons": [
-            "finger"
-        ],
-        "position": [
-            [
-                283,
-                1381
-            ]
-        ],
-        "wait": 4000
+        "buttons": ["finger"],
+        "position": [[283, 1381]],
+        "wait": 0
     },
     {
         "buttons": [],
-        "wait": 4050
+        "wait": 300
     },
     {
         "text": "123"
     },
     {
-        "buttons": [
-            "finger"
-        ],
-        "position": [
-            [
-                870,
-                1397
-            ]
-        ],
-        "wait": 5000
+        "buttons": ["finger"],
+        "position": [[870, 1397]],
+        "wait": 0
     },
     {
         "buttons": [],
-        "wait": 5050
+        "wait": 300
     },
     {
         "text": "65432"
     },
     {
-        "buttons": [
-            "finger"
-        ],
-        "position": [
-            [
-                563,
-                1577
-            ]
-        ],
-        "wait": 6000   
+        "buttons": ["finger"],
+        "position": [[563, 1577]],
+        "wait": 0   
     },
     {
         "buttons": [],

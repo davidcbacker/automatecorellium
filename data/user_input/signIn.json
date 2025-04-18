@@ -6,10 +6,14 @@
     },
     {
         "buttons": [],
-        "wait": 100
+        "wait": 300
     },
     {
-        "text": "Username123"
+        "text": "Username123",
+    },
+    {
+        "buttons": [],
+        "wait": 300
     },
     {
         "buttons": ["finger"],
@@ -18,15 +22,19 @@
     },
     {
         "buttons": [],
-        "wait": 100
+        "wait": 300
     },
     {
         "text": "Password123"
     },
     {
+        "buttons": [],
+        "wait": 300
+    },
+    {
         "buttons": ["finger"],
         "position": [[570, 2143]],
-        "wait": 400
+        "wait": 0
     },
     {
         "buttons": [],

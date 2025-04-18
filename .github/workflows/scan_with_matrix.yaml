@@ -141,7 +141,8 @@ jobs:
           echo "Running MATRIX test"
           corellium matrix test \
             --instance "${{ vars.MATRIX_INSTANCE }}" \
-            --assessment "${assessment_id}"
+            --assessment "${assessment_id}" \
+            2> /dev/null
 
           echo "Waiting for test to complete"
           assessment_status="$(corellium matrix get-assessment \

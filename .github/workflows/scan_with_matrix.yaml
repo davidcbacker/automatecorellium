@@ -149,7 +149,7 @@ jobs:
             | jq -r '.status')"
           while [ "${assessment_status}" != 'complete' ]; do
             echo "Current assessment status is ${assessment_status}"
-            sleep 30
+            sleep 60
             assessment_status="$(corellium matrix get-assessment \
               --instance "${{ vars.MATRIX_INSTANCE }}" \
               --assessment "${assessment_id}" \

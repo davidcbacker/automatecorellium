@@ -11,19 +11,19 @@
     {
         "buttons": ["finger"],
         "position": [[290, 677]],
-        "wait": 100
+        "wait": 0
     },
     {
         "buttons": [],
-        "wait": 300
+        "wait": 500
     },
     {
         "buttons": ["finger"],
         "position": [[583, 1217]],
-        "wait": 1000
+        "wait": 0
     },
     {
         "buttons": [],
-        "wait": 1100
+        "wait": 300
     }
 ]

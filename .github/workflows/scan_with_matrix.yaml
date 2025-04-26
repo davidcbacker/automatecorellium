@@ -29,8 +29,14 @@ jobs:
       - name: Wait for device agent to be ready
         run: |
           readonly SLEEP_TIME='10'
-          readonly MATRIX_PROJECT="$(corellium instance get --instance b1af4d8b-b364-4f94-bac7-30f9ae45c98c | jq -r '.project')"
-          ready_status="$(corellium ready --instance "${{ vars.MATRIX_INSTANCE }}" --project "${MATRIX_PROJECT}" | jq -r '.ready')"
+          readonly MATRIX_PROJECT="$(corellium instance get \
+            --instance "${{ vars.MATRIX_INSTANCE }}" \
+            | jq -r '.project')"
+          ready_status="$(corellium ready \
+            --instance "${{ vars.MATRIX_INSTANCE }}" \
+            --project "${MATRIX_PROJECT}" \
+            2> /dev/null \
+            | jq -r '.ready')"
           while [ "${ready_status}" != 'true' ]; do
             echo "Agent is not ready yet. Checking again in ${SLEEP_TIME} seconds."
             sleep "${SLEEP_TIME}"

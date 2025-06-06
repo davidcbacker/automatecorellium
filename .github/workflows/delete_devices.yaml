@@ -20,7 +20,7 @@ jobs:
       - name: Install Corellium CLI
         run: npm install -g @corellium/corellium-cli
       - name: Source Corellium Functions
-        run: source ./scripts/corellium_functions.sh
+        run: source ./scripts/functions.sh
       - name: Delete Corellium virtual devices
         env:
           AUTHORIZED_INSTANCES: ${{ vars.AUTHORIZED_INSTANCES }}

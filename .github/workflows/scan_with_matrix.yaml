@@ -19,10 +19,8 @@ jobs:
           node-version: 22
       - name: Install Corellium CLI
         run: npm install -g @corellium/corellium-cli
-      - name: Source Corellium Functions
-        run: |
-          chmod +x ./scripts/corellium_functions.sh
-          source ./scripts/corellium_functions.sh
+      - name: Load the shell functions
+        run: source ./scripts/corellium_functions.sh
       - name: Start Corellium virtual device
         run: start_instance "${{ vars.MATRIX_INSTANCE }}"
       - name: Wait for device agent to be ready

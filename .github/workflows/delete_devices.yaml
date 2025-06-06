@@ -25,22 +25,8 @@ jobs:
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Delete Corellium virtual devices
+        env:
+          AUTHORIZED_INSTANCES: ${{ vars.AUTHORIZED_INSTANCES }}
         run: |
-          authorized_instances=()
-          while IFS= read -r line; do
-            authorized_instances+=("$(echo "${line}" | tr -d '\r\n')")
-          done <<< "${{ vars.AUTHORIZED_INSTANCES }}"
-          corellium_devices=($(corellium list | jq -r '.[].id'))
-          for device in "${corellium_devices[@]}"; do
-            is_authorized='false'
-            for authorized_device in "${authorized_instances[@]}"; do
-              if [ "${device}" = "${authorized_device}" ]; then
-                is_authorized='true'
-                break
-              fi
-            done
-            if [ "${is_authorized}" = 'false' ]; then
-              echo "Deleting unauthorized instance ${device}"
-              corellium instance delete "${device}" --wait
-            fi
-          done
+          source ./src/functions.sh
+          delete_unauthorized_devices

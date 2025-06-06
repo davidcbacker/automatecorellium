@@ -7,7 +7,7 @@ on:
 
 jobs:
   corellium-stop:
-    name: Stop devices
+    name: Start devices
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code
@@ -25,12 +25,9 @@ jobs:
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Stop Corellium virtual devices
+        env:
+          STOP_INSTANCES: ${{ vars.STOP_INSTANCES }}
         run: |
-          stop_instances=()
-          while IFS= read -r line; do
-            stop_instances+=("$(echo "${line}" | tr -d '\r\n')")
-          done <<< "${{ vars.STOP_INSTANCES }}"
-          for instance in "${stop_instances[@]}"; do
-            echo "Stopping instance ${instance}"
-            corellium instance stop "${instance}" --wait || true
-          done
+          source ./src/functions.sh
+          stop_demo_instances
+

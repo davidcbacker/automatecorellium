@@ -22,141 +22,20 @@ jobs:
       - name: Log in to Corellium
         run: |
           corellium login \
-            --apitoken "${{ secrets.CORELLIUM_API_TOKEN }}" \
-            --endpoint "${{ secrets.CORELLIUM_API_ENDPOINT }}"
-      - name: Start Corellium virtual device
+            --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
+            --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
+      - name: Run Corellium Cafe MATRIX assessment
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
-          echo "Starting instance ${{ vars.MATRIX_INSTANCE }}"
-          corellium instance start "${{ vars.MATRIX_INSTANCE }}" --wait || true
-      - name: Wait for device agent to be ready
-        run: |
-          readonly SLEEP_TIME='10'
-          readonly MATRIX_PROJECT="$(corellium instance get \
-            --instance "${{ vars.MATRIX_INSTANCE }}" \
-            | jq -r '.project')"
-          ready_status="$(corellium ready \
-            --instance "${{ vars.MATRIX_INSTANCE }}" \
-            --project "${MATRIX_PROJECT}" \
-            2> /dev/null \
-            | jq -r '.ready')"
-          while [ "${ready_status}" != 'true' ]; do
-            echo "Agent is not ready yet. Checking again in ${SLEEP_TIME} seconds."
-            sleep "${SLEEP_TIME}"
-            ready_status="$(corellium ready \
-              --instance "${{ vars.MATRIX_INSTANCE }}" \
-              --project "${MATRIX_PROJECT}" \
-              | jq -r '.ready')"
-          done
-      - name: Install Corellium Cafe app
-        run: |
-          readonly CORELLIUM_CAFE_IPA_URL='https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
-          readonly CORELLIUM_CAFE_IPA_FILENAME="$(basename "${CORELLIUM_CAFE_IPA_URL}")"
-          readonly MATRIX_PROJECT="$(corellium instance get \
-            --instance "${{ vars.MATRIX_INSTANCE }}" \
-            | jq -r '.project')"
-          echo "Downloading ${CORELLIUM_CAFE_IPA_FILENAME}"
-          wget --no-verbose "${CORELLIUM_CAFE_IPA_URL}"
-          echo "Installing ${CORELLIUM_CAFE_IPA_FILENAME}"
-          corellium apps install \
-            --instance "${{ vars.MATRIX_INSTANCE }}" \
-            --project "${MATRIX_PROJECT}" \
-            --app "${CORELLIUM_CAFE_IPA_FILENAME}"
-          if [ "$?" -gt 0 ]; then
-            echo "Error installing app" >&2
-            exit 1
-          fi
-          echo "Successfully installed ${CORELLIUM_CAFE_IPA_FILENAME}"
-      - name: Run MATRIX
-        run: |
-          echo "Creating MATRIX assessment"
-          readonly assessment_id="$(corellium matrix create-assessment \
-            --instance "${{ vars.MATRIX_INSTANCE }}" \
-            --bundle com.corellium.Cafe \
-            | jq -r '.id')"
-          if [ -z "${assessment_id}" ]; then
-            echo "Failed to create assessment" >&2
-            exit 1
-          fi
-          echo "Created MATRIX assessment ${assessment_id}"
-
-          echo "Starting MATRIX monitoring"
-          corellium matrix start-monitor \
-            --instance "${{ vars.MATRIX_INSTANCE }}" \
-            --assessment "${assessment_id}"
-
-          echo "Waiting for monitoring to start"
-          assessment_status="$(corellium matrix get-assessment \
-            --instance "${{ vars.MATRIX_INSTANCE }}" \
-            --assessment "${assessment_id}" \
-            | jq -r '.status')"
-          while [ "${assessment_status}" != 'monitoring' ]; do
-            echo "Current assessment status is ${assessment_status}"
-            sleep 5
-            assessment_status="$(corellium matrix get-assessment \
-              --instance "${{ vars.MATRIX_INSTANCE }}" \
-              --assessment "${assessment_id}" \
-              | jq -r '.status')"
-          done
-
-          echo "Stopping MATRIX monitoring"
-          corellium matrix stop-monitor \
-            --instance "${{ vars.MATRIX_INSTANCE }}" \
-            --assessment "${assessment_id}"
-
-          echo "Waiting for monitoring to stop"
-          assessment_status="$(corellium matrix get-assessment \
-            --instance "${{ vars.MATRIX_INSTANCE }}" \
-            --assessment "${assessment_id}" \
-            | jq -r '.status')"
-          while [ "${assessment_status}" != 'readyForTesting' ]; do
-            echo "Current assessment status is ${assessment_status}"
-            sleep 5
-            assessment_status="$(corellium matrix get-assessment \
-              --instance "${{ vars.MATRIX_INSTANCE }}" \
-              --assessment "${assessment_id}" \
-              | jq -r '.status')"
-          done
-          
-          echo "Running MATRIX test"
-          corellium matrix test \
-            --instance "${{ vars.MATRIX_INSTANCE }}" \
-            --assessment "${assessment_id}"
-
-          echo "Waiting for test to complete"
-          assessment_status="$(corellium matrix get-assessment \
-            --instance "${{ vars.MATRIX_INSTANCE }}" \
-            --assessment "${assessment_id}" \
-            | jq -r '.status')"
-          while [ "${assessment_status}" != 'complete' ]; do
-            echo "Current assessment status is ${assessment_status}"
-            sleep 60
-            assessment_status="$(corellium matrix get-assessment \
-              --instance "${{ vars.MATRIX_INSTANCE }}" \
-              --assessment "${assessment_id}" \
-              | jq -r '.status')"
-          done
-
-          readonly report_id="$(corellium matrix get-assessment \
-              --instance "${{ vars.MATRIX_INSTANCE }}" \
-              --assessment "${assessment_id}" \
-              | jq -r '.reportId')"
-
-          echo "Downloading MATRIX report ${report_id} as HTML"
-          corellium matrix download-report \
-              --instance "${{ vars.MATRIX_INSTANCE }}" \
-              --assessment "${assessment_id}" \
-              > "matrix_report_${report_id}.html"
-
-          echo "Downloading MATRIX report ${report_id} as JSON"
-          corellium matrix download-report \
-              --instance "${{ vars.MATRIX_INSTANCE }}" \
-              --assessment "${assessment_id}" \
-              --format json \
-              > "matrix_report_${report_id}.json"
-
-          echo "TROUBLESHOOTING THE PATH"
-          echo "CURRENT WORKING DIRECTORY IS $(pwd)"
-          ls -la
+          source ./src/functions.sh
+          start_instance "${{ vars.MATRIX_INSTANCE }}"
+          wait_until_agent_ready "${{ vars.MATRIX_INSTANCE }}"
+          kill_cafe_app_process "${{ vars.MATRIX_INSTANCE }}"
+          install_corellium_cafe "${{ vars.MATRIX_INSTANCE }}"
+          run_matrix_cafe_checks "${{ vars.MATRIX_INSTANCE }}"
+          kill_cafe_app_process "${{ vars.MATRIX_INSTANCE }}"
       - name: Upload MATRIX artifacts
         uses: actions/upload-artifact@v4
         with:

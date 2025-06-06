@@ -106,7 +106,7 @@ delete_unauthorized_devices() {
   local authorized_instances=()
   while IFS= read -r line; do
     authorized_instances+=("$(echo "${line}" | tr -d '\r\n')")
-  done <<< "$1"
+  done <<< "${AUTHORIZED_INSTANCES}"
 
   local corellium_devices
   corellium_devices=($(corellium list | jq -r '.[].id'))

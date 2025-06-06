@@ -19,6 +19,11 @@ jobs:
           node-version: 22
       - name: Install Corellium CLI
         run: npm install -g @corellium/corellium-cli
+      - name: Log in to Corellium
+        run: |
+          corellium login \
+            --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
+            --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Start Corellium virtual device
         run: |
           source ./src/functions.sh

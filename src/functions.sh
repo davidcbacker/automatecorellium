@@ -8,7 +8,7 @@ start_instance() {
   corellium instance start "${instance_id}" --wait || true
 }
 
-wait_for_agent_ready() {
+wait_until_agent_ready() {
   local instance_id="$1"
   local sleep_time=10
   local project_id

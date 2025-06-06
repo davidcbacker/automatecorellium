@@ -152,9 +152,8 @@ stop_demo_instances() {
 
 kill_cafe_app_process() {
   local instance_id="$1"
-  local readonly api_endpoint='https://corelliumsales.enterprise.corellium.com/api'
-  local readonly bundle_id='com.corellium.Cafe'
-  curl -X POST "${api_endpoint}/v1/instances/${instance_id}/agent/v1/app/apps/${bundle_id}/kill" \
+  local readonly BUNDLE_ID='com.corellium.Cafe'
+  curl -X POST "${CORELLIUM_API_ENDPOINT}/v1/instances/${instance_id}/agent/v1/app/apps/${BUNDLE_ID}/kill" \
     -H "Accept: application/json" \
-    -H "Authorization: Bearer ${KEY_GOES_HERE}" 
+    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" 
 }

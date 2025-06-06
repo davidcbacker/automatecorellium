@@ -26,6 +26,7 @@ jobs:
           wait_until_agent_ready "${{ vars.MATRIX_INSTANCE }}"
           install_corellium_cafe "${{ vars.MATRIX_INSTANCE }}"
           run_matrix_cafe_checks "${{ vars.MATRIX_INSTANCE }}"
+          kill_cafe_app_process "${{ vars.MATRIX_INSTANCE }}"
       - name: Upload MATRIX artifacts
         uses: actions/upload-artifact@v4
         with:

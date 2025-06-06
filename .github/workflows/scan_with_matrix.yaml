@@ -19,16 +19,13 @@ jobs:
           node-version: 22
       - name: Install Corellium CLI
         run: npm install -g @corellium/corellium-cli
-      - name: Load the shell functions
-        run: source ./src/functions.sh
       - name: Start Corellium virtual device
-        run: start_instance "${{ vars.MATRIX_INSTANCE }}"
-      - name: Wait for device agent to be ready
-        run: wait_for_agent_ready "${{ vars.MATRIX_INSTANCE }}"
-      - name: Install Corellium Cafe app
-        run: install_corellium_cafe "${{ vars.MATRIX_INSTANCE }}"
-      - name: Run MATRIX
-        run: run_matrix "${{ vars.MATRIX_INSTANCE }}"
+        run: |
+          source ./src/functions.sh
+          start_instance "${{ vars.MATRIX_INSTANCE }}"
+          wait_until_agent_ready "${{ vars.MATRIX_INSTANCE }}"
+          install_corellium_cafe "${{ vars.MATRIX_INSTANCE }}"
+          run_matrix_cafe_checks "${{ vars.MATRIX_INSTANCE }}"
       - name: Upload MATRIX artifacts
         uses: actions/upload-artifact@v4
         with:

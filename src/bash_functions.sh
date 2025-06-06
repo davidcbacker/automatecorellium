@@ -101,3 +101,27 @@ run_matrix() {
   echo "Downloading MATRIX report ${report_id} as JSON"
   corellium matrix download-report --instance "${instance_id}" --assessment "${assessment_id}" --format json > "matrix_report_${report_id}.json"
 }
+
+delete_unauthorized_devices() {
+  local authorized_instances=()
+  while IFS= read -r line; do
+    authorized_instances+=("$(echo "${line}" | tr -d '\r\n')")
+  done <<< "$1"
+
+  local corellium_devices
+  corellium_devices=($(corellium list | jq -r '.[].id'))
+
+  for device in "${corellium_devices[@]}"; do
+    local is_authorized='false'
+    for authorized_device in "${authorized_instances[@]}"; do
+      if [ "${device}" = "${authorized_device}" ]; then
+        is_authorized='true'
+        break
+      fi
+    done
+    if [ "${is_authorized}" = 'false' ]; then
+      echo "Deleting unauthorized instance ${device}"
+      corellium instance delete "${device}" --wait
+    fi
+  done
+}

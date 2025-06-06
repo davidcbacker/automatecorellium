@@ -27,4 +27,6 @@ jobs:
       - name: Load the shell functions
         run: source ./scripts/corellium_functions.sh
       - name: Start Corellium virtual devices
+        env:
+          START_INSTANCES: ${{ vars.START_INSTANCES }}
         run: start_demo_instances

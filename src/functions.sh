@@ -149,3 +149,11 @@ stop_demo_instances() {
     corellium instance stop "${instance}" --wait || true
   done
 }
+
+kill_app_process() {
+  local instance_id="$1"
+  local app_bundle_id="$2"
+  curl -X POST "https://corelliumsales.enterprise.corellium.com/api/v1/instances/$1/agent/v1/app/apps/$2/kill" \
+    -H "Accept: application/json" \
+    -H "Authorization: Bearer ${KEY_GOES_HERE}" 
+}

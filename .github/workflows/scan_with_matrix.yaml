@@ -40,13 +40,18 @@ jobs:
           while [ "${ready_status}" != 'true' ]; do
             echo "Agent is not ready yet. Checking again in ${SLEEP_TIME} seconds."
             sleep "${SLEEP_TIME}"
-            ready_status="$(corellium ready --instance "${{ vars.MATRIX_INSTANCE }}" --project "${MATRIX_PROJECT}" | jq -r '.ready')"
+            ready_status="$(corellium ready \
+              --instance "${{ vars.MATRIX_INSTANCE }}" \
+              --project "${MATRIX_PROJECT}" \
+              | jq -r '.ready')"
           done
       - name: Install Corellium Cafe app
         run: |
           readonly CORELLIUM_CAFE_IPA_URL='https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
           readonly CORELLIUM_CAFE_IPA_FILENAME="$(basename "${CORELLIUM_CAFE_IPA_URL}")"
-          readonly MATRIX_PROJECT="$(corellium instance get --instance b1af4d8b-b364-4f94-bac7-30f9ae45c98c | jq -r '.project')"
+          readonly MATRIX_PROJECT="$(corellium instance get \
+            --instance "${{ vars.MATRIX_INSTANCE }}" \
+            | jq -r '.project')"
           echo "Downloading ${CORELLIUM_CAFE_IPA_FILENAME}"
           wget --no-verbose "${CORELLIUM_CAFE_IPA_URL}"
           echo "Installing ${CORELLIUM_CAFE_IPA_FILENAME}"

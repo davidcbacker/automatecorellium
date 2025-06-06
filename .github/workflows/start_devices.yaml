@@ -25,7 +25,7 @@ jobs:
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Load the shell functions
-        run: source ./scripts/functions.sh
+        run: source ./src/functions.sh
       - name: Start Corellium virtual devices
         env:
           START_INSTANCES: ${{ vars.START_INSTANCES }}

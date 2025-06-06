@@ -20,7 +20,7 @@ jobs:
       - name: Install Corellium CLI
         run: npm install -g @corellium/corellium-cli
       - name: Load the shell functions
-        run: source ./scripts/corellium_functions.sh
+        run: source ./scripts/functions.sh
       - name: Start Corellium virtual device
         run: start_instance "${{ vars.MATRIX_INSTANCE }}"
       - name: Wait for device agent to be ready

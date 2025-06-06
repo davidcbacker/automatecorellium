@@ -10,14 +10,14 @@ start_instance() {
 
 wait_until_agent_ready() {
   local instance_id="$1"
-  local AGENT_READY_SLEEP_TIME='10'
+  local readonly AGENT_READY_SLEEP_TIME='10'
   local project_id
   project_id=$(corellium instance get --instance "${instance_id}" | jq -r '.project')
   local ready_status
   ready_status=$(corellium ready --instance "${instance_id}" --project "${project_id}" 2>/dev/null | jq -r '.ready')
 
   while [ "${ready_status}" != 'true' ]; do
-    echo "Agent is not ready yet. Checking again in ${sleep_time} seconds."
+    echo "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
     sleep "${AGENT_READY_SLEEP_TIME}"
     ready_status=$(corellium ready --instance "${instance_id}" --project "${project_id}" | jq -r '.ready')
   done
@@ -85,7 +85,7 @@ run_matrix_cafe_checks() {
   corellium matrix test --instance "${instance_id}" --assessment "${assessment_id}"
 
   echo "Waiting for test to complete"
-  readonly MATRIX_TESTING_SLEEP_TIME='60'
+  local readonly MATRIX_TESTING_SLEEP_TIME='60'
   assessment_status=$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')
 
   while [ "${assessment_status}" != 'complete' ]; do

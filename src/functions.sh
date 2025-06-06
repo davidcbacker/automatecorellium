@@ -150,7 +150,7 @@ stop_demo_instances() {
   done
 }
 
-kill_app_process() {
+kill_cafe_app_process() {
   local instance_id="$1"
   local readonly api_endpoint='https://corelliumsales.enterprise.corellium.com/api'
   local readonly bundle_id='com.corellium.Cafe'

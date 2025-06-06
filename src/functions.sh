@@ -10,7 +10,7 @@ start_instance() {
 
 wait_until_agent_ready() {
   local instance_id="$1"
-  local sleep_time=10
+  local AGENT_READY_SLEEP_TIME='10'
   local project_id
   project_id=$(corellium instance get --instance "${instance_id}" | jq -r '.project')
   local ready_status
@@ -18,7 +18,7 @@ wait_until_agent_ready() {
 
   while [ "${ready_status}" != 'true' ]; do
     echo "Agent is not ready yet. Checking again in ${sleep_time} seconds."
-    sleep "${sleep_time}"
+    sleep "${AGENT_READY_SLEEP_TIME}"
     ready_status=$(corellium ready --instance "${instance_id}" --project "${project_id}" | jq -r '.ready')
   done
 }
@@ -59,12 +59,13 @@ run_matrix_cafe_checks() {
   corellium matrix start-monitor --instance "${instance_id}" --assessment "${assessment_id}"
 
   echo "Waiting for monitoring to start"
+  local readonly MATRIX_MONITORING_SLEEP_TIME='5'
   local assessment_status
   assessment_status=$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')
 
   while [ "${assessment_status}" != 'monitoring' ]; do
     echo "Current assessment status is ${assessment_status}"
-    sleep 5
+    sleep "${MATRIX_MONITORING_SLEEP_TIME}"
     assessment_status=$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')
   done
 
@@ -76,7 +77,7 @@ run_matrix_cafe_checks() {
 
   while [ "${assessment_status}" != 'readyForTesting' ]; do
     echo "Current assessment status is ${assessment_status}"
-    sleep 5
+    sleep "${MATRIX_MONITORING_SLEEP_TIME}"
     assessment_status=$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')
   done
 
@@ -84,11 +85,12 @@ run_matrix_cafe_checks() {
   corellium matrix test --instance "${instance_id}" --assessment "${assessment_id}"
 
   echo "Waiting for test to complete"
+  readonly MATRIX_TESTING_SLEEP_TIME='60'
   assessment_status=$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')
 
   while [ "${assessment_status}" != 'complete' ]; do
     echo "Current assessment status is ${assessment_status}"
-    sleep 60
+    sleep "${MATRIX_TEST_SLEEP_TIME}"
     assessment_status=$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')
   done
 

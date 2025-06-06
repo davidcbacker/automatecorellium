@@ -137,3 +137,15 @@ start_demo_instances() {
     corellium instance start "${instance}" --wait || true
   done
 }
+
+stop_demo_instances() {
+  local stop_instances=()
+  while IFS= read -r line; do
+    stop_instances+=("$(echo "${line}" | tr -d '\r\n')")
+  done <<< "${STOP_INSTANCES}"
+
+  for instance in "${stop_instances[@]}"; do
+    echo "Stopping instance ${instance}"
+    corellium instance stop "${instance}" --wait || true
+  done
+}

@@ -43,7 +43,7 @@ install_corellium_cafe() {
   echo "Successfully installed ${ipa_filename}"
 }
 
-run_matrix() {
+run_matrix_cafe_checks() {
   local instance_id="$1"
   echo "Creating MATRIX assessment"
   local assessment_id

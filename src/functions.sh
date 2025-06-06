@@ -125,3 +125,15 @@ delete_unauthorized_devices() {
     fi
   done
 }
+
+start_demo_instances() {
+  local start_instances=()
+  while IFS= read -r line; do
+    start_instances+=("$(echo "${line}" | tr -d '\r\n')")
+  done <<< "${START_INSTANCES}"
+
+  for instance in "${start_instances[@]}"; do
+    echo "Starting instance ${instance}"
+    corellium instance start "${instance}" --wait || true
+  done
+}

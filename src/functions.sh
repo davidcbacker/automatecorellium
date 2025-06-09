@@ -12,24 +12,24 @@ wait_until_agent_ready() {
   local instance_id="$1"
   local readonly AGENT_READY_SLEEP_TIME='10'
   local project_id
-  project_id=$(corellium instance get --instance "${instance_id}" | jq -r '.project')
+  project_id="$(corellium instance get --instance "${instance_id}" | jq -r '.project')"
   local ready_status
-  ready_status=$(corellium ready --instance "${instance_id}" --project "${project_id}" 2>/dev/null | jq -r '.ready')
+  ready_status="$(corellium ready --instance "${instance_id}" --project "${project_id}" 2>/dev/null | jq -r '.ready')"
 
   while [ "${ready_status}" != 'true' ]; do
     echo "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
     sleep "${AGENT_READY_SLEEP_TIME}"
-    ready_status=$(corellium ready --instance "${instance_id}" --project "${project_id}" | jq -r '.ready')
+    ready_status="$(corellium ready --instance "${instance_id}" --project "${project_id}" | jq -r '.ready')"
   done
 }
 
 install_corellium_cafe() {
   local instance_id="$1"
   local project_id
-  project_id=$(corellium instance get --instance "${instance_id}" | jq -r '.project')
+  project_id="$(corellium instance get --instance "${instance_id}" | jq -r '.project')"
   local ipa_url="https://www.corellium.com/hubfs/Corellium_Cafe.ipa"
   local ipa_filename
-  ipa_filename=$(basename "${ipa_url}")
+  ipa_filename="$(basename "${ipa_url}")"
 
   echo "Downloading ${ipa_filename}"
   wget --no-verbose "${ipa_url}"
@@ -45,11 +45,10 @@ install_corellium_cafe() {
 
 run_matrix_cafe_checks() {
   local instance_id="$1"
-  readonly MATRIX_MONITORING_SLEEP_TIME='5'
-  
+
   echo "Creating MATRIX assessment"
   local assessment_id
-  assessment_id=$(corellium matrix create-assessment --instance "${instance_id}" --bundle com.corellium.Cafe | jq -r '.id')
+  assessment_id="$(corellium matrix create-assessment --instance "${instance_id}" --bundle com.corellium.Cafe | jq -r '.id')"
 
   if [ -z "${assessment_id}" ]; then
     echo "Failed to create assessment" >&2
@@ -61,25 +60,26 @@ run_matrix_cafe_checks() {
   corellium matrix start-monitor --instance "${instance_id}" --assessment "${assessment_id}"
 
   echo "Waiting for monitoring to start"
+  local readonly MATRIX_MONITORING_SLEEP_TIME='5'
   local assessment_status
-  assessment_status=$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')
+  assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
 
   while [ "${assessment_status}" != 'monitoring' ]; do
     echo "Current assessment status is ${assessment_status}"
     sleep "${MATRIX_MONITORING_SLEEP_TIME}"
-    assessment_status=$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')
+    assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
   done
 
   echo "Stopping MATRIX monitoring"
   corellium matrix stop-monitor --instance "${instance_id}" --assessment "${assessment_id}"
 
   echo "Waiting for monitoring to stop"
-  assessment_status=$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')
+  assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
 
   while [ "${assessment_status}" != 'readyForTesting' ]; do
     echo "Current assessment status is ${assessment_status}"
     sleep "${MATRIX_MONITORING_SLEEP_TIME}"
-    assessment_status=$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')
+    assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
   done
 
   echo "Running MATRIX test"
@@ -87,16 +87,16 @@ run_matrix_cafe_checks() {
 
   echo "Waiting for test to complete"
   local readonly MATRIX_TESTING_SLEEP_TIME='60'
-  assessment_status=$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')
+  assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
 
   while [ "${assessment_status}" != 'complete' ]; do
     echo "Current assessment status is ${assessment_status}"
-    sleep "${MATRIX_TEST_SLEEP_TIME}"
-    assessment_status=$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')
+    sleep "${MATRIX_TESTING_SLEEP_TIME}"
+    assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
   done
 
   local report_id
-  report_id=$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.reportId')
+  report_id="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.reportId')"
 
   echo "Downloading MATRIX report ${report_id} as HTML"
   corellium matrix download-report --instance "${instance_id}" --assessment "${assessment_id}" > "matrix_report_${report_id}.html"

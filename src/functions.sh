@@ -45,6 +45,8 @@ install_corellium_cafe() {
 
 run_matrix_cafe_checks() {
   local instance_id="$1"
+  readonly MATRIX_MONITORING_SLEEP_TIME='5'
+  
   echo "Creating MATRIX assessment"
   local assessment_id
   assessment_id=$(corellium matrix create-assessment --instance "${instance_id}" --bundle com.corellium.Cafe | jq -r '.id')
@@ -59,7 +61,6 @@ run_matrix_cafe_checks() {
   corellium matrix start-monitor --instance "${instance_id}" --assessment "${assessment_id}"
 
   echo "Waiting for monitoring to start"
-  local readonly MATRIX_MONITORING_SLEEP_TIME='5'
   local assessment_status
   assessment_status=$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')
 

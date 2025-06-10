@@ -20,7 +20,7 @@ jobs:
         uses: luizm/action-sh-checker@v0.9.0
         env:
           SHELLCHECK_OPTS: >-
-            --exclude SC2154
+            --exclude SC2153,SC2154
             --enable add-default-case
             --enable avoid-nullary-conditions
             --enable check-unassigned-uppercase

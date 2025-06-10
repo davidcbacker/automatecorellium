@@ -1,0 +1,43 @@
+name: Check the changes
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  shell-lint:
+    name: Shell linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull the latest code
+        uses: actions/checkout@v4
+      - name: Lint
+        uses: luizm/action-sh-checker@v0.9.0
+        env:
+          SHELLCHECK_OPTS: >-
+            --enable add-default-case
+            --enable avoid-nullary-conditions
+            --enable check-unassigned-uppercase
+            --enable deprecate-which
+            --enable quote-safe-variables
+            --enable require-variable-braces
+          SHFMT_OPTS: >-
+              --case-indent
+              --func-next-line
+              --indent 2
+              --space-redirects
+  yaml-lint:
+    name: YAML Linting
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull the latest code
+        uses: actions/checkout@v4
+      - name: Lint
+        run: |
+          bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+          ./actionlint -color -verbose

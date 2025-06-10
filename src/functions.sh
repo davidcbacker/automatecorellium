@@ -37,9 +37,7 @@ install_corellium_cafe()
   echo "Downloading ${ipa_filename}"
   wget --no-verbose "${ipa_url}"
   echo "Installing ${ipa_filename}"
-  corellium apps install --instance "${instance_id}" --project "${project_id}" --app "${ipa_filename}"
-
-  if [ "$?" -gt 0 ]; then
+  if ! corellium apps install --instance "${instance_id}" --project "${project_id}" --app "${ipa_filename}"; then
     echo "Error installing app" >&2
     exit 1
   fi

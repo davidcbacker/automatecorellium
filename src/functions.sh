@@ -164,5 +164,5 @@ kill_cafe_app_process()
   local BUNDLE_ID='com.corellium.Cafe'
   curl -X POST "${CORELLIUM_API_ENDPOINT}/v1/instances/${instance_id}/agent/v1/app/apps/${BUNDLE_ID}/kill" \
     -H "Accept: application/json" \
-    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" 
+    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
 }

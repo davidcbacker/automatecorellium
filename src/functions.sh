@@ -115,6 +115,8 @@ delete_unauthorized_devices()
   done <<< "${AUTHORIZED_INSTANCES}"
 
   local corellium_devices
+  # disable lint check since all values are assumed to be UUIDs
+  #shellcheck disable=SC2207
   corellium_devices=($(corellium list | jq -r '.[].id'))
 
   for device in "${corellium_devices[@]}"; do

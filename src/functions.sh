@@ -81,15 +81,15 @@ run_matrix_cafe_checks()
 
   echo "Starting MATRIX monitoring"
   corellium matrix start-monitor --instance "${instance_id}" --assessment "${assessment_id}"
-  wait_for_assessment_status "${instance_id}" 'monitoring'
+  wait_for_assessment_status "${instance_id}" "${assessment_id}" 'monitoring'
 
   echo "Stopping MATRIX monitoring"
   corellium matrix stop-monitor --instance "${instance_id}" --assessment "${assessment_id}"
-  wait_for_assessment_status "${instance_id}" 'readyForTesting'
+  wait_for_assessment_status "${instance_id}" "${assessment_id}" 'readyForTesting'
 
   echo "Running MATRIX test"
   corellium matrix test --instance "${instance_id}" --assessment "${assessment_id}"
-  wait_for_assessment_status "${instance_id}" 'complete'
+  wait_for_assessment_status "${instance_id}" "${assessment_id}" 'complete'
 
   local report_id
   report_id="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.reportId')"

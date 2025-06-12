@@ -41,28 +41,28 @@ install_app_from_url()
 
   local project_id
   project_id="$(corellium instance get --instance "${instance_id}" | jq -r '.project')"
-  local ipa_filename
-  ipa_filename="$(basename "${ipa_url}")"
+  local app_filename
+  app_filename="$(basename "${app_url}")"
 
-  echo "Downloading ${ipa_filename}"
-  wget --no-verbose "${ipa_url}"
-  echo "Installing ${ipa_filename}"
-  if ! corellium apps install --instance "${instance_id}" --project "${project_id}" --app "${ipa_filename}"; then
+  echo "Downloading ${app_filename}"
+  wget --no-verbose "${app_url}"
+  echo "Installing ${app_filename}"
+  if ! corellium apps install --instance "${instance_id}" --project "${project_id}" --app "${app_filename}"; then
     echo "Error installing app" >&2
     exit 1
   fi
 }
 
-install_corellium_cafe()
+install_corellium_cafe_ios()
 {
   local instance_id="$1"
 
-  local ipa_url="https://www.corellium.com/hubfs/Corellium_Cafe.ipa"
+  local app_url="https://www.corellium.com/hubfs/Corellium_Cafe.ipa"
   local cafe_ios_bundle_id='com.corellium.Cafe'
 
-  kill_app "${instance_id}" "${cafe_ios_buncle_id}"
-  install_app_from_url "${instance_id}" "${ipa_url}"
-  echo "Successfully installed ${ipa_filename}"
+  kill_app "${instance_id}" "${cafe_ios_bundle_id}"
+  install_app_from_url "${instance_id}" "${app_url}"
+  echo "Successfully installed ${app_filename}"
 }
 
 run_matrix_cafe_checks()

@@ -100,7 +100,7 @@ run_matrix_cafe_checks()
   echo "Downloading MATRIX report ${report_id} as JSON"
   corellium matrix download-report --instance "${instance_id}" --assessment "${assessment_id}" --format json > "matrix_report_${report_id}.json"
 
-  echo "Finished MATRIX assessment ${assessmentid} with report ${report_id}."
+  echo "Finished MATRIX assessment ${assessment_id} with report ${report_id}."
 }
 
 delete_unauthorized_devices()

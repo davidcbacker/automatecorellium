@@ -29,7 +29,7 @@ kill_app()
 {
   local instance_id="$1"
   local app_buncle_id="$2"
-  curl -X POST "${CORELLIUM_API_ENDPOINT}/v1/instances/${instance_id}/agent/v1/app/apps/${app_buncle_id}/kill" \
+  curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/app/apps/${app_buncle_id}/kill" \
     -H "Accept: application/json" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
 }

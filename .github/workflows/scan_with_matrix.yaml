@@ -35,7 +35,6 @@ jobs:
           source ./src/functions.sh
           start_instance "${{ vars.MATRIX_INSTANCE }}"
           wait_until_agent_ready "${{ vars.MATRIX_INSTANCE }}"
-          kill_cafe_app_process "${{ vars.MATRIX_INSTANCE }}"
           install_corellium_cafe_ios "${{ vars.MATRIX_INSTANCE }}"
           run_matrix_cafe_checks "${{ vars.MATRIX_INSTANCE }}"
           kill_cafe_app_process "${{ vars.MATRIX_INSTANCE }}"

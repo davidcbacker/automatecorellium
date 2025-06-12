@@ -216,10 +216,8 @@ wait_for_assessment_status()
         ;;
     esac
 
-    printf 'Current status is %s and waiting for %s. Sleeping for %d seconds.' \
-      "${current_assessment_status}" \
-      "${TARGET_ASSESSMENT_STATUS}" \
-      "${sleep_time}"
+    echo "Current status is ${current_assessment_status}. Sleeping for ${sleep_time} seconds."
     sleep "${sleep_time}"
+    current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
   done
 }

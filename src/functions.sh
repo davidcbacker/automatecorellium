@@ -169,14 +169,16 @@ kill_cafe_app_process()
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
 }
 
-get_assessment_status() {
+get_assessment_status()
+{
   local instance_id="$1"
   local assessment_id="$2"
 
   corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status'
 }
 
-wait_for_assessment_status() {
+wait_for_assessment_status()
+{
   # declare parameters
   local INSTANCE_ID="$1"
   local ASSESSMENT_ID="$2"
@@ -188,8 +190,7 @@ wait_for_assessment_status() {
 
   # validate parameter
   case "${TARGET_ASSESSMENT_STATUS}" in
-    'complete' | 'failed' | 'monitoring' | 'readyForTesting' | 'startMonitoring' | 'stopMonitoring' | 'testing')
-      ;;
+    'complete' | 'failed' | 'monitoring' | 'readyForTesting' | 'startMonitoring' | 'stopMonitoring' | 'testing') ;;
     *)
       echo "Unsupported target status: '${TARGET_ASSESSMENT_STATUS}'. Exiting." >&2
       exit 1
@@ -198,7 +199,7 @@ wait_for_assessment_status() {
 
   local assessment_status
   current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
-  
+
   while [ "${current_assessment_status}" != "${TARGET_ASSESSMENT_STATUS}" ]; do
     case "${current_assessment_status}" in
       'failed')
@@ -216,7 +217,7 @@ wait_for_assessment_status() {
         sleep_time="${SLEEP_TIME_DEFAULT}"
         ;;
     esac
-    
+
     printf 'Current status is %s and waiting for %s. Sleeping for %d seconds.' \
       "${current_assessment_status}" \
       "${TARGET_ASSESSMENT_STATUS}" \

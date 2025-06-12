@@ -38,7 +38,7 @@ install_app_from_url()
 {
   local instance_id="$1"
   local app_url="$2"
-  
+
   local project_id
   project_id="$(corellium instance get --instance "${instance_id}" | jq -r '.project')"
   local ipa_filename
@@ -56,7 +56,7 @@ install_app_from_url()
 install_corellium_cafe()
 {
   local instance_id="$1"
-  
+
   local ipa_url="https://www.corellium.com/hubfs/Corellium_Cafe.ipa"
   local cafe_ios_bundle_id='com.corellium.Cafe'
 

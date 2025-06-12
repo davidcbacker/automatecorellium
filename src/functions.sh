@@ -60,42 +60,16 @@ run_matrix_cafe_checks()
 
   echo "Starting MATRIX monitoring"
   corellium matrix start-monitor --instance "${instance_id}" --assessment "${assessment_id}"
-
-  echo "Waiting for monitoring to start"
-  local MATRIX_MONITORING_SLEEP_TIME='5'
-  local assessment_status
-  assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
-
-  while [ "${assessment_status}" != 'monitoring' ]; do
-    echo "Current assessment status is ${assessment_status}"
-    sleep "${MATRIX_MONITORING_SLEEP_TIME}"
-    assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
-  done
+  wait_for_assessment_status 'monitoring'
 
   echo "Stopping MATRIX monitoring"
   corellium matrix stop-monitor --instance "${instance_id}" --assessment "${assessment_id}"
 
-  echo "Waiting for monitoring to stop"
-  assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
-
-  while [ "${assessment_status}" != 'readyForTesting' ]; do
-    echo "Current assessment status is ${assessment_status}"
-    sleep "${MATRIX_MONITORING_SLEEP_TIME}"
-    assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
-  done
+  wait_for_assessment_status 'readyForTesting'
 
   echo "Running MATRIX test"
   corellium matrix test --instance "${instance_id}" --assessment "${assessment_id}"
-
-  echo "Waiting for test to complete"
-  local MATRIX_TESTING_SLEEP_TIME='60'
-  assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
-
-  while [ "${assessment_status}" != 'complete' ]; do
-    echo "Current assessment status is ${assessment_status}"
-    sleep "${MATRIX_TESTING_SLEEP_TIME}"
-    assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
-  done
+  wait_for_assessment_status 'complete'
 
   local report_id
   report_id="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.reportId')"
@@ -105,6 +79,8 @@ run_matrix_cafe_checks()
 
   echo "Downloading MATRIX report ${report_id} as JSON"
   corellium matrix download-report --instance "${instance_id}" --assessment "${assessment_id}" --format json > "matrix_report_${report_id}.json"
+
+  echo "Finished MATRIX assessment ${assessmentid} with report ${report_id}."
 }
 
 delete_unauthorized_devices()
@@ -196,6 +172,8 @@ wait_for_assessment_status()
       exit 1
       ;;
   esac
+
+  echo "Waiting for assessment status of ${TARGET_ASSESSMENT_STATUS}"
 
   local assessment_status
   current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"

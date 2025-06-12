@@ -25,12 +25,22 @@ wait_until_agent_ready()
   done
 }
 
-install_corellium_cafe()
+kill_app()
 {
   local instance_id="$1"
+  local app_buncle_id="$2"
+  curl -X POST "${CORELLIUM_API_ENDPOINT}/v1/instances/${instance_id}/agent/v1/app/apps/${app_buncle_id}/kill" \
+    -H "Accept: application/json" \
+    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
+}
+
+install_app_from_url()
+{
+  local instance_id="$1"
+  local app_url="$2"
+  
   local project_id
   project_id="$(corellium instance get --instance "${instance_id}" | jq -r '.project')"
-  local ipa_url="https://www.corellium.com/hubfs/Corellium_Cafe.ipa"
   local ipa_filename
   ipa_filename="$(basename "${ipa_url}")"
 
@@ -41,6 +51,17 @@ install_corellium_cafe()
     echo "Error installing app" >&2
     exit 1
   fi
+}
+
+install_corellium_cafe()
+{
+  local instance_id="$1"
+  
+  local ipa_url="https://www.corellium.com/hubfs/Corellium_Cafe.ipa"
+  local cafe_ios_bundle_id='com.corellium.Cafe'
+
+  kill_app "${instance_id}" "${cafe_ios_buncle_id}"
+  install_app_from_url "${instance_id}" "${ipa_url}"
   echo "Successfully installed ${ipa_filename}"
 }
 

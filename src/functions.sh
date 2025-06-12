@@ -81,42 +81,15 @@ run_matrix_cafe_checks()
 
   echo "Starting MATRIX monitoring"
   corellium matrix start-monitor --instance "${instance_id}" --assessment "${assessment_id}"
-
-  echo "Waiting for monitoring to start"
-  local MATRIX_MONITORING_SLEEP_TIME='5'
-  local assessment_status
-  assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
-
-  while [ "${assessment_status}" != 'monitoring' ]; do
-    echo "Current assessment status is ${assessment_status}"
-    sleep "${MATRIX_MONITORING_SLEEP_TIME}"
-    assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
-  done
+  wait_for_assessment_status 'monitoring'
 
   echo "Stopping MATRIX monitoring"
   corellium matrix stop-monitor --instance "${instance_id}" --assessment "${assessment_id}"
-
-  echo "Waiting for monitoring to stop"
-  assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
-
-  while [ "${assessment_status}" != 'readyForTesting' ]; do
-    echo "Current assessment status is ${assessment_status}"
-    sleep "${MATRIX_MONITORING_SLEEP_TIME}"
-    assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
-  done
+  wait_for_assessment_status 'readyForTesting'
 
   echo "Running MATRIX test"
   corellium matrix test --instance "${instance_id}" --assessment "${assessment_id}"
-
-  echo "Waiting for test to complete"
-  local MATRIX_TESTING_SLEEP_TIME='60'
-  assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
-
-  while [ "${assessment_status}" != 'complete' ]; do
-    echo "Current assessment status is ${assessment_status}"
-    sleep "${MATRIX_TESTING_SLEEP_TIME}"
-    assessment_status="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status')"
-  done
+  wait_for_assessment_status 'complete'
 
   local report_id
   report_id="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.reportId')"
@@ -126,6 +99,8 @@ run_matrix_cafe_checks()
 
   echo "Downloading MATRIX report ${report_id} as JSON"
   corellium matrix download-report --instance "${instance_id}" --assessment "${assessment_id}" --format json > "matrix_report_${report_id}.json"
+
+  echo "Finished MATRIX assessment ${assessmentid} with report ${report_id}."
 }
 
 delete_unauthorized_devices()
@@ -188,4 +163,63 @@ kill_cafe_app_process()
   curl -X POST "${CORELLIUM_API_ENDPOINT}/v1/instances/${instance_id}/agent/v1/app/apps/${BUNDLE_ID}/kill" \
     -H "Accept: application/json" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
+}
+
+get_assessment_status()
+{
+  local instance_id="$1"
+  local assessment_id="$2"
+
+  corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status'
+}
+
+wait_for_assessment_status()
+{
+  # declare parameters
+  local INSTANCE_ID="$1"
+  local ASSESSMENT_ID="$2"
+  local TARGET_ASSESSMENT_STATUS="$3"
+
+  # declare constants
+  local SLEEP_TIME_DEFAULT='5'
+  local SLEEP_TIME_FOR_TESTING='60'
+
+  # validate parameter
+  case "${TARGET_ASSESSMENT_STATUS}" in
+    'complete' | 'failed' | 'monitoring' | 'readyForTesting' | 'startMonitoring' | 'stopMonitoring' | 'testing') ;;
+    *)
+      echo "Unsupported target status: '${TARGET_ASSESSMENT_STATUS}'. Exiting." >&2
+      exit 1
+      ;;
+  esac
+
+  echo "Waiting for assessment status of ${TARGET_ASSESSMENT_STATUS}"
+
+  local current_assessment_status
+  current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
+
+  while [ "${current_assessment_status}" != "${TARGET_ASSESSMENT_STATUS}" ]; do
+    case "${current_assessment_status}" in
+      'failed')
+        echo 'Detected a failed run. Exiting.' >&2
+        exit 1
+        ;;
+      'monitoring')
+        echo 'Cannot wait when status is monitoring.' >&2
+        exit 1
+        ;;
+      'testing')
+        sleep_time="${SLEEP_TIME_FOR_TESTING}"
+        ;;
+      *)
+        sleep_time="${SLEEP_TIME_DEFAULT}"
+        ;;
+    esac
+
+    printf 'Current status is %s and waiting for %s. Sleeping for %d seconds.' \
+      "${current_assessment_status}" \
+      "${TARGET_ASSESSMENT_STATUS}" \
+      "${sleep_time}"
+    sleep "${sleep_time}"
+  done
 }

@@ -191,7 +191,7 @@ wait_for_assessment_status() {
     'complete' | 'failed' | 'monitoring' | 'readyForTesting' | 'startMonitoring' | 'stopMonitoring' | 'testing')
       ;;
     *)
-      echo "Unsupported target status: ${$TARGET_ASSESSMENT_STATUS}. Exiting." >&2
+      echo "Unsupported target status: '${TARGET_ASSESSMENT_STATUS}'. Exiting." >&2
       exit 1
       ;;
   esac

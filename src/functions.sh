@@ -100,7 +100,7 @@ run_matrix_cafe_checks()
   echo "Downloading MATRIX report ${report_id} as JSON"
   corellium matrix download-report --instance "${instance_id}" --assessment "${assessment_id}" --format json > "matrix_report_${report_id}.json"
 
-  echo "Finished MATRIX assessment ${assessmentid} with report ${report_id}."
+  echo "Finished MATRIX assessment ${assessment_id} with report ${report_id}."
 }
 
 delete_unauthorized_devices()
@@ -181,7 +181,7 @@ wait_for_assessment_status()
   local TARGET_ASSESSMENT_STATUS="$3"
 
   # declare constants
-  local SLEEP_TIME_DEFAULT='5'
+  local SLEEP_TIME_DEFAULT='2'
   local SLEEP_TIME_FOR_TESTING='60'
 
   # validate parameter
@@ -193,7 +193,7 @@ wait_for_assessment_status()
       ;;
   esac
 
-  echo "Waiting for assessment status of ${TARGET_ASSESSMENT_STATUS}"
+  echo "Waiting for assessment status of '${TARGET_ASSESSMENT_STATUS}'."
 
   local current_assessment_status
   current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
@@ -216,10 +216,8 @@ wait_for_assessment_status()
         ;;
     esac
 
-    printf 'Current status is %s and waiting for %s. Sleeping for %d seconds.' \
-      "${current_assessment_status}" \
-      "${TARGET_ASSESSMENT_STATUS}" \
-      "${sleep_time}"
+    echo "Current status is ${current_assessment_status}. Sleeping for ${sleep_time} seconds."
     sleep "${sleep_time}"
+    current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
   done
 }

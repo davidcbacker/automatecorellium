@@ -17,6 +17,8 @@ jobs:
         with:
           cache: 'npm'
           node-version: 22
+      - name: Check npm status
+        run: curl -s https://status.npmjs.org | grep -i "All Systems Operational" || echo "Registry may be down"
       - name: Install Corellium CLI
         run: npm install -g @corellium/corellium-cli
       - name: Log in to Corellium

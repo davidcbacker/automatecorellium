@@ -37,6 +37,13 @@ kill_app()
   fi
 }
 
+kill_corellium_cafe_ios()
+{
+  local instance_id="$1"
+  local app_bundle_id='com.corellium.Cafe'
+  kill_app "${instance_id}" "${app_bundle_id}"
+}
+
 get_project_from_instance_id()
 {
   local instance_id="$1"
@@ -81,7 +88,7 @@ is_app_running()
   project_id="$(get_project_from_instance_id "${instance_id}")"
 
   corellium apps --project "${project_id}" --instance "${instance_id}" |
-    jq -r --arg id "${app_bundle_id}" '.apps[] | select(.bundleID == $id) | .running'
+    jq -r --arg id "${app_bundle_id}" '.[] | select(.bundleID == $id) | .running'
 }
 
 run_matrix_cafe_checks()
@@ -112,6 +119,8 @@ run_matrix_cafe_checks()
   echo "Running MATRIX test"
   corellium matrix test --instance "${instance_id}" --assessment "${assessment_id}"
   wait_for_assessment_status "${instance_id}" "${assessment_id}" 'complete'
+
+  kill_corellium_cafe_ios "${instance_id}"
 
   local report_id
   report_id="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.reportId')"

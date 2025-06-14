@@ -28,10 +28,13 @@ wait_until_agent_ready()
 kill_app()
 {
   local instance_id="$1"
-  local app_buncle_id="$2"
-  curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/app/apps/${app_buncle_id}/kill" \
-    -H "Accept: application/json" \
-    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
+  local app_bundle_id="$2"
+
+  if [ "$(is_app_running "${instance_id}" "${app_bundle_id}")" = 'true' ]; then
+    curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/app/apps/${app_bundle_id}/kill" \
+      -H "Accept: application/json" \
+      -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
+  fi
 }
 
 install_app_from_url()
@@ -56,13 +59,23 @@ install_app_from_url()
 install_corellium_cafe_ios()
 {
   local instance_id="$1"
-
   local app_url="https://www.corellium.com/hubfs/Corellium_Cafe.ipa"
   local cafe_ios_bundle_id='com.corellium.Cafe'
 
   kill_app "${instance_id}" "${cafe_ios_bundle_id}"
   install_app_from_url "${instance_id}" "${app_url}"
   echo "Successfully installed ${app_filename}"
+}
+
+is_app_running()
+{
+  local instance_id="$1"
+  local app_bundle_id="$2"
+
+  curl -X GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/app/apps/update" \
+    -H "Accept: application/json" \
+    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
+    | jq -r --arg id "${app_bundle_id}" '.apps[] | select(.bundleID == $id) | .running'
 }
 
 run_matrix_cafe_checks()

@@ -74,8 +74,8 @@ is_app_running()
 
   curl -X GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/app/apps/update" \
     -H "Accept: application/json" \
-    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
-    | jq -r --arg id "${app_bundle_id}" '.apps[] | select(.bundleID == $id) | .running'
+    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" |
+    jq -r --arg id "${app_bundle_id}" '.apps[] | select(.bundleID == $id) | .running'
 }
 
 run_matrix_cafe_checks()

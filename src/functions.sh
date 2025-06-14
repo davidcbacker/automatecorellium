@@ -203,7 +203,7 @@ wait_for_assessment_status()
   local TARGET_ASSESSMENT_STATUS="$3"
 
   # declare constants
-  local SLEEP_TIME_DEFAULT='2'
+  local SLEEP_TIME_DEFAULT='1'
   local SLEEP_TIME_FOR_TESTING='60'
 
   # validate parameter

@@ -37,6 +37,13 @@ kill_app()
   fi
 }
 
+kill_corellium_cafe_ios
+{
+  local instance_id="$1"
+  local app_bundle_id='com.corellium.Cafe'
+  kill_app "${instance_id}" "${app_bundle_id}"
+}
+
 install_app_from_url()
 {
   local instance_id="$1"

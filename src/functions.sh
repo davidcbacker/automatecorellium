@@ -44,13 +44,19 @@ kill_corellium_cafe_ios()
   kill_app "${instance_id}" "${app_bundle_id}"
 }
 
+get_project_from_instance_id()
+{
+  local instance_id="$1"
+  corellium instance get --instance "${instance_id}" | jq -r '.project'
+}
+
 install_app_from_url()
 {
   local instance_id="$1"
   local app_url="$2"
 
   local project_id
-  project_id="$(corellium instance get --instance "${instance_id}" | jq -r '.project')"
+  project_id="$(get_project_from_instance_id "${instance_id}")"
   local app_filename
   app_filename="$(basename "${app_url}")"
 
@@ -78,10 +84,10 @@ is_app_running()
 {
   local instance_id="$1"
   local app_bundle_id="$2"
+  local project_id
+  project_id="$(get_project_from_instance_id "${instance_id}")"
 
-  curl -X GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/app/apps/update" \
-    -H "Accept: application/json" \
-    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" |
+  corellium apps --project "${project_id}" --instance "${instance_id}" |
     jq -r --arg id "${app_bundle_id}" '.apps[] | select(.bundleID == $id) | .running'
 }
 

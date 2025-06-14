@@ -88,7 +88,7 @@ is_app_running()
   project_id="$(get_project_from_instance_id "${instance_id}")"
 
   corellium apps --project "${project_id}" --instance "${instance_id}" |
-    jq -r --arg id "${app_bundle_id}" '.apps[] | select(.bundleID == $id) | .running'
+    jq -r --arg id "${app_bundle_id}" '.[] | select(.bundleID == $id) | .running'
 }
 
 run_matrix_cafe_checks()

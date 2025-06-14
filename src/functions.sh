@@ -114,6 +114,8 @@ run_matrix_cafe_checks()
   corellium matrix test --instance "${instance_id}" --assessment "${assessment_id}"
   wait_for_assessment_status "${instance_id}" "${assessment_id}" 'complete'
 
+  kill_corellium_cafe_ios
+  
   local report_id
   report_id="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.reportId')"
 

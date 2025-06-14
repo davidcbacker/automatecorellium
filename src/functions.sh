@@ -9,6 +9,13 @@ start_instance()
   corellium instance start "${instance_id}" --wait || true
 }
 
+stop_instance()
+{
+  local instance_id="$1"
+  echo "Stopping instance ${instance_id}"
+  corellium instance stop "${instance_id}" --wait || true
+}
+
 wait_until_agent_ready()
 {
   local instance_id="$1"

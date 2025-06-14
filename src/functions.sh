@@ -106,18 +106,21 @@ run_matrix_cafe_checks()
   echo "Created MATRIX assessment ${assessment_id}"
 
   echo "Starting MATRIX monitoring"
-  corellium matrix start-monitor --instance "${instance_id}" --assessment "${assessment_id}"
+  corellium matrix start-monitor --instance "${instance_id}" --assessment "${assessment_id}" \
+    > /dev/null
   wait_for_assessment_status "${instance_id}" "${assessment_id}" 'monitoring'
 
   # debug
   sleep 10
 
   echo "Stopping MATRIX monitoring"
-  corellium matrix stop-monitor --instance "${instance_id}" --assessment "${assessment_id}"
+  corellium matrix stop-monitor --instance "${instance_id}" --assessment "${assessment_id}" \
+    > /dev/null
   wait_for_assessment_status "${instance_id}" "${assessment_id}" 'readyForTesting'
 
   echo "Running MATRIX test"
-  corellium matrix test --instance "${instance_id}" --assessment "${assessment_id}"
+  corellium matrix test --instance "${instance_id}" --assessment "${assessment_id}" \
+    > /dev/null
   wait_for_assessment_status "${instance_id}" "${assessment_id}" 'complete'
 
   kill_corellium_cafe_ios "${instance_id}"

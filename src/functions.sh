@@ -5,7 +5,7 @@
 start_instance()
 {
   local instance_id="$1"
-  case "$(get_instance_staus "${instance_id}")" in
+  case "$(get_instance_status "${instance_id}")" in
     'on')
       echo "Instance ${instance_id}" is already on."
       ;;
@@ -19,7 +19,7 @@ start_instance()
 stop_instance()
 {
   local instance_id="$1"
-  case "$(get_instance_staus "${instance_id}")" in
+  case "$(get_instance_status "${instance_id}")" in
     'off')
       echo "Instance ${instance_id}" is already off."
       ;;

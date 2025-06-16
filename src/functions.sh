@@ -28,7 +28,7 @@ wait_until_agent_ready()
   while [ "${ready_status}" != 'true' ]; do
     echo "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
     sleep "${AGENT_READY_SLEEP_TIME}"
-    ready_status="$(corellium ready --instance "${instance_id}" --project "${project_id}" | jq -r '.ready')"
+    ready_status="$(corellium ready --instance "${instance_id}" --project "${project_id}" 2> /dev/null | jq -r '.ready')"
   done
 }
 

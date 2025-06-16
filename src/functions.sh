@@ -5,15 +5,35 @@
 start_instance()
 {
   local instance_id="$1"
-  echo "Starting instance ${instance_id}"
-  corellium instance start "${instance_id}" --wait || true
+  case "$(get_instance_status "${instance_id}")" in
+    'on')
+      echo "Instance ${instance_id} is already on."
+      ;;
+    *)
+      echo "Starting instance ${instance_id}"
+      corellium instance start "${instance_id}" --wait || true
+      ;;
+  esac
 }
 
 stop_instance()
 {
   local instance_id="$1"
-  echo "Stopping instance ${instance_id}"
-  corellium instance stop "${instance_id}" --wait || true
+  case "$(get_instance_status "${instance_id}")" in
+    'off')
+      echo "Instance ${instance_id} is already off."
+      ;;
+    *)
+      echo "Stopping instance ${instance_id}"
+      corellium instance stop "${instance_id}" --wait || true
+      ;;
+  esac
+}
+
+get_instance_status()
+{
+  local instance_id="$1"
+  corellium instance get --instance "${instance_id}" | jq -r '.state'
 }
 
 wait_until_agent_ready()
@@ -210,22 +230,17 @@ get_assessment_status()
 {
   local instance_id="$1"
   local assessment_id="$2"
-
   corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status'
 }
 
 wait_for_assessment_status()
 {
-  # declare parameters
   local INSTANCE_ID="$1"
   local ASSESSMENT_ID="$2"
   local TARGET_ASSESSMENT_STATUS="$3"
-
-  # declare constants
   local SLEEP_TIME_DEFAULT='1'
   local SLEEP_TIME_FOR_TESTING='60'
 
-  # validate parameter
   case "${TARGET_ASSESSMENT_STATUS}" in
     'complete' | 'failed' | 'monitoring' | 'readyForTesting' | 'startMonitoring' | 'stopMonitoring' | 'testing') ;;
     *)
@@ -235,7 +250,6 @@ wait_for_assessment_status()
   esac
 
   echo "Waiting for assessment status of '${TARGET_ASSESSMENT_STATUS}'."
-
   local current_assessment_status
   current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
 

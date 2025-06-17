@@ -88,7 +88,7 @@ install_app_from_url()
   app_filename="$(basename "${app_url}")"
 
   echo "Downloading ${app_filename}"
-  wget --no-verbose "${app_url}"
+  wget --quiet "${app_url}"
   echo "Installing ${app_filename}"
   if ! corellium apps install --instance "${instance_id}" --project "${project_id}" --app "${app_filename}"; then
     echo "Error installing app" >&2

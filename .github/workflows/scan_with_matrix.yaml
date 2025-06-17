@@ -26,16 +26,19 @@ jobs:
           corellium login \
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
+      - name: Load shell functions 
+          set -e
+          source ./src/functions.sh
+      - name: Start instance and wait until ready
+        run: |
+          start_instance "${{ vars.MATRIX_INSTANCE }}"
+          wait_until_agent_ready "${{ vars.MATRIX_INSTANCE }}"
       - name: Run Corellium Cafe MATRIX assessment
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
-          set -e
-          source ./src/functions.sh
-          start_instance "${{ vars.MATRIX_INSTANCE }}"
-          wait_until_agent_ready "${{ vars.MATRIX_INSTANCE }}"
-          install_corellium_cafe_ios "${{ vars.MATRIX_INSTANCE }}"
+          install_corellium_cafe_ios "${{ vars.MATRIX_INSTANCE }}"        
           run_matrix_cafe_checks "${{ vars.MATRIX_INSTANCE }}"
           stop_instance "${{ vars.MATRIX_INSTANCE }}"
       - name: Upload MATRIX artifacts

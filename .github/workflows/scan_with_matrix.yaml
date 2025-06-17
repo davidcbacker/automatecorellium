@@ -5,6 +5,9 @@ on:
     - cron: "17 * * * *"
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.event_name == 'schedule' && 'scheduled' || 'non-scheduled' }}
+
 jobs:
   corellium-matrixscan:
     name: Scan with MATRIX

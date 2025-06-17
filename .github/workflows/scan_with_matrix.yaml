@@ -26,7 +26,8 @@ jobs:
           corellium login \
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
-      - name: Load shell functions 
+      - name: Load shell functions
+        run: |
           set -e
           source ./src/functions.sh
       - name: Start instance and wait until ready

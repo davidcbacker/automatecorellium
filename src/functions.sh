@@ -250,6 +250,7 @@ wait_for_assessment_status()
   esac
 
   echo "Waiting for assessment status of '${TARGET_ASSESSMENT_STATUS}'."
+  local last_assessment_status=''
   local current_assessment_status
   current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
 

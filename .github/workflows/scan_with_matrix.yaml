@@ -8,6 +8,10 @@ on:
 concurrency:
   group: ${{ github.event_name == 'schedule' && 'scheduled' || 'non-scheduled' }}
 
+env:
+  MATRIX_INSTANCE_ID: ${{ github.event_name == 'schedule' && vars.MATRIX_AUTOMATION_INSTANCE
+                        || vars.MATRIX_DEVELOPMENT_INSTANCE }}
+
 jobs:
   corellium-matrixscan:
     name: Scan with MATRIX
@@ -33,8 +37,8 @@ jobs:
         run: |
           set -e
           source ./src/functions.sh
-          start_instance "${{ vars.MATRIX_INSTANCE }}"
-          wait_until_agent_ready "${{ vars.MATRIX_INSTANCE }}"
+          start_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Run Corellium Cafe MATRIX assessment
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
@@ -42,9 +46,9 @@ jobs:
         run: |
           set -e
           source ./src/functions.sh
-          install_corellium_cafe_ios "${{ vars.MATRIX_INSTANCE }}"
-          run_matrix_cafe_checks "${{ vars.MATRIX_INSTANCE }}"
-          stop_instance "${{ vars.MATRIX_INSTANCE }}"
+          install_corellium_cafe_ios "${{ env.MATRIX_INSTANCE_ID }}"
+          run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"
+          stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Upload MATRIX artifacts
         uses: actions/upload-artifact@v4
         with:

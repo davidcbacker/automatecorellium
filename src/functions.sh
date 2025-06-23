@@ -55,6 +55,7 @@ wait_until_agent_ready()
     sleep "${AGENT_READY_SLEEP_TIME}"
     ready_status="$(corellium ready --instance "${instance_id}" --project "${project_id}" 2> /dev/null | jq -r '.ready')"
   done
+  echo "Virtual device agent is ready."
 }
 
 kill_app()

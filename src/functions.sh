@@ -147,7 +147,7 @@ run_matrix_cafe_checks()
   wait_for_assessment_status "${instance_id}" "${assessment_id}" 'monitoring'
 
   # debug
-  sleep 10
+  sleep 60
 
   echo "Stopping MATRIX monitoring"
   corellium matrix stop-monitor --instance "${instance_id}" --assessment "${assessment_id}" \

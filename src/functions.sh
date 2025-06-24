@@ -247,9 +247,9 @@ download_file_at_path()
   local instance_id="$1"
   local file_path="$2"
   # replace '/' with '%2F' using parameter expansion
-  local file_path_encoded="${file_path//\//%2F}"
+  local encoded_file_path="${file_path//\//%2F}"
 
-  curl -X GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/file/device//"${file_path_encoded}" \
+  curl -X GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/file/device/${encoded_file_path}" \
     -H "Accept: application/octet-stream" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
 }

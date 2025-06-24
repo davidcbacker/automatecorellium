@@ -26,7 +26,7 @@ stop_instance()
     *)
       echo "Stopping instance ${instance_id}"
       # Fix if this causes nonzero exit status or stderr messages
-      curl -X POST "${CORELLIUM_API_ENDPOINT}/v1/instances/${instance_id}/stop" \
+      curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/stop" \
         -H "Accept: application/json" \
         -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
         -H "Content-Type: application/json" \

@@ -62,6 +62,14 @@ jobs:
             "${{ env.MATRIX_INSTANCE_ID }}" \
             "${INSTANCE_NETMON_PCAP_PATH}" \
             "${RUNNER_NETMON_PCAP_PATH}"
+      - name: Stop instance
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+        run: |
+          set -e
+          source ./src/functions.sh
+          stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Upload MATRIX netmon artifact
         uses: actions/upload-artifact@v4
         with:
@@ -77,11 +85,3 @@ jobs:
             matrix_report_*.html
             matrix_report_*.json
           if-no-files-found: error
-      - name: Stop instance
-        env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
-        run: |
-          set -e
-          source ./src/functions.sh
-          stop_instance "${{ env.MATRIX_INSTANCE_ID }}"

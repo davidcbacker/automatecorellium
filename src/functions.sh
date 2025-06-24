@@ -44,7 +44,7 @@ get_instance_status()
 wait_until_agent_ready()
 {
   local instance_id="$1"
-  local AGENT_READY_SLEEP_TIME='10'
+  local AGENT_READY_SLEEP_TIME='20'
   local project_id
   project_id="$(corellium instance get --instance "${instance_id}" | jq -r '.project')"
   local ready_status
@@ -247,7 +247,7 @@ wait_for_assessment_status()
   local INSTANCE_ID="$1"
   local ASSESSMENT_ID="$2"
   local TARGET_ASSESSMENT_STATUS="$3"
-  local SLEEP_TIME_DEFAULT='1'
+  local SLEEP_TIME_DEFAULT='2'
   local SLEEP_TIME_FOR_TESTING='60'
 
   case "${TARGET_ASSESSMENT_STATUS}" in

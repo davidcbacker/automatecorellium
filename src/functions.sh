@@ -245,13 +245,15 @@ get_assessment_status()
 download_file_at_path()
 {
   local instance_id="$1"
-  local file_path="$2"
+  local download_path="$2"
+  local local_save_path="$3"
   # replace '/' with '%2F' using parameter expansion
-  local encoded_file_path="${file_path//\//%2F}"
+  local encoded_download_path="${instance_download_path//\//%2F}"
 
-  curl -X GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/file/device/${encoded_file_path}" \
+  curl -X GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/file/device/${encoded_download_path}" \
     -H "Accept: application/octet-stream" \
-    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
+    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"\
+    -o "${local_save_path}"
 }
 
 wait_for_assessment_status()

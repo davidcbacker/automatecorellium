@@ -26,7 +26,7 @@ stop_instance()
     *)
       echo "Stopping instance ${instance_id}"
       # Fix if this causes nonzero exit status or stderr messages
-      curl -X POST "${CORELLIUM_API_ENDPOINT}/v1/instances/${instance_id}/stop" \
+      curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/stop" \
         -H "Accept: application/json" \
         -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
         -H "Content-Type: application/json" \
@@ -147,7 +147,7 @@ run_matrix_cafe_checks()
   wait_for_assessment_status "${instance_id}" "${assessment_id}" 'monitoring'
 
   # debug
-  sleep 10
+  sleep 60
 
   echo "Stopping MATRIX monitoring"
   corellium matrix stop-monitor --instance "${instance_id}" --assessment "${assessment_id}" \
@@ -259,13 +259,14 @@ wait_for_assessment_status()
   esac
 
   echo "Waiting for assessment status of '${TARGET_ASSESSMENT_STATUS}'."
+  local last_assessment_status=''
   local current_assessment_status
   current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
 
   while [ "${current_assessment_status}" != "${TARGET_ASSESSMENT_STATUS}" ]; do
     case "${current_assessment_status}" in
       'failed')
-        echo 'Detected a failed run. Exiting.' >&2
+        echo "Detected a failed run. Last state was ${last_assessment_status}. Exiting." >&2
         exit 1
         ;;
       'monitoring')
@@ -282,6 +283,7 @@ wait_for_assessment_status()
 
     echo "Current status is ${current_assessment_status}. Sleeping for ${sleep_time} seconds."
     sleep "${sleep_time}"
+    last_assessment_status="${current_assessment_status}"
     current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
   done
 }

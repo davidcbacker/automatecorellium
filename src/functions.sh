@@ -252,7 +252,7 @@ download_file_at_path()
 
   curl -X GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/file/device/${encoded_download_path}" \
     -H "Accept: application/octet-stream" \
-    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"\
+    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
     -o "${local_save_path}"
 }
 

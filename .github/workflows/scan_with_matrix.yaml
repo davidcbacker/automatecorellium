@@ -54,7 +54,7 @@ jobs:
           run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Start instance and wait until ready
         run: |
-          set -e
+          set -ex
           source ./src/functions.sh
           stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Upload MATRIX artifacts

@@ -242,7 +242,7 @@ get_assessment_status()
   corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status'
 }
 
-download_file_at_path()
+download_file_to_local_path()
 {
   local instance_id="$1"
   local download_path="$2"

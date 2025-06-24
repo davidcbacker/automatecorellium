@@ -242,6 +242,18 @@ get_assessment_status()
   corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status'
 }
 
+download_file_at_path()
+{
+  local instance_id="$1"
+  local file_path="$2"
+  # replace '/' with '%2F' using parameter expansion
+  local file_path_encoded="${file_path//\//%2F}"
+
+  curl -X GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/file/device//"${file_path_encoded}" \
+    -H "Accept: application/octet-stream" \
+    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
+}
+
 wait_for_assessment_status()
 {
   local INSTANCE_ID="$1"

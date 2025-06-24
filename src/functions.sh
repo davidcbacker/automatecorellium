@@ -274,7 +274,7 @@ wait_for_assessment_status()
 
     echo "Current status is ${current_assessment_status}. Sleeping for ${sleep_time} seconds."
     sleep "${sleep_time}"
-    last_assessment_status="$(echo "${current_assessment_status}")"
+    last_assessment_status="${current_assessment_status}"
     current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
   done
 }

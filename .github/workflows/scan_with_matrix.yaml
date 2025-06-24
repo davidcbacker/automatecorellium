@@ -58,7 +58,7 @@ jobs:
         run: |
           set -e
           source ./src/functions.sh
-          save_instance_file_to_local_path \
+          download_file_to_local_path \
             "${{ env.MATRIX_INSTANCE_ID }}" \
             "${INSTANCE_NETMON_PCAP_PATH}" \
             "${RUNNER_NETMON_PCAP_PATH}"

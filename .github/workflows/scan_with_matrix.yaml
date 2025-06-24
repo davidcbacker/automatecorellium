@@ -53,6 +53,9 @@ jobs:
           install_corellium_cafe_ios "${{ env.MATRIX_INSTANCE_ID }}"
           run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Stop instance
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -ex
           source ./src/functions.sh

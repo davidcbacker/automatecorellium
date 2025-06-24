@@ -248,7 +248,7 @@ download_file_at_path()
   local download_path="$2"
   local local_save_path="$3"
   # replace '/' with '%2F' using parameter expansion
-  local encoded_download_path="${instance_download_path//\//%2F}"
+  local encoded_download_path="${download_path//\//%2F}"
 
   curl -X GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/file/device/${encoded_download_path}" \
     -H "Accept: application/octet-stream" \

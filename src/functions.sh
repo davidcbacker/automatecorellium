@@ -254,7 +254,7 @@ download_file_to_local_path()
   echo "instance_id=${instance_id}"
   echo "download_path=${download_path}"
   echo "local_save_path=${local_save_path}"
-  echo encoded_download_path=${encoded_download_path}"
+  echo encoded_download_path="${encoded_download_path}"
 
   curl -X GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/file/device/${encoded_download_path}" \
     -H "Accept: application/octet-stream" \

@@ -56,7 +56,7 @@ jobs:
           run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Download netmon pcap artifact
         run: |
-          set -e
+          set -ex
           source ./src/functions.sh
           download_file_to_local_path \
             "${{ env.MATRIX_INSTANCE_ID }}" \

@@ -256,7 +256,8 @@ download_file_to_local_path()
   echo "local_save_path=${local_save_path}"
   echo encoded_download_path="${encoded_download_path}"
 
-  curl -X GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/file/device/${encoded_download_path}" \
+  # TODO: remove verbose flag after debugging
+  curl -vX GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/file/device/${encoded_download_path}" \
     -H "Accept: application/octet-stream" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
     -o "${local_save_path}"

@@ -2,6 +2,18 @@
 #
 # Define reusable functions for CI
 
+check_env_vars()
+{
+  if [ ! -n ${CORELLIUM_API_ENDPOINT} ]; then
+    echo "CORELLIUM_API_ENDPOINT not set." >&2
+    exit 0
+  fi
+  if [ ! -n ${CORELLIUM_API_TOKEN} ]; then
+    echo "CORELLIUM_API_TOKEN not set." >&2
+    exit 0
+  fi
+}
+
 start_instance()
 {
   local instance_id="$1"

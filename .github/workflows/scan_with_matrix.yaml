@@ -66,7 +66,7 @@ jobs:
             "${INSTANCE_NETMON_PCAP_PATH}" \
             "${RUNNER_NETMON_PCAP_PATH}"
           echo 'DEBUG'
-          la -la "${RUNNER_NETMON_PCAP_PATH}"
+          ls -la "${RUNNER_NETMON_PCAP_PATH}"
       - name: Stop instance
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}

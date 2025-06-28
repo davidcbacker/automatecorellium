@@ -30,6 +30,7 @@ start_instance()
 
 stop_instance()
 {
+  check_env_vars
   local instance_id="$1"
   case "$(get_instance_status "${instance_id}")" in
     'off')
@@ -72,6 +73,7 @@ wait_until_agent_ready()
 
 kill_app()
 {
+  check_env_vars
   local instance_id="$1"
   local app_bundle_id="$2"
 
@@ -240,6 +242,7 @@ stop_demo_instances()
 
 kill_cafe_app_process()
 {
+  check_env_vars
   local instance_id="$1"
   local BUNDLE_ID='com.corellium.Cafe'
   curl -X POST "${CORELLIUM_API_ENDPOINT}/v1/instances/${instance_id}/agent/v1/app/apps/${BUNDLE_ID}/kill" \

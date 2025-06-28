@@ -4,11 +4,11 @@
 
 check_env_vars()
 {
-  if [ ! -n "${CORELLIUM_API_ENDPOINT}" ]; then
+  if [ -z "${CORELLIUM_API_ENDPOINT}" ]; then
     echo "CORELLIUM_API_ENDPOINT not set." >&2
     exit 0
   fi
-  if [ ! -n "${CORELLIUM_API_TOKEN}" ]; then
+  if [ -z "${CORELLIUM_API_TOKEN}" ]; then
     echo "CORELLIUM_API_TOKEN not set." >&2
     exit 0
   fi

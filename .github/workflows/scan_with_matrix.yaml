@@ -79,7 +79,7 @@ jobs:
         with:
           name: matrix-netmon-pcap
           path: |
-            "${env.RUNNER_NETMON_PCAP_PATH}"
+            "${{ env.RUNNER_NETMON_PCAP_PATH }}"
           if-no-files-found: error
       - name: Upload MATRIX report artifacts
         uses: actions/upload-artifact@v4

@@ -82,7 +82,7 @@ jobs:
           echo 'file'
           file /home/runner/netmon.pcap
           echo 'cat head xxd'
-          cat /home/runner/netmon.pcap | head -c 100 | xxd\0=[fcd
+          cat /home/runner/netmon.pcap
 
       - name: Upload MATRIX netmon artifact
         uses: actions/upload-artifact@v4

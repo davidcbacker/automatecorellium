@@ -84,12 +84,12 @@ jobs:
           echo 'cat head xxd'
           cat /home/runner/netmon.pcap
 
-      - name: Upload MATRIX netmon artifact
+      - name: Upload MATRIX runtime netmon artifact
         uses: actions/upload-artifact@v4
         with:
-          name: matrix-netmon-pcap
+          name: matrix-runtime-netmon-pcap
           path: |
-            "${{ env.RUNNER_NETMON_PCAP_PATH }}"
+            ${{ env.RUNNER_NETMON_PCAP_PATH }}
           if-no-files-found: error
       - name: Upload MATRIX report artifacts
         uses: actions/upload-artifact@v4

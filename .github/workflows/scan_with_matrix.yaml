@@ -1,4 +1,4 @@
-name: Scan with Corellium MATRIX
+\name: Scan with Corellium MATRIX
 
 on:
   push:
@@ -74,6 +74,16 @@ jobs:
           set -e
           source ./src/functions.sh
           stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
+
+      - name: Debug file existence
+        run: |
+          echo 'ls'
+          ls -l /home/runner/netmon.pcap
+          echo 'file'
+          file /home/runner/netmon.pcap
+          echo 'cat head xxd'
+          cat /home/runner/netmon.pcap | head -c 100 | xxd\0=[fcd
+
       - name: Upload MATRIX netmon artifact
         uses: actions/upload-artifact@v4
         with:

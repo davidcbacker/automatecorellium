@@ -13,6 +13,8 @@ concurrency:
   group: ${{ github.event_name == 'schedule' && 'scheduled' || 'non-scheduled' }}
 
 env:
+  INSTANCE_NETMON_PCAP_PATH: /tmp/artifacts/netmon.pcap
+  RUNNER_NETMON_PCAP_PATH: /home/runner/netmon.pcap
   MATRIX_INSTANCE_ID: ${{ github.event_name == 'schedule' && vars.MATRIX_AUTOMATION_INSTANCE
                         || vars.MATRIX_DEVELOPMENT_INSTANCE }}
 
@@ -38,6 +40,7 @@ jobs:
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Start instance and wait until ready
+        timeout-minutes: 20
         run: |
           set -e
           source ./src/functions.sh
@@ -53,18 +56,48 @@ jobs:
           install_corellium_cafe_ios "${{ env.MATRIX_INSTANCE_ID }}"
           run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}" ||
             run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Stop instance
+      - name: Download netmon pcap artifact
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -ex
           source ./src/functions.sh
+          download_file_to_local_path \
+            "${{ env.MATRIX_INSTANCE_ID }}" \
+            "${INSTANCE_NETMON_PCAP_PATH}" \
+            "${RUNNER_NETMON_PCAP_PATH}"
+          ls -la "${RUNNER_NETMON_PCAP_PATH}"
+      - name: Stop instance
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+        run: |
+          set -e
+          source ./src/functions.sh
           stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Upload MATRIX artifacts
+
+      - name: Debug file existence
+        run: |
+          echo 'ls'
+          ls -l /home/runner/netmon.pcap
+          echo 'file'
+          file /home/runner/netmon.pcap
+          echo 'cat head xxd'
+          cat /home/runner/netmon.pcap
+
+      - name: Upload MATRIX runtime netmon artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: matrix-runtime-netmon-pcap
+          path: |
+            ${{ env.RUNNER_NETMON_PCAP_PATH }}
+          if-no-files-found: error
+      - name: Upload MATRIX report artifacts
         uses: actions/upload-artifact@v4
         with:
           name: matrix-reports
           path: |
             matrix_report_*.html
             matrix_report_*.json
+          if-no-files-found: error

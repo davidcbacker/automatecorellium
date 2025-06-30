@@ -114,7 +114,7 @@ install_app_from_url()
     --instance "${instance_id}" \
     --project "${project_id}" \
     --app "${app_filename}" > /dev/null; then
-    echo "Error installing app" >&2
+    echo "Error installing app. Exiting." >&2
     exit 1
   fi
 }
@@ -273,19 +273,18 @@ wait_for_assessment_status()
       ;;
   esac
 
-  echo "Waiting for assessment status of '${TARGET_ASSESSMENT_STATUS}'."
-  local last_assessment_status=''
   local current_assessment_status
   current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
+  local last_assessment_status=''
 
   while [ "${current_assessment_status}" != "${TARGET_ASSESSMENT_STATUS}" ]; do
     case "${current_assessment_status}" in
       'failed')
-        echo "Detected a failed run. Last state was ${last_assessment_status}. Exiting." >&2
+        echo "Detected a failed run. Last state was '${last_assessment_status}'. Exiting." >&2
         exit 1
         ;;
       'monitoring')
-        echo 'Cannot wait when status is monitoring.' >&2
+        echo 'Cannot wait when status is monitoring. Exiting.' >&2
         exit 1
         ;;
       'testing')
@@ -296,8 +295,9 @@ wait_for_assessment_status()
         ;;
     esac
 
-    echo "Current status is ${current_assessment_status}. Sleeping for ${sleep_time} seconds."
+    echo "Status is '${current_assessment_status}', target is '${TARGET_ASSESSMENT_STATUS}'. Waiting ${sleep_time} seconds."
     sleep "${sleep_time}"
+
     last_assessment_status="${current_assessment_status}"
     current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
   done

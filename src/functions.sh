@@ -2,6 +2,18 @@
 #
 # Define reusable functions for CI
 
+check_env_vars()
+{
+  if [ -z "${CORELLIUM_API_ENDPOINT}" ]; then
+    echo "CORELLIUM_API_ENDPOINT not set." >&2
+    exit 0
+  fi
+  if [ -z "${CORELLIUM_API_TOKEN}" ]; then
+    echo "CORELLIUM_API_TOKEN not set." >&2
+    exit 0
+  fi
+}
+
 start_instance()
 {
   local instance_id="$1"
@@ -18,6 +30,7 @@ start_instance()
 
 stop_instance()
 {
+  check_env_vars
   local instance_id="$1"
   case "$(get_instance_status "${instance_id}")" in
     'off')
@@ -60,6 +73,7 @@ wait_until_agent_ready()
 
 kill_app()
 {
+  check_env_vars
   local instance_id="$1"
   local app_bundle_id="$2"
 
@@ -228,6 +242,7 @@ stop_demo_instances()
 
 kill_cafe_app_process()
 {
+  check_env_vars
   local instance_id="$1"
   local BUNDLE_ID='com.corellium.Cafe'
   curl -X POST "${CORELLIUM_API_ENDPOINT}/v1/instances/${instance_id}/agent/v1/app/apps/${BUNDLE_ID}/kill" \

@@ -38,6 +38,7 @@ jobs:
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Start instance and wait until ready
+        timeout-minutes: 20
         run: |
           set -e
           source ./src/functions.sh

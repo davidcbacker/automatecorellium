@@ -14,9 +14,7 @@ concurrency:
 
 env:
   INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.zip
-  INSTANCE_NETMON_PCAP_PATH: /tmp/artifacts/netmon.pcap
   RUNNER_ARTIFACTS_PATH: /home/runner/matrix_artifacts.zip
-  RUNNER_NETMON_PCAP_PATH: /home/runner/netmon.pcap
   MATRIX_INSTANCE_ID: ${{ github.event_name == 'schedule' && vars.MATRIX_AUTOMATION_INSTANCE
                         || vars.MATRIX_DEVELOPMENT_INSTANCE }}
 
@@ -35,8 +33,7 @@ jobs:
       - name: Check npm status
         run: curl -s https://status.npmjs.org | grep -i "All Systems Operational" || echo "Registry may be down"
       - name: Install Corellium CLI
-        run: |
-          npm install -g @corellium/corellium-cli
+        run: npm install -g @corellium/corellium-cli
       - name: Log in to Corellium
         run: |
           corellium login \
@@ -79,11 +76,7 @@ jobs:
             "${INSTANCE_ARTIFACTS_PATH}" \
             "${RUNNER_ARTIFACTS_PATH}"
           ls -la "${RUNNER_ARTIFACTS_PATH}"
-          download_file_to_local_path \
-            "${{ env.MATRIX_INSTANCE_ID }}" \
-            "${INSTANCE_NETMON_PCAP_PATH}" \
-            "${RUNNER_NETMON_PCAP_PATH}"
-          ls -la "${RUNNER_NETMON_PCAP_PATH}"
+          sha256sum "${RUNNER_ARTIFACTS_PATH}"
       - name: Stop instance
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
@@ -98,19 +91,14 @@ jobs:
           name: matrix-runtime-artifacts
           path: |
             ${{ env.RUNNER_ARTIFACTS_PATH }}
+          compression-level: 9
           if-no-files-found: error
-      - name: Upload MATRIX runtime netmon artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: matrix-runtime-netmon-pcap
-          path: |
-            ${{ env.RUNNER_NETMON_PCAP_PATH }}
-          if-no-files-found: error
-      - name: Upload MATRIX report artifacts
+      - name: Upload MATRIX reports
         uses: actions/upload-artifact@v4
         with:
           name: matrix-reports
           path: |
             matrix_report_*.html
             matrix_report_*.json
+          compression-level: 9
           if-no-files-found: error

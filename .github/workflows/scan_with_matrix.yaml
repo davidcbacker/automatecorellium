@@ -35,7 +35,8 @@ jobs:
       - name: Check npm status
         run: curl -s https://status.npmjs.org | grep -i "All Systems Operational" || echo "Registry may be down"
       - name: Install Corellium CLI
-        run: npm install -g @corellium/corellium-cli
+        run: |
+          npm install -g @corellium/corellium-cli
       - name: Log in to Corellium
         run: |
           corellium login \
@@ -64,6 +65,7 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
           MATRIX_INSATNCE_ID: ${{ env.MATRIX_INSTANCE_ID }}
         run: |
+          npm install -g @corellium/corellium-api
           node ./src/zip_matrix_artifacts.js
       - name: Download netmon pcap artifact
         env:

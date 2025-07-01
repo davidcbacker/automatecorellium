@@ -69,7 +69,7 @@ wait_until_agent_ready()
   ready_status="$(corellium ready --instance "${instance_id}" --project "${project_id}" 2> /dev/null | jq -r '.ready')"
 
   while [ "${ready_status}" != 'true' ]; do
-    if [ "${local_instance_status}" != "${INSTANCE_STATUS_ON}" ]; then
+    if [ "${instance_status}" != "${INSTANCE_STATUS_ON}" ]; then
       echo "Instance is not ${INSTANCE_STATUS_ON}. Exiting" >&2
       exit 1
     fi

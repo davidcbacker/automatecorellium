@@ -7,7 +7,6 @@ if (!CORELLIUM_API_ENDPOINT || !CORELLIUM_API_TOKEN || !MATRIX_INSTANCE_ID) {
     handleError('Error: Environment variables CORELLIUM_API_ENDPOINT, CORELLIUM_API_TOKEN, and MATRIX_INSTANCE_ID must be set.');
 }
 const CORELLIUM_API_ENDPOINT_ORIGIN = new URL(CORELLIUM_API_ENDPOINT).origin.toString();
-
 const INSTANCE_STATE_ON = 'on';
 
 function handleError(error, message = '') {
@@ -15,6 +14,20 @@ function handleError(error, message = '') {
         ? console.error('ERROR:', message, error)
         : console.error('ERROR:', error);
     process.exit(1);
+}
+
+async function execCommandOnInstance(agent, command) {
+    try {
+        console.log(`Executing command on instance: ${command}`);
+        const result = await agent.shellExec(command);
+        if (!result.success) {
+            console.error(result);
+            throw new Error(`Command execution failed: ${command}`);
+        }
+        console.log(result.output);
+    } catch (error) {
+        console.error('ERROR in execCommandOnInstance:', error);
+    }
 }
 
 async function main() {
@@ -48,26 +61,9 @@ async function main() {
         await agent.ready();
         console.log(`Agent for instance ${MATRIX_INSTANCE_ID} is ready.`);
 
-        const installDepsResult = await agent.shellExec('apt -qq install -y zip');
-        if (!installDepsResult.success) {
-            console.log(installDepsResult);
-            handleError('install deps command failed.');
-        }
-        console.log(installDepsResult.output);
-
-        const zipArtifactsResult = await agent.shellExec(`zip -r ${zipOutputPath} ${zipInputDir}`);
-        if (!zipArtifactsResult.success) {
-            console.log(zipArtifactsResult);
-            handleError('zip command failed.');
-        }
-        console.log(zipArtifactsResult.output);
-
-        const lsShellExecResult = await agent.shellExec(`ls -l ${zipOutputPath}`);
-        if (!lsShellExecResult.success) {
-            console.log(lsShellExecResult);
-            handleError('ls command failed.');
-        }
-        console.log(lsShellExecResult.output);
+        await execCommandOnInstance(agent, 'apt -qq install -y zip');
+        await execCommandOnInstance(agent, `zip -r ${zipOutputPath} ${zipInputDir}`);
+        await execCommandOnInstance(agent, `ls -l ${zipOutputPath}`);
 
         console.log('Script completed successfully.');
         process.exit(0);

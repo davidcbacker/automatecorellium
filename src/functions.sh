@@ -58,8 +58,8 @@ wait_until_agent_ready()
 {
   local instance_id="$1"
 
-  local readonly AGENT_READY_SLEEP_TIME='20'
-  local readonly INSTANCE_STATUS_ON='on'
+  local AGENT_READY_SLEEP_TIME='20'
+  local INSTANCE_STATUS_ON='on'
   local project_id
   project_id="$(corellium instance get --instance "${instance_id}" | jq -r '.project')"
 

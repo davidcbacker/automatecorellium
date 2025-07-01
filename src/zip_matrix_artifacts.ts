@@ -8,16 +8,7 @@ if (!CORELLIUM_API_ENDPOINT || !CORELLIUM_API_TOKEN || !MATRIX_INSTANCE_ID) {
 }
 const CORELLIUM_API_ENDPOINT_ORIGIN = new URL(CORELLIUM_API_ENDPOINT).origin.toString();
 
-// Define the time constants
-const SLEEP_TIME_SECONDS = 60;
-
-// Define the constants for instance states and task states
-const INSTANCE_STATE_OFF = 'off';
 const INSTANCE_STATE_ON = 'on';
-const INSTANCE_STATE_BOOTING = 'booting';
-const INSTANCE_STATE_CREATING = 'creating';
-const INSTANCE_STATE_REBOOTING = 'rebooting';
-const INSTANCE_TASK_STATE_NONE = 'none';
 
 function handleError(error, message = '') {
     if (message) {
@@ -62,21 +53,21 @@ async function main() {
         await agent.ready();
         console.log(`Agent for instance ${MATRIX_INSTANCE_ID} is ready.`);
 
-        let installDepsResult = await agent.shellExec('apt -qq install -y zip');
+        const installDepsResult = await agent.shellExec('apt -qq install -y zip');
         if (!installDepsResult.success) {
             console.log(installDepsResult);
             handleError('install deps command failed.');
         }
         console.log(installDepsResult.output);
 
-        let zipArtifactsResult = await agent.shellExec(`zip -r ${zipOutputPath} ${zipInputDir}`);
+        const zipArtifactsResult = await agent.shellExec(`zip -r ${zipOutputPath} ${zipInputDir}`);
         if (!zipArtifactsResult.success) {
             console.log(zipArtifactsResult);
             handleError('zip command failed.');
         }
         console.log(zipArtifactsResult.output);
 
-        let lsShellExecResult = await agent.shellExec(`ls -l ${zipOutputPath}`);
+        const lsShellExecResult = await agent.shellExec(`ls -l ${zipOutputPath}`);
         if (!lsShellExecResult.success) {
             console.log(lsShellExecResult);
             handleError('ls command failed.');

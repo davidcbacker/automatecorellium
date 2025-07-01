@@ -64,7 +64,7 @@ jobs:
         run: |
           npm install @corellium/corellium-api
           node ./src/zip_matrix_artifacts.js
-      - name: Download netmon pcap artifact
+      - name: Download MATRIX runtime artifacts
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}

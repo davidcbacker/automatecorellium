@@ -13,9 +13,9 @@ concurrency:
   group: ${{ github.event_name == 'schedule' && 'scheduled' || 'non-scheduled' }}
 
 env:
-  INSTANCE_ARTIFACTS_PATH: /tmp/artifacts/
+  INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.zip
   INSTANCE_NETMON_PCAP_PATH: /tmp/artifacts/netmon.pcap
-  RUNNER_ARTIFACTS_PATH: /home/runner/artifacts/
+  RUNNER_ARTIFACTS_PATH: /home/runner/matrix_artifacts.zip
   RUNNER_NETMON_PCAP_PATH: /home/runner/netmon.pcap
   MATRIX_INSTANCE_ID: ${{ github.event_name == 'schedule' && vars.MATRIX_AUTOMATION_INSTANCE
                         || vars.MATRIX_DEVELOPMENT_INSTANCE }}
@@ -58,7 +58,14 @@ jobs:
           install_corellium_cafe_ios "${{ env.MATRIX_INSTANCE_ID }}"
           run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}" ||
             run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Download artifacts
+      - name: Compress MATRIX runtime artifacts
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          MATRIX_INSATNCE_ID: ${{ env.MATRIX_INSTANCE_ID }}
+        run: |
+          node ./src/zip_matrix_artifacts.ts
+      - name: Download netmon pcap artifact
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
@@ -70,13 +77,6 @@ jobs:
             "${INSTANCE_ARTIFACTS_PATH}" \
             "${RUNNER_ARTIFACTS_PATH}"
           ls -la "${RUNNER_ARTIFACTS_PATH}"
-      - name: Download netmon pcap artifact
-        env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
-        run: |
-          set -ex
-          source ./src/functions.sh
           download_file_to_local_path \
             "${{ env.MATRIX_INSTANCE_ID }}" \
             "${INSTANCE_NETMON_PCAP_PATH}" \

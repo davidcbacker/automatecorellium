@@ -46,6 +46,11 @@ jobs:
           source ./src/functions.sh
           start_instance "${{ env.MATRIX_INSTANCE_ID }}"
           wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
+      - name: Install Corellium Cafe from URL
+        run: |
+          set -e
+          source ./src/functions.sh
+          install_corellium_cafe_ios "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Run Corellium Cafe MATRIX assessment
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
@@ -53,9 +58,10 @@ jobs:
         run: |
           set -e
           source ./src/functions.sh
-          install_corellium_cafe_ios "${{ env.MATRIX_INSTANCE_ID }}"
-          run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}" ||
+          if ! run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
+            echo 'FIRST RUN FAILED. RE-RUNNING.'
             run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"
+          fi
       - name: Compress MATRIX runtime artifacts
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}

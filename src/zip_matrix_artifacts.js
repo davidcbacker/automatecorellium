@@ -11,14 +11,9 @@ const CORELLIUM_API_ENDPOINT_ORIGIN = new URL(CORELLIUM_API_ENDPOINT).origin.toS
 const INSTANCE_STATE_ON = 'on';
 
 function handleError(error, message = '') {
-    if (message) {
-        console.error('ERROR:', message);
-        if (error) {
-            console.error(error);
-        }
-    } else {
-        console.error('ERROR:', error);
-    }
+    (message)
+        ? console.error('ERROR:', message, error)
+        : console.error('ERROR:', error);
     process.exit(1);
 }
 

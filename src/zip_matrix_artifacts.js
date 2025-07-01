@@ -1,4 +1,4 @@
-const { Corellium } = require("@corellium/corellium-api");
+import { Corellium } from "@corellium/corellium-api";
 
 const CORELLIUM_API_ENDPOINT = process.env.CORELLIUM_API_ENDPOINT;
 const CORELLIUM_API_TOKEN = process.env.CORELLIUM_API_TOKEN;

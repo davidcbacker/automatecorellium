@@ -57,15 +57,25 @@ get_instance_status()
 wait_until_agent_ready()
 {
   local instance_id="$1"
-  local AGENT_READY_SLEEP_TIME='20'
+
+  local readonly AGENT_READY_SLEEP_TIME='20'
+  local readonly INSTANCE_STATUS_ON='on'
   local project_id
   project_id="$(corellium instance get --instance "${instance_id}" | jq -r '.project')"
+
+  local instance_status
+  instance_status="$(get_instance_status "${instance_id}")"
   local ready_status
   ready_status="$(corellium ready --instance "${instance_id}" --project "${project_id}" 2> /dev/null | jq -r '.ready')"
 
   while [ "${ready_status}" != 'true' ]; do
+    if [ "${local_instance_status}" != "${INSTANCE_STATUS_ON}" ]; then
+      echo "Instance is not ${INSTANCE_STATUS_ON}. Exiting" >&2
+      exit 1
+    fi
     echo "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
     sleep "${AGENT_READY_SLEEP_TIME}"
+    instance_status="$(get_instance_status "${instance_id}")"
     ready_status="$(corellium ready --instance "${instance_id}" --project "${project_id}" 2> /dev/null | jq -r '.ready')"
   done
   echo "Virtual device agent is ready."

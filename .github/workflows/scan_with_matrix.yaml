@@ -59,7 +59,7 @@ jobs:
           set -e
           source ./src/functions.sh
           if ! run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
-            echo 'FIRST RUN FAILED. RE-RUNNING.'
+            echo 'Warning - First MATRIX run failed. Retrtying once.'
             run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"
           fi
       - name: Compress MATRIX runtime artifacts

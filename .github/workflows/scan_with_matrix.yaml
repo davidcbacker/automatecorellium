@@ -13,8 +13,8 @@ concurrency:
   group: ${{ github.event_name == 'schedule' && 'scheduled' || 'non-scheduled' }}
 
 env:
-  INSTANCE_NETMON_PCAP_PATH: /tmp/artifacts/netmon.pcap
-  RUNNER_NETMON_PCAP_PATH: /home/runner/netmon.pcap
+  INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.zip
+  RUNNER_ARTIFACTS_PATH: /home/runner/matrix_artifacts.zip
   MATRIX_INSTANCE_ID: ${{ github.event_name == 'schedule' && vars.MATRIX_AUTOMATION_INSTANCE
                         || vars.MATRIX_DEVELOPMENT_INSTANCE }}
 
@@ -56,7 +56,15 @@ jobs:
           install_corellium_cafe_ios "${{ env.MATRIX_INSTANCE_ID }}"
           run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}" ||
             run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Download netmon pcap artifact
+      - name: Compress MATRIX runtime artifacts
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          MATRIX_INSATNCE_ID: ${{ env.MATRIX_INSTANCE_ID }}
+        run: |
+          npm install @corellium/corellium-api
+          node ./src/zip_matrix_artifacts.js
+      - name: Download MATRIX runtime artifacts
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
@@ -65,9 +73,10 @@ jobs:
           source ./src/functions.sh
           download_file_to_local_path \
             "${{ env.MATRIX_INSTANCE_ID }}" \
-            "${INSTANCE_NETMON_PCAP_PATH}" \
-            "${RUNNER_NETMON_PCAP_PATH}"
-          ls -la "${RUNNER_NETMON_PCAP_PATH}"
+            "${INSTANCE_ARTIFACTS_PATH}" \
+            "${RUNNER_ARTIFACTS_PATH}"
+          ls -la "${RUNNER_ARTIFACTS_PATH}"
+          sha256sum "${RUNNER_ARTIFACTS_PATH}"
       - name: Stop instance
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
@@ -76,28 +85,20 @@ jobs:
           set -e
           source ./src/functions.sh
           stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
-
-      - name: Debug file existence
-        run: |
-          echo 'ls'
-          ls -l /home/runner/netmon.pcap
-          echo 'file'
-          file /home/runner/netmon.pcap
-          echo 'cat head xxd'
-          cat /home/runner/netmon.pcap
-
-      - name: Upload MATRIX runtime netmon artifact
+      - name: Upload MATRIX runtime artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: matrix-runtime-netmon-pcap
+          name: matrix-runtime-artifacts
           path: |
-            ${{ env.RUNNER_NETMON_PCAP_PATH }}
+            ${{ env.RUNNER_ARTIFACTS_PATH }}
+          compression-level: 9
           if-no-files-found: error
-      - name: Upload MATRIX report artifacts
+      - name: Upload MATRIX reports
         uses: actions/upload-artifact@v4
         with:
           name: matrix-reports
           path: |
             matrix_report_*.html
             matrix_report_*.json
+          compression-level: 9
           if-no-files-found: error

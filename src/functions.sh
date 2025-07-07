@@ -275,12 +275,6 @@ download_file_to_local_path()
   # replace '/' with '%2F' using parameter expansion
   local encoded_download_path="${download_path//\//%2F}"
 
-  echo DEBUG
-  echo "instance_id=${instance_id}"
-  echo "download_path=${download_path}"
-  echo "local_save_path=${local_save_path}"
-  echo encoded_download_path="${encoded_download_path}"
-
   curl -X GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/file/device/${encoded_download_path}" \
     -H "Accept: application/octet-stream" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \

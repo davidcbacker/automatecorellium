@@ -11,6 +11,7 @@ on:
 
 concurrency:
   group: ${{ github.event_name == 'schedule' && 'scheduled' || 'non-scheduled' }}
+  cancel-in-progress: false
 
 env:
   INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.zip

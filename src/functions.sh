@@ -70,7 +70,7 @@ wait_until_agent_ready()
 
   while [ "${ready_status}" != 'true' ]; do
     if [ "${instance_status}" != "${INSTANCE_STATUS_ON}" ]; then
-      echo "Instance is not ${INSTANCE_STATUS_ON}. Exiting" >&2
+      echo "Instance is "${instance_status}" not ${INSTANCE_STATUS_ON}. Exiting" >&2
       exit 1
     fi
     echo "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."

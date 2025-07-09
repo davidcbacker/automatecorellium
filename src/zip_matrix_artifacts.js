@@ -64,6 +64,7 @@ async function main() {
         await execCommandOnInstance(agent, 'apt -qq install -y zip');
         await execCommandOnInstance(agent, `zip -r ${zipOutputPath} ${zipInputDir}`);
         await execCommandOnInstance(agent, `ls -l ${zipOutputPath}`);
+        await execCommandOnInstance(agent, `sha256sum ${zipOutputPath}`);
 
         console.log('Script completed successfully.');
         process.exit(0);

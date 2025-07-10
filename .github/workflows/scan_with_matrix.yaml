@@ -31,10 +31,11 @@ jobs:
         with:
           cache: 'npm'
           node-version: 22
-      - name: Check npm status
-        run: curl -s https://status.npmjs.org | grep -i "All Systems Operational" || echo "Registry may be down"
       - name: Install Corellium CLI
-        run: npm install -g @corellium/corellium-cli
+        run: |
+          curl --silent https://status.npmjs.org | grep --quiet "All Systems Operational" ||
+            echo "The npm registry may be down"
+          npm install --global @corellium/corellium-cli
       - name: Log in to Corellium
         run: |
           corellium login \
@@ -63,7 +64,7 @@ jobs:
             echo 'Warning - First MATRIX run failed. Retrying once.'
             run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"
           fi
-      - name: Download MATRIX artifacts to runner
+      - name: Download MATRIX artifacts from VM to runner
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
@@ -95,7 +96,7 @@ jobs:
             ${{ env.RUNNER_ARTIFACTS_PATH }}
           compression-level: 9
           if-no-files-found: error
-      - name: Upload MATRIX reports
+      - name: Upload MATRIX report artifacts
         uses: actions/upload-artifact@v4
         with:
           name: matrix-reports

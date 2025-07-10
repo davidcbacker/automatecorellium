@@ -250,16 +250,6 @@ stop_demo_instances()
   done
 }
 
-kill_cafe_app_process()
-{
-  check_env_vars
-  local instance_id="$1"
-  local BUNDLE_ID='com.corellium.Cafe'
-  curl -X POST "${CORELLIUM_API_ENDPOINT}/v1/instances/${instance_id}/agent/v1/app/apps/${BUNDLE_ID}/kill" \
-    -H "Accept: application/json" \
-    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
-}
-
 get_assessment_status()
 {
   local instance_id="$1"

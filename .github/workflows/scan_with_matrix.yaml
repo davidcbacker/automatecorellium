@@ -44,6 +44,19 @@ jobs:
           source ./src/functions.sh
           start_instance "${{ env.MATRIX_INSTANCE_ID }}"
           wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
+      - name: Install VPN dep
+        run: |
+          sudo apt -qq update
+          sudo apt -qq install -y openvpn
+      - name: Connect to project VPN
+        run: |
+          echo "${{ secrets.MATRIX_PROJECT_OVPN_CONFIG }}" > my_vpn_config.ovpn
+          sudo openvpn --config my_vpn_config.ovpn --daemon
+      - name: Verify VPN tunnel is established
+        timeout-minutes: 1
+        run: |
+          # TODO: get services IP dynamically
+          until ping -c2 10.11.1.1; do sleep 1; done
       - name: Install Corellium Cafe from URL
         run: |
           set -e
@@ -76,6 +89,10 @@ jobs:
             "${RUNNER_ARTIFACTS_PATH}"
           ls -la "${RUNNER_ARTIFACTS_PATH}"
           sha256sum "${RUNNER_ARTIFACTS_PATH}"
+      - name: Clean up VPN connection
+        if: always()
+        run: |
+            sudo killall openvpn
       - name: Stop instance
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}

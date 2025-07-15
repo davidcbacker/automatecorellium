@@ -51,7 +51,8 @@ jobs:
       - name: Connect to project VPN
         run: |
           echo "${{ secrets.MATRIX_PROJECT_OVPN_CONFIG }}" > my_vpn_config.ovpn
-          sudo openvpn --config my_vpn_config.ovpn --daemon
+          sudo openvpn --config my_vpn_config.ovpn --daemon --verbose
+          # TODO: remove verbose
       - name: Verify VPN tunnel is established
         timeout-minutes: 1
         run: |

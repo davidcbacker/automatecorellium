@@ -44,13 +44,14 @@ jobs:
           set -e
           source ./src/functions.sh
           start_instance "${{ env.MATRIX_INSTANCE_ID }}"
-          wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
+          # TODO: add back the wait agent ready step
+          #wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Install VPN dep
         run: |
-          if ! command -v openvpn; then
+          command -v openvpn || {
             sudo apt -qq update
             sudo apt -qq install -y openvpn
-          fi
+          }
       - name: Connect to project VPN
         run: |
           echo "${{ secrets.MATRIX_PROJECT_OVPN_CONFIG }}" > "${{ env.VPN_CONFIG_PATH }}"

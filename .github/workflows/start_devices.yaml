@@ -1,6 +1,8 @@
 name: Start Corellium devices
 
 on:
+  schedule:
+    - cron: '50 11 * * 1-5'
   workflow_dispatch:
 
 jobs:

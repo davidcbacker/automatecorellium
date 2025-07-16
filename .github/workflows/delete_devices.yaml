@@ -1,6 +1,8 @@
 name: Delete Corellium devices
 
 on:
+  schedule:
+    - cron: '49 5 * * 1-5'
   workflow_dispatch:
 
 jobs:

@@ -59,7 +59,6 @@ jobs:
           command -v openvpn
           openvpn --version
           openvpn --help
-          man openvpn | tee /dev/null
           echo 'DEBUG WRITING CONFIG FILE'
           echo "${{ secrets.MATRIX_PROJECT_OVPN_CONFIG }}" > "${{ env.VPN_CONFIG_PATH }}"
           echo 'DEBUG INSPECTING CONFIG FILE'
@@ -71,7 +70,7 @@ jobs:
           echo 'DEBUG READING THE CONFIG FILE'
           cat "${{ env.VPN_CONFIG_PATH }}"
           # TODO: remove debug message, cat, and verbose flag
-          sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" --verb 9
+          sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" --verb 11
       - name: Verify VPN tunnel is established
         timeout-minutes: 1
         run: |

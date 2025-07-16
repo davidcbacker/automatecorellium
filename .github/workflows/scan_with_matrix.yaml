@@ -49,8 +49,8 @@ jobs:
       - name: Install VPN dep
         run: |
           command -v openvpn || {
-            sudo apt -qq update
-            sudo apt -qq install -y openvpn
+            sudo apt-get -qq update
+            sudo apt-get -qq install -y openvpn
           }
       - name: Connect to project VPN
         run: |
@@ -114,7 +114,6 @@ jobs:
             "${RUNNER_ARTIFACTS_PATH}"
           ls -la "${RUNNER_ARTIFACTS_PATH}"
           sha256sum "${RUNNER_ARTIFACTS_PATH}"
-
       - name: Stop instance
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}

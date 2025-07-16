@@ -58,7 +58,6 @@ jobs:
           echo 'checking binary'
           command -v openvpn
           openvpn --version
-          openvpn --help
           echo 'DEBUG WRITING CONFIG FILE'
           echo "${{ secrets.MATRIX_PROJECT_OVPN_CONFIG }}" > "${{ env.VPN_CONFIG_PATH }}"
           echo 'DEBUG INSPECTING CONFIG FILE'

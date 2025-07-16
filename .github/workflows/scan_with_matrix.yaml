@@ -54,11 +54,24 @@ jobs:
           }
       - name: Connect to project VPN
         run: |
+          set -x
+          echo 'checking binary'
+          command -v openvpn
+          openvpn --version
+          openvpn --help
+          man openvpn | tee /dev/null
+          echo 'DEBUG WRITING CONFIG FILE'
           echo "${{ secrets.MATRIX_PROJECT_OVPN_CONFIG }}" > "${{ env.VPN_CONFIG_PATH }}"
+          echo 'DEBUG INSPECTING CONFIG FILE'
+          ls -la "${{ env.VPN_CONFIG_PATH }}"
+          file "${{ env.VPN_CONFIG_PATH }}"
+          sha256sum "${{ env.VPN_CONFIG_PATH }}"
+          echo 'DEBUG COUNTING LINES IN CONFIG FILE'
+          wc -l "${{ env.VPN_CONFIG_PATH }}"
           echo 'DEBUG READING THE CONFIG FILE'
           cat "${{ env.VPN_CONFIG_PATH }}"
           # TODO: remove debug message, cat, and verbose flag
-          sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" --daemon --verbose
+          sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" --verb 9
       - name: Verify VPN tunnel is established
         timeout-minutes: 1
         run: |

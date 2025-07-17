@@ -68,7 +68,7 @@ jobs:
       - name: Verify VPN tunnel is established
         timeout-minutes: 1
         run: |
-          until ping -c1 10.11.3.2 || ping -c1 10.11.3.3; do sleep 1; done
+          until ping -c1 10.11.3.2; do sleep 1; done
           # TODO: get services IP dynamically
           until ping -c2 10.11.1.1; do sleep 1; done
       - name: Install Corellium Cafe from URL

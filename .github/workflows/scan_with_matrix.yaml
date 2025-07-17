@@ -48,8 +48,10 @@ jobs:
           #wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Check tap
         run: |
-          lsmod | grep tap || echo 'no lsmod tap'
-          ls -l /dev/net/tap || true
+          find /lib/modules -name "tap*"
+          sudo modprobe tap
+          lsmod | grep tap || echo 'no lsmod tap loaded'
+          ls -l /dev/net/tap || echo 'no /dev/net/tap found'
       - name: Install VPN dep
         run: |
           command -v openvpn || {

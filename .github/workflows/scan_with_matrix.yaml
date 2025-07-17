@@ -59,8 +59,8 @@ jobs:
           sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" &
           matrix_instance_vpn_ip="$(ip a show tap0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1)"
           matrix_instance_service_ip="$(get_instance_service_ip "${{ env.MATRIX_INSTANCE_ID }}")"
-          until ping -q -c1 "${matrix_instance_vpn_ip}"; do sleep 1; done
-          until ping -q -c1 "${matrix_instance_service_ip}"; do sleep 1; done
+          until ping -c1 "${matrix_instance_vpn_ip}"; do sleep 1; done
+          until ping -c1 "${matrix_instance_service_ip}"; do sleep 1; done
       - name: Install Corellium Cafe from URL
         run: |
           set -e

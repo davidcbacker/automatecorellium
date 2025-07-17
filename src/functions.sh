@@ -54,6 +54,12 @@ get_instance_status()
   corellium instance get --instance "${instance_id}" | jq -r '.state'
 }
 
+get_instance_service_ip()
+{
+  local instance_id="$1"
+  corellium instance get --instance "${instance_id}" | jq -r '.serviceIp'
+}
+
 wait_until_agent_ready()
 {
   local instance_id="$1"

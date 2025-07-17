@@ -48,10 +48,9 @@ jobs:
           #wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Check tap
         run: |
-          find /lib/modules -name "tap*"
+          lsmod | grep tap || echo 'no lsmod tap preloaded'
           sudo modprobe tap
           lsmod | grep tap || echo 'no lsmod tap loaded'
-          ls -l /dev/net/tap || echo 'no /dev/net/tap found'
       - name: Install VPN dep
         run: |
           command -v openvpn || {
@@ -59,7 +58,7 @@ jobs:
             sudo apt-get -qq install -y openvpn
           }
       - name: Connect to project VPN
-        timeout-minutes: 1
+        timeout-minutes: 3
         run: |
           set -x
           echo 'checking binary'

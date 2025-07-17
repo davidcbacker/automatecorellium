@@ -63,14 +63,17 @@ jobs:
           echo '0'
           ip addr show tap0
           echo '1'
-          ip addr show tap0 | grep 'inet '
+          ip addr show tap0 | grep 'inet ' | cut -d' ' -f1
           echo '2'
           ip addr show tap0 | grep 'inet ' | cut -d' ' -f2
           echo '3'
-          ip addr show tap0 | grep 'inet ' | cut -d'/' -f2
+          ip addr show tap0 | grep 'inet ' | cut -d' ' -f3
+          #ip addr show tap0 | grep 'inet ' | cut -d' ' -f2 | cut -d'/' -f1
           echo '4'
-          ip addr show tap0 | grep 'inet ' | cut -d' ' -f2 | cut -d'/' -f1
+          ip addr show tap0 | grep 'inet ' | cut -d' ' -f4
+          #ip addr show tap0 | grep 'inet ' | cut -d' ' -f2 | cut -d'/' -f1
           echo '5'
+          ip addr show tap0 | grep 'inet ' | cut -d' ' -f5
           source ./src/functions.sh
           # TODO: get VPN IP dynamically
           until ping -c1 10.11.3.2; do sleep 1; done

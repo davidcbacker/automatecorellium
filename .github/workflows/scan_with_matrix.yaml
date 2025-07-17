@@ -14,6 +14,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
   INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.zip
   RUNNER_ARTIFACTS_PATH: /home/runner/matrix_artifacts.zip
   MATRIX_INSTANCE_ID: ${{ github.event_name == 'schedule' && vars.MATRIX_AUTOMATION_INSTANCE
@@ -48,12 +49,29 @@ jobs:
           source ./src/functions.sh
           start_instance "${{ env.MATRIX_INSTANCE_ID }}"
           wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
+      - name: Install VPN client
+        run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install -y openvpn
+      - name: Connect to project VPN
+        timeout-minutes: 1
+        run: |
+          set -e
+          source ./src/functions.sh
+          save_vpn_config_to_local_path "${{ env.MATRIX_INSTANCE_ID }}" "${{ env.VPN_CONFIG_PATH }}"
+          sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" &
+          until ip addr show tap0 > /dev/null 2>&1; do sleep 1; done
+          matrix_instance_vpn_ip="$(ip addr show tap0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1)"
+          matrix_instance_service_ip="$(get_instance_service_ip "${{ env.MATRIX_INSTANCE_ID }}")"
+          until ping -c1 "${matrix_instance_vpn_ip}"; do sleep 1; done
+          until ping -c1 "${matrix_instance_service_ip}"; do sleep 1; done
       - name: Install Corellium Cafe from URL
         run: |
           set -e
           source ./src/functions.sh
           install_corellium_cafe_ios "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Run Corellium Cafe MATRIX assessment
+        timeout-minutes: 20
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
@@ -64,13 +82,19 @@ jobs:
             echo 'Warning - First MATRIX run failed. Retrying once.'
             run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"
           fi
+      - name: Clean up VPN connection
+        if: always()
+        run: |
+            [ -f  "${{ env.VPN_CONFIG_PATH }}" ] &&
+              rm "${{ env.VPN_CONFIG_PATH }}"
+            sudo killall openvpn
       - name: Download MATRIX artifacts from VM to runner
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
           MATRIX_INSATNCE_ID: ${{ env.MATRIX_INSTANCE_ID }}
         run: |
-          set -ex
+          set -e
           source ./src/functions.sh
           npm install @corellium/corellium-api
           node ./src/zip_matrix_artifacts.js

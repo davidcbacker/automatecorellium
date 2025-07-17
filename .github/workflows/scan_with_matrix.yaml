@@ -48,8 +48,7 @@ jobs:
           set -e
           source ./src/functions.sh
           start_instance "${{ env.MATRIX_INSTANCE_ID }}"
-          # TODO: add back the wait agent ready step
-          #wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
+          wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Install VPN client
         run: |
           sudo apt-get -qq update
@@ -73,6 +72,7 @@ jobs:
           source ./src/functions.sh
           install_corellium_cafe_ios "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Run Corellium Cafe MATRIX assessment
+        timeout-minutes: 20
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
@@ -86,8 +86,9 @@ jobs:
       - name: Clean up VPN connection
         if: always()
         run: |
+            [ -f  "${{ env.VPN_CONFIG_PATH }}" ] &&
+              rm "${{ env.VPN_CONFIG_PATH }}"
             sudo killall openvpn
-            rm "${{ env.VPN_CONFIG_PATH }}"
       - name: Download MATRIX artifacts from VM to runner
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}

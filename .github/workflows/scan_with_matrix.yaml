@@ -49,7 +49,7 @@ jobs:
       - name: Check tap
         run: |
           lsmod | grep tun || echo 'no lsmod tun preloaded'
-          sudo modprobe tun
+          #sudo modprobe tun
           lsmod | grep tun || echo 'no lsmod tun loaded'
       - name: Install VPN dep
         run: |

@@ -66,13 +66,13 @@ wait_until_agent_ready()
 
   local AGENT_READY_SLEEP_TIME='20'
   local INSTANCE_STATUS_ON='on'
-  local project_id
-  project_id="$(get_project_from_instance_id "${instance_id}")"
+  local PROJECT_ID
+  PROJECT_ID="$(get_project_from_instance_id "${instance_id}")"
 
   local instance_status
   instance_status="$(get_instance_status "${instance_id}")"
   local ready_status
-  ready_status="$(corellium ready --instance "${instance_id}" --project "${project_id}" 2> /dev/null | jq -r '.ready')"
+  ready_status="$(corellium ready --instance "${instance_id}" --project "${PROJECT_ID}" 2> /dev/null | jq -r '.ready')"
 
   while [ "${ready_status}" != 'true' ]; do
     if [ "${instance_status}" != "${INSTANCE_STATUS_ON}" ]; then
@@ -82,7 +82,7 @@ wait_until_agent_ready()
     echo "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
     sleep "${AGENT_READY_SLEEP_TIME}"
     instance_status="$(get_instance_status "${instance_id}")"
-    ready_status="$(corellium ready --instance "${instance_id}" --project "${project_id}" 2> /dev/null | jq -r '.ready')"
+    ready_status="$(corellium ready --instance "${instance_id}" --project "${PROJECT_ID}" 2> /dev/null | jq -r '.ready')"
   done
   echo "Virtual device agent is ready."
 }
@@ -118,8 +118,8 @@ install_app_from_url()
   local instance_id="$1"
   local app_url="$2"
 
-  local project_id
-  project_id="$(get_project_from_instance_id "${instance_id}")"
+  local PROJECT_ID
+  PROJECT_ID="$(get_project_from_instance_id "${instance_id}")"
   local app_filename
   app_filename="$(basename "${app_url}")"
 
@@ -128,7 +128,7 @@ install_app_from_url()
   echo "Installing ${app_filename}"
   if ! corellium apps install \
     --instance "${instance_id}" \
-    --project "${project_id}" \
+    --project "${PROJECT_ID}" \
     --app "${app_filename}" > /dev/null; then
     echo "Error installing app. Exiting." >&2
     exit 1
@@ -150,10 +150,10 @@ is_app_running()
 {
   local instance_id="$1"
   local app_bundle_id="$2"
-  local project_id
-  project_id="$(get_project_from_instance_id "${instance_id}")"
+  local PROJECT_ID
+  PROJECT_ID="$(get_project_from_instance_id "${instance_id}")"
 
-  corellium apps --project "${project_id}" --instance "${instance_id}" |
+  corellium apps --project "${PROJECT_ID}" --instance "${instance_id}" |
     jq -r --arg id "${app_bundle_id}" '.[] | select(.bundleID == $id) | .running'
 }
 
@@ -283,7 +283,7 @@ save_vpn_config_to_local_path()
   local LOCAL_SAVE_PATH="$2"
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
-  corellium project vpnConfig --project "${project_id}" --path "${LOCAL_SAVE_PATH}"
+  corellium project vpnConfig --project "${PROJECT_ID}" --path "${LOCAL_SAVE_PATH}"
 }
 
 wait_for_assessment_status()

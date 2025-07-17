@@ -68,7 +68,7 @@ jobs:
           echo "${{ secrets.MATRIX_PROJECT_OVPN_CONFIG }}" > "${{ env.VPN_CONFIG_PATH }}"
           # TODO: remove debug message, cat, and verbose flag
           echo 'DEBUG CONNECTING TO VPN'
-          sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" --verb 3
+          sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" --verb 3 &
       - name: Verify VPN tunnel is established
         timeout-minutes: 1
         run: |

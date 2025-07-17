@@ -51,17 +51,12 @@ jobs:
           lsmod | grep tun || echo 'no lsmod tun preloaded'
           #sudo modprobe tun
           lsmod | grep tun || echo 'no lsmod tun loaded'
-      - name: Install VPN dep
-        run: |
-          command -v openvpn || {
-            sudo apt-get -qq update
-            sudo apt-get -qq install -y openvpn
-          }
       - name: Connect to project VPN
         run: |
+          sudo apt-get -qq update
+          sudo apt-get -qq install -y openvpn
           echo "${{ secrets.MATRIX_PROJECT_OVPN_CONFIG }}" > "${{ env.VPN_CONFIG_PATH }}"
-          # TODO: remove verbose flag
-          sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" --verb 3 &
+          sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" &
       - name: Verify VPN tunnel is established
         timeout-minutes: 1
         run: |

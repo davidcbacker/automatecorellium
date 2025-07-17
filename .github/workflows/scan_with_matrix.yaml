@@ -63,8 +63,8 @@ jobs:
           set -x
           echo "${{ secrets.MATRIX_PROJECT_OVPN_CONFIG }}" > "${{ env.VPN_CONFIG_PATH }}"
           # TODO: remove verbose flag
-          sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" --verb 3 --daemon
-          sleep 10
+          sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" --verb 3 &
+          sleep 1
       - name: Verify VPN tunnel is established
         timeout-minutes: 1
         run: |

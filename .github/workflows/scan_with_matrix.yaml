@@ -60,23 +60,10 @@ jobs:
       - name: Verify VPN tunnel is established
         timeout-minutes: 1
         run: |
-          echo '0'
-          ip addr show tap0
-          echo '1'
-          ip addr show tap0 | grep 'inet ' | cut -d' ' -f1
-          echo '2'
-          ip addr show tap0 | grep 'inet ' | cut -d' ' -f2
-          echo '3'
-          ip addr show tap0 | grep 'inet ' | cut -d' ' -f3
-          #ip addr show tap0 | grep 'inet ' | cut -d' ' -f2 | cut -d'/' -f1
-          echo '4'
-          ip addr show tap0 | grep 'inet ' | cut -d' ' -f4
-          #ip addr show tap0 | grep 'inet ' | cut -d' ' -f2 | cut -d'/' -f1
-          echo '5'
-          ip addr show tap0 | grep 'inet ' | cut -d' ' -f5
           source ./src/functions.sh
-          # TODO: get VPN IP dynamically
-          until ping -c1 10.11.3.2; do sleep 1; done
+          ip a show tap0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1
+          matrix_instance_vpn_ip="$(ip a show tap0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1)"
+          until ping -c1 matrix_instance_vpn_ip; do sleep 1; done
           matrix_instance_service_ip="$(get_instance_service_ip "${{ env.MATRIX_INSTANCE_ID }}")"
           until ping -c1 "${matrix_instance_service_ip}"; do sleep 1; done
       - name: Install Corellium Cafe from URL

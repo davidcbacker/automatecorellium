@@ -58,22 +58,20 @@ jobs:
             sudo apt-get -qq install -y openvpn
           }
       - name: Connect to project VPN
-        timeout-minutes: 1
         run: |
-          set -x
           echo "${{ secrets.MATRIX_PROJECT_OVPN_CONFIG }}" > "${{ env.VPN_CONFIG_PATH }}"
           # TODO: remove verbose flag
           sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" --verb 3 &
-          sleep 1
       - name: Verify VPN tunnel is established
         timeout-minutes: 1
         run: |
-          set -e
+          ip addr show tap0 | grep inet | cut -d' ' -f2 | cut -d'/' -f1 || true
+          ip addr show tap0 || true
           source ./src/functions.sh
           # TODO: get VPN IP dynamically
           until ping -c1 10.11.3.2; do sleep 1; done
-          readonly matrix_instance_service_ip="$(get_instance_service_ip "${{ env.MATRIX_INSTANCE_ID }}")"
-          until ping -c2 "${matrix_instance_service_ip}"; do sleep 1; done
+          matrix_instance_service_ip="$(get_instance_service_ip "${{ env.MATRIX_INSTANCE_ID }}")"
+          until ping -c1 "${matrix_instance_service_ip}"; do sleep 1; done
       - name: Install Corellium Cafe from URL
         run: |
           set -e

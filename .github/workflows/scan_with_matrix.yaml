@@ -63,8 +63,8 @@ jobs:
           ip link show
           ip addr show eth0 | grep inet | cut -d' ' -f2 | cut -d'/' -f1 || true
           ip addr show eth0 || true
-          ip addr show eth1 | grep inet | cut -d' ' -f2 | cut -d'/' -f1 || true
-          ip addr show eth1 || true
+          ip addr show tap0 | grep 'inet ' | cut -d' ' -f2 | cut -d'/' -f1 || true
+          ip addr show tap0 || true
           source ./src/functions.sh
           # TODO: get VPN IP dynamically
           until ping -c1 10.11.3.2; do sleep 1; done

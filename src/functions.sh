@@ -67,7 +67,7 @@ wait_until_agent_ready()
   local AGENT_READY_SLEEP_TIME='20'
   local INSTANCE_STATUS_ON='on'
   local project_id
-  project_id="$(corellium instance get --instance "${instance_id}" | jq -r '.project')"
+  project_id="$(get_project_from_instance_id "${instance_id}")"
 
   local instance_status
   instance_status="$(get_instance_status "${instance_id}")"
@@ -265,16 +265,26 @@ get_assessment_status()
 
 download_file_to_local_path()
 {
-  local instance_id="$1"
-  local download_path="$2"
-  local local_save_path="$3"
+  local INSTANCE_ID="$1"
+  local DOWNLOAD_PATH="$2"
+  local LOCAL_SAVE_PATH="$3"
   # replace '/' with '%2F' using parameter expansion
-  local encoded_download_path="${download_path//\//%2F}"
+  local encoded_download_path="${DOWNLOAD_PATH//\//%2F}"
 
-  curl -X GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/file/device/${encoded_download_path}" \
+  curl -X GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/file/device/${encoded_download_path}" \
     -H "Accept: application/octet-stream" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
-    -o "${local_save_path}"
+    -o "${LOCAL_SAVE_PATH}"
+}
+
+save_vpn_config_to_local_path()
+{
+  local INSTANCE_ID="$1"
+  local LOCAL_SAVE_PATH="2"
+  local project_id
+  project_id="$(get_project_from_instance_id "${instance_id}")"
+
+  corellium project vpnConfig --project "${project_id}" --path "${LOCAL_SAVE_PATH}"
 }
 
 wait_for_assessment_status()

@@ -284,6 +284,7 @@ save_vpn_config_to_local_path()
   local project_id
   project_id="$(get_project_from_instance_id "${INSTANCE_ID}")"
 
+  echo "DEBUG project_id=${project_id} and LOCAL_SAVE_PATH=${LOCAL_SAVE_PATH}"
   corellium project vpnConfig --project "${project_id}" --path "${LOCAL_SAVE_PATH}"
 }
 

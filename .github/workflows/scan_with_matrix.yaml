@@ -60,11 +60,17 @@ jobs:
       - name: Verify VPN tunnel is established
         timeout-minutes: 1
         run: |
-          ip link show
-          ip addr show eth0 | grep inet | cut -d' ' -f2 | cut -d'/' -f1 || true
-          ip addr show eth0 || true
-          ip addr show tap0 | grep 'inet ' | cut -d' ' -f2 | cut -d'/' -f1 || true
-          ip addr show tap0 || true
+          echo '0'
+          ip addr show tap0
+          echo '1'
+          ip addr show tap0 | grep 'inet '
+          echo '2'
+          ip addr show tap0 | grep 'inet ' | cut -d' ' -f2
+          echo '3'
+          ip addr show tap0 | grep 'inet ' | cut -d'/' -f2
+          echo '4'
+          ip addr show tap0 | grep 'inet ' | cut -d' ' -f2 | cut -d'/' -f1
+          echo '5'
           source ./src/functions.sh
           # TODO: get VPN IP dynamically
           until ping -c1 10.11.3.2; do sleep 1; done

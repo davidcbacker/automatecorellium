@@ -46,26 +46,20 @@ jobs:
           start_instance "${{ env.MATRIX_INSTANCE_ID }}"
           # TODO: add back the wait agent ready step
           #wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Check tap
-        run: |
-          lsmod | grep tun || echo 'no lsmod tun preloaded'
-          #sudo modprobe tun
-          lsmod | grep tun || echo 'no lsmod tun loaded'
-      - name: Connect to project VPN
+      - name: Install VPN dependency
         run: |
           sudo apt-get -qq update
           sudo apt-get -qq install -y openvpn
-          echo "${{ secrets.MATRIX_PROJECT_OVPN_CONFIG }}" > "${{ env.VPN_CONFIG_PATH }}"
-          sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" &
-      - name: Verify VPN tunnel is established
+      - name: Connect to project VPN
         timeout-minutes: 1
         run: |
+          echo "${{ secrets.MATRIX_PROJECT_OVPN_CONFIG }}" > "${{ env.VPN_CONFIG_PATH }}"
+          sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" &
           source ./src/functions.sh
-          ip a show tap0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1
           matrix_instance_vpn_ip="$(ip a show tap0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1)"
-          until ping -c1 "${matrix_instance_vpn_ip}"; do sleep 1; done
           matrix_instance_service_ip="$(get_instance_service_ip "${{ env.MATRIX_INSTANCE_ID }}")"
-          until ping -c1 "${matrix_instance_service_ip}"; do sleep 1; done
+          until ping -q -c1 "${matrix_instance_vpn_ip}"; do sleep 1; done
+          until ping -q -c1 "${matrix_instance_service_ip}"; do sleep 1; done
       - name: Install Corellium Cafe from URL
         run: |
           set -e

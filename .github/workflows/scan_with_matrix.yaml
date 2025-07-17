@@ -56,10 +56,12 @@ jobs:
       - name: Connect to project VPN
         timeout-minutes: 1
         run: |
-          set -e
+          set -ex
           source ./src/functions.sh
           save_vpn_config_to_local_path "${{ env.MATRIX_INSTANCE_ID }}" "${{ env.VPN_CONFIG_PATH }}"
           echo 'debug'
+          ls -la "${{ env.VPN_CONFIG_PATH }}"
+          sha256sum "${{ env.VPN_CONFIG_PATH }}"
           cat "${{ env.VPN_CONFIG_PATH }}"
           sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" &
           # ensure tap0 interface exists before 

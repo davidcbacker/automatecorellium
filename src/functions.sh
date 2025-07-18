@@ -14,6 +14,22 @@ check_env_vars()
   fi
 }
 
+log_stdout()
+{
+  local friendly_date="$(date +'%Y-%m-%dT%H:%M:%S')"
+  if [ "$#" -eq 0 ]; then
+    printf '[!] %s ERROR: No argument supplied to log_info.\n' \
+      "${friendly_date}" \
+      >&2
+    exit 1
+  fi
+  for arg in "$@"; do
+    printf '[+] %s  INFO: %s\n' \
+      "${friendly_date}" \
+      "${arg}"
+  done
+}
+
 start_instance()
 {
   local instance_id="$1"

@@ -66,21 +66,30 @@ jobs:
           until ping -c1 "${matrix_instance_vpn_ip}"; do sleep 1; done
           until ping -c1 "${matrix_instance_service_ip}"; do sleep 1; done
       - name: Install Corellium Cafe from URL
-        run: |
-          set -e
-          source ./src/functions.sh
-          install_corellium_cafe_ios "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Run Corellium Cafe MATRIX assessment
-        timeout-minutes: 20
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -e
           source ./src/functions.sh
+          install_corellium_cafe_ios "${{ env.MATRIX_INSTANCE_ID }}"
+      - name: Run Corellium Cafe MATRIX assessment
+        timeout-minutes: 40
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+        run: |
+          set -e
+          source ./src/functions.sh
+          readonly MAX_MATRIX_RETRIES=2
+          
+          for i in 
           if ! run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
             echo 'Warning - First MATRIX run failed. Retrying once.'
-            run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"
+            # TODO: refactor as a for loop
+            if ! run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
+              run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"
+            fi
           fi
       - name: Clean up VPN connection
         if: always()

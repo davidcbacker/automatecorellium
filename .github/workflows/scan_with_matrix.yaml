@@ -82,8 +82,7 @@ jobs:
         run: |
           set -e
           source ./src/functions.sh
-           
-          for failures_count in "$(seq 0 MAX_MATRIX_RETRIES)"; do
+          for failures_count in $(seq 0 MAX_MATRIX_RETRIES); do
             if run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
               break
             else

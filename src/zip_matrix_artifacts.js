@@ -33,7 +33,8 @@ async function execCommandOnInstance(agent, command) {
 async function main() {
     try {
         console.log(`Starting the script at ${new Date().toISOString()}.`);
-        const zipInputDir = '/tmp/artifacts/';
+        const zipInputArtifactsDir = '/tmp/artifacts/';
+        const zipInputAssessmentsDir = '/tmp/assessment.*/'
         const zipOutputPath = '/tmp/matrix_artifacts.zip';
 
         const corellium = new Corellium({
@@ -62,7 +63,7 @@ async function main() {
         console.log(`Agent for instance ${MATRIX_INSTANCE_ID} is ready.`);
 
         await execCommandOnInstance(agent, 'apt -qq install -y zip');
-        await execCommandOnInstance(agent, `zip -r ${zipOutputPath} ${zipInputDir}`);
+        await execCommandOnInstance(agent, `zip -r ${zipOutputPath} ${zipInputArtifactsDir} ${zipInputAssessmentsDir}`);
         await execCommandOnInstance(agent, `ls -l ${zipOutputPath}`);
         await execCommandOnInstance(agent, `sha256sum ${zipOutputPath}`);
 

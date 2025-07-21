@@ -78,19 +78,17 @@ jobs:
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          MAX_MATRIX_RETRIES: 2
         run: |
           set -e
           source ./src/functions.sh
-          readonly MAX_MATRIX_RETRIES=2
-          
-          for i in 
-          if ! run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
-            echo 'Warning - First MATRIX run failed. Retrying once.'
-            # TODO: refactor as a for loop
-            if ! run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
-              run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"
+          for failures_count in {0.."${MAX_MATRIX_RETRIES}"}; do
+            if run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
+              break
+            else
+              echo "[!] Warning - MATRIX failed on run $((MAX_MATRIX_RETRIES + 1))"
             fi
-          fi
+          done
       - name: Clean up VPN connection
         if: always()
         run: |

@@ -66,12 +66,15 @@ jobs:
           until ping -c1 "${matrix_instance_vpn_ip}"; do sleep 1; done
           until ping -c1 "${matrix_instance_service_ip}"; do sleep 1; done
       - name: Install Corellium Cafe from URL
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -e
           source ./src/functions.sh
           install_corellium_cafe_ios "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Run Corellium Cafe MATRIX assessment
-        timeout-minutes: 20
+        timeout-minutes: 40
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}

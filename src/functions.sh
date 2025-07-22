@@ -14,16 +14,34 @@ check_env_vars()
   fi
 }
 
+log_stdout()
+{
+  local friendly_date
+  friendly_date="$(date +'%Y-%m-%dT%H:%M:%S')"
+  if [ "$#" -eq 0 ]; then
+    printf '[!] %s ERROR: No argument supplied to log_info.\n' \
+      "${friendly_date}" \
+      >&2
+    exit 1
+  fi
+  for arg in "$@"; do
+    printf '[+] %s  INFO: %s\n' \
+      "${friendly_date}" \
+      "${arg}"
+  done
+}
+
 start_instance()
 {
   local instance_id="$1"
   case "$(get_instance_status "${instance_id}")" in
     'on')
-      echo "Instance ${instance_id} is already on."
+      log_stdout "Instance ${instance_id} is already on."
       ;;
     *)
-      echo "Starting instance ${instance_id}"
-      corellium instance start "${instance_id}" --wait || true
+      log_stdout "Starting instance ${instance_id}"
+      corellium instance start "${instance_id}" --wait > /dev/null || true
+      log_stdout "Started instance ${instance_id}"
       ;;
   esac
 }
@@ -34,10 +52,10 @@ stop_instance()
   local instance_id="$1"
   case "$(get_instance_status "${instance_id}")" in
     'off')
-      echo "Instance ${instance_id} is already off."
+      log_stdout "Instance ${instance_id} is already off."
       ;;
     *)
-      echo "Stopping instance ${instance_id}"
+      log_stdout "Stopping instance ${instance_id}"
       # Fix if this causes nonzero exit status or stderr messages
       curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/stop" \
         -H "Accept: application/json" \
@@ -76,15 +94,15 @@ wait_until_agent_ready()
 
   while [ "${ready_status}" != 'true' ]; do
     if [ "${instance_status}" != "${INSTANCE_STATUS_ON}" ]; then
-      echo "Instance is ${instance_status} not ${INSTANCE_STATUS_ON}. Exiting" >&2
+      log_stdout "Instance is ${instance_status} not ${INSTANCE_STATUS_ON}. Exiting" >&2
       exit 1
     fi
-    echo "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
+    log_stdout "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
     sleep "${AGENT_READY_SLEEP_TIME}"
     instance_status="$(get_instance_status "${instance_id}")"
     ready_status="$(corellium ready --instance "${instance_id}" --project "${PROJECT_ID}" 2> /dev/null | jq -r '.ready')"
   done
-  echo "Virtual device agent is ready."
+  log_stdout 'Virtual device agent is ready.'
 }
 
 kill_app()
@@ -123,9 +141,9 @@ install_app_from_url()
   local app_filename
   app_filename="$(basename "${app_url}")"
 
-  echo "Downloading ${app_filename}"
+  log_stdout "Downloading ${app_filename}"
   wget --quiet "${app_url}"
-  echo "Installing ${app_filename}"
+  log_stdout "Installing ${app_filename}"
   if ! corellium apps install \
     --instance "${instance_id}" \
     --project "${PROJECT_ID}" \
@@ -161,7 +179,7 @@ run_matrix_cafe_checks()
 {
   local instance_id="$1"
 
-  echo "Creating MATRIX assessment"
+  log_stdout "Creating new MATRIX assessment"
   local assessment_id
   assessment_id="$(corellium matrix create-assessment --instance "${instance_id}" --bundle com.corellium.Cafe | jq -r '.id')"
 
@@ -169,9 +187,9 @@ run_matrix_cafe_checks()
     echo "Failed to create assessment" >&2
     exit 1
   fi
-  echo "Created MATRIX assessment ${assessment_id}"
+  log_stdout "Created MATRIX assessment ${assessment_id}"
 
-  echo "Starting MATRIX monitoring"
+  log_stdout "Starting MATRIX monitoring"
   corellium matrix start-monitor --instance "${instance_id}" --assessment "${assessment_id}" \
     > /dev/null
   wait_for_assessment_status "${instance_id}" "${assessment_id}" 'monitoring'
@@ -179,12 +197,12 @@ run_matrix_cafe_checks()
   # debug
   sleep 60
 
-  echo "Stopping MATRIX monitoring"
+  log_stdout "Stopping MATRIX monitoring"
   corellium matrix stop-monitor --instance "${instance_id}" --assessment "${assessment_id}" \
     > /dev/null
   wait_for_assessment_status "${instance_id}" "${assessment_id}" 'readyForTesting'
 
-  echo "Running MATRIX test"
+  log_stdout "Running MATRIX test"
   corellium matrix test --instance "${instance_id}" --assessment "${assessment_id}" \
     > /dev/null
   wait_for_assessment_status "${instance_id}" "${assessment_id}" 'complete'
@@ -194,13 +212,13 @@ run_matrix_cafe_checks()
   local report_id
   report_id="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.reportId')"
 
-  echo "Downloading MATRIX report ${report_id} as HTML"
+  log_stdout "Downloading MATRIX report ${report_id} as HTML"
   corellium matrix download-report --instance "${instance_id}" --assessment "${assessment_id}" > "matrix_report_${report_id}.html"
 
-  echo "Downloading MATRIX report ${report_id} as JSON"
+  log_stdout "Downloading MATRIX report ${report_id} as JSON"
   corellium matrix download-report --instance "${instance_id}" --assessment "${assessment_id}" --format json > "matrix_report_${report_id}.json"
 
-  echo "Finished MATRIX assessment ${assessment_id} with report ${report_id}."
+  log_stdout "Finished MATRIX assessment ${assessment_id} with report ${report_id}."
 }
 
 delete_unauthorized_devices()
@@ -224,7 +242,7 @@ delete_unauthorized_devices()
       fi
     done
     if [ "${is_authorized}" = 'false' ]; then
-      echo "Deleting unauthorized instance ${device}"
+      log_stdout "Deleting unauthorized instance ${device}"
       corellium instance delete "${device}" --wait
     fi
   done
@@ -251,7 +269,7 @@ stop_demo_instances()
   done <<< "${STOP_INSTANCES}"
 
   for instance in "${stop_instances[@]}"; do
-    echo "Stopping instance ${instance}"
+    log_stdout "Stopping instance ${instance}"
     corellium instance stop "${instance}" --wait || true
   done
 }
@@ -324,7 +342,7 @@ wait_for_assessment_status()
         ;;
     esac
 
-    echo "Status is ${current_assessment_status} and target is ${TARGET_ASSESSMENT_STATUS}. Wait ${sleep_time} seconds."
+    log_stdout "Status is ${current_assessment_status} and target is ${TARGET_ASSESSMENT_STATUS}. Wait ${sleep_time} seconds."
     sleep "${sleep_time}"
 
     last_assessment_status="${current_assessment_status}"

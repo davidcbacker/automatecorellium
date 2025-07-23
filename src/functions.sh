@@ -175,15 +175,13 @@ is_app_running()
 run_matrix_cafe_checks()
 {
   local instance_id="$1"
-
-  local readonly MATRIX_STATUS_MONITORING='monitoring'
-  local readonly MATRIX_STATUS_READY_FOR_TESTING='readyForTesting'
-  local readonly MATRIX_STATUS_COMPLETED_TESTING='complete'
+  local MATRIX_STATUS_MONITORING='monitoring'
+  local MATRIX_STATUS_READY_FOR_TESTING='readyForTesting'
+  local MATRIX_STATUS_COMPLETED_TESTING='complete'
 
   log_stdout "Creating new MATRIX assessment"
   local assessment_id
   assessment_id="$(corellium matrix create-assessment --instance "${instance_id}" --bundle com.corellium.Cafe | jq -r '.id')"
-
   if [ -z "${assessment_id}" ]; then
     echo "Failed to create assessment" >&2
     exit 1

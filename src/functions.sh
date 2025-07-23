@@ -225,18 +225,14 @@ run_matrix_cafe_checks()
 
   kill_corellium_cafe_ios "${instance_id}"
 
-  set -x
   local report_id
   report_id="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.reportId')"
-
   log_stdout "Downloading MATRIX report ${report_id} as HTML"
   corellium matrix download-report --instance "${instance_id}" --assessment "${assessment_id}" > "matrix_report_${report_id}.html"
-
   log_stdout "Downloading MATRIX report ${report_id} as JSON"
   corellium matrix download-report --instance "${instance_id}" --assessment "${assessment_id}" --format json > "matrix_report_${report_id}.json"
 
   log_stdout "Finished report ${report_id} for MATRIX assessment ${assessment_id}."
-  set +x
 }
 
 delete_unauthorized_devices()

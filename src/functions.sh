@@ -348,3 +348,55 @@ wait_for_assessment_status()
     current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
   done
 }
+
+install_usbfluxd_and_dependencies()
+{
+  local usbfluxd_apt_deps=(
+    avahi-daemon
+    build-essential
+    git
+    libimobiledevice6
+    libtool
+    pkg-config
+    python3-dev
+    usbmuxd
+  )
+  log_stdout 'Installing apt dependencies.'
+  sudo apt -qq update
+  for dep in ${usbfluxd_apt_deps[@]}; do
+    if sudo apt -qq install -y "${dep}"; then
+      log_stdout "Installed ${dep}."
+    else
+      echo "Failed to install ${dep}." >&2
+      exit 1
+    fi
+  done
+  log_stdout 'Installed apt dependencies.'
+
+  local temp_compile_dir="$(mktemp -d)"
+  local usbfluxd_compile_dep_urls=(
+    'https://github.com/libimobiledevice/libplist'
+    'https://github.com/corellium/usbfluxd'
+  )
+
+  for compile_dep_url in ${usbfluxd_compile_dep_urls[@]}; do
+    compile_dep_name="$(basename "${compile_dep_url}")"
+    log_stdout "Cloning ${compile_dep_name}."
+    git clone "${compile_dep_url}" "${compile_dep_name}"
+    cd "${temp_compile_dir}/${compile_dep_name}/"
+    log_stdout "Generating Makefile for ${compile_dep_name}."
+    ./autogen.sh
+    log_stdout "Building ${compile_dep_name}."
+    make -j "$(nproc)"
+    log_stdout "Installing ${compile_dep_name}."
+    sudo make install
+    cd ../
+    log_stdout "Deleting compile dir for ${compile_dep_name}."
+    rm -rf "${compile_dep_name}/"
+  done
+
+  command -v usbfluxd
+  command -v usbfluxctl
+
+  rm -rf "${temp_compile_dir}/"
+}

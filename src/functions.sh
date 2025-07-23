@@ -361,9 +361,10 @@ install_usbfluxd_and_dependencies()
     python3-dev
     usbmuxd
   )
+
   log_stdout 'Installing apt dependencies.'
   sudo apt -qq update
-  for dep in ${usbfluxd_apt_deps[@]}; do
+  for dep in "${usbfluxd_apt_deps[@]}"; do
     if sudo apt -qq install -y "${dep}"; then
       log_stdout "Installed ${dep}."
     else
@@ -379,11 +380,11 @@ install_usbfluxd_and_dependencies()
     'https://github.com/corellium/usbfluxd'
   )
 
-  for compile_dep_url in ${usbfluxd_compile_dep_urls[@]}; do
+  for compile_dep_url in "${usbfluxd_compile_dep_urls[@]}"; do
     compile_dep_name="$(basename "${compile_dep_url}")"
     log_stdout "Cloning ${compile_dep_name}."
     git clone "${compile_dep_url}" "${compile_dep_name}"
-    cd "${temp_compile_dir}/${compile_dep_name}/"
+    cd "${temp_compile_dir}/${compile_dep_name}/" || exit 1
     log_stdout "Generating Makefile for ${compile_dep_name}."
     ./autogen.sh
     log_stdout "Building ${compile_dep_name}."
@@ -392,11 +393,11 @@ install_usbfluxd_and_dependencies()
     sudo make install
     cd ../
     log_stdout "Deleting compile dir for ${compile_dep_name}."
-    rm -rf "${compile_dep_name}/"
+    rm -rf "${compile_dep_name:?}/"
   done
 
   command -v usbfluxd
   command -v usbfluxctl
 
-  rm -rf "${temp_compile_dir}/"
+  rm -rf "${temp_compile_dir:?}/"
 }

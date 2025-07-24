@@ -80,7 +80,6 @@ get_instance_service_ip()
 wait_until_agent_ready()
 {
   local instance_id="$1"
-
   local AGENT_READY_SLEEP_TIME='20'
   local INSTANCE_STATUS_ON='on'
   local PROJECT_ID
@@ -109,9 +108,8 @@ kill_app()
   check_env_vars
   local instance_id="$1"
   local app_bundle_id="$2"
-
   if [ "$(is_app_running "${instance_id}" "${app_bundle_id}")" = 'true' ]; then
-    curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/app/apps/${app_bundle_id}/kill" \
+    curl -sX POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/app/apps/${app_bundle_id}/kill" \
       -H "Accept: application/json" \
       -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
   fi
@@ -177,47 +175,64 @@ is_app_running()
 run_matrix_cafe_checks()
 {
   local instance_id="$1"
+  local MATRIX_STATUS_MONITORING='monitoring'
+  local MATRIX_STATUS_READY_FOR_TESTING='readyForTesting'
+  local MATRIX_STATUS_COMPLETED_TESTING='complete'
 
   log_stdout "Creating new MATRIX assessment"
   local assessment_id
   assessment_id="$(corellium matrix create-assessment --instance "${instance_id}" --bundle com.corellium.Cafe | jq -r '.id')"
-
   if [ -z "${assessment_id}" ]; then
     echo "Failed to create assessment" >&2
     exit 1
   fi
-  log_stdout "Created MATRIX assessment ${assessment_id}"
+  log_stdout "Created MATRIX assessment ${assessment_id}."
 
-  log_stdout "Starting MATRIX monitoring"
-  corellium matrix start-monitor --instance "${instance_id}" --assessment "${assessment_id}" \
+  log_stdout "Starting monitoring for MATRIX assessment ${assessment_id}."
+  corellium matrix start-monitor \
+    --instance "${instance_id}" \
+    --assessment "${assessment_id}" \
     > /dev/null
-  wait_for_assessment_status "${instance_id}" "${assessment_id}" 'monitoring'
+  wait_for_assessment_status \
+    "${instance_id}" \
+    "${assessment_id}" \
+    "${MATRIX_STATUS_MONITORING}"
+  log_stdout "MATRIX assessment ${assessment_id} is ${MATRIX_STATUS_MONITORING}."
 
-  # debug
   sleep 60
 
-  log_stdout "Stopping MATRIX monitoring"
-  corellium matrix stop-monitor --instance "${instance_id}" --assessment "${assessment_id}" \
+  log_stdout "Stopping monitoring for MATRIX assessment ${assessment_id}."
+  corellium matrix stop-monitor \
+    --instance "${instance_id}" \
+    --assessment "${assessment_id}" \
     > /dev/null
-  wait_for_assessment_status "${instance_id}" "${assessment_id}" 'readyForTesting'
+  wait_for_assessment_status \
+    "${instance_id}" \
+    "${assessment_id}" \
+    "${MATRIX_STATUS_READY_FOR_TESTING}"
+  log_stdout "MATRIX assessment ${assessment_id} is ${MATRIX_STATUS_READY_FOR_TESTING}."
 
-  log_stdout "Running MATRIX test"
-  corellium matrix test --instance "${instance_id}" --assessment "${assessment_id}" \
+  log_stdout "Running test for MATRIX assessment ${assessment_id}."
+  corellium matrix test \
+    --instance "${instance_id}" \
+    --assessment "${assessment_id}" \
     > /dev/null
-  wait_for_assessment_status "${instance_id}" "${assessment_id}" 'complete'
+  wait_for_assessment_status \
+    "${instance_id}" \
+    "${assessment_id}" \
+    "${MATRIX_STATUS_COMPLETED_TESTING}"
+  log_stdout "MATRIX assessment ${assessment_id} is ${MATRIX_STATUS_COMPLETED_TESTING}."
 
   kill_corellium_cafe_ios "${instance_id}"
 
   local report_id
   report_id="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.reportId')"
-
   log_stdout "Downloading MATRIX report ${report_id} as HTML"
   corellium matrix download-report --instance "${instance_id}" --assessment "${assessment_id}" > "matrix_report_${report_id}.html"
-
   log_stdout "Downloading MATRIX report ${report_id} as JSON"
   corellium matrix download-report --instance "${instance_id}" --assessment "${assessment_id}" --format json > "matrix_report_${report_id}.json"
 
-  log_stdout "Finished MATRIX assessment ${assessment_id} with report ${report_id}."
+  log_stdout "Finished report ${report_id} for MATRIX assessment ${assessment_id}."
 }
 
 delete_unauthorized_devices()

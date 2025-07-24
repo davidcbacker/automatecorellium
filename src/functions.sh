@@ -374,7 +374,8 @@ install_usbfluxd_and_dependencies()
   done
   log_stdout 'Installed apt dependencies.'
 
-  local temp_compile_dir="$(mktemp -d)"
+  local temp_compile_dir
+  temp_compile_dir="$(mktemp -d)"
   local usbfluxd_compile_dep_urls=(
     'https://github.com/libimobiledevice/libplist'
     'https://github.com/corellium/usbfluxd'

@@ -86,7 +86,7 @@ jobs:
             if run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
               break
             else
-              echo "[!] Warning - MATRIX failed on run $((failures_count + 1))"
+              echo "[!] Warning - MATRIX failed on run $((i + 1))"
             fi
           done
       - name: Clean up VPN connection

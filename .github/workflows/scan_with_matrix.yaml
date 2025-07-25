@@ -82,11 +82,11 @@ jobs:
         run: |
           set -e
           source ./src/functions.sh
-          for ((i=0; i<=MAX_MATRIX_RUN_RETRIES; i++)); do
+          for ((failures=0; failures<=MAX_MATRIX_RUN_RETRIES; failures++)); do
             if run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
               break
             else
-              echo "[!] Warning - MATRIX failed on run $((failures_count + 1))"
+              echo "[!] Warning - MATRIX failed on run $((failures + 1))"
             fi
           done
       - name: Clean up VPN connection

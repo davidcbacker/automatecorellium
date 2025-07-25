@@ -69,7 +69,7 @@ jobs:
         run: |
           set -e
           source ./src/functions.sh
-          install_usbfluxd_and_depdencies
+          install_usbfluxd_and_depedencies
           idevice_id --list
           idevicepair pair
       - name: Install Corellium Cafe from URL

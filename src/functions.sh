@@ -382,7 +382,7 @@ install_usbfluxd_and_dependencies()
   local temp_compile_dir
   temp_compile_dir="$(mktemp -d)"
 
-  cd "${temp_compile_dir}/"
+  cd "${temp_compile_dir}/" || exit 1
   for compile_dep_url in "${usbfluxd_compile_dep_urls[@]}"; do
     compile_dep_name="$(basename "${compile_dep_url}")"
     log_stdout "Cloning ${compile_dep_name}."
@@ -402,6 +402,6 @@ install_usbfluxd_and_dependencies()
   command -v usbfluxd
   command -v usbfluxctl
 
-  cd "${HOME}/"
+  cd "${HOME}/" || exit 1
   rm -rf "${temp_compile_dir:?}/"
 }

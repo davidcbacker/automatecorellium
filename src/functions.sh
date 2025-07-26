@@ -368,18 +368,18 @@ install_usbfluxd_and_dependencies()
     'https://github.com/corellium/usbfluxd'
   )
 
-  log_stdout 'Installing apt dependencies.'
-  sudo apt -qq update
+  log_stdout 'Installing apt-get dependencies.'
+  sudo apt-get -qq update
   for dep in "${usbfluxd_apt_deps[@]}"; do
-    if sudo apt install -y "${dep}" > /dev/null; then
+    if sudo apt-get install -y "${dep}" > /dev/null; then
       log_stdout "Installed ${dep}."
     else
       echo "Failed to install ${dep}." >&2
-      sudo apt -qq install -y "${dep}"
+      sudo apt-get -qq install -y "${dep}"
       exit 1
     fi
   done
-  log_stdout 'Installed apt dependencies.'
+  log_stdout 'Installed apt-get dependencies.'
 
   local temp_compile_dir
   temp_compile_dir="$(mktemp -d)"

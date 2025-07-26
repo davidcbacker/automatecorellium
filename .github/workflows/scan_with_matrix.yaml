@@ -47,6 +47,7 @@ jobs:
           set -e
           source ./src/functions.sh
           install_usbfluxd_and_dependencies
+          run_usbfluxd_and_dependencies
           idevice_id --list
           idevicepair pair
       - name: Start instance and wait until ready

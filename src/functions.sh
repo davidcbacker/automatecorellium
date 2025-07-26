@@ -71,7 +71,7 @@ get_instance_status()
   corellium instance get --instance "${instance_id}" | jq -r '.state'
 }
 
-get_instance_service_ip()
+get_instance_services_ip()
 {
   local instance_id="$1"
   corellium instance get --instance "${instance_id}" | jq -r '.serviceIp'
@@ -362,4 +362,80 @@ wait_for_assessment_status()
     last_assessment_status="${current_assessment_status}"
     current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
   done
+}
+
+install_usbfluxd_and_dependencies()
+{
+  local usbfluxd_apt_deps=(
+    avahi-daemon
+    build-essential
+    git
+    libimobiledevice6
+    libimobiledevice-utils
+    libtool
+    pkg-config
+    python3-dev
+    usbmuxd
+  )
+
+  local usbfluxd_compile_dep_urls=(
+    'https://github.com/libimobiledevice/libplist'
+    'https://github.com/corellium/usbfluxd'
+  )
+
+  log_stdout 'Installing apt-get dependencies.'
+  sudo apt-get -qq update
+  for dep in "${usbfluxd_apt_deps[@]}"; do
+    if sudo apt-get install -y "${dep}" > /dev/null; then
+      log_stdout "Installed ${dep}."
+    else
+      echo "Failed to install ${dep}." >&2
+      sudo apt-get -qq install -y "${dep}"
+      exit 1
+    fi
+  done
+  log_stdout 'Installed apt-get dependencies.'
+
+  local temp_compile_dir
+  temp_compile_dir="$(mktemp -d)"
+
+  cd "${temp_compile_dir}/" || exit 1
+  for compile_dep_url in "${usbfluxd_compile_dep_urls[@]}"; do
+    compile_dep_name="$(basename "${compile_dep_url}")"
+    log_stdout "Cloning ${compile_dep_name}."
+    git clone "${compile_dep_url}" "${compile_dep_name}"
+    cd "${temp_compile_dir}/${compile_dep_name}/" || exit 1
+    log_stdout "Generating Makefile for ${compile_dep_name}."
+    ./autogen.sh
+    log_stdout "Building ${compile_dep_name}."
+    make -j "$(nproc)"
+    log_stdout "Installing ${compile_dep_name}."
+    sudo make install
+    cd ../
+    log_stdout "Deleting compile dir for ${compile_dep_name}."
+    rm -rf "${compile_dep_name:?}/"
+  done
+
+  command -v usbfluxd
+  command -v usbfluxctl
+
+  cd "${HOME}/" || exit 1
+  rm -rf "${temp_compile_dir:?}/"
+}
+
+run_usbfluxd_and_dependencies()
+{
+  sudo systemctl start usbmuxd
+  sudo systemctl status usbmuxd
+  sudo avahi-daemon &
+  sudo usbfluxd -f -n &
+}
+
+add_instance_to_usbfluxd()
+{
+  local INSTANCE_ID="$1"
+  local USBFLUXD_PORT='5000'
+  local INSTANCE_SERVICES_IP
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  usbfluxctl add "${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
 }

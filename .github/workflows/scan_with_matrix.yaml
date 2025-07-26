@@ -70,7 +70,8 @@ jobs:
           matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
           until ping -c1 "${matrix_instance_vpn_ip}"; do sleep 1; done
           until ping -c1 "${matrix_instance_services_ip}"; do sleep 1; done
-      - name: Run USBFlux and connect to instance via USB
+      - name: Start USBFlux and connect to instance via USB
+        run: |
           run_usbfluxd_and_dependencies
           add_instance_to_usbfluxd "${{ env.MATRIX_INSTANCE_ID }}"
           idevice_id --list

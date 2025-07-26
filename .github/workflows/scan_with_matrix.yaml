@@ -70,7 +70,7 @@ jobs:
           matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
           until ping -c1 "${matrix_instance_vpn_ip}"; do sleep 1; done
           until ping -c1 "${matrix_instance_services_ip}"; do sleep 1; done
-      - name: Start USBFlux
+      - name: Start USBFlux and connect
         timeout-minutes: 1
         run: |
           set -e

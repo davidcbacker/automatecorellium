@@ -362,6 +362,11 @@ install_usbfluxd_and_dependencies()
     usbmuxd
   )
 
+  local usbfluxd_compile_dep_urls=(
+    'https://github.com/libimobiledevice/libplist'
+    'https://github.com/corellium/usbfluxd'
+  )
+
   log_stdout 'Installing apt dependencies.'
   sudo apt -qq update
   for dep in "${usbfluxd_apt_deps[@]}"; do
@@ -376,11 +381,8 @@ install_usbfluxd_and_dependencies()
 
   local temp_compile_dir
   temp_compile_dir="$(mktemp -d)"
-  local usbfluxd_compile_dep_urls=(
-    'https://github.com/libimobiledevice/libplist'
-    'https://github.com/corellium/usbfluxd'
-  )
 
+  cd "${temp_compile_dir}/"
   for compile_dep_url in "${usbfluxd_compile_dep_urls[@]}"; do
     compile_dep_name="$(basename "${compile_dep_url}")"
     log_stdout "Cloning ${compile_dep_name}."
@@ -400,5 +402,6 @@ install_usbfluxd_and_dependencies()
   command -v usbfluxd
   command -v usbfluxctl
 
+  cd "${HOME}/"
   rm -rf "${temp_compile_dir:?}/"
 }

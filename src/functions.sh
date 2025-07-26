@@ -371,10 +371,11 @@ install_usbfluxd_and_dependencies()
   log_stdout 'Installing apt dependencies.'
   sudo apt -qq update
   for dep in "${usbfluxd_apt_deps[@]}"; do
-    if sudo apt -qq install -y "${dep}"; then
+    if sudo apt install -y "${dep}" > /dev/null; then
       log_stdout "Installed ${dep}."
     else
       echo "Failed to install ${dep}." >&2
+      sudo apt -qq install -y "${dep}"
       exit 1
     fi
   done

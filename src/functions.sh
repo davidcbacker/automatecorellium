@@ -418,7 +418,8 @@ run_usbfluxd_and_dependencies()
 add_instance_to_usbfluxd()
 {
   local INSTANCE_ID="$1"
-  local INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   local USBFLUXD_PORT='5000'
+  local INSTANCE_SERVICES_IP
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   usbfluxctl add "${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
 }

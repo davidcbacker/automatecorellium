@@ -184,7 +184,7 @@ run_matrix_cafe_checks()
   assessment_id="$(corellium matrix create-assessment --instance "${instance_id}" --bundle com.corellium.Cafe | jq -r '.id')"
   if [ -z "${assessment_id}" ]; then
     echo "Failed to create assessment" >&2
-    exit 1
+    return 1
   fi
   log_stdout "Created MATRIX assessment ${assessment_id}."
 

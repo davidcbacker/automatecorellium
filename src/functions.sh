@@ -356,6 +356,7 @@ install_usbfluxd_and_dependencies()
     build-essential
     git
     libimobiledevice6
+    libimobiledevice-utils
     libtool
     pkg-config
     python3-dev

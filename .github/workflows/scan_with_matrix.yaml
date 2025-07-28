@@ -54,15 +54,6 @@ jobs:
           python3 -m pip install -U pymobiledevice3
           sudo apt-get -qq install -y libusb
           pymobiledevice3 mounter auto-mount
-      - name: Test Appium comms
-        env:
-          APPIUM_DEFUALT_PORT: 8100
-        timeout-minutes: 1
-        run: |
-          source ./src/functions.sh
-          matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
-          readonly APPIUM_TEST_URL="${matrix_instance_services_ip}:${APPIUM_DEFUALT_PORT}/status"
-          until curl "${APPIUM_TEST_URL}"; do sleep 1; done
       - name: Start instance and wait until ready
         timeout-minutes: 20
         run: |
@@ -86,6 +77,15 @@ jobs:
           matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
           until ping -c1 "${matrix_instance_vpn_ip}"; do sleep 1; done
           until ping -c1 "${matrix_instance_services_ip}"; do sleep 1; done
+      - name: Test Appium comms
+        env:
+          APPIUM_DEFUALT_PORT: 8100
+        timeout-minutes: 1
+        run: |
+          source ./src/functions.sh
+          matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
+          readonly APPIUM_TEST_URL="${matrix_instance_services_ip}:${APPIUM_DEFUALT_PORT}/status"
+          until curl "${APPIUM_TEST_URL}"; do sleep 1; done
       - name: Start USBFlux and connect
         timeout-minutes: 1
         run: |

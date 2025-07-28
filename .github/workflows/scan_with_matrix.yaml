@@ -81,6 +81,7 @@ jobs:
           source ./src/functions.sh
           run_usbfluxd_and_dependencies
           add_instance_to_usbfluxd "${{ env.MATRIX_INSTANCE_ID }}"
+          set +e
           until idevice_id --list; do sleep 1; done
           idevicepair pair
       - name: Install Corellium Cafe from URL

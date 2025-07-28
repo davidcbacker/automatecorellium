@@ -52,7 +52,7 @@ jobs:
           npm install --location=global appium
           appium driver install xcuitest
           python3 -m pip install -U pymobiledevice3
-          sudo apt-get -qq install -y libusb
+          #sudo apt-get -qq install -y libusb
           pymobiledevice3 mounter auto-mount
       - name: Start instance and wait until ready
         timeout-minutes: 20

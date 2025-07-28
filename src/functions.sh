@@ -155,7 +155,7 @@ install_corellium_cafe_ios()
   local INSTANCE_ID="$1"
   local CORELLIUM_CAFE_IOS_URL="https://www.corellium.com/hubfs/Corellium_Cafe.ipa"
   local CORELLIUM_CAFE_BUNDLE_ID='com.corellium.Cafe'
-  local CORELLIUM_CAFE_FILENAME
+  local CORELLIUM_CAFE_IOS_FILENAME
   CORELLIUM_CAFE_IOS_FILENAME="$(basename CORELLIUM_CAFE_IOS_URL)"
 
   kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_BUNDLE_ID}"
@@ -189,13 +189,6 @@ launch_app()
     echo "Error installing app ${APP_BUNDLE_ID}. Exiting." >&2
     exit 1
   fi
-}
-
-launch_corellium_cafe_ios()
-{
-  local INSTANCE_ID="$1"
-  local CAFE_IOS_BUNDLE_ID='com.corellium.Cafe'
-  launch_app "${INSTANCE_ID}" "{CAFE_IOS_BUNDLE_ID}"
 }
 
 launch_appium_runner_ios()

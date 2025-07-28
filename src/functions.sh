@@ -186,7 +186,7 @@ launch_app()
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \
     --bundle "${APP_BUNDLE_ID}"; then
-    echo "Error installing app ${APP_BUNDLE_ID}. Exiting." >&2
+    echo "Error launching app ${APP_BUNDLE_ID}. Exiting." >&2
     exit 1
   fi
 }
@@ -196,6 +196,12 @@ launch_appium_runner_ios()
   local INSTANCE_ID="$1"
   local APPIUM_RUNNER_IOS_BUNDLE_ID='org.appium.WebDriverAgentRunner.xctrunner'
   launch_app "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_BUNDLE_ID}"
+}
+
+unlock_instance()
+{
+  local INSTANCE_ID="$1"
+  corellium instance unlock --instance "${INSTANCE_ID}"
 }
 
 is_app_running()

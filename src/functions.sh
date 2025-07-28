@@ -195,7 +195,7 @@ launch_appium_runner_ios()
 {
   local INSTANCE_ID="$1"
   local APPIUM_RUNNER_IOS_BUNDLE_ID='org.appium.WebDriverAgentRunner.xctrunner'
-  launch_app "${INSTANCE_ID}" "{APPIUM_RUNNER_IOS_BUNDLE_ID}"
+  launch_app "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_BUNDLE_ID}"
 }
 
 is_app_running()

@@ -184,7 +184,7 @@ run_matrix_cafe_checks()
   assessment_id="$(corellium matrix create-assessment --instance "${instance_id}" --bundle com.corellium.Cafe | jq -r '.id')"
   if [ -z "${assessment_id}" ]; then
     echo "Failed to create assessment" >&2
-    exit 1
+    return 1
   fi
   log_stdout "Created MATRIX assessment ${assessment_id}."
 
@@ -196,7 +196,8 @@ run_matrix_cafe_checks()
   wait_for_assessment_status \
     "${instance_id}" \
     "${assessment_id}" \
-    "${MATRIX_STATUS_MONITORING}"
+    "${MATRIX_STATUS_MONITORING}" ||
+    return 1
   log_stdout "MATRIX assessment ${assessment_id} is ${MATRIX_STATUS_MONITORING}."
 
   sleep 60
@@ -209,7 +210,8 @@ run_matrix_cafe_checks()
   wait_for_assessment_status \
     "${instance_id}" \
     "${assessment_id}" \
-    "${MATRIX_STATUS_READY_FOR_TESTING}"
+    "${MATRIX_STATUS_READY_FOR_TESTING}" ||
+    return 1
   log_stdout "MATRIX assessment ${assessment_id} is ${MATRIX_STATUS_READY_FOR_TESTING}."
 
   log_stdout "Running test for MATRIX assessment ${assessment_id}."
@@ -220,7 +222,8 @@ run_matrix_cafe_checks()
   wait_for_assessment_status \
     "${instance_id}" \
     "${assessment_id}" \
-    "${MATRIX_STATUS_COMPLETED_TESTING}"
+    "${MATRIX_STATUS_COMPLETED_TESTING}" ||
+    return 1
   log_stdout "MATRIX assessment ${assessment_id} is ${MATRIX_STATUS_COMPLETED_TESTING}."
 
   kill_corellium_cafe_ios "${instance_id}"
@@ -342,11 +345,11 @@ wait_for_assessment_status()
     case "${current_assessment_status}" in
       'failed')
         echo "Detected a failed run. Last state was '${last_assessment_status}'. Exiting." >&2
-        exit 1
+        return 1
         ;;
       'monitoring')
         echo 'Cannot wait when status is monitoring. Exiting.' >&2
-        exit 1
+        return 1
         ;;
       'testing')
         sleep_time="${SLEEP_TIME_FOR_TESTING}"

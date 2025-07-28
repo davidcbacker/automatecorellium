@@ -42,29 +42,34 @@ jobs:
           corellium login \
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
-      - name: Install USBFlux dependency
-        run: |
-          set -e
-          source ./src/functions.sh
-          install_usbfluxd_and_dependencies
-      - name: Install Appium and dependencies
-        run: |
-          npm install --location=global appium
-          appium driver install xcuitest
-          python3 -m pip install -U pymobiledevice3
-          #sudo apt-get -qq install -y libusb
-          pymobiledevice3 mounter auto-mount
-      - name: Start instance and wait until ready
+      - name: Start instance
         timeout-minutes: 20
         run: |
           set -e
           source ./src/functions.sh
           start_instance "${{ env.MATRIX_INSTANCE_ID }}"
-          wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
+      - name: Install USBFlux dependency
+        run: |
+          set -e
+          source ./src/functions.sh
+          install_usbfluxd_and_dependencies
       - name: Install VPN client
         run: |
           sudo apt-get -qq update
           sudo apt-get -qq install -y openvpn
+      - name: Install Appium and dependencies
+        run: |
+          npm install --location=global appium
+          appium driver install xcuitest
+          python3 -m pip install -U pymobiledevice3
+          sudo apt-get -qq install -y libusb-dev
+          #
+      - name: Wait for instance to boot
+        timeout-minutes: 20
+        run: |
+          set -e
+          source ./src/functions.sh
+          wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Connect to project VPN
         timeout-minutes: 1
         run: |
@@ -77,16 +82,7 @@ jobs:
           matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
           until ping -c1 "${matrix_instance_vpn_ip}"; do sleep 1; done
           until ping -c1 "${matrix_instance_services_ip}"; do sleep 1; done
-      - name: Test Appium comms
-        env:
-          APPIUM_DEFUALT_PORT: 8100
-        timeout-minutes: 1
-        run: |
-          source ./src/functions.sh
-          matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
-          readonly APPIUM_TEST_URL="${matrix_instance_services_ip}:${APPIUM_DEFUALT_PORT}/status"
-          until curl "${APPIUM_TEST_URL}"; do sleep 1; done
-      - name: Start USBFlux and connect
+      - name: Connect to device over USB
         timeout-minutes: 1
         run: |
           set -e
@@ -98,6 +94,18 @@ jobs:
         run: |
           until idevice_id --list; do sleep 1; done
           idevicepair pair
+      - name: Mount the device's Developer Disk Image
+        run: |
+          pymobiledevice3 mounter auto-mount
+      - name: Test Appium comms
+        env:
+          APPIUM_DEFUALT_PORT: 8100
+        timeout-minutes: 1
+        run: |
+          source ./src/functions.sh
+          matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
+          readonly APPIUM_TEST_URL="${matrix_instance_services_ip}:${APPIUM_DEFUALT_PORT}/status"
+          until curl "${APPIUM_TEST_URL}"; do sleep 1; done
       - name: Install Corellium Cafe from URL
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
@@ -120,6 +128,10 @@ jobs:
               break
             else
               echo "[!] Warning - MATRIX failed on run $((failures + 1))"
+              if [ "${failures}" = "${MAX_MATRIX_RUN_RETRIES}" ]; then
+                echo "[!] Error - MATRIX failed the max $((failures + 1)) times" >&2 &&
+                exit 1
+              fi
             fi
           done
       - name: Clean up VPN connection

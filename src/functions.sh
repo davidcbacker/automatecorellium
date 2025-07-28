@@ -191,13 +191,6 @@ launch_app()
   fi
 }
 
-launch_corellium_cafe_ios()
-{
-  local INSTANCE_ID="$1"
-  local CAFE_IOS_BUNDLE_ID='com.corellium.Cafe'
-  launch_app "${INSTANCE_ID}" "{CAFE_IOS_BUNDLE_ID}"
-}
-
 launch_appium_runner_ios()
 {
   local INSTANCE_ID="$1"

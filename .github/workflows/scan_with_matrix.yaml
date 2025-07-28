@@ -42,18 +42,17 @@ jobs:
           corellium login \
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
-      - name: Install USBFlux dependency
-        run: |
-          set -e
-          source ./src/functions.sh
-          install_usbfluxd_and_dependencies
-      - name: Start instance and wait until ready
+      - name: Start instance
         timeout-minutes: 20
         run: |
           set -e
           source ./src/functions.sh
           start_instance "${{ env.MATRIX_INSTANCE_ID }}"
-          wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
+      - name: Install USBFlux dependency
+        run: |
+          set -e
+          source ./src/functions.sh
+          install_usbfluxd_and_dependencies
       - name: Install VPN client
         run: |
           sudo apt-get -qq update
@@ -70,16 +69,18 @@ jobs:
           matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
           until ping -c1 "${matrix_instance_vpn_ip}"; do sleep 1; done
           until ping -c1 "${matrix_instance_services_ip}"; do sleep 1; done
-      - name: Start USBFlux and connect
+      - name: Wait for instance to boot
+        run: |
+          set -e
+          source ./src/functions.sh
+          wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
+      - name: Connect to device over USB
         timeout-minutes: 1
         run: |
           set -e
           source ./src/functions.sh
           run_usbfluxd_and_dependencies
           add_instance_to_usbfluxd "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Verify USB connection and pair
-        timeout-minutes: 1
-        run: |
           until idevice_id --list; do sleep 1; done
           idevicepair pair
       - name: Install Corellium Cafe from URL

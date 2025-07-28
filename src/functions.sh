@@ -326,7 +326,7 @@ wait_for_assessment_status()
   local INSTANCE_ID="$1"
   local ASSESSMENT_ID="$2"
   local TARGET_ASSESSMENT_STATUS="$3"
-  local SLEEP_TIME_DEFAULT='2'
+  local SLEEP_TIME_DEFAULT='5'
   local SLEEP_TIME_FOR_TESTING='60'
 
   case "${TARGET_ASSESSMENT_STATUS}" in

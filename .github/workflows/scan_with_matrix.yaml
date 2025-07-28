@@ -104,6 +104,9 @@ jobs:
               break
             else
               echo "[!] Warning - MATRIX failed on run $((failures + 1))"
+              [ "${failures}" = "${MAX_MATRIX_RUN_RETRIES}" ] &&
+                echo "[!] Error - MATRIX failed the max $((failures + 1)) times" >&2
+                exit 1
             fi
           done
       - name: Clean up VPN connection

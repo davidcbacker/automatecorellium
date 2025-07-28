@@ -95,16 +95,19 @@ jobs:
           until idevice_id --list; do sleep 1; done
           idevicepair pair
       - name: Mount the device's Developer Disk Image
+        run: pymobiledevice3 mounter auto-mount
+      - name: Launch Appium runner app
+        timeout-minutes: 1
         run: |
-          pymobiledevice3 mounter auto-mount
+          source ./src/functions.sh
+          unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          launch_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Test Appium comms
         env:
           APPIUM_DEFUALT_PORT: 8100
         timeout-minutes: 1
         run: |
           source ./src/functions.sh
-          unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
-          launch_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"
           matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
           readonly APPIUM_TEST_URL="http://${matrix_instance_services_ip}:${APPIUM_DEFUALT_PORT}/status"
           until curl "${APPIUM_TEST_URL}"; do sleep 1; done

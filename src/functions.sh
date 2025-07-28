@@ -169,7 +169,7 @@ install_appium_runner_ios()
   local APPIUM_RUNNER_IOS_URL="https://www.corellium.com/hubfs/Blog%20Attachments/WebDriverAgentRunner-Runner.ipa"
   local APPIUM_RUNNER_IOS_BUNDLE_ID='org.appium.WebDriverAgentRunner.xctrunner'
   local APPIUM_RUNNER_IOS_FILENAME
-  APPIUM_RUNNER_IOS_FILENAME="$(basename APPIUM_RUNNER_IOS_URL)"
+  APPIUM_RUNNER_IOS_FILENAME="$(basename "${APPIUM_RUNNER_IOS_URL}")"
 
   kill_app "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_BUNDLE_ID}"
   install_app_from_url "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_URL}"

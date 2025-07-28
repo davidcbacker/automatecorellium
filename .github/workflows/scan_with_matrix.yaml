@@ -57,6 +57,11 @@ jobs:
         run: |
           sudo apt-get -qq update
           sudo apt-get -qq install -y openvpn
+      - name: Wait for instance to boot
+        run: |
+          set -e
+          source ./src/functions.sh
+          wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Connect to project VPN
         timeout-minutes: 1
         run: |
@@ -69,11 +74,6 @@ jobs:
           matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
           until ping -c1 "${matrix_instance_vpn_ip}"; do sleep 1; done
           until ping -c1 "${matrix_instance_services_ip}"; do sleep 1; done
-      - name: Wait for instance to boot
-        run: |
-          set -e
-          source ./src/functions.sh
-          wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Connect to device over USB
         timeout-minutes: 1
         run: |

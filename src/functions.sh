@@ -155,7 +155,7 @@ install_corellium_cafe_ios()
   local INSTANCE_ID="$1"
   local CORELLIUM_CAFE_IOS_URL="https://www.corellium.com/hubfs/Corellium_Cafe.ipa"
   local CORELLIUM_CAFE_BUNDLE_ID='com.corellium.Cafe'
-  local CORELLIUM_CAFE_FILENAME
+  local CORELLIUM_CAFE_IOS_FILENAME
   CORELLIUM_CAFE_IOS_FILENAME="$(basename CORELLIUM_CAFE_IOS_URL)"
 
   kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_BUNDLE_ID}"

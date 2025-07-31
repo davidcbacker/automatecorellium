@@ -45,13 +45,11 @@ jobs:
       - name: Start instance
         timeout-minutes: 1
         run: |
-          set -e
-          source ./src/functions.sh
+          set -eu && source ./src/functions.sh
           start_instance "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Install USBFlux dependency
         run: |
-          set -e
-          source ./src/functions.sh
+          set -eu && source ./src/functions.sh
           install_usbfluxd_and_dependencies
       - name: Install VPN client
         run: |
@@ -67,14 +65,12 @@ jobs:
       - name: Wait for instance to boot
         timeout-minutes: 20
         run: |
-          set -e
-          source ./src/functions.sh
+          set -eu && source ./src/functions.sh
           wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Connect to project VPN
         timeout-minutes: 1
         run: |
-          set -e
-          source ./src/functions.sh
+          set -eu && source ./src/functions.sh
           save_vpn_config_to_local_path "${{ env.MATRIX_INSTANCE_ID }}" "${{ env.VPN_CONFIG_PATH }}"
           sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" &
           until ip addr show tap0 > /dev/null 2>&1; do sleep 1; done
@@ -85,8 +81,7 @@ jobs:
       - name: Connect to device over USB
         timeout-minutes: 1
         run: |
-          set -e
-          source ./src/functions.sh
+          set -eu && source ./src/functions.sh
           run_usbfluxd_and_dependencies
           add_instance_to_usbfluxd "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Verify USB connection and pair
@@ -99,7 +94,7 @@ jobs:
       - name: Launch Appium runner app
         timeout-minutes: 1
         run: |
-          source ./src/functions.sh
+          set -eu && source ./src/functions.sh
           unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
           launch_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Test Appium runner comms
@@ -107,7 +102,7 @@ jobs:
           APPIUM_DEFUALT_PORT: 8100
         timeout-minutes: 5
         run: |
-          source ./src/functions.sh
+          set -eu && source ./src/functions.sh
           matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
           readonly APPIUM_TEST_URL="http://${matrix_instance_services_ip}:${APPIUM_DEFUALT_PORT}/status"
           until curl "${APPIUM_TEST_URL}"; do sleep 1; done
@@ -116,8 +111,7 @@ jobs:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
-          set -e
-          source ./src/functions.sh
+          set -eu && source ./src/functions.sh
           install_corellium_cafe_ios "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Run Corellium Cafe MATRIX assessment
         timeout-minutes: 40
@@ -126,8 +120,7 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
           MAX_MATRIX_RUN_RETRIES: 2
         run: |
-          set -e
-          source ./src/functions.sh
+          set -eu && source ./src/functions.sh
           for ((failures=0; failures<=MAX_MATRIX_RUN_RETRIES; failures++)); do
             if run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
               break
@@ -151,8 +144,7 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
           MATRIX_INSATNCE_ID: ${{ env.MATRIX_INSTANCE_ID }}
         run: |
-          set -e
-          source ./src/functions.sh
+          set -eu && source ./src/functions.sh
           npm install @corellium/corellium-api
           node ./src/zip_matrix_artifacts.js
           download_file_to_local_path \
@@ -166,8 +158,7 @@ jobs:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
-          set -e
-          source ./src/functions.sh
+          set -eu && source ./src/functions.sh
           stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Upload MATRIX runtime artifacts
         uses: actions/upload-artifact@v4

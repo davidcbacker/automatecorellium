@@ -122,7 +122,7 @@ jobs:
                   "${curl_attempt}"
                 break 2
               fi
-              sleep 0.1
+              sleep 0.3
             done
           done
           if [ "${appium_runner_success}" != 'true' ]; then

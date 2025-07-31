@@ -108,7 +108,7 @@ jobs:
           unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
           matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
           readonly APPIUM_TEST_URL="http://${matrix_instance_services_ip}:${APPIUM_DEFUALT_PORT}/status"
-          success='false'
+          appium_runner_success='false'
           for launch_attempt in $(seq 1 "${APPIUM_RUNNER_LAUNCH_RETRIES}"); do
             if ! launch_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"; then
               echo "Failed to launch app during attempt ${launch_attempt}"
@@ -116,13 +116,13 @@ jobs:
             fi
             for curl_attempt in $(seq 1 "${APPIUM_RUNNER_CURL_RETRIES}"); do
               if curl "${APPIUM_TEST_URL}"; then
-                success='true'
+                appium_runner_success='true'
                 break 2
               fi
-              sleep 1
+              sleep 0.1
             done
           done
-          if [ "${success}" != 'true' ]; then
+          if [ "${appium_runner_success}" != 'true' ]; then
             echo 'FAILED TO ESTABLISH APPIUM COMMS' >&2
             exit 1
           fi

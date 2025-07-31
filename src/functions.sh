@@ -286,7 +286,7 @@ delete_unauthorized_devices()
 {
   local authorized_instances=()
   while IFS= read -r line; do
-    authorized_instances+=("$(printf "${line}" | tr -d '\r\n')")
+    authorized_instances+=("$(echo "${line}" | tr -d '\r\n')")
   done <<< "${AUTHORIZED_INSTANCES}"
 
   local corellium_devices
@@ -313,7 +313,7 @@ start_demo_instances()
 {
   local start_instances=()
   while IFS= read -r line; do
-    start_instances+=("$(printf "${line}" | tr -d '\r\n')")
+    start_instances+=("$(echo "${line}" | tr -d '\r\n')")
   done <<< "${START_INSTANCES}"
 
   for instance in "${start_instances[@]}"; do
@@ -326,7 +326,7 @@ stop_demo_instances()
 {
   local stop_instances=()
   while IFS= read -r line; do
-    stop_instances+=("$(printf "${line}" | tr -d '\r\n')")
+    stop_instances+=("$(echo "${line}" | tr -d '\r\n')")
   done <<< "${STOP_INSTANCES}"
 
   for instance in "${stop_instances[@]}"; do

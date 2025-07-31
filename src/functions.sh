@@ -160,7 +160,7 @@ install_corellium_cafe_ios()
 
   kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_BUNDLE_ID}"
   install_app_from_url "${INSTANCE_ID}" "${CORELLIUM_CAFE_IOS_URL}"
-  echo "Successfully installed ${CORELLIUM_CAFE_IOS_FILENAME}"
+  log_stdout "Successfully installed ${CORELLIUM_CAFE_IOS_FILENAME}"
 }
 
 install_appium_runner_ios()
@@ -173,7 +173,7 @@ install_appium_runner_ios()
 
   kill_app "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_BUNDLE_ID}"
   install_app_from_url "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_URL}"
-  echo "Successfully installed ${APPIUM_RUNNER_IOS_FILENAME}"
+  log_stdout "Successfully installed ${APPIUM_RUNNER_IOS_FILENAME}"
 }
 
 launch_app()
@@ -196,6 +196,7 @@ launch_appium_runner_ios()
   local INSTANCE_ID="$1"
   local APPIUM_RUNNER_IOS_BUNDLE_ID='org.appium.WebDriverAgentRunner.xctrunner'
   launch_app "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_BUNDLE_ID}"
+  log_stdout "Successfully launched ${APPIUM_RUNNER_IOS_BUNDLE_ID}"
 }
 
 unlock_instance()
@@ -316,7 +317,7 @@ start_demo_instances()
   done <<< "${START_INSTANCES}"
 
   for instance in "${start_instances[@]}"; do
-    echo "Starting instance ${instance}"
+    log_stdout "Starting instance ${instance}"
     corellium instance start "${instance}" --wait || true
   done
 }

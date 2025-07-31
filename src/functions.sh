@@ -181,7 +181,7 @@ launch_app()
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID="$2"
   local PROJECT_ID
-  PROJECT_ID="$(get_project_from_instance_id "${instance_id}")"
+  PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   if ! corellium apps open \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \

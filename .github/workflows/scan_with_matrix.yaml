@@ -117,6 +117,7 @@ jobs:
             for curl_attempt in $(seq 1 "${APPIUM_RUNNER_CURL_RETRIES}"); do
               if curl "${APPIUM_TEST_URL}"; then
                 appium_runner_success='true'
+                printf 'Appium runner comms succeeded on attempt %s' "${curl_attempt}"
                 break 2
               fi
               sleep 0.1

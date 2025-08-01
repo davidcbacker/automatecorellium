@@ -97,15 +97,38 @@ jobs:
           set -eu && source ./src/functions.sh
           unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
           launch_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Test Appium runner comms
+      - name: Establish Appium runner comms
         env:
           APPIUM_DEFUALT_PORT: 8100
+          APPIUM_RUNNER_LAUNCH_RETRIES: 5
+          APPIUM_RUNNER_CURL_RETRIES: 60
         timeout-minutes: 5
         run: |
           set -eu && source ./src/functions.sh
+          unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
           matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
           readonly APPIUM_TEST_URL="http://${matrix_instance_services_ip}:${APPIUM_DEFUALT_PORT}/status"
-          until curl "${APPIUM_TEST_URL}"; do sleep 1; done
+          appium_runner_success='false'
+          for launch_attempt in $(seq 1 "${APPIUM_RUNNER_LAUNCH_RETRIES}"); do
+            if ! launch_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"; then
+              echo "Failed to launch app during attempt ${launch_attempt}"
+              continue
+            fi
+            for curl_attempt in $(seq 1 "${APPIUM_RUNNER_CURL_RETRIES}"); do
+              if curl --silent "${APPIUM_TEST_URL}" 2>/dev/null; then
+                appium_runner_success='true'
+                printf 'Appium runner comms succeeded on launch %s and curl attempt %s' \
+                  "${launch_attempt}" \
+                  "${curl_attempt}"
+                break 2
+              fi
+              sleep 0.3
+            done
+          done
+          if [ "${appium_runner_success}" != 'true' ]; then
+            echo 'FAILED TO ESTABLISH APPIUM COMMS' >&2
+            exit 1
+          fi
       - name: Install Corellium Cafe from URL
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}

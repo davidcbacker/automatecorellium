@@ -97,7 +97,7 @@ jobs:
           set -eu && source ./src/functions.sh
           unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
           launch_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Establish Appium runner comms
+      - name: install Appium runner and check connection
         env:
           APPIUM_DEFUALT_PORT: 8100
           APPIUM_RUNNER_LAUNCH_RETRIES: 5
@@ -106,6 +106,7 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          install_appium_runner_ios
           matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
           readonly APPIUM_TEST_URL="http://${matrix_instance_services_ip}:${APPIUM_DEFUALT_PORT}/status"
           appium_runner_success='false'

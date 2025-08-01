@@ -106,14 +106,19 @@ wait_until_agent_ready()
 kill_app()
 {
   check_env_vars
-  local instance_id="$1"
-  local app_bundle_id="$2"
-  if [ "$(is_app_running "${instance_id}" "${app_bundle_id}")" = 'true' ]; then
-    log_stdout "Killing running app ${app_bundle_id}"
-    curl -sX POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/app/apps/${app_bundle_id}/kill" \
+  local INSTANCE_ID="$1"
+  local APP_BUNDLE_ID="$2"
+  if [ "$(is_app_running "${INSTANCE_ID}" "${APP_BUNDLE_ID}")" = 'true' ]; then
+    log_stdout "Killing running app ${APP_BUNDLE_ID}"
+    if curl -sX POST \
+      "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/app/apps/${APP_BUNDLE_ID}/kill" \
       -H "Accept: application/json" \
-      -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
-    log_stdout "Killed running app ${app_bundle_id}"
+      -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"; then
+      log_stdout "Killed running app ${APP_BUNDLE_ID}"
+    else
+      echo "Error killing app ${APP_BUNDLE_ID}. Exiting." >&2
+      exit 1
+    fi
   fi
 }
 

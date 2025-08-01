@@ -109,17 +109,11 @@ kill_app()
   local instance_id="$1"
   local app_bundle_id="$2"
   if [ "$(is_app_running "${instance_id}" "${app_bundle_id}")" = 'true' ]; then
+    log_stdout "Killing running app ${app_bundle_id}"
     curl -sX POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/app/apps/${app_bundle_id}/kill" \
       -H "Accept: application/json" \
       -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
   fi
-}
-
-kill_corellium_cafe_ios()
-{
-  local instance_id="$1"
-  local app_bundle_id='com.corellium.Cafe'
-  kill_app "${instance_id}" "${app_bundle_id}"
 }
 
 get_project_from_instance_id()
@@ -141,10 +135,12 @@ install_app_from_url()
   log_stdout "Downloading ${APP_FILENAME}"
   wget --quiet "${app_url}"
   log_stdout "Installing ${APP_FILENAME}"
-  if ! corellium apps install \
+  if corellium apps install \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \
     --app "${APP_FILENAME}" > /dev/null; then
+    log_stout "Installed ${APP_FILENAME}"
+  else
     echo "Error installing app ${APP_FILENAME}. Exiting." >&2
     exit 1
   fi
@@ -155,12 +151,8 @@ install_corellium_cafe_ios()
   local INSTANCE_ID="$1"
   local CORELLIUM_CAFE_IOS_URL="https://www.corellium.com/hubfs/Corellium_Cafe.ipa"
   local CORELLIUM_CAFE_BUNDLE_ID='com.corellium.Cafe'
-  local CORELLIUM_CAFE_IOS_FILENAME
-  CORELLIUM_CAFE_IOS_FILENAME="$(basename "${CORELLIUM_CAFE_IOS_URL}")"
-
   kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_BUNDLE_ID}"
   install_app_from_url "${INSTANCE_ID}" "${CORELLIUM_CAFE_IOS_URL}"
-  log_stdout "Successfully installed ${CORELLIUM_CAFE_IOS_FILENAME}"
 }
 
 install_appium_runner_ios()
@@ -168,12 +160,8 @@ install_appium_runner_ios()
   local INSTANCE_ID="$1"
   local APPIUM_RUNNER_IOS_URL="https://www.corellium.com/hubfs/Blog%20Attachments/WebDriverAgentRunner-Runner.ipa"
   local APPIUM_RUNNER_IOS_BUNDLE_ID='org.appium.WebDriverAgentRunner.xctrunner'
-  local APPIUM_RUNNER_IOS_FILENAME
-  APPIUM_RUNNER_IOS_FILENAME="$(basename "${APPIUM_RUNNER_IOS_URL}")"
-
   kill_app "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_BUNDLE_ID}"
   install_app_from_url "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_URL}"
-  log_stdout "Successfully installed ${APPIUM_RUNNER_IOS_FILENAME}"
 }
 
 launch_app()
@@ -182,10 +170,13 @@ launch_app()
   local APP_BUNDLE_ID="$2"
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
-  if ! corellium apps open \
+  log_stdout "Launching app ${APP_BUNDLE_ID}"
+  if corellium apps open \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \
     --bundle "${APP_BUNDLE_ID}"; then
+    log_stdout "Launched app ${APP_BUNDLE_ID}"
+  else
     echo "Error launching app ${APP_BUNDLE_ID}. Exiting." >&2
     exit 1
   fi

@@ -176,7 +176,7 @@ launch_app()
   if corellium apps open \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \
-    --bundle "${APP_BUNDLE_ID}"; then
+    --bundle "${APP_BUNDLE_ID}" > /dev/null; then
     log_stdout "Launched app ${APP_BUNDLE_ID}"
   else
     echo "Error launching app ${APP_BUNDLE_ID}. Exiting." >&2

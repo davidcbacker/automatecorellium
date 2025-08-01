@@ -99,10 +99,11 @@ jobs:
           APPIUM_DEFUALT_PORT: 8100
           APPIUM_RUNNER_LAUNCH_RETRIES: 5
           APPIUM_RUNNER_CURL_RETRIES: 60
-        timeout-minutes: 5
+        timeout-minutes: 10
         run: |
           set -eu && source ./src/functions.sh
           unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          sleep 300
           install_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"
           matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
           readonly APPIUM_TEST_URL="http://${matrix_instance_services_ip}:${APPIUM_DEFUALT_PORT}/status"

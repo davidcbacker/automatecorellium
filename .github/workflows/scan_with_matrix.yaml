@@ -147,12 +147,11 @@ jobs:
           for ((failures=0; failures<=MAX_MATRIX_RUN_RETRIES; failures++)); do
             if run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
               break
-            else
+            elif [ "${failures}" -lt "${MAX_MATRIX_RUN_RETRIES}" ]; then
               echo "[!] Warning - MATRIX failed on run $((failures + 1))"
-              if [ "${failures}" = "${MAX_MATRIX_RUN_RETRIES}" ]; then
-                echo "[!] Error - MATRIX failed the max $((failures + 1)) times" >&2 &&
-                exit 1
-              fi
+            else
+              echo "[!] Error - MATRIX failed the max $((failures + 1)) times" >&2 &&
+              exit 1
             fi
           done
       - name: Clean up VPN connection

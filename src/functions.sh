@@ -140,7 +140,7 @@ install_app_from_url()
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \
     --app "${APP_FILENAME}" > /dev/null; then
-    log_stout "Installed ${APP_FILENAME}"
+    log_stdout "Installed ${APP_FILENAME}"
   else
     echo "Error installing app ${APP_FILENAME}. Exiting." >&2
     exit 1

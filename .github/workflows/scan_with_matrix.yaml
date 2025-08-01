@@ -101,6 +101,7 @@ jobs:
           APPIUM_RUNNER_CURL_RETRIES: 60
         timeout-minutes: 5
         run: |
+          set -x
           set -eu && source ./src/functions.sh
           unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
           install_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"

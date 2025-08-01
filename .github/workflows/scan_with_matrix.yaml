@@ -91,7 +91,6 @@ jobs:
           idevicepair pair
       - name: Mount the device's Developer Disk Image
         run: pymobiledevice3 mounter auto-mount
-
       - name: Install Appium runner and check connection
         env:
           APPIUM_DEFUALT_PORT: 8100

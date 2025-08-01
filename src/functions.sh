@@ -113,6 +113,7 @@ kill_app()
     curl -sX POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/agent/v1/app/apps/${app_bundle_id}/kill" \
       -H "Accept: application/json" \
       -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
+    log_stdout "Killed running app ${app_bundle_id}"
   fi
 }
 

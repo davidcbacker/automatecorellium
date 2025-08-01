@@ -91,12 +91,6 @@ jobs:
           idevicepair pair
       - name: Mount the device's Developer Disk Image
         run: pymobiledevice3 mounter auto-mount
-      - name: Launch Appium runner app
-        timeout-minutes: 1
-        run: |
-          set -eu && source ./src/functions.sh
-          unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
-          launch_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Establish Appium runner comms
         env:
           APPIUM_DEFUALT_PORT: 8100
@@ -147,10 +141,10 @@ jobs:
           for ((failures=0; failures<=MAX_MATRIX_RUN_RETRIES; failures++)); do
             if run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
               break
-            else
+            elif [ "${failures}" -lt "${MAX_MATRIX_RUN_RETRIES}" ]; then
               echo "[!] Warning - MATRIX failed on run $((failures + 1))"
-              if [ "${failures}" = "${MAX_MATRIX_RUN_RETRIES}" ]; then
-                echo "[!] Error - MATRIX failed the max $((failures + 1)) times" >&2 &&
+             else 
+                echo "[!] Error - MATRIX failed the max $((failures + 1)) times" >&2
                 exit 1
               fi
             fi

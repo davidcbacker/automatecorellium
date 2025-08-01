@@ -117,6 +117,13 @@ kill_app()
   fi
 }
 
+kill_corellium_cafe_ios()
+{
+  local INSTANCE_ID="$1"
+  local CORELLIUM_CAFE_BUNDLE_ID='com.corellium.Cafe'
+  kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_BUNDLE_ID}"
+}
+
 get_project_from_instance_id()
 {
   local instance_id="$1"
@@ -199,13 +206,12 @@ unlock_instance()
 
 is_app_running()
 {
-  local instance_id="$1"
-  local app_bundle_id="$2"
+  local INSTANCE_ID="$1"
+  local APP_BUNDLE_ID="$2"
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${instance_id}")"
-
-  corellium apps --project "${PROJECT_ID}" --instance "${instance_id}" |
-    jq -r --arg id "${app_bundle_id}" '.[] | select(.bundleID == $id) | .running'
+  corellium apps --project "${PROJECT_ID}" --instance "${INSTANCE_ID}" |
+    jq -r --arg id "${APP_BUNDLE_ID}" '.[] | select(.bundleID == $id) | .running'
 }
 
 run_matrix_cafe_checks()

@@ -171,6 +171,7 @@ launch_app()
   local APP_BUNDLE_ID="$2"
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
+  kill_app "${APP_BUNDLE_ID}"
   log_stdout "Launching app ${APP_BUNDLE_ID}"
   if corellium apps open \
     --instance "${INSTANCE_ID}" \

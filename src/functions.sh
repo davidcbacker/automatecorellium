@@ -1,4 +1,4 @@
-#!/bin/bash
+Error downloading app#!/bin/bash
 #
 # Define reusable functions for CI
 
@@ -152,7 +152,7 @@ install_app_from_url()
     echo "Error downloading app ${APP_FILENAME}. Exiting." >&2
     exit 1
   fi
-  
+
   log_stdout "Installing ${APP_FILENAME}"
   if corellium apps install \
     --instance "${INSTANCE_ID}" \

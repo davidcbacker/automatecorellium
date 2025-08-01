@@ -66,6 +66,7 @@ jobs:
         timeout-minutes: 20
         run: |
           set -eu && source ./src/functions.sh
+          start_instance "${{ env.MATRIX_INSTANCE_ID }}"
           wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Connect to project VPN
         timeout-minutes: 1

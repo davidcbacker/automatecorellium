@@ -131,22 +131,28 @@ kill_corellium_cafe_ios()
 
 get_project_from_instance_id()
 {
-  local instance_id="$1"
-  corellium instance get --instance "${instance_id}" | jq -r '.project'
+  local INSTANCE_ID="$1"
+  corellium instance get --instance "${INSTANCE_ID}" | jq -r '.project'
 }
 
 install_app_from_url()
 {
   local INSTANCE_ID="$1"
-  local app_url="$2"
+  local APP_URL="$2"
 
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   local APP_FILENAME
-  APP_FILENAME="$(basename "${app_url}")"
+  APP_FILENAME="$(basename "${APP_URL}")"
 
   log_stdout "Downloading ${APP_FILENAME}"
-  wget --quiet "${app_url}"
+  if wget --quiet "${APP_URL}"; then
+    log_stdout "Downloaded ${APP_FILENAME}"
+  else
+    echo "Error downloading app ${APP_FILENAME}. Exiting." >&2
+    exit 1
+  fi
+  
   log_stdout "Installing ${APP_FILENAME}"
   if corellium apps install \
     --instance "${INSTANCE_ID}" \
@@ -214,7 +220,7 @@ is_app_running()
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID="$2"
   local PROJECT_ID
-  PROJECT_ID="$(get_project_from_instance_id "${instance_id}")"
+  PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   corellium apps --project "${PROJECT_ID}" --instance "${INSTANCE_ID}" |
     jq -r --arg id "${APP_BUNDLE_ID}" '.[] | select(.bundleID == $id) | .running'
 }

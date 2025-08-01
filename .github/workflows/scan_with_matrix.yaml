@@ -177,6 +177,7 @@ jobs:
           ls -la "${RUNNER_ARTIFACTS_PATH}"
           sha256sum "${RUNNER_ARTIFACTS_PATH}"
       - name: Stop instance
+        if: always()
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}

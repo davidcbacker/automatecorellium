@@ -1,4 +1,4 @@
-Error downloading app#!/bin/bash
+#!/bin/bash
 #
 # Define reusable functions for CI
 

@@ -90,8 +90,9 @@ jobs:
         run: |
           until idevice_id --list; do sleep 1; done
           idevicepair pair
-      - name: Mount the device's Developer Disk Image
-        run: pymobiledevice3 mounter auto-mount
+      #TODO: Uncomment after Appium Runner is stable to reduce rate limiting failures
+      # - name: Mount the device's Developer Disk Image
+      #   run: pymobiledevice3 mounter auto-mount
       - name: Install Appium runner and check connection
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}

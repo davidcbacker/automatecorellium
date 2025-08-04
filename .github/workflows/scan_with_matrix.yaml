@@ -93,6 +93,7 @@ jobs:
       - name: Mount the device's Developer Disk Image
         run: pymobiledevice3 mounter auto-mount
       - name: Install Appium runner and check connection
+        continue-on-error: true
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}

@@ -28,6 +28,6 @@ jobs:
         env:
           STOP_INSTANCES: ${{ vars.STOP_INSTANCES }}
         run: |
-          source ./src/functions.sh
+          set -eu && source ./src/functions.sh
           stop_demo_instances
 

@@ -150,7 +150,7 @@ jobs:
               break
             elif [ "${failures}" -lt "${MAX_MATRIX_RUN_RETRIES}" ]; then
               echo "[!] Warning - MATRIX failed on run $((failures + 1))"
-            else 
+            else
               echo "[!] Error - MATRIX failed the max $((failures + 1)) times" >&2
               exit 1
             fi

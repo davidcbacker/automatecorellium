@@ -66,6 +66,7 @@ jobs:
         timeout-minutes: 20
         run: |
           set -eu && source ./src/functions.sh
+          start_instance "${{ env.MATRIX_INSTANCE_ID }}"
           wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Connect to project VPN
         timeout-minutes: 1
@@ -89,23 +90,23 @@ jobs:
         run: |
           until idevice_id --list; do sleep 1; done
           idevicepair pair
-      - name: Mount the device's Developer Disk Image
-        run: pymobiledevice3 mounter auto-mount
-      - name: Launch Appium runner app
-        timeout-minutes: 1
-        run: |
-          set -eu && source ./src/functions.sh
-          unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
-          launch_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Establish Appium runner comms
+      #TODO: Uncomment after Appium Runner is stable to reduce rate limiting failures
+      # - name: Mount the device's Developer Disk Image
+      #   run: pymobiledevice3 mounter auto-mount
+      - name: Install Appium runner and check connection
+        continue-on-error: true
         env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
           APPIUM_DEFUALT_PORT: 8100
           APPIUM_RUNNER_LAUNCH_RETRIES: 5
           APPIUM_RUNNER_CURL_RETRIES: 60
-        timeout-minutes: 5
+        timeout-minutes: 10
         run: |
           set -eu && source ./src/functions.sh
           unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          sleep 60
+          install_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"
           matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
           readonly APPIUM_TEST_URL="http://${matrix_instance_services_ip}:${APPIUM_DEFUALT_PORT}/status"
           appium_runner_success='false'
@@ -176,6 +177,7 @@ jobs:
           ls -la "${RUNNER_ARTIFACTS_PATH}"
           sha256sum "${RUNNER_ARTIFACTS_PATH}"
       - name: Stop instance
+        if: always()
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}

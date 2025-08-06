@@ -28,5 +28,5 @@ jobs:
         env:
           START_INSTANCES: ${{ vars.START_INSTANCES }}
         run: |
-          source ./src/functions.sh
+          set -eu && source ./src/functions.sh
           start_demo_instances

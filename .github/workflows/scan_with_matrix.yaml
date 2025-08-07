@@ -62,12 +62,13 @@ jobs:
           python3 -m pip install -U pymobiledevice3
           sudo apt-get -qq install -y libusb-dev
           #
-      - name: Wait for instance to boot
+      - name: Wait for instance to boot then unlock
         timeout-minutes: 20
         run: |
           set -eu && source ./src/functions.sh
           start_instance "${{ env.MATRIX_INSTANCE_ID }}"
           wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
+          unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Connect to project VPN
         timeout-minutes: 1
         run: |
@@ -104,8 +105,6 @@ jobs:
         timeout-minutes: 10
         run: |
           set -eu && source ./src/functions.sh
-          unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
-          sleep 60
           install_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"
           matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
           readonly APPIUM_TEST_URL="http://${matrix_instance_services_ip}:${APPIUM_DEFUALT_PORT}/status"

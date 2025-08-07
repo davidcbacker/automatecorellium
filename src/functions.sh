@@ -412,7 +412,7 @@ wait_for_assessment_status()
         ;;
     esac
 
-    log_stdout "Status is ${current_assessment_status} and target is ${TARGET_ASSESSMENT_STATUS}. Wait ${sleep_time} seconds."
+    log_stdout "Status is ${current_assessment_status} and target is ${TARGET_ASSESSMENT_STATUS}. Waiting ${sleep_time} seconds."
     sleep "${sleep_time}"
 
     last_assessment_status="${current_assessment_status}"

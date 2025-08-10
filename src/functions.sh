@@ -303,15 +303,18 @@ delete_unauthorized_devices()
   #shellcheck disable=SC2207
   corellium_devices=($(corellium list | jq -r '.[].id'))
 
+  local is_device_authorized
   for device in "${corellium_devices[@]}"; do
-    local is_authorized='false'
+    is_device_authorized='false'
+    log_stdout "Checking if ${device} is authorized."
     for authorized_device in "${authorized_instances[@]}"; do
       if [ "${device}" = "${authorized_device}" ]; then
-        is_authorized='true'
+        log_stdout "Device ${device} is authorized."
+        is_device_authorized='true'
         break
       fi
     done
-    if [ "${is_authorized}" = 'false' ]; then
+    if [ "${is_device_authorized}" != 'true' ]; then
       log_stdout "Deleting unauthorized instance ${device}"
       corellium instance delete "${device}" --wait
     fi

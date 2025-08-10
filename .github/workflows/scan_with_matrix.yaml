@@ -154,21 +154,24 @@ jobs:
               exit 1
             fi
           done
+      - name: Create MATRIX artifacts zip archive
+        run: |
+          set -eu && source ./src/functions.sh
+          npm install @corellium/corellium-api
+          node ./src/zip_matrix_artifacts.js
       - name: Clean up VPN connection
         if: always()
         run: |
             [ -f  "${{ env.VPN_CONFIG_PATH }}" ] &&
               rm "${{ env.VPN_CONFIG_PATH }}"
             sudo killall openvpn
-      - name: Download MATRIX artifacts from VM to runner
+      - name: Download MATRIX artifacts zip archive from VM
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
           MATRIX_INSATNCE_ID: ${{ env.MATRIX_INSTANCE_ID }}
         run: |
           set -eu && source ./src/functions.sh
-          npm install @corellium/corellium-api
-          node ./src/zip_matrix_artifacts.js
           download_file_to_local_path \
             "${{ env.MATRIX_INSTANCE_ID }}" \
             "${INSTANCE_ARTIFACTS_PATH}" \

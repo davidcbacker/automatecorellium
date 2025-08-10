@@ -429,9 +429,9 @@ install_openvpn_dependencies()
   sudo apt-get -qq install -y openvpn
 }
 
-install_usbfluxd_dependencies()
+install_usbfluxd_and_dependencies()
 {
-  local usbfluxd_apt_deps=(
+  local USBFLUXD_APT_DEPS=(
     avahi-daemon
     build-essential
     git
@@ -443,49 +443,63 @@ install_usbfluxd_dependencies()
     usbmuxd
   )
 
-  local usbfluxd_compile_dep_urls=(
+  local USBFLUXD_COMPILE_DEP_URLS=(
     'https://github.com/libimobiledevice/libplist'
     'https://github.com/corellium/usbfluxd'
   )
 
+  local USBFLUXD_EXPECTED_BINARIES=(
+    usbfluxd
+    usbfluxctl
+  )
+
   log_stdout 'Installing apt-get dependencies.'
   sudo apt-get -qq update
-  for dep in "${usbfluxd_apt_deps[@]}"; do
-    if sudo apt-get install -y "${dep}" > /dev/null; then
-      log_stdout "Installed ${dep}."
+  for APT_DEP in "${USBFLUXD_APT_DEPS[@]}"; do
+    if sudo apt-get install -y "${APT_DEP}" > /dev/null; then
+      log_stdout "Installed ${APT_DEP}."
     else
-      echo "Failed to install ${dep}." >&2
-      sudo apt-get -qq install -y "${dep}"
+      echo "Failed to install ${APT_DEP}." >&2
+      sudo apt-get -qq install -y "${APT_DEP}"
       exit 1
     fi
   done
   log_stdout 'Installed apt-get dependencies.'
 
-  local temp_compile_dir
-  temp_compile_dir="$(mktemp -d)"
-
-  cd "${temp_compile_dir}/" || exit 1
-  for compile_dep_url in "${usbfluxd_compile_dep_urls[@]}"; do
-    compile_dep_name="$(basename "${compile_dep_url}")"
-    log_stdout "Cloning ${compile_dep_name}."
-    git clone "${compile_dep_url}" "${compile_dep_name}"
-    cd "${temp_compile_dir}/${compile_dep_name}/" || exit 1
-    log_stdout "Generating Makefile for ${compile_dep_name}."
-    ./autogen.sh
-    log_stdout "Building ${compile_dep_name}."
-    make -j "$(nproc)"
-    log_stdout "Installing ${compile_dep_name}."
+  local COMPILE_TEMP_DIR
+  COMPILE_TEMP_DIR="$(mktemp -d)"
+  local COMPILE_DEP_NAME
+  cd "${COMPILE_TEMP_DIR}/"
+  for COMPILE_DEP_URL in "${USBFLUXD_COMPILE_DEP_URLS[@]}"; do
+    COMPILE_DEP_NAME="$(basename "${COMPILE_DEP_URL}")"
+    log_stdout "Cloning ${COMPILE_DEP_NAME}."
+    git clone "${COMPILE_DEP_URL}" "${COMPILE_DEP_NAME}"
+    cd "${COMPILE_TEMP_DIR}/${COMPILE_DEP_NAME}/" || exit 1
+    log_stdout "Generating Makefile for ${COMPILE_DEP_NAME}."
+    ./autogen.sh > /dev/null
+    log_stdout "Compiling ${COMPILE_DEP_NAME}."
+    make -j "$(nproc)" 2>/dev/null || make -j "$(nproc)"
+    log_stdout "Compiled ${COMPILE_DEP_NAME}."
+    log_stdout "Installing ${COMPILE_DEP_NAME}."
     sudo make install
-    cd ../
-    log_stdout "Deleting compile dir for ${compile_dep_name}."
-    rm -rf "${compile_dep_name:?}/"
+    log_stdout "Installed ${COMPILE_DEP_NAME}."
+    cd "${COMPILE_TEMP_DIR}/"
+    log_stdout "Deleting compile directory for ${COMPILE_DEP_NAME}."
+    rm -rf "${COMPILE_DEP_NAME:?}/"
+    log_stdout "Deleted compile directory for ${COMPILE_DEP_NAME}."
   done
 
-  command -v usbfluxd
-  command -v usbfluxctl
+  for EXPECTED_BINARY in "${USBFLUXD_EXPECTED_BINARIES[@]}"; do
+    if command -v "${EXPECTED_BINARY}" > /dev/null; then
+      log_stdout "Installed ${EXPECTED_BINARY} at $(command -v "${EXPECTED_BINARY}")."
+    else
+      echo "Error, failed to install ${EXPECTED_BINARY}."
+      exit 1
+    fi
+  done
 
-  cd "${HOME}/" || exit 1
-  rm -rf "${temp_compile_dir:?}/"
+  cd "${HOME}/"
+  rm -rf "${COMPILE_TEMP_DIR:?}/"
 }
 
 install_appium_server_dependencies()

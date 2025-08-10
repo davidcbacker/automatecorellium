@@ -173,6 +173,7 @@ jobs:
                 echo "[+] Killing ${PROCESS}"
                 sudo killall "${PROCESS}"
                 echo "[+] Killed ${PROCESS}"
+              fi
             done
       - name: Download MATRIX artifacts from VM to runner
         env:

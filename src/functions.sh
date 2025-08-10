@@ -18,7 +18,7 @@ log_stdout()
   local friendly_date
   friendly_date="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -eq 0 ]; then
-    printf '[!] %s ERROR: No argument supplied to log_info.\n' \
+    printf '[!] %s ERROR: No argument supplied to log_stdout.\n' \
       "${friendly_date}" \
       >&2
     exit 1
@@ -423,9 +423,15 @@ wait_for_assessment_status()
   done
 }
 
+install_openvpn_dependencies()
+{
+  sudo apt-get -qq update
+  sudo apt-get -qq install -y openvpn
+}
+
 install_usbfluxd_and_dependencies()
 {
-  local usbfluxd_apt_deps=(
+  local USBFLUXD_APT_DEPS=(
     avahi-daemon
     build-essential
     git
@@ -437,49 +443,94 @@ install_usbfluxd_and_dependencies()
     usbmuxd
   )
 
-  local usbfluxd_compile_dep_urls=(
+  local USBFLUXD_COMPILE_DEP_URLS=(
     'https://github.com/libimobiledevice/libplist'
     'https://github.com/corellium/usbfluxd'
   )
 
+  local USBFLUXD_EXPECTED_BINARIES=(
+    usbfluxd
+    usbfluxctl
+  )
+
   log_stdout 'Installing apt-get dependencies.'
   sudo apt-get -qq update
-  for dep in "${usbfluxd_apt_deps[@]}"; do
-    if sudo apt-get install -y "${dep}" > /dev/null; then
-      log_stdout "Installed ${dep}."
+  for APT_DEP in "${USBFLUXD_APT_DEPS[@]}"; do
+    if sudo apt-get install -y "${APT_DEP}" > /dev/null; then
+      log_stdout "Installed ${APT_DEP}."
     else
-      echo "Failed to install ${dep}." >&2
-      sudo apt-get -qq install -y "${dep}"
+      echo "Failed to install ${APT_DEP}." >&2
+      sudo apt-get -qq install -y "${APT_DEP}"
       exit 1
     fi
   done
   log_stdout 'Installed apt-get dependencies.'
 
-  local temp_compile_dir
-  temp_compile_dir="$(mktemp -d)"
-
-  cd "${temp_compile_dir}/" || exit 1
-  for compile_dep_url in "${usbfluxd_compile_dep_urls[@]}"; do
-    compile_dep_name="$(basename "${compile_dep_url}")"
-    log_stdout "Cloning ${compile_dep_name}."
-    git clone "${compile_dep_url}" "${compile_dep_name}"
-    cd "${temp_compile_dir}/${compile_dep_name}/" || exit 1
-    log_stdout "Generating Makefile for ${compile_dep_name}."
-    ./autogen.sh
-    log_stdout "Building ${compile_dep_name}."
-    make -j "$(nproc)"
-    log_stdout "Installing ${compile_dep_name}."
-    sudo make install
-    cd ../
-    log_stdout "Deleting compile dir for ${compile_dep_name}."
-    rm -rf "${compile_dep_name:?}/"
+  local COMPILE_TEMP_DIR COMPILE_DEP_NAME
+  COMPILE_TEMP_DIR="$(mktemp -d)"
+  cd "${COMPILE_TEMP_DIR}/" || exit 1
+  for COMPILE_DEP_URL in "${USBFLUXD_COMPILE_DEP_URLS[@]}"; do
+    COMPILE_DEP_NAME="$(basename "${COMPILE_DEP_URL}")"
+    log_stdout "Cloning ${COMPILE_DEP_NAME}."
+    git clone "${COMPILE_DEP_URL}" "${COMPILE_DEP_NAME}"
+    cd "${COMPILE_TEMP_DIR}/${COMPILE_DEP_NAME}/" || exit 1
+    log_stdout "Generating Makefile for ${COMPILE_DEP_NAME}."
+    ./autogen.sh > /dev/null 2>&1
+    log_stdout "Compiling ${COMPILE_DEP_NAME}."
+    make --jobs "$(nproc)" 2>&1 | grep 'Making all in ' || make --jobs "$(nproc)"
+    log_stdout "Installing ${COMPILE_DEP_NAME}."
+    sudo make install | grep '/usr/bin/install '
+    cd "${COMPILE_TEMP_DIR}/" || exit 1
+    log_stdout "Deleting build directory for ${COMPILE_DEP_NAME}."
+    rm -rf "${COMPILE_DEP_NAME:?}/"
+    log_stdout "Installed ${COMPILE_DEP_NAME} and cleaned up build directory."
   done
 
-  command -v usbfluxd
-  command -v usbfluxctl
+  for EXPECTED_BINARY in "${USBFLUXD_EXPECTED_BINARIES[@]}"; do
+    if command -v "${EXPECTED_BINARY}" > /dev/null; then
+      log_stdout "Installed ${EXPECTED_BINARY} at $(command -v "${EXPECTED_BINARY}")."
+    else
+      echo "Error, failed to install ${EXPECTED_BINARY}."
+      exit 1
+    fi
+  done
 
   cd "${HOME}/" || exit 1
-  rm -rf "${temp_compile_dir:?}/"
+  rm -rf "${COMPILE_TEMP_DIR:?}/"
+}
+
+install_appium_server_and_dependencies()
+{
+  sudo apt-get -qq update
+  sudo apt-get -qq install -y libusb-dev
+  npm install --location=global appium
+  appium driver install xcuitest
+  python3 -m pip install -U pymobiledevice3
+}
+
+connect_to_vpn_for_instance()
+{
+  # Run this function with a timeout like 1 minute
+  local INSTANCE_ID="$1"
+  local OVPN_CONFIG_PATH="$2"
+  local INSTANCE_SERVICES_IP
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+
+  if ! command -v openvpn; then
+    log_stdout 'Warning - openvpn not found. Attempting to install.'
+    install_openvpn_dependency
+  fi
+  save_vpn_config_to_local_path "${INSTANCE_ID}" "${OVPN_CONFIG_PATH}"
+  sudo openvpn --config "${OVPN_CONFIG_PATH}" &
+
+  # Wait for the tunnel to establish, find the VPN IPv4 address, and test the connection
+  until ip addr show tap0 > /dev/null 2>&1; do sleep 1; done
+  local INSTANCE_VPN_IP
+  INSTANCE_VPN_IP="$(ip addr show tap0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1)"
+  until ping -c1 "${INSTANCE_VPN_IP}"; do sleep 1; done
+  log_stdout 'Successfully pinged the project VPN IP.'
+  until ping -c1 "${INSTANCE_SERVICES_IP}"; do sleep 1; done
+  log_stdout 'Successfully pinged the instance services IP.'
 }
 
 run_usbfluxd_and_dependencies()

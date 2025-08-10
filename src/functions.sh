@@ -488,7 +488,7 @@ install_usbfluxd_dependencies()
   rm -rf "${temp_compile_dir:?}/"
 }
 
-install_appium_dependencies()
+install_appium_server_dependencies()
 {
 
 }

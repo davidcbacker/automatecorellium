@@ -423,7 +423,12 @@ wait_for_assessment_status()
   done
 }
 
-install_usbfluxd_and_dependencies()
+install_openvpn_dependencies()
+{
+
+}
+
+install_usbfluxd_dependencies()
 {
   local usbfluxd_apt_deps=(
     avahi-daemon
@@ -482,12 +487,32 @@ install_usbfluxd_and_dependencies()
   rm -rf "${temp_compile_dir:?}/"
 }
 
+install_appium_dependencies()
+{
+
+}
+
+connect_to_vpn_for_instance()
+{
+  local INSTANCE_ID="$1"
+  if ! command -v openvpn; then
+    log_stdout 'Warning - openvpn not found. Attempting to install.'
+    install_openvpn_dependency
+  fi
+  
+}
+
 run_usbfluxd_and_dependencies()
 {
   sudo systemctl start usbmuxd
   sudo systemctl status usbmuxd
   sudo avahi-daemon &
   sudo usbfluxd -f -n &
+}
+
+run_appium_server_and_dependencies()
+{
+
 }
 
 add_instance_to_usbfluxd()

@@ -544,11 +544,6 @@ run_usbfluxd_and_dependencies()
   sudo usbfluxd -f -n &
 }
 
-run_appium_server_and_dependencies()
-{
-
-}
-
 add_instance_to_usbfluxd()
 {
   local INSTANCE_ID="$1"

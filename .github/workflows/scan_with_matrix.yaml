@@ -76,7 +76,7 @@ jobs:
       - name: Verify USB connection and pair
         timeout-minutes: 1
         run: |
-          until idevice_id --list; do sleep 1; done
+          until idevice_id --list; do sleep 0.1; done
           idevicepair pair
       # - name: Mount the device's Developer Disk Image
       #TODO: Uncomment this step after Appium Runner is stable to reduce rate limiting failures
@@ -109,7 +109,7 @@ jobs:
                   "${curl_attempt}"
                 break 2
               fi
-              sleep 0.3
+              sleep 0.1
             done
           done
           if [ "${appium_runner_success}" != 'true' ]; then

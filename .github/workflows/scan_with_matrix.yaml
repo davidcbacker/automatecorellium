@@ -156,7 +156,7 @@ jobs:
               usbfluxd
             )
             for FILE_PATH in "${FILES_TO_DELETE[@]}"; do
-              if [ -f "${FILE_PATH}"; then\
+              if [ -f "${FILE_PATH}" ]; then
                 echo "[+] Deleting ${FILE_PATH}"
                 rm -f "${{ env.CORELLIUM_CLI_PROFILE }}"
               fi

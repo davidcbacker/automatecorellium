@@ -73,6 +73,9 @@ jobs:
           set -eu && source ./src/functions.sh
           run_usbfluxd_and_dependencies
           add_instance_to_usbfluxd "${{ env.MATRIX_INSTANCE_ID }}"
+      - name: Verify USB connection and pair
+        timeout-minutes: 1
+        run: |
           until idevice_id --list; do sleep 1; done
           idevicepair pair
       # - name: Mount the device's Developer Disk Image

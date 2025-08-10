@@ -531,7 +531,7 @@ connect_to_vpn_for_instance()
   local INSTANCE_VPN_IP
   INSTANCE_VPN_IP="$(ip addr show tap0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1)"
   until ping -c1 "${INSTANCE_VPN_IP}"; do sleep 1; done
-  log_stdout 'Successfully pinged the project's VPN IP.'
+  log_stdout 'Successfully pinged the project VPN IP.'
   until ping -c1 "${INSTANCE_SERVICES_IP}"; do sleep 1; done
   log_stdout 'Successfully pinged the instance services IP.'
 }

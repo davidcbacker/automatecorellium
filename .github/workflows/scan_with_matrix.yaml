@@ -57,11 +57,8 @@ jobs:
           install_openvpn_dependencies
       - name: Install Appium and dependencies
         run: |
-          npm install --location=global appium
-          appium driver install xcuitest
-          python3 -m pip install -U pymobiledevice3
-          sudo apt-get -qq install -y libusb-dev
-          #
+          set -eu && source ./src/functions.sh
+          install_appium_server_and_dependencies
       - name: Wait for instance to boot then unlock
         timeout-minutes: 20
         run: |

@@ -479,7 +479,7 @@ install_usbfluxd_and_dependencies()
     log_stdout "Compiling ${COMPILE_DEP_NAME}."
     make --jobs "$(nproc)" 2>&1 | grep 'Making all in ' || make --jobs "$(nproc)"
     log_stdout "Installing ${COMPILE_DEP_NAME}."
-    sudo make install
+    sudo make install | grep '/usr/bin/install '
     cd "${COMPILE_TEMP_DIR}/" || exit 1
     log_stdout "Deleting build directory for ${COMPILE_DEP_NAME}."
     rm -rf "${COMPILE_DEP_NAME:?}/"

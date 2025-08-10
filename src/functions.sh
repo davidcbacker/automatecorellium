@@ -475,18 +475,15 @@ install_usbfluxd_and_dependencies()
     git clone "${COMPILE_DEP_URL}" "${COMPILE_DEP_NAME}"
     cd "${COMPILE_TEMP_DIR}/${COMPILE_DEP_NAME}/" || exit 1
     log_stdout "Generating Makefile for ${COMPILE_DEP_NAME}."
-    ./autogen.sh > /dev/null
+    ./autogen.sh > /dev/null 2>&1
     log_stdout "Compiling ${COMPILE_DEP_NAME}."
-    make -j "$(nproc)" 2> /dev/null || make -j "$(nproc)"
-    log_stdout "Compiled ${COMPILE_DEP_NAME}."
+    make --jobs "$(nproc)" > /dev/null 2>&1 || make --jobs "$(nproc)"
     log_stdout "Installing ${COMPILE_DEP_NAME}."
     sudo make install
-    log_stdout "Installed ${COMPILE_DEP_NAME}."
-    #shellcheck disable=SC2164
     cd "${COMPILE_TEMP_DIR}/" || exit 1
-    log_stdout "Deleting compile directory for ${COMPILE_DEP_NAME}."
+    log_stdout "Deleting build directory for ${COMPILE_DEP_NAME}."
     rm -rf "${COMPILE_DEP_NAME:?}/"
-    log_stdout "Deleted compile directory for ${COMPILE_DEP_NAME}."
+    log_stdout "Installed ${COMPILE_DEP_NAME} and cleaned up build directory."
   done
 
   for EXPECTED_BINARY in "${USBFLUXD_EXPECTED_BINARIES[@]}"; do

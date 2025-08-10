@@ -490,7 +490,11 @@ install_usbfluxd_dependencies()
 
 install_appium_server_dependencies()
 {
-
+  sudo apt-get -qq update
+  sudo apt-get -qq install -y libusb-dev
+  npm install --location=global appium
+  appium driver install xcuitest
+  python3 -m pip install -U pymobiledevice3
 }
 
 connect_to_vpn_for_instance()
@@ -500,6 +504,7 @@ connect_to_vpn_for_instance()
     log_stdout 'Warning - openvpn not found. Attempting to install.'
     install_openvpn_dependency
   fi
+
   
 }
 

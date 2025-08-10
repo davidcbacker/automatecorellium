@@ -53,8 +53,8 @@ jobs:
           install_usbfluxd_and_dependencies
       - name: Install VPN client
         run: |
-          sudo apt-get -qq update
-          sudo apt-get -qq install -y openvpn
+          set -eu && source ./src/functions.sh
+          install_openvpn_dependencies
       - name: Install Appium and dependencies
         run: |
           npm install --location=global appium

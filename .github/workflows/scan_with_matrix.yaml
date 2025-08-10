@@ -15,7 +15,7 @@ concurrency:
 
 env:
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
-  RUNNER_ARTIFACTS_PATH: /home/runner/matrix_artifacts.zip
+  MATRIX_RUNNER_ARTIFACTS_PATH: /home/runner/matrix_artifacts.zip
   MATRIX_INSTANCE_ID: ${{ github.event_name == 'schedule' && vars.MATRIX_AUTOMATION_INSTANCE
                         || vars.MATRIX_DEVELOPMENT_INSTANCE }}
 
@@ -154,6 +154,9 @@ jobs:
             fi
           done
       - name: Create MATRIX artifacts zip archive
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
           npm install @corellium/corellium-api
@@ -174,9 +177,9 @@ jobs:
           download_file_to_local_path \
             "${{ env.MATRIX_INSTANCE_ID }}" \
             "${MATRIX_INSTANCE_ARTIFACTS_PATH}" \
-            "${RUNNER_ARTIFACTS_PATH}"
-          ls -la "${RUNNER_ARTIFACTS_PATH}"
-          sha256sum "${RUNNER_ARTIFACTS_PATH}"
+            "${MATRIX_RUNNER_ARTIFACTS_PATH}"
+          ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
+          sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
       - name: Stop instance
         if: always()
         env:
@@ -189,8 +192,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: matrix-runtime-artifacts
-          path: |
-            ${{ env.RUNNER_ARTIFACTS_PATH }}
+          path: ${{ env.MATRIX_RUNNER_ARTIFACTS_PATH }}
           compression-level: 9
           if-no-files-found: error
       - name: Upload MATRIX report artifacts

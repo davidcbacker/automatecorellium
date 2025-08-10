@@ -47,22 +47,13 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           start_instance "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Install USBFlux dependency
+      - name: Install OpenVPN, USBFlux, and Appium dependencies
         run: |
           set -eu && source ./src/functions.sh
+          install_openvpn_dependencies
           install_usbfluxd_and_dependencies
-      - name: Install VPN client
-        run: |
-          sudo apt-get -qq update
-          sudo apt-get -qq install -y openvpn
-      - name: Install Appium and dependencies
-        run: |
-          npm install --location=global appium
-          appium driver install xcuitest
-          python3 -m pip install -U pymobiledevice3
-          sudo apt-get -qq install -y libusb-dev
-          #
-      - name: Wait for instance to boot then unlock
+          install_appium_server_and_dependencies
+      - name: Unlock instance after successful boot
         timeout-minutes: 20
         run: |
           set -eu && source ./src/functions.sh
@@ -73,13 +64,9 @@ jobs:
         timeout-minutes: 1
         run: |
           set -eu && source ./src/functions.sh
-          save_vpn_config_to_local_path "${{ env.MATRIX_INSTANCE_ID }}" "${{ env.VPN_CONFIG_PATH }}"
-          sudo openvpn --config "${{ env.VPN_CONFIG_PATH }}" &
-          until ip addr show tap0 > /dev/null 2>&1; do sleep 1; done
-          matrix_instance_vpn_ip="$(ip addr show tap0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1)"
-          matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
-          until ping -c1 "${matrix_instance_vpn_ip}"; do sleep 1; done
-          until ping -c1 "${matrix_instance_services_ip}"; do sleep 1; done
+          connect_to_vpn_for_instance \
+            "${{ env.MATRIX_INSTANCE_ID }}" \
+            "${{ env.VPN_CONFIG_PATH }}"
       - name: Connect to device over USB
         timeout-minutes: 1
         run: |
@@ -91,8 +78,8 @@ jobs:
         run: |
           until idevice_id --list; do sleep 1; done
           idevicepair pair
-      #TODO: Uncomment after Appium Runner is stable to reduce rate limiting failures
       # - name: Mount the device's Developer Disk Image
+      #TODO: Uncomment this step after Appium Runner is stable to reduce rate limiting failures
       #   run: pymobiledevice3 mounter auto-mount
       - name: Install Appium runner and check connection
         continue-on-error: true

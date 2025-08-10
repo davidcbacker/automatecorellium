@@ -524,12 +524,12 @@ connect_to_vpn_for_instance()
   sudo openvpn --config "${OVPN_CONFIG_PATH}" &
 
   # Wait for the tunnel to establish, find the VPN IPv4 address, and test the connection
-  until ip addr show tap0 > /dev/null 2>&1; do sleep 1; done
+  until ip addr show tap0 > /dev/null 2>&1; do sleep 0.1; done
   local INSTANCE_VPN_IP
   INSTANCE_VPN_IP="$(ip addr show tap0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1)"
-  until ping -c1 "${INSTANCE_VPN_IP}"; do sleep 1; done
+  until ping -c1 "${INSTANCE_VPN_IP}"; do sleep 0.1; done
   log_stdout 'Successfully pinged the project VPN IP.'
-  until ping -c1 "${INSTANCE_SERVICES_IP}"; do sleep 1; done
+  until ping -c1 "${INSTANCE_SERVICES_IP}"; do sleep 0.1; done
   log_stdout 'Successfully pinged the instance services IP.'
 }
 

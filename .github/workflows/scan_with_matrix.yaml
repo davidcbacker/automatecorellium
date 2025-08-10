@@ -146,15 +146,21 @@ jobs:
         env:
           CORELLIUM_CLI_PROFILE: '/home/runner/.config/.corellium/profile.json'
         run: |
-            [ -f  "${{ env.CORELLIUM_CLI_PROFILE }}" ] &&
-              rm "${{ env.CORELLIUM_CLI_PROFILE }}"
-            [ -f  "${{ env.VPN_CONFIG_PATH }}" ] &&
-              rm "${{ env.VPN_CONFIG_PATH }}"
+            readonly FILES_TO_DELETE=(
+              "${{ env.CORELLIUM_CLI_PROFILE }}"
+              "${{ env.VPN_CONFIG_PATH }}"
+            )
             readonly PROCS_TO_KILL=(
               openvpn
               avahi-daemon
               usbfluxd
             )
+            for FILE_PATH in "${FILES_TO_DELETE[@]}"; do
+              if [ -f "${FILE_PATH}"; then\
+                echo "[+] Deleting ${FILE_PATH}"
+                rm -f "${{ env.CORELLIUM_CLI_PROFILE }}"
+              fi
+            done
             for PROCESS in "${PROCS_TO_KILL[@]}"; do
               if pgrep "${PROCESS}" > /dev/null 2>&1; then
                 echo "[+] Killing ${PROCESS}"

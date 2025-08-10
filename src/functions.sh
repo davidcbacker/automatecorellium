@@ -18,7 +18,7 @@ log_stdout()
   local friendly_date
   friendly_date="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -eq 0 ]; then
-    printf '[!] %s ERROR: No argument supplied to log_info.\n' \
+    printf '[!] %s ERROR: No argument supplied to log_stdout.\n' \
       "${friendly_date}" \
       >&2
     exit 1
@@ -466,10 +466,9 @@ install_usbfluxd_and_dependencies()
   done
   log_stdout 'Installed apt-get dependencies.'
 
-  local COMPILE_TEMP_DIR
+  local COMPILE_TEMP_DIR COMPILE_DEP_NAME
   COMPILE_TEMP_DIR="$(mktemp -d)"
-  local COMPILE_DEP_NAME
-  cd "${COMPILE_TEMP_DIR}/"
+  cd "${COMPILE_TEMP_DIR}/" || exit 1
   for COMPILE_DEP_URL in "${USBFLUXD_COMPILE_DEP_URLS[@]}"; do
     COMPILE_DEP_NAME="$(basename "${COMPILE_DEP_URL}")"
     log_stdout "Cloning ${COMPILE_DEP_NAME}."
@@ -478,12 +477,13 @@ install_usbfluxd_and_dependencies()
     log_stdout "Generating Makefile for ${COMPILE_DEP_NAME}."
     ./autogen.sh > /dev/null
     log_stdout "Compiling ${COMPILE_DEP_NAME}."
-    make -j "$(nproc)" 2>/dev/null || make -j "$(nproc)"
+    make -j "$(nproc)" 2> /dev/null || make -j "$(nproc)"
     log_stdout "Compiled ${COMPILE_DEP_NAME}."
     log_stdout "Installing ${COMPILE_DEP_NAME}."
     sudo make install
     log_stdout "Installed ${COMPILE_DEP_NAME}."
-    cd "${COMPILE_TEMP_DIR}/"
+    #shellcheck disable=SC2164
+    cd "${COMPILE_TEMP_DIR}/" || exit 1
     log_stdout "Deleting compile directory for ${COMPILE_DEP_NAME}."
     rm -rf "${COMPILE_DEP_NAME:?}/"
     log_stdout "Deleted compile directory for ${COMPILE_DEP_NAME}."
@@ -498,7 +498,7 @@ install_usbfluxd_and_dependencies()
     fi
   done
 
-  cd "${HOME}/"
+  cd "${HOME}/" || exit 1
   rm -rf "${COMPILE_TEMP_DIR:?}/"
 }
 

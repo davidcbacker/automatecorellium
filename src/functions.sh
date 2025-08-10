@@ -425,7 +425,8 @@ wait_for_assessment_status()
 
 install_openvpn_dependencies()
 {
-
+  sudo apt-get -qq update
+  sudo apt-get -qq install -y openvpn
 }
 
 install_usbfluxd_dependencies()

@@ -298,7 +298,7 @@ download_matrix_report_html_to_path()
   local INSTANCE_ID="$1"
   local MATRIX_ASSESSMENT_ID="$2"
   local MATRIX_REPORT_DOWNLOAD_PATH="$3"
-  log_stdout "Downloading MATRIX report ${MATRIX_REPORT_ID} as HTML"
+  log_stdout "Downloading MATRIX assessment ${MATRIX_ASSESSMENT_ID} report as HTML"
   corellium matrix download-report --instance "${INSTANCE_ID}" --assessment "${MATRIX_ASSESSMENT_ID}" > "${MATRIX_REPORT_DOWNLOAD_PATH}"
 }
 
@@ -307,7 +307,7 @@ download_matrix_report_json_to_path()
   local INSTANCE_ID="$1"
   local MATRIX_ASSESSMENT_ID="$2"
   local MATRIX_REPORT_DOWNLOAD_PATH="$3"
-  log_stdout "Downloading MATRIX report ${MATRIX_REPORT_ID} as JSON"
+  log_stdout "Downloading MATRIX assessment ${MATRIX_ASSESSMENT_ID} report as JSON"
   corellium matrix download-report --instance "${INSTANCE_ID}" --assessment "${MATRIX_ASSESSMENT_ID}" --format json > "${MATRIX_REPORT_DOWNLOAD_PATH}"
 }
 

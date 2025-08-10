@@ -502,7 +502,7 @@ install_usbfluxd_and_dependencies()
   rm -rf "${COMPILE_TEMP_DIR:?}/"
 }
 
-install_appium_server_dependencies()
+install_appium_server_and_dependencies()
 {
   sudo apt-get -qq update
   sudo apt-get -qq install -y libusb-dev

@@ -154,12 +154,26 @@ jobs:
               exit 1
             fi
           done
-      - name: Clean up VPN connection
+      - name: Clean up Corellium auth and processes
         if: always()
+        env:
+          CORELLIUM_CLI_PROFILE: '/home/runner/.config/.corellium/profile.json'
         run: |
+            [ -f  "${{ env.CORELLIUM_CLI_PROFILE }}" ] &&
+              rm "${{ env.CORELLIUM_CLI_PROFILE }}"
             [ -f  "${{ env.VPN_CONFIG_PATH }}" ] &&
               rm "${{ env.VPN_CONFIG_PATH }}"
-            sudo killall openvpn
+            readonly PROCS_TO_KILL=(
+              openvpn
+              avahi-daemon
+              usbfluxd
+            )
+            for PROCESS in "${PROCS_TO_KILL[@]}"; do
+              if pgrep "${PROCESS}" > /dev/null 2>&1; then
+                echo "[+] Killing ${PROCESS}"
+                sudo killall "${PROCESS}"
+                echo "[+] Killed ${PROCESS}"
+            done
       - name: Download MATRIX artifacts from VM to runner
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}

@@ -499,13 +499,27 @@ install_appium_server_dependencies()
 
 connect_to_vpn_for_instance()
 {
+  # Run this function with a timeout like 1 minute
   local INSTANCE_ID="$1"
+  local OVPN_CONFIG_PATH="$2"
+  local INSTANCE_SERVICES_IP
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+
   if ! command -v openvpn; then
     log_stdout 'Warning - openvpn not found. Attempting to install.'
     install_openvpn_dependency
   fi
+  save_vpn_config_to_local_path "${INSTANCE_ID}" "${OVPN_CONFIG_PATH}"
+  sudo openvpn --config "${OVPN_CONFIG_PATH}" &
 
-  
+  # Wait for the tunnel to establish, find the VPN IPv4 address, and test the connection
+  until ip addr show tap0 > /dev/null 2>&1; do sleep 1; done
+  local INSTANCE_VPN_IP
+  INSTANCE_VPN_IP="$(ip addr show tap0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1)"
+  until ping -c1 "${INSTANCE_VPN_IP}"; do sleep 1; done
+  log_stdout 'Successfully pinged the project's VPN IP.'
+  until ping -c1 "${INSTANCE_SERVICES_IP}"; do sleep 1; done
+  log_stdout 'Successfully pinged the instance services IP.'
 }
 
 run_usbfluxd_and_dependencies()

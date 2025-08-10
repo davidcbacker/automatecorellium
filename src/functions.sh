@@ -477,7 +477,7 @@ install_usbfluxd_and_dependencies()
     log_stdout "Generating Makefile for ${COMPILE_DEP_NAME}."
     ./autogen.sh > /dev/null 2>&1
     log_stdout "Compiling ${COMPILE_DEP_NAME}."
-    make --jobs "$(nproc)" > /dev/null 2>&1 || make --jobs "$(nproc)"
+    make --jobs "$(nproc)" 2>&1 | grep 'Making all in ' || make --jobs "$(nproc)"
     log_stdout "Installing ${COMPILE_DEP_NAME}."
     sudo make install
     cd "${COMPILE_TEMP_DIR}/" || exit 1

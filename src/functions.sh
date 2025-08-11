@@ -594,7 +594,7 @@ install_usbfluxd_and_dependencies()
   for COMPILE_DEP_URL in "${USBFLUXD_COMPILE_DEP_URLS[@]}"; do
     COMPILE_DEP_NAME="$(basename "${COMPILE_DEP_URL}")"
     log_stdout "Cloning ${COMPILE_DEP_NAME}."
-    git clone "${COMPILE_DEP_URL}" "${COMPILE_DEP_NAME}"
+    git clone --quiet "${COMPILE_DEP_URL}" "${COMPILE_DEP_NAME}"
     cd "${COMPILE_TEMP_DIR}/${COMPILE_DEP_NAME}/" || exit 1
     log_stdout "Generating Makefile for ${COMPILE_DEP_NAME}."
     ./autogen.sh > /dev/null 2>&1

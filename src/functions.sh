@@ -464,7 +464,7 @@ wait_for_instance_status()
 {
   local INSTANCE_ID="$1"
   local TARGET_INSTANCE_STATUS="$2"
-  local SLEEP_TIME_DEFAULT='5'
+  local SLEEP_TIME_DEFAULT='2'
 
   case "${TARGET_INSTANCE_STATUS}" in
     'on' | 'off') ;;

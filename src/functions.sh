@@ -30,17 +30,31 @@ log_stdout()
   done
 }
 
+ensure_instance_exists()
+{
+  local INSTANCE_ID="$1"
+  if ! corellium instance get --instance "${INSTANCE_ID}" |
+    jq -e --arg id "${INSTANCE_ID}" 'select(.id == $id)' > /dev/null; then
+    echo "Error, instance ${INSTANCE_ID} does not exist." >&2
+    exit 1
+  fi
+}
+
 start_instance()
 {
-  local instance_id="$1"
-  case "$(get_instance_status "${instance_id}")" in
-    'on')
-      log_stdout "Instance ${instance_id} is already on."
+  local INSTANCE_ID="$1"
+  local TARGET_INSTANCE_STATUS_ON='on'
+  ensure_instance_exists "${INSTANCE_ID}"
+  case "$(get_instance_status "${INSTANCE_ID}")" in
+    "${TARGET_INSTANCE_STATUS_ON}")
+      log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_ON}."
       ;;
     *)
-      log_stdout "Starting instance ${instance_id}"
-      corellium instance start "${instance_id}" --wait > /dev/null || true
-      log_stdout "Started instance ${instance_id}"
+      log_stdout "Starting instance ${INSTANCE_ID}"
+      corellium instance start "${INSTANCE_ID}" --wait > /dev/null
+      log_stdout "Started instance ${INSTANCE_ID}. Waiting for ${TARGET_INSTANCE_STATUS_ON} state."
+      wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_ON}"
+      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_ON}."
       ;;
   esac
 }
@@ -49,20 +63,20 @@ soft_stop_instance()
 {
   local INSTANCE_ID="$1"
   local TARGET_INSTANCE_STATUS_OFF='off'
-  check_env_vars
+  ensure_instance_exists "${INSTANCE_ID}"
   case "$(get_instance_status "${INSTANCE_ID}")" in
     "${TARGET_INSTANCE_STATUS_OFF}")
       log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_OFF}."
       ;;
     *)
       log_stdout "Stopping instance ${INSTANCE_ID}."
-      # Fix if this causes nonzero exit status or stderr messages
+      check_env_vars
       curl --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/stop" \
         -H "Accept: application/json" \
         -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
         -H "Content-Type: application/json" \
         -d '{"soft":true}'
-      log_stdout "Initiated a soft stop of instance ${INSTANCE_ID}."
+      log_stdout "Soft stopped instance ${INSTANCE_ID}. Waiting for ${TARGET_INSTANCE_STATUS_OFF} state."
       wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_OFF}"
       log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_OFF}."
       ;;
@@ -84,7 +98,7 @@ get_instance_services_ip()
 wait_until_agent_ready()
 {
   local instance_id="$1"
-  local AGENT_READY_SLEEP_TIME='20'
+  local AGENT_READY_SLEEP_TIME='15'
   local INSTANCE_STATUS_ON='on'
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${instance_id}")"
@@ -503,8 +517,10 @@ wait_for_assessment_status()
 
 install_openvpn_dependencies()
 {
+  log_stdout 'Installing openvpn.'
   sudo apt-get -qq update
-  sudo apt-get -qq install -y openvpn
+  sudo apt-get -qq install --assume-yes --no-install-recommends openvpn
+  log_stdout 'Installed openvpn.'
 }
 
 install_usbfluxd_and_dependencies()
@@ -531,19 +547,12 @@ install_usbfluxd_and_dependencies()
     usbfluxctl
   )
 
-  log_stdout 'Installing apt-get dependencies.'
+  log_stdout 'Installing usbfluxd apt-get dependencies.'
   sudo apt-get -qq update
-  for APT_DEP in "${USBFLUXD_APT_DEPS[@]}"; do
-    if sudo apt-get install -y "${APT_DEP}" > /dev/null; then
-      log_stdout "Installed ${APT_DEP}."
-    else
-      echo "Failed to install ${APT_DEP}." >&2
-      sudo apt-get -qq install -y "${APT_DEP}"
-      exit 1
-    fi
-  done
-  log_stdout 'Installed apt-get dependencies.'
+  sudo apt-get -qq install --assume-yes --no-install-recommends "${USBFLUXD_APT_DEPS[@]}"
+  log_stdout 'Installed usbfluxd apt-get dependencies.'
 
+  log_stdout 'Installing usbfluxd compiled dependencies.'
   local COMPILE_TEMP_DIR COMPILE_DEP_NAME
   COMPILE_TEMP_DIR="$(mktemp -d)"
   cd "${COMPILE_TEMP_DIR}/" || exit 1
@@ -563,6 +572,7 @@ install_usbfluxd_and_dependencies()
     rm -rf "${COMPILE_DEP_NAME:?}/"
     log_stdout "Installed ${COMPILE_DEP_NAME} and cleaned up build directory."
   done
+  log_stdout 'Installed usbfluxd compiled dependencies.'
 
   for EXPECTED_BINARY in "${USBFLUXD_EXPECTED_BINARIES[@]}"; do
     if command -v "${EXPECTED_BINARY}" > /dev/null; then
@@ -572,18 +582,21 @@ install_usbfluxd_and_dependencies()
       exit 1
     fi
   done
-
   cd "${HOME}/" || exit 1
   rm -rf "${COMPILE_TEMP_DIR:?}/"
 }
 
 install_appium_server_and_dependencies()
 {
+  log_stdout 'Installing appium dependencies.'
   sudo apt-get -qq update
-  sudo apt-get -qq install -y libusb-dev
+  sudo apt-get -qq install --assume-yes --no-install-recommends libusb-dev
+  python3 -m pip install -U pymobiledevice3
+  log_stdout 'Installed appium dependencies.'
+  log_stdout 'Installing appium and xcuitest driver.'
   npm install --location=global appium
   appium driver install xcuitest
-  python3 -m pip install -U pymobiledevice3
+  log_stdout 'Installed appium and xcuitest driver.'
 }
 
 connect_to_vpn_for_instance()

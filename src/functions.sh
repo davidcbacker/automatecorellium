@@ -57,7 +57,7 @@ soft_stop_instance()
     *)
       log_stdout "Stopping instance ${INSTANCE_ID}."
       # Fix if this causes nonzero exit status or stderr messages
-      curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/stop" \
+      curl --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/stop" \
         -H "Accept: application/json" \
         -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
         -H "Content-Type: application/json" \
@@ -114,7 +114,7 @@ kill_app()
   local APP_BUNDLE_ID="$2"
   if [ "$(is_app_running "${INSTANCE_ID}" "${APP_BUNDLE_ID}")" = 'true' ]; then
     log_stdout "Killing running app ${APP_BUNDLE_ID}"
-    if curl -sX POST \
+    if curl --silent -X POST \
       "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/app/apps/${APP_BUNDLE_ID}/kill" \
       -H "Accept: application/json" \
       -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"; then
@@ -416,7 +416,8 @@ download_file_to_local_path()
   # replace '/' with '%2F' using parameter expansion
   local encoded_download_path="${DOWNLOAD_PATH//\//%2F}"
 
-  curl -X GET "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/file/device/${encoded_download_path}" \
+  curl --silent -X GET \
+    "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/file/device/${encoded_download_path}" \
     -H "Accept: application/octet-stream" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
     -o "${LOCAL_SAVE_PATH}"

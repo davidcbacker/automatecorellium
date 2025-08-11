@@ -502,8 +502,8 @@ wait_for_assessment_status()
 
 install_openvpn_dependencies()
 {
-  sudo apt-get -qq update
-  sudo apt-get -qq install -y openvpn
+  sudo apt-get -qq -o=Dpkg::Use-Pty=0 update > /dev/null
+  sudo apt-get -qq -o=Dpkg::Use-Pty=0 install -y openvpn > /dev/null
 }
 
 install_usbfluxd_and_dependencies()
@@ -531,9 +531,9 @@ install_usbfluxd_and_dependencies()
   )
 
   log_stdout 'Installing apt-get dependencies.'
-  sudo apt-get -qq update
+  sudo apt-get -qq -o=Dpkg::Use-Pty=0 update > /dev/null
   for APT_DEP in "${USBFLUXD_APT_DEPS[@]}"; do
-    if sudo apt-get install -y "${APT_DEP}" > /dev/null; then
+    if sudo apt-get -qq -o=Dpkg::Use-Pty=0 install -y "${APT_DEP}" > /dev/null; then
       log_stdout "Installed ${APT_DEP}."
     else
       echo "Failed to install ${APT_DEP}." >&2
@@ -578,8 +578,8 @@ install_usbfluxd_and_dependencies()
 
 install_appium_server_and_dependencies()
 {
-  sudo apt-get -qq update
-  sudo apt-get -qq install -y libusb-dev
+  sudo apt-get -qq -o=Dpkg::Use-Pty=0 update > /dev/null
+  sudo apt-get -qq -o=Dpkg::Use-Pty=0 install -y libusb-dev > /dev/null
   npm install --location=global appium
   appium driver install xcuitest
   python3 -m pip install -U pymobiledevice3

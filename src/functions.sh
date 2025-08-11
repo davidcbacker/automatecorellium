@@ -60,14 +60,14 @@ soft_stop_instance()
 {
   local INSTANCE_ID="$1"
   local TARGET_INSTANCE_STATUS_OFF='off'
-  check_env_vars
+  ensure_instance_exists "${INSTANCE_ID}"
   case "$(get_instance_status "${INSTANCE_ID}")" in
     "${TARGET_INSTANCE_STATUS_OFF}")
       log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_OFF}."
       ;;
     *)
       log_stdout "Stopping instance ${INSTANCE_ID}."
-      # Fix if this causes nonzero exit status or stderr messages
+      check_env_vars
       curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/stop" \
         -H "Accept: application/json" \
         -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \

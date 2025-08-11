@@ -225,70 +225,120 @@ is_app_running()
     jq -r --arg id "${APP_BUNDLE_ID}" '.[] | select(.bundleID == $id) | .running'
 }
 
-run_matrix_cafe_checks()
+create_matrix_assessment()
 {
-  local instance_id="$1"
+  local INSTANCE_ID="$1"
+  local APP_BUNDLE_ID="$2"
+  corellium matrix create-assessment --instance "${INSTANCE_ID}" --bundle "${APP_BUNDLE_ID}" | jq -r '.id'
+}
+
+start_matrix_monitoring()
+{
+  local INSTANCE_ID="$1"
+  local MATRIX_ASSESSMENT_ID="$2"
   local MATRIX_STATUS_MONITORING='monitoring'
-  local MATRIX_STATUS_READY_FOR_TESTING='readyForTesting'
-  local MATRIX_STATUS_COMPLETED_TESTING='complete'
-
-  log_stdout "Creating new MATRIX assessment"
-  local assessment_id
-  assessment_id="$(corellium matrix create-assessment --instance "${instance_id}" --bundle com.corellium.Cafe | jq -r '.id')"
-  if [ -z "${assessment_id}" ]; then
-    echo "Failed to create assessment" >&2
-    return 1
-  fi
-  log_stdout "Created MATRIX assessment ${assessment_id}."
-
-  log_stdout "Starting monitoring for MATRIX assessment ${assessment_id}."
+  log_stdout "Starting monitoring for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix start-monitor \
-    --instance "${instance_id}" \
-    --assessment "${assessment_id}" \
+    --instance "${INSTANCE_ID}" \
+    --assessment "${MATRIX_ASSESSMENT_ID}" \
     > /dev/null
   wait_for_assessment_status \
-    "${instance_id}" \
-    "${assessment_id}" \
+    "${INSTANCE_ID}" \
+    "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_MONITORING}" ||
     return 1
-  log_stdout "MATRIX assessment ${assessment_id} is ${MATRIX_STATUS_MONITORING}."
+  log_stdout "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_MONITORING}."
+}
 
-  sleep 60
-
-  log_stdout "Stopping monitoring for MATRIX assessment ${assessment_id}."
+stop_matrix_monitoring()
+{
+  local INSTANCE_ID="$1"
+  local MATRIX_ASSESSMENT_ID="$2"
+  local MATRIX_STATUS_READY_FOR_TESTING='readyForTesting'
+  log_stdout "Stopping monitoring for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix stop-monitor \
-    --instance "${instance_id}" \
-    --assessment "${assessment_id}" \
+    --instance "${INSTANCE_ID}" \
+    --assessment "${MATRIX_ASSESSMENT_ID}" \
     > /dev/null
   wait_for_assessment_status \
-    "${instance_id}" \
-    "${assessment_id}" \
+    "${INSTANCE_ID}" \
+    "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_READY_FOR_TESTING}" ||
     return 1
   log_stdout "MATRIX assessment ${assessment_id} is ${MATRIX_STATUS_READY_FOR_TESTING}."
+}
 
-  log_stdout "Running test for MATRIX assessment ${assessment_id}."
+test_matrix_evidence()
+{
+  local INSTANCE_ID="$1"
+  local MATRIX_ASSESSMENT_ID="$2"
+  local MATRIX_STATUS_COMPLETED_TESTING='complete'
+  log_stdout "Running test for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix test \
-    --instance "${instance_id}" \
-    --assessment "${assessment_id}" \
+    --instance "${INSTANCE_ID}" \
+    --assessment "${MATRIX_ASSESSMENT_ID}" \
     > /dev/null
   wait_for_assessment_status \
-    "${instance_id}" \
-    "${assessment_id}" \
+    "${INSTANCE_ID}" \
+    "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_COMPLETED_TESTING}" ||
     return 1
-  log_stdout "MATRIX assessment ${assessment_id} is ${MATRIX_STATUS_COMPLETED_TESTING}."
+  log_stdout "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETED_TESTING}."
+}
 
-  kill_corellium_cafe_ios "${instance_id}"
+get_matrix_report_id()
+{
+  local INSTANCE_ID="$1"
+  local MATRIX_ASSESSMENT_ID="$2"
+  corellium matrix get-assessment --instance "${INSTANCE_ID}" --assessment "${MATRIX_ASSESSMENT_ID}" | jq -r '.reportId'
+}
 
-  local report_id
-  report_id="$(corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.reportId')"
-  log_stdout "Downloading MATRIX report ${report_id} as HTML"
-  corellium matrix download-report --instance "${instance_id}" --assessment "${assessment_id}" > "matrix_report_${report_id}.html"
-  log_stdout "Downloading MATRIX report ${report_id} as JSON"
-  corellium matrix download-report --instance "${instance_id}" --assessment "${assessment_id}" --format json > "matrix_report_${report_id}.json"
+download_matrix_report_html_to_path()
+{
+  local INSTANCE_ID="$1"
+  local MATRIX_ASSESSMENT_ID="$2"
+  local MATRIX_REPORT_DOWNLOAD_PATH="$3"
+  log_stdout "Downloading MATRIX assessment ${MATRIX_ASSESSMENT_ID} report as HTML"
+  corellium matrix download-report --instance "${INSTANCE_ID}" --assessment "${MATRIX_ASSESSMENT_ID}" > "${MATRIX_REPORT_DOWNLOAD_PATH}"
+}
 
-  log_stdout "Finished report ${report_id} for MATRIX assessment ${assessment_id}."
+download_matrix_report_json_to_path()
+{
+  local INSTANCE_ID="$1"
+  local MATRIX_ASSESSMENT_ID="$2"
+  local MATRIX_REPORT_DOWNLOAD_PATH="$3"
+  log_stdout "Downloading MATRIX assessment ${MATRIX_ASSESSMENT_ID} report as JSON"
+  corellium matrix download-report --instance "${INSTANCE_ID}" --assessment "${MATRIX_ASSESSMENT_ID}" --format json > "${MATRIX_REPORT_DOWNLOAD_PATH}"
+}
+
+run_full_matrix_assessment()
+{
+  local INSTANCE_ID="$1"
+  local APP_BUNDLE_ID="$2"
+  log_stdout "Creating new MATRIX assessment"
+  local MATRIX_ASSESSMENT_ID
+  MATRIX_ASSESSMENT_ID="$(create_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}")"
+  if [ -z "${MATRIX_ASSESSMENT_ID}" ]; then
+    echo "Failed to create assessment" >&2
+    return 1
+  fi
+  log_stdout "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
+  # TODO: add app interactions
+  sleep 10
+  start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
+  test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
+  download_matrix_report_html_to_path "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" "matrix_report_${MATRIX_ASSESSMENT_ID}.html"
+  download_matrix_report_json_to_path "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" "matrix_report_${MATRIX_ASSESSMENT_ID}.json"
+  log_stdout "Downloaded reports for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  kill_app "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
+}
+
+run_matrix_cafe_checks()
+{
+  local INSTANCE_ID="$1"
+  local APP_BUNDLE_ID='com.corellium.Cafe'
+  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
 }
 
 delete_unauthorized_devices()

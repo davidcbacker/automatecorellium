@@ -50,7 +50,7 @@ start_instance()
       ;;
     *)
       log_stdout "Starting instance ${INSTANCE_ID}"
-      corellium instance start "${INSTANCE_ID}" --wait > /dev/null || true
+      corellium instance start "${INSTANCE_ID}" --wait > /dev/null
       log_stdout "Started instance ${INSTANCE_ID}"
       ;;
   esac

@@ -503,7 +503,7 @@ wait_for_assessment_status()
 install_openvpn_dependencies()
 {
   sudo apt-get -qq update
-  sudo apt-get -qq install -y openvpn
+  sudo apt-get -qq install --assume-yes --no-install-recommends openvpn
 }
 
 install_usbfluxd_and_dependencies()
@@ -532,15 +532,7 @@ install_usbfluxd_and_dependencies()
 
   log_stdout 'Installing apt-get dependencies.'
   sudo apt-get -qq update
-  for APT_DEP in "${USBFLUXD_APT_DEPS[@]}"; do
-    if sudo apt-get install -y "${APT_DEP}" > /dev/null; then
-      log_stdout "Installed ${APT_DEP}."
-    else
-      echo "Failed to install ${APT_DEP}." >&2
-      sudo apt-get -qq install -y "${APT_DEP}"
-      exit 1
-    fi
-  done
+  sudo apt-get -qq install --assume-yes --no-install-recommends "${USBFLUXD_APT_DEPS[@]}"
   log_stdout 'Installed apt-get dependencies.'
 
   local COMPILE_TEMP_DIR COMPILE_DEP_NAME
@@ -579,7 +571,7 @@ install_usbfluxd_and_dependencies()
 install_appium_server_and_dependencies()
 {
   sudo apt-get -qq update
-  sudo apt-get -qq install -y libusb-dev
+  sudo apt-get -qq install --assume-yes --no-install-recommends libusb-dev
   npm install --location=global appium
   appium driver install xcuitest
   python3 -m pip install -U pymobiledevice3

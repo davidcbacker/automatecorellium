@@ -404,9 +404,7 @@ delete_unauthorized_devices()
 
   for DEVICE_TO_DELETE in "${UNAUTHORIZED_DEVICES[@]}"; do
     log_stdout "Deleting unauthorized device ${DEVICE_TO_DELETE}."
-    # TODO: set it to delete devices
-    #corellium instance delete "${DEVICE_TO_DELETE}" --wait
-    echo "DEBUG THIS WILL DELETE ${DEVICE_TO_DELETE}!!!!"
+    corellium instance delete "${DEVICE_TO_DELETE}" --wait
     log_stdout "Deleted unauthorized device ${DEVICE_TO_DELETE}."
   done
 }

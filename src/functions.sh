@@ -45,30 +45,33 @@ start_instance()
   esac
 }
 
-stop_instance()
+soft_stop_instance()
 {
+  local INSTANCE_ID="$1"
+  local TARGET_INSTANCE_STATUS_OFF='off'
   check_env_vars
-  local instance_id="$1"
-  case "$(get_instance_status "${instance_id}")" in
-    'off')
-      log_stdout "Instance ${instance_id} is already off."
+  case "$(get_instance_status "${INSTANCE_ID}")" in
+    "${TARGET_INSTANCE_STATUS_OFF}")
+      log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_OFF}."
       ;;
     *)
-      log_stdout "Stopping instance ${instance_id}"
+      log_stdout "Stopping instance ${INSTANCE_ID}."
       # Fix if this causes nonzero exit status or stderr messages
-      curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${instance_id}/stop" \
+      curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/stop" \
         -H "Accept: application/json" \
         -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
         -H "Content-Type: application/json" \
         -d '{"soft":true}'
+      wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_OFF}"
+      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_OFF}."
       ;;
   esac
 }
 
 get_instance_status()
 {
-  local instance_id="$1"
-  corellium instance get --instance "${instance_id}" | jq -r '.state'
+  local INSTANCE_ID="$1"
+  corellium instance get --instance "${INSTANCE_ID}" | jq -r '.state'
 }
 
 get_instance_services_ip()
@@ -426,6 +429,30 @@ save_vpn_config_to_local_path()
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   corellium project vpnConfig --project "${PROJECT_ID}" --path "${LOCAL_SAVE_PATH}"
 }
+
+wait_for_instance_status()
+{
+  local INSTANCE_ID="$1"
+  local TARGET_INSTANCE_STATUS="$2"
+  local SLEEP_TIME_DEFAULT='5'
+
+  case "${TARGET_INSTANCE_STATUS}" in
+    'on' | 'off') ;;
+    *)
+      echo "Unsupported target status: '${TARGET_ASSESSMENT_STATUS}'. Exiting." >&2
+      exit 1
+      ;;
+  esac
+
+  local CURRENT_INSTANCE_STATUS
+  CURRENT_INSTANCE_STATUS="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
+  while [ "${CURRENT_INSTANCE_STATUS}" != "${TARGET_INSTANCE_STATUS}" ]; do
+    log_stdout "Status is ${CURRENT_INSTANCE_STATUS} and target is ${TARGET_INSTANCE_STATUS}. Waiting ${SLEEP_TIME_DEFAULT} seconds."
+    sleep "${SLEEP_TIME_DEFAULT}"
+    CURRENT_INSTANCE_STATUS="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
+  done
+}
+
 
 wait_for_assessment_status()
 {

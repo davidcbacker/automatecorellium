@@ -148,6 +148,27 @@ jobs:
           set -eu && source ./src/functions.sh
           npm install @corellium/corellium-api
           node ./src/zip_matrix_artifacts.js
+      - name: Download MATRIX artifacts zip archive from VM
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          MATRIX_INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.zip
+        run: |
+          set -eu && source ./src/functions.sh
+          download_file_to_local_path \
+            "${{ env.MATRIX_INSTANCE_ID }}" \
+            "${MATRIX_INSTANCE_ARTIFACTS_PATH}" \
+            "${MATRIX_RUNNER_ARTIFACTS_PATH}"
+          ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
+          sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
+      - name: Stop instance
+        if: always()
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+        run: |
+          set -eu && source ./src/functions.sh
+          stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Clean up Corellium auth and processes
         if: always()
         env:
@@ -174,27 +195,6 @@ jobs:
               sudo killall "${PROCESS}"
             fi
           done
-      - name: Download MATRIX artifacts zip archive from VM
-        env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
-          MATRIX_INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.zip
-        run: |
-          set -eu && source ./src/functions.sh
-          download_file_to_local_path \
-            "${{ env.MATRIX_INSTANCE_ID }}" \
-            "${MATRIX_INSTANCE_ARTIFACTS_PATH}" \
-            "${MATRIX_RUNNER_ARTIFACTS_PATH}"
-          ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
-          sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
-      - name: Stop instance
-        if: always()
-        env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
-        run: |
-          set -eu && source ./src/functions.sh
-          soft_stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Upload MATRIX runtime artifacts
         uses: actions/upload-artifact@v4
         with:

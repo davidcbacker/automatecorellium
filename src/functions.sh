@@ -330,7 +330,7 @@ run_full_matrix_assessment()
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   # TODO: add app interactions
   sleep 10
-  start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
+  stop_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   download_matrix_report_html_to_path "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" "matrix_report_${MATRIX_ASSESSMENT_ID}.html"
   download_matrix_report_json_to_path "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" "matrix_report_${MATRIX_ASSESSMENT_ID}.json"

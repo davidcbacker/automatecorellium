@@ -361,22 +361,35 @@ run_matrix_cafe_checks()
 
 delete_unauthorized_devices()
 {
+  if [[ -z "${AUTHORIZED_INSTANCES}" ]]; then
+    log_stdout "Error: AUTHORIZED_INSTANCES is empty or unset."
+    return 1
+  }
+
   local INSTANCES_TO_KEEP=()
   while IFS= read -r line; do
     INSTANCES_TO_KEEP+=("$(echo "${line}" | tr -d '\r\n')")
   done <<< "${AUTHORIZED_INSTANCES}"
 
-  local ALL_EXISTING_DEVICES
+  local CORELLIUM_DEVICES_JSON ALL_EXISTING_DEVICES
   # disable lint check since all values are assumed to be UUIDs
   #shellcheck disable=SC2207
-  ALL_EXISTING_DEVICES=($(corellium list | jq -r '.[].id'))
+  CORELLIUM_DEVICES_JSON="$(corellium list)" || {
+    echo "Error getting device list" >&2
+    exit 1
+  }
+  ALL_EXISTING_DEVICES=($(echo "${CORELLIUM_DEVICES_JSON}" | jq -r '.[].id')) || {
+    echo "Error parsing device list" >&2
+    exit 1
+  }
 
+  local UNAUTHORIZED_DEVICES=()
   local IS_DEVICE_AUTHORIZED
   for EXISTING_DEVICE in "${ALL_EXISTING_DEVICES[@]}"; do
     log_stdout "Checking ${EXISTING_DEVICE}."
     IS_DEVICE_AUTHORIZED='false'
-    for authorized_device in "${INSTANCES_TO_KEEP[@]}"; do
-      if [ "${EXISTING_DEVICE}" = "${authorized_device}" ]; then
+    for AUTHORIZED_DEVICE in "${INSTANCES_TO_KEEP[@]}"; do
+      if [ "${EXISTING_DEVICE}" = "${AUTHORIZED_DEVICE}" ]; then
         IS_DEVICE_AUTHORIZED='true'
         break
       fi
@@ -384,10 +397,17 @@ delete_unauthorized_devices()
     if [ "${IS_DEVICE_AUTHORIZED}" = 'true' ]; then
       log_stdout "Device ${EXISTING_DEVICE} is authorized."
     else
-      log_stdout "Deleting unauthorized device ${EXISTING_DEVICE}."
-      corellium instance delete "${EXISTING_DEVICE}" --wait
-      log_stdout "Deleted unauthorized device ${EXISTING_DEVICE}."
+      log_stdout "Device ${EXISTING_DEVICE} is unauthorized."
+      UNAUTHORIZED_DEVICES+=("${EXISTING_DEVICE}")
     fi
+  done
+
+  for DEVICE_TO_DELETE in "${UNAUTHORIZED_DEVICES[@]}"; do
+    log_stdout "Deleting unauthorized device ${DEVICE_TO_DELETE}."
+    # TODO: set it to delete devices
+    #corellium instance delete "${DEVICE_TO_DELETE}" --wait
+    echo "DEBUG THIS WILL DELETE ${DEVICE_TO_DELETE}!!!!"
+    log_stdout "Deleted unauthorized device ${DEVICE_TO_DELETE}."
   done
 }
 

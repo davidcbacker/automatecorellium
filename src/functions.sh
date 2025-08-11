@@ -380,31 +380,51 @@ run_matrix_cafe_checks()
 
 delete_unauthorized_devices()
 {
-  local authorized_instances=()
+  if [[ -z "${AUTHORIZED_INSTANCES}" ]]; then
+    log_stdout "Error: AUTHORIZED_INSTANCES is empty or unset."
+    return 1
+  fi
+
+  local INSTANCES_TO_KEEP=()
   while IFS= read -r line; do
-    authorized_instances+=("$(echo "${line}" | tr -d '\r\n')")
+    INSTANCES_TO_KEEP+=("$(echo "${line}" | tr -d '\r\n')")
   done <<< "${AUTHORIZED_INSTANCES}"
 
-  local corellium_devices
+  local CORELLIUM_DEVICES_JSON ALL_EXISTING_DEVICES
+  CORELLIUM_DEVICES_JSON="$(corellium list)" || {
+    echo "Error getting device list" >&2
+    exit 1
+  }
   # disable lint check since all values are assumed to be UUIDs
   #shellcheck disable=SC2207
-  corellium_devices=($(corellium list | jq -r '.[].id'))
+  ALL_EXISTING_DEVICES=($(echo "${CORELLIUM_DEVICES_JSON}" | jq -r '.[].id')) || {
+    echo "Error parsing device list" >&2
+    exit 1
+  }
 
-  local is_device_authorized
-  for device in "${corellium_devices[@]}"; do
-    is_device_authorized='false'
-    log_stdout "Checking if ${device} is authorized."
-    for authorized_device in "${authorized_instances[@]}"; do
-      if [ "${device}" = "${authorized_device}" ]; then
-        log_stdout "Device ${device} is authorized."
-        is_device_authorized='true'
+  local UNAUTHORIZED_DEVICES=()
+  local IS_DEVICE_AUTHORIZED
+  for EXISTING_DEVICE in "${ALL_EXISTING_DEVICES[@]}"; do
+    log_stdout "Checking ${EXISTING_DEVICE}."
+    IS_DEVICE_AUTHORIZED='false'
+    for AUTHORIZED_DEVICE in "${INSTANCES_TO_KEEP[@]}"; do
+      if [ "${EXISTING_DEVICE}" = "${AUTHORIZED_DEVICE}" ]; then
+        IS_DEVICE_AUTHORIZED='true'
         break
       fi
     done
-    if [ "${is_device_authorized}" != 'true' ]; then
-      log_stdout "Deleting unauthorized instance ${device}"
-      corellium instance delete "${device}" --wait
+    if [ "${IS_DEVICE_AUTHORIZED}" = 'true' ]; then
+      log_stdout "Device ${EXISTING_DEVICE} is authorized."
+    else
+      log_stdout "Device ${EXISTING_DEVICE} is unauthorized."
+      UNAUTHORIZED_DEVICES+=("${EXISTING_DEVICE}")
     fi
+  done
+
+  for DEVICE_TO_DELETE in "${UNAUTHORIZED_DEVICES[@]}"; do
+    log_stdout "Deleting unauthorized device ${DEVICE_TO_DELETE}."
+    corellium instance delete "${DEVICE_TO_DELETE}" --wait
+    log_stdout "Deleted unauthorized device ${DEVICE_TO_DELETE}."
   done
 }
 

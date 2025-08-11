@@ -43,15 +43,18 @@ ensure_instance_exists()
 start_instance()
 {
   local INSTANCE_ID="$1"
+  local TARGET_INSTANCE_STATUS_ON='on'
   ensure_instance_exists "${INSTANCE_ID}"
   case "$(get_instance_status "${INSTANCE_ID}")" in
-    'on')
-      log_stdout "Instance ${INSTANCE_ID} is already on."
+    "${TARGET_INSTANCE_STATUS_ON}")
+      log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_ON}."
       ;;
     *)
       log_stdout "Starting instance ${INSTANCE_ID}"
       corellium instance start "${INSTANCE_ID}" --wait > /dev/null
-      log_stdout "Started instance ${INSTANCE_ID}"
+      log_stdout "Started instance ${INSTANCE_ID}. Waiting for ${TARGET_INSTANCE_STATUS_ON} state."
+      wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_ON}"
+      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_ON}."
       ;;
   esac
 }
@@ -73,7 +76,7 @@ soft_stop_instance()
         -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
         -H "Content-Type: application/json" \
         -d '{"soft":true}'
-      log_stdout "Initiated a soft stop of instance ${INSTANCE_ID}."
+      log_stdout "Soft stopped instance ${INSTANCE_ID}. Waiting for ${TARGET_INSTANCE_STATUS_OFF} state."
       wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_OFF}"
       log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_OFF}."
       ;;

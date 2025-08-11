@@ -148,12 +148,32 @@ jobs:
           set -eu && source ./src/functions.sh
           npm install @corellium/corellium-api
           node ./src/zip_matrix_artifacts.js
-      - name: Clean up VPN connection
+      - name: Clean up Corellium auth and processes
         if: always()
+        env:
+          CORELLIUM_CLI_PROFILE: '/home/runner/.config/.corellium/profile.json'
         run: |
-            [ -f  "${{ env.VPN_CONFIG_PATH }}" ] &&
-              rm "${{ env.VPN_CONFIG_PATH }}"
-            sudo killall openvpn
+          readonly FILES_TO_DELETE=(
+            "${{ env.CORELLIUM_CLI_PROFILE }}"
+            "${{ env.VPN_CONFIG_PATH }}"
+          )
+          readonly PROCS_TO_KILL=(
+            openvpn
+            avahi-daemon
+            usbfluxd
+          )
+          for FILE_PATH in "${FILES_TO_DELETE[@]}"; do
+            if [ -f "${FILE_PATH}" ]; then
+              echo "[+] Deleting ${FILE_PATH}"
+              rm -f "${{ env.CORELLIUM_CLI_PROFILE }}"
+            fi
+          done
+          for PROCESS in "${PROCS_TO_KILL[@]}"; do
+            if pgrep "${PROCESS}" > /dev/null 2>&1; then
+              echo "[+] Killing ${PROCESS}"
+              sudo killall "${PROCESS}"
+            fi
+          done
       - name: Download MATRIX artifacts zip archive from VM
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}

@@ -172,7 +172,6 @@ jobs:
             if pgrep "${PROCESS}" > /dev/null 2>&1; then
               echo "[+] Killing ${PROCESS}"
               sudo killall "${PROCESS}"
-              echo "[+] Killed ${PROCESS}"
             fi
           done
       - name: Download MATRIX artifacts zip archive from VM

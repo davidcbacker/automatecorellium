@@ -84,7 +84,7 @@ get_instance_services_ip()
 wait_until_agent_ready()
 {
   local instance_id="$1"
-  local AGENT_READY_SLEEP_TIME='20'
+  local AGENT_READY_SLEEP_TIME='15'
   local INSTANCE_STATUS_ON='on'
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${instance_id}")"

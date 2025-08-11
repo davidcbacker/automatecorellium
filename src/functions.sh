@@ -59,6 +59,25 @@ start_instance()
   esac
 }
 
+stop_instance()
+{
+  local INSTANCE_ID="$1"
+  local TARGET_INSTANCE_STATUS_OFF='off'
+  ensure_instance_exists "${INSTANCE_ID}"
+  case "$(get_instance_status "${INSTANCE_ID}")" in
+    "${TARGET_INSTANCE_STATUS_OFF}")
+      log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_OFF}."
+      ;;
+    *)
+      log_stdout "Stopping instance ${INSTANCE_ID}"
+      corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
+      log_stdout "Stopped instance ${INSTANCE_ID}. Waiting for ${TARGET_INSTANCE_STATUS_OFF} state."
+      wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_OFF}"
+      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_OFF}."
+      ;;
+  esac
+}
+
 soft_stop_instance()
 {
   local INSTANCE_ID="$1"
@@ -391,27 +410,23 @@ delete_unauthorized_devices()
 
 start_demo_instances()
 {
-  local start_instances=()
+  local INSTANCES_TO_START=()
   while IFS= read -r line; do
-    start_instances+=("$(echo "${line}" | tr -d '\r\n')")
+    INSTANCES_TO_START+=("$(echo "${line}" | tr -d '\r\n')")
   done <<< "${START_INSTANCES}"
-
-  for instance in "${start_instances[@]}"; do
-    log_stdout "Starting instance ${instance}"
-    corellium instance start "${instance}" --wait || true
+  for INSTANCE_ID in "${INSTANCES_TO_START[@]}"; do
+    start_instance "${INSTANCE_ID}"
   done
 }
 
 stop_demo_instances()
 {
-  local stop_instances=()
+  local INSTANCES_TO_STOP=()
   while IFS= read -r line; do
-    stop_instances+=("$(echo "${line}" | tr -d '\r\n')")
+    INSTANCES_TO_STOP+=("$(echo "${line}" | tr -d '\r\n')")
   done <<< "${STOP_INSTANCES}"
-
-  for instance in "${stop_instances[@]}"; do
-    log_stdout "Stopping instance ${instance}"
-    corellium instance stop "${instance}" --wait || true
+  for INSTANCE_ID in "${INSTANCES_TO_STOP[@]}"; do
+    stop_instance "${INSTANCE_ID}"
   done
 }
 
@@ -449,7 +464,7 @@ wait_for_instance_status()
 {
   local INSTANCE_ID="$1"
   local TARGET_INSTANCE_STATUS="$2"
-  local SLEEP_TIME_DEFAULT='5'
+  local SLEEP_TIME_DEFAULT='2'
 
   case "${TARGET_INSTANCE_STATUS}" in
     'on' | 'off') ;;

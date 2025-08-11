@@ -62,6 +62,7 @@ soft_stop_instance()
         -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
         -H "Content-Type: application/json" \
         -d '{"soft":true}'
+      log_stdout "Initiated a soft stop of instance ${INSTANCE_ID}."
       wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_OFF}"
       log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_OFF}."
       ;;

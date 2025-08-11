@@ -34,7 +34,7 @@ async function main() {
     try {
         console.log(`Starting the script at ${new Date().toISOString()}.`);
         const zipInputArtifactsDir = '/tmp/artifacts/';
-        const zipInputAssessmentsDir = '/tmp/assessment.*/'
+        const zipInputAssessmentsDir = '/tmp/assessment.*/';
         const zipOutputPath = '/tmp/matrix_artifacts.zip';
 
         const corellium = new Corellium({

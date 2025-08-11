@@ -502,8 +502,10 @@ wait_for_assessment_status()
 
 install_openvpn_dependencies()
 {
+  log_stdout 'Installing openvpn.'
   sudo apt-get -qq update
   sudo apt-get -qq install --assume-yes --no-install-recommends openvpn
+  log_stdout 'Installed openvpn.'
 }
 
 install_usbfluxd_and_dependencies()
@@ -530,11 +532,12 @@ install_usbfluxd_and_dependencies()
     usbfluxctl
   )
 
-  log_stdout 'Installing apt-get dependencies.'
+  log_stdout 'Installing usbfluxd apt-get dependencies.'
   sudo apt-get -qq update
   sudo apt-get -qq install --assume-yes --no-install-recommends "${USBFLUXD_APT_DEPS[@]}"
-  log_stdout 'Installed apt-get dependencies.'
+  log_stdout 'Installed usbfluxd apt-get dependencies.'
 
+  log_stdout 'Installing usbfluxd compiled dependencies.'
   local COMPILE_TEMP_DIR COMPILE_DEP_NAME
   COMPILE_TEMP_DIR="$(mktemp -d)"
   cd "${COMPILE_TEMP_DIR}/" || exit 1
@@ -554,6 +557,7 @@ install_usbfluxd_and_dependencies()
     rm -rf "${COMPILE_DEP_NAME:?}/"
     log_stdout "Installed ${COMPILE_DEP_NAME} and cleaned up build directory."
   done
+  log_stdout 'Installed usbfluxd compiled dependencies.'
 
   for EXPECTED_BINARY in "${USBFLUXD_EXPECTED_BINARIES[@]}"; do
     if command -v "${EXPECTED_BINARY}" > /dev/null; then
@@ -563,18 +567,21 @@ install_usbfluxd_and_dependencies()
       exit 1
     fi
   done
-
   cd "${HOME}/" || exit 1
   rm -rf "${COMPILE_TEMP_DIR:?}/"
 }
 
 install_appium_server_and_dependencies()
 {
+  log_stdout 'Installing appium dependencies.'
   sudo apt-get -qq update
   sudo apt-get -qq install --assume-yes --no-install-recommends libusb-dev
+  python3 -m pip install -U pymobiledevice3
+  log_stdout 'Installed appium dependencies.'
+  log_stdout 'Installing appium and xcuitest driver.'
   npm install --location=global appium
   appium driver install xcuitest
-  python3 -m pip install -U pymobiledevice3
+  log_stdout 'Installed appium and xcuitest driver.'
 }
 
 connect_to_vpn_for_instance()

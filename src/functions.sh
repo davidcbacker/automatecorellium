@@ -364,7 +364,7 @@ delete_unauthorized_devices()
   if [[ -z "${AUTHORIZED_INSTANCES}" ]]; then
     log_stdout "Error: AUTHORIZED_INSTANCES is empty or unset."
     return 1
-  }
+  fi
 
   local INSTANCES_TO_KEEP=()
   while IFS= read -r line; do
@@ -372,12 +372,12 @@ delete_unauthorized_devices()
   done <<< "${AUTHORIZED_INSTANCES}"
 
   local CORELLIUM_DEVICES_JSON ALL_EXISTING_DEVICES
-  # disable lint check since all values are assumed to be UUIDs
-  #shellcheck disable=SC2207
   CORELLIUM_DEVICES_JSON="$(corellium list)" || {
     echo "Error getting device list" >&2
     exit 1
   }
+  # disable lint check since all values are assumed to be UUIDs
+  #shellcheck disable=SC2207
   ALL_EXISTING_DEVICES=($(echo "${CORELLIUM_DEVICES_JSON}" | jq -r '.[].id')) || {
     echo "Error parsing device list" >&2
     exit 1

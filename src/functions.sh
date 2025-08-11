@@ -453,7 +453,6 @@ wait_for_instance_status()
   done
 }
 
-
 wait_for_assessment_status()
 {
   local INSTANCE_ID="$1"

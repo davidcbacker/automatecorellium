@@ -440,17 +440,17 @@ wait_for_instance_status()
   case "${TARGET_INSTANCE_STATUS}" in
     'on' | 'off') ;;
     *)
-      echo "Unsupported target status: '${TARGET_ASSESSMENT_STATUS}'. Exiting." >&2
+      echo "Unsupported target status: '${TARGET_INSTANCE_STATUS}'. Exiting." >&2
       exit 1
       ;;
   esac
 
   local CURRENT_INSTANCE_STATUS
-  CURRENT_INSTANCE_STATUS="$(get_assessment_status "${INSTANCE_ID}")"
+  CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
   while [ "${CURRENT_INSTANCE_STATUS}" != "${TARGET_INSTANCE_STATUS}" ]; do
     log_stdout "Status is ${CURRENT_INSTANCE_STATUS} and target is ${TARGET_INSTANCE_STATUS}. Waiting ${SLEEP_TIME_DEFAULT} seconds."
     sleep "${SLEEP_TIME_DEFAULT}"
-    CURRENT_INSTANCE_STATUS="$(get_assessment_status "${INSTANCE_ID}")"
+    CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
   done
 }
 

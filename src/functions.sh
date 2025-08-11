@@ -265,7 +265,7 @@ stop_matrix_monitoring()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_READY_FOR_TESTING}" ||
     return 1
-  log_stdout "MATRIX assessment ${assessment_id} is ${MATRIX_STATUS_READY_FOR_TESTING}."
+  log_stdout "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_READY_FOR_TESTING}."
 }
 
 test_matrix_evidence()

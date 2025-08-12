@@ -1,0 +1,13 @@
+ci:
+  - '.github/workflows/*.yaml'
+  - '.github/workflows/*.yml'
+  - 'data/config/**'
+matrix:
+  - '.github/workflows/scan_with_matrix.yaml'
+  - 'data/wordlist.txt'
+shell:
+  - 'src/*.sh'
+javascript:
+  - 'src/*.js'
+markdown:
+  - '*.md'

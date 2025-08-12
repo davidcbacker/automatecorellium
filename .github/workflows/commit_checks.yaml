@@ -13,8 +13,8 @@ jobs:
   changes:
     name: Check for file changes
     runs-on: ubuntu-latest
-    # permissions:
-    #   pull-requests: read
+    permissions:
+      pull-requests: read
     outputs:
       ci: ${{ steps.filter.outputs.ci }}
       javascript: ${{ steps.filter.outputs.javascript }}
@@ -31,7 +31,7 @@ jobs:
   shell-lint:
     name: Shell linting
     needs: changes
-    if: ${{ needs.changes.outputs.shell }}
+    if: ${{ needs.changes.outputs.shell == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code
@@ -55,7 +55,7 @@ jobs:
   yaml-lint:
     name: YAML linting
     needs: changes
-    if: ${{ needs.changes.outputs.ci }}
+    if: ${{ needs.changes.outputs.ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code

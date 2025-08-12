@@ -28,6 +28,18 @@ jobs:
       with:
         filters: data/config/dorny-paths-filter.yaml
         list-files: 'shell'
+  javascript-lint:
+    name: JavaScript linting
+    needs: changes
+    if: ${{ needs.changes.outputs.javascript == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run ESLint with SuperLinter
+        uses: super-linter/super-linter@v5
+        env:
+          VALIDATE_JAVASCRIPT_ES: true
   shell-lint:
     name: Shell linting
     needs: changes

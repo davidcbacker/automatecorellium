@@ -31,20 +31,20 @@ jobs:
   javascript-lint:
     name: JavaScript linting
     needs: changes
-    if: ${{ needs.changes.outputs.javascript }}
+    if: ${{ needs.changes.outputs.javascript == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Run ESLint with SuperLinter
-        uses: super-linter/super-linter@v5 # Use the latest version
+        uses: super-linter/super-linter@v5
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_JAVASCRIPT_ES: true # Enable JavaScript linting
+          VALIDATE_JAVASCRIPT_ES: true
   shell-lint:
     name: Shell linting
     needs: changes
-    if: ${{ needs.changes.outputs.shell }}
+    if: ${{ needs.changes.outputs.shell == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code
@@ -68,7 +68,7 @@ jobs:
   yaml-lint:
     name: YAML linting
     needs: changes
-    if: ${{ needs.changes.outputs.ci }}
+    if: ${{ needs.changes.outputs.ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code

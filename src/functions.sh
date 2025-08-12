@@ -372,12 +372,14 @@ get_open_matrix_assessment_json()
 handle_open_matrix_assessment()
 {
   local INSTANCE_ID="$1"
-  local OPEN_MATRIX_ASSESSMENT_JSON="$(get_open_matrix_assessment_json "${INSTANCE_ID}")"
+  local OPEN_MATRIX_ASSESSMENT_JSON
+  OPEN_MATRIX_ASSESSMENT_JSON="$(get_open_matrix_assessment_json "${INSTANCE_ID}")"
   local MATRIX_STATUS_COMPLETED_TESTING='complete'
   if [ -n "${OPEN_MATRIX_ASSESSMENT_JSON}" ]; then
     # There should only ever be one open MATRIX assessment. Added head -1 in case of handle edge cases.
-    local OPEN_MATRIX_ASSESSMENT_ID="$(echo "${OPEN_MATRIX_ASSESSMENT_JSON}" | jq -r '.id' | head -1)"
-    local OPEN_MATRIX_ASSESSMENT_STATUS="$(echo "${OPEN_MATRIX_ASSESSMENT_JSON}" | jq -r '.status' | head -1)"
+    local OPEN_MATRIX_ASSESSMENT_ID OPEN_MATRIX_ASSESSMENT_STATUS
+    OPEN_MATRIX_ASSESSMENT_ID="$(echo "${OPEN_MATRIX_ASSESSMENT_JSON}" | jq -r '.id' | head -1)"
+    OPEN_MATRIX_ASSESSMENT_STATUS="$(echo "${OPEN_MATRIX_ASSESSMENT_JSON}" | jq -r '.status' | head -1)"
     echo "Warning, assessment ${OPEN_MATRIX_ASSESSMENT_ID} is currently ${OPEN_MATRIX_ASSESSMENT_STATUS}."
     case "${OPEN_MATRIX_ASSESSMENT_STATUS}" in
       'testing')
@@ -385,10 +387,11 @@ handle_open_matrix_assessment()
         wait_for_assessment_status \
           "${INSTANCE_ID}" \
           "${OPEN_MATRIX_ASSESSMENT_ID}" \
-          "${MATRIX_STATUS_COMPLETED_TESTING}"
+          "${MATRIX_STATUS_COMPLETED_TESTING}" ||
+          exit 1
         ;;
       *)
-        delete_matrix_assessment
+        delete_matrix_assessment "${INSTANCE_ID}" "${OPEN_MATRIX_ASSESSMENT_ID}"
         ;;
     esac
   fi

@@ -13,8 +13,8 @@ jobs:
   changes:
     name: Check for file changes
     runs-on: ubuntu-latest
-    # permissions:
-    #   pull-requests: read
+    permissions:
+      pull-requests: read
     outputs:
       ci: ${{ steps.filter.outputs.ci }}
       javascript: ${{ steps.filter.outputs.javascript }}
@@ -28,6 +28,19 @@ jobs:
       with:
         filters: data/config/dorny-paths-filter.yaml
         list-files: 'shell'
+  javascript-lint:
+    name: JavaScript linting
+    needs: changes
+    if: ${{ needs.chagnes.outputs.javascript }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Run ESLint with SuperLinter
+        uses: super-linter/super-linter@v5 # Use the latest version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_JAVASCRIPT_ES: true # Enable JavaScript linting
   shell-lint:
     name: Shell linting
     needs: changes

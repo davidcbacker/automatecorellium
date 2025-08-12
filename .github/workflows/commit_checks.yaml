@@ -39,7 +39,6 @@ jobs:
       - name: Run ESLint with SuperLinter
         uses: super-linter/super-linter@v5
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_JAVASCRIPT_ES: true
   shell-lint:
     name: Shell linting

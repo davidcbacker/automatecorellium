@@ -345,13 +345,60 @@ download_matrix_report_json_to_path()
   local MATRIX_ASSESSMENT_ID="$2"
   local MATRIX_REPORT_DOWNLOAD_PATH="$3"
   log_stdout "Downloading MATRIX assessment ${MATRIX_ASSESSMENT_ID} report as JSON"
-  corellium matrix download-report --instance "${INSTANCE_ID}" --assessment "${MATRIX_ASSESSMENT_ID}" --format json > "${MATRIX_REPORT_DOWNLOAD_PATH}"
+  corellium matrix download-report \
+    --instance "${INSTANCE_ID}" \
+    --assessment "${MATRIX_ASSESSMENT_ID}" \
+    --format json > "${MATRIX_REPORT_DOWNLOAD_PATH}"
+}
+
+delete_matrix_assessment()
+{
+  local INSTANCE_ID="$1"
+  local MATRIX_ASSESSMENT_ID="$2"
+  log_stdout "Deleting MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  corellium matrix delete-assessment \
+    --instance "${INSTANCE_ID}" \
+    --assessment "${MATRIX_ASSESSMENT_ID}"
+  log_stdout "Deleted MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+}
+
+get_open_matrix_assessment_json()
+{
+  local INSTANCE_ID="$1"
+  corellium matrix get-assessments --instance "${INSTANCE_ID}" |
+    jq -r '.[] | select(.status != "complete" and .status != "failed")'
+}
+
+handle_open_matrix_assessment()
+{
+  local INSTANCE_ID="$1"
+  local OPEN_MATRIX_ASSESSMENT_JSON="$(get_open_matrix_assessment_json "${INSTANCE_ID}")"
+  local MATRIX_STATUS_COMPLETED_TESTING='complete'
+  if [ -n "${OPEN_MATRIX_ASSESSMENT_JSON}" ]; then
+    # There should only ever be one open MATRIX assessment. Added head -1 in case of handle edge cases.
+    local OPEN_MATRIX_ASSESSMENT_ID="$(echo "${OPEN_MATRIX_ASSESSMENT_JSON}" | jq -r '.id' | head -1)"
+    local OPEN_MATRIX_ASSESSMENT_STATUS="$(echo "${OPEN_MATRIX_ASSESSMENT_JSON}" | jq -r '.status' | head -1)"
+    echo "Warning, assessment ${OPEN_MATRIX_ASSESSMENT_ID} is currently ${OPEN_MATRIX_ASSESSMENT_STATUS}."
+    case "${OPEN_MATRIX_ASSESSMENT_STATUS}" in
+      'testing')
+        log_stdout "Waiting until ${OPEN_MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETED_TESTING}."
+        wait_for_assessment_status \
+          "${INSTANCE_ID}" \
+          "${OPEN_MATRIX_ASSESSMENT_ID}" \
+          "${MATRIX_STATUS_COMPLETED_TESTING}"
+        ;;
+      *)
+        delete_matrix_assessment
+        ;;
+    esac
+  fi
 }
 
 run_full_matrix_assessment()
 {
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID="$2"
+  handle_open_matrix_assessment "${INSTANCE_ID}"
   log_stdout "Creating new MATRIX assessment"
   local MATRIX_ASSESSMENT_ID
   MATRIX_ASSESSMENT_ID="$(create_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}")"
@@ -365,10 +412,11 @@ run_full_matrix_assessment()
   sleep 10
   stop_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
+  log_stdout "Completed MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  kill_app "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   download_matrix_report_html_to_path "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" "matrix_report_${MATRIX_ASSESSMENT_ID}.html"
   download_matrix_report_json_to_path "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" "matrix_report_${MATRIX_ASSESSMENT_ID}.json"
   log_stdout "Downloaded reports for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
-  kill_app "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
 }
 
 run_matrix_cafe_checks()

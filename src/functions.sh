@@ -309,7 +309,7 @@ test_matrix_evidence()
 {
   local INSTANCE_ID="$1"
   local MATRIX_ASSESSMENT_ID="$2"
-  local MATRIX_STATUS_COMPLETED_TESTING='complete'
+  local MATRIX_STATUS_COMPLETE='complete'
   log_stdout "Running test for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix test \
     --instance "${INSTANCE_ID}" \
@@ -318,9 +318,9 @@ test_matrix_evidence()
   wait_for_assessment_status \
     "${INSTANCE_ID}" \
     "${MATRIX_ASSESSMENT_ID}" \
-    "${MATRIX_STATUS_COMPLETED_TESTING}" ||
+    "${MATRIX_STATUS_COMPLETE}" ||
     return 1
-  log_stdout "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETED_TESTING}."
+  log_stdout "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETE}."
 }
 
 get_matrix_report_id()
@@ -374,7 +374,7 @@ handle_open_matrix_assessment()
   local INSTANCE_ID="$1"
   local OPEN_MATRIX_ASSESSMENT_JSON
   OPEN_MATRIX_ASSESSMENT_JSON="$(get_open_matrix_assessment_json "${INSTANCE_ID}")"
-  local MATRIX_STATUS_COMPLETED_TESTING='complete'
+  local MATRIX_STATUS_COMPLETE='complete'
   if [ -n "${OPEN_MATRIX_ASSESSMENT_JSON}" ]; then
     # There should only ever be one open MATRIX assessment. Added head -1 in case of handle edge cases.
     local OPEN_MATRIX_ASSESSMENT_ID OPEN_MATRIX_ASSESSMENT_STATUS
@@ -383,11 +383,11 @@ handle_open_matrix_assessment()
     echo "Warning, assessment ${OPEN_MATRIX_ASSESSMENT_ID} is currently ${OPEN_MATRIX_ASSESSMENT_STATUS}."
     case "${OPEN_MATRIX_ASSESSMENT_STATUS}" in
       'testing')
-        log_stdout "Waiting until ${OPEN_MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETED_TESTING}."
+        log_stdout "Waiting until ${OPEN_MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETE}."
         wait_for_assessment_status \
           "${INSTANCE_ID}" \
           "${OPEN_MATRIX_ASSESSMENT_ID}" \
-          "${MATRIX_STATUS_COMPLETED_TESTING}" ||
+          "${MATRIX_STATUS_COMPLETE}" ||
           exit 1
         ;;
       *)

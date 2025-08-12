@@ -520,14 +520,12 @@ wait_for_assessment_status()
       ;;
   esac
 
-  local current_assessment_status
-  current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
-  local last_assessment_status=''
-
-  while [ "${current_assessment_status}" != "${TARGET_ASSESSMENT_STATUS}" ]; do
-    case "${current_assessment_status}" in
+  local CURRENT_ASSESSMENT_STATUS LAST_ASSESSMENT_STATUS ASSESSMENT_STATUS_SLEEP_TIME
+  CURRENT_ASSESSMENT_STATUS="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
+  while [ "${CURRENT_ASSESSMENT_STATUS}" != "${TARGET_ASSESSMENT_STATUS}" ]; do
+    case "${CURRENT_ASSESSMENT_STATUS}" in
       'failed')
-        echo "Detected a failed run. Last state was '${last_assessment_status}'. Exiting." >&2
+        echo "Detected a failed run. Last state was '${LAST_ASSESSMENT_STATUS}'. Exiting." >&2
         return 1
         ;;
       'monitoring')
@@ -535,18 +533,18 @@ wait_for_assessment_status()
         return 1
         ;;
       'testing')
-        sleep_time="${SLEEP_TIME_FOR_TESTING}"
+        ASSESSMENT_STATUS_SLEEP_TIME="${SLEEP_TIME_FOR_TESTING}"
         ;;
       *)
-        sleep_time="${SLEEP_TIME_DEFAULT}"
+        ASSESSMENT_STATUS_SLEEP_TIME="${SLEEP_TIME_DEFAULT}"
         ;;
     esac
 
-    log_stdout "Status is ${current_assessment_status} and target is ${TARGET_ASSESSMENT_STATUS}. Waiting ${sleep_time} seconds."
-    sleep "${sleep_time}"
+    log_stdout "Status is ${CURRENT_ASSESSMENT_STATUS} and target is ${TARGET_ASSESSMENT_STATUS}. Waiting ${ASSESSMENT_STATUS_SLEEP_TIME} seconds."
+    sleep "${ASSESSMENT_STATUS_SLEEP_TIME}"
 
-    last_assessment_status="${current_assessment_status}"
-    current_assessment_status="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
+    LAST_ASSESSMENT_STATUS="${CURRENT_ASSESSMENT_STATUS}"
+    CURRENT_ASSESSMENT_STATUS="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
   done
 }
 

@@ -85,7 +85,7 @@ jobs:
           wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
           unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Connect to project VPN
-        timeout-minutes: 1
+        timeout-minutes: 2
         run: |
           set -eu && source ./src/functions.sh
           connect_to_vpn_for_instance \

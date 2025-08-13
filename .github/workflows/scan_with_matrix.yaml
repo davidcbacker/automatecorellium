@@ -186,6 +186,22 @@ jobs:
             "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
+      - name: Upload MATRIX runtime artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: matrix-runtime-artifacts
+          path: ${{ env.MATRIX_RUNNER_ARTIFACTS_PATH }}
+          compression-level: 9
+          if-no-files-found: error
+      - name: Upload MATRIX report artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: matrix-reports
+          path: |
+            matrix_report_*.html
+            matrix_report_*.json
+          compression-level: 9
+          if-no-files-found: error
       - name: Stop instance
         if: always()
         timeout-minutes: 2
@@ -222,19 +238,3 @@ jobs:
               sudo killall "${PROCESS}"
             fi
           done
-      - name: Upload MATRIX runtime artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: matrix-runtime-artifacts
-          path: ${{ env.MATRIX_RUNNER_ARTIFACTS_PATH }}
-          compression-level: 9
-          if-no-files-found: error
-      - name: Upload MATRIX report artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: matrix-reports
-          path: |
-            matrix_report_*.html
-            matrix_report_*.json
-          compression-level: 9
-          if-no-files-found: error

@@ -269,7 +269,9 @@ launch_appium_runner_ios()
 unlock_instance()
 {
   local INSTANCE_ID="$1"
-  corellium instance unlock --instance "${INSTANCE_ID}"
+  log_stdout "Unlocking instance ${INSTANCE_ID}."
+  corellium instance unlock --instance "${INSTANCE_ID}" > /dev/null
+  log_stdout "Unlocked instance ${INSTANCE_ID}."
 }
 
 is_app_running()

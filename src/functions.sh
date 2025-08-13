@@ -44,16 +44,20 @@ start_instance()
 {
   local INSTANCE_ID="$1"
   local TARGET_INSTANCE_STATUS_ON='on'
+  local TARGET_INSTANCE_STATUS_CREATING='creating'
   ensure_instance_exists "${INSTANCE_ID}"
   case "$(get_instance_status "${INSTANCE_ID}")" in
     "${TARGET_INSTANCE_STATUS_ON}")
       log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_ON}."
       ;;
+    "${TARGET_INSTANCE_STATUS_CREATING}")
+      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_CREATING}. Waiting for ${TARGET_INSTANCE_STATUS_ON} state."
+      wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_ON}"
+      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_ON}."
+      ;;
     *)
       log_stdout "Starting instance ${INSTANCE_ID}"
       corellium instance start "${INSTANCE_ID}" --wait > /dev/null
-      log_stdout "Started instance ${INSTANCE_ID}. Waiting for ${TARGET_INSTANCE_STATUS_ON} state."
-      wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_ON}"
       log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_ON}."
       ;;
   esac
@@ -63,16 +67,23 @@ stop_instance()
 {
   local INSTANCE_ID="$1"
   local TARGET_INSTANCE_STATUS_OFF='off'
+  local TARGET_INSTANCE_STATUS_CREATING='creating'
   ensure_instance_exists "${INSTANCE_ID}"
   case "$(get_instance_status "${INSTANCE_ID}")" in
     "${TARGET_INSTANCE_STATUS_OFF}")
       log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_OFF}."
       ;;
+    "${TARGET_INSTANCE_STATUS_CREATING}")
+      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_CREATING}. Waiting for ${TARGET_INSTANCE_STATUS_ON} state."
+      wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_ON}"
+      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_ON}."
+      log_stdout "Stopping instance ${INSTANCE_ID}"
+      corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
+      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_OFF}."
+      ;;
     *)
       log_stdout "Stopping instance ${INSTANCE_ID}"
       corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
-      log_stdout "Stopped instance ${INSTANCE_ID}. Waiting for ${TARGET_INSTANCE_STATUS_OFF} state."
-      wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_OFF}"
       log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_OFF}."
       ;;
   esac

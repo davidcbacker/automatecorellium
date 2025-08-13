@@ -105,11 +105,12 @@ soft_stop_instance()
 get_instance_status()
 {
   local INSTANCE_ID="$1"
-  local GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
+  local GET_INSTANCE_RESPONSE_JSON INSTANCE_STATE
+  GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
     echo "Error, failed to get details for instance ${INSTANCE_ID}." >&2
     return
   }
-  local INSTANCE_STATE="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.state')" || {
+  INSTANCE_STATE="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.state')" || {
     echo "Error, failed to parse get details JSON response for instance ${INSTANCE_ID}." >&2
     exit 1
   }

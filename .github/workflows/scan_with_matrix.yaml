@@ -186,8 +186,25 @@ jobs:
             "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
+      - name: Upload MATRIX runtime artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: matrix-runtime-artifacts
+          path: ${{ env.MATRIX_RUNNER_ARTIFACTS_PATH }}
+          compression-level: 9
+          if-no-files-found: error
+      - name: Upload MATRIX report artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: matrix-reports
+          path: |
+            matrix_report_*.html
+            matrix_report_*.json
+          compression-level: 9
+          if-no-files-found: error
       - name: Stop instance
         if: always()
+        timeout-minutes: 2
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
@@ -196,6 +213,7 @@ jobs:
           soft_stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Clean up Corellium auth and processes
         if: always()
+        timeout-minutes: 1
         env:
           CORELLIUM_CLI_PROFILE: '/home/runner/.config/.corellium/profile.json'
         run: |
@@ -220,19 +238,3 @@ jobs:
               sudo killall "${PROCESS}"
             fi
           done
-      - name: Upload MATRIX runtime artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: matrix-runtime-artifacts
-          path: ${{ env.MATRIX_RUNNER_ARTIFACTS_PATH }}
-          compression-level: 9
-          if-no-files-found: error
-      - name: Upload MATRIX report artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: matrix-reports
-          path: |
-            matrix_report_*.html
-            matrix_report_*.json
-          compression-level: 9
-          if-no-files-found: error

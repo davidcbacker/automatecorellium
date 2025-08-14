@@ -17,15 +17,15 @@ log_stdout()
 {
   local FRIENDLY_DATE
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
-  if [ "$#" -eq 0 ]; then
-    log_error 'No argument supplied to log_stdout.'
-    exit 1
-  else
+  if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
       printf '[+] %s  INFO: %s\n' \
         "${FRIENDLY_DATE}" \
         "${arg}"
     done
+  else
+    log_error 'No argument supplied to log_stdout.'
+    exit 1
   fi
 }
 
@@ -34,10 +34,12 @@ log_error()
   local FRIENDLY_DATE
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
-    printf '[!] %s  ERR: %s\n' \
-      "${FRIENDLY_DATE}" \
-      "$@"
-      >&2
+    for arg in "$@"; do
+      printf '[!] %s  ERR: %s\n' \
+        "${FRIENDLY_DATE}" \
+        "$@"
+        >&2
+    done
   else
     printf '[!] %s  ERR: No argument supplied to log_error.\n' \
       "${FRIENDLY_DATE}" \
@@ -49,15 +51,16 @@ log_warn()
 {
   local FRIENDLY_DATE
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
-  if [ "$#" -eq 0 ]; then
-    log_error 'No argument supplied to log_warn'
+  if [ "$#" -gt 0 ]; then
+    for arg in "$@"; do
+      printf '[!] %s WARN: %s\n' \
+        "${FRIENDLY_DATE}" \
+        "$@"
+        >&2
+    done
   else
-    printf '[!] %s WARN: %s\n' \
-      "${FRIENDLY_DATE}" \
-      "$@"
-      >&2
+    log_error 'No argument supplied to log_warn'
   fi
-
 }
 
 does_instance_exist()

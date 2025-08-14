@@ -66,11 +66,20 @@ jobs:
           corellium login \
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
-      - name: Start instance
+      - name: Start or create instance
         timeout-minutes: 1
         run: |
           set -eu && source ./src/functions.sh
-          start_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          if does_instance_exist "${{ env.MATRIX_INSTANCE_ID }}"; then
+            start_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          else
+            NEW_MATRIX_INSTANCE_ID="$(create_instance \
+              "${{ env.DEFAULT_MATRIX_HARDWARE_FLAVOR }}" \
+              "${{ env.DEFAULT_MATRIX_FIRMWARE_VERSION }}" \
+              "${{ env.DEFAULT_MATRIX_PROJECT }}")"
+            log_stdout "Saving new instance ID as environmental variable"
+            echo "NEW_MATRIX_INSTANCE_ID=${NEW_MATRIX_INSTANCE_ID}" >> "${GITHUB_ENV}"
+          fi
       - name: Install OpenVPN, USBFlux, and Appium dependencies
         run: |
           set -eu && source ./src/functions.sh

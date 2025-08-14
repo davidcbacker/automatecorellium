@@ -59,7 +59,7 @@ jobs:
       - name: Install Corellium npm dependencies
         run: |
           npm ci
-          echo "$(pwd)/node_modules/.bin" >> ${GITHUB_PATH}
+          echo "$(pwd)/node_modules/.bin" >> "${GITHUB_PATH}"
       - name: Log in to Corellium
         run: |
           corellium login \

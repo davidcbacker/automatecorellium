@@ -67,7 +67,7 @@ jobs:
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Start or create instance
-        timeout-minutes: 10
+        timeout-minutes: 1
         run: |
           set -eu && source ./src/functions.sh
           if does_instance_exist "${MATRIX_INSTANCE_ID}"; then

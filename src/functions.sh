@@ -50,10 +50,21 @@ create_instance()
   NEW_INSTANCE_NAME="MATRIX Automation $(date '+%Y-%m-%d') ${RANDOM}"
   corellium instance create "${HARDWARE_FLAVOR}" "${FIRMWARE_VERSION}" \
     "${PROJECT_ID}" "${NEW_INSTANCE_NAME}" --os-build "${FIRMWARE_BUILD}" --wait || {
-    echo "Error, failed to create new instance in project ${PROJECT_ID}." >&2
+    echo "Error, failed to create instance in project ${PROJECT_ID}." >&2
     echo "Error, hardware was ${HARDWARE_FLAVOR} running ${FIRMWARE_VERSION} (${FIRMWARE_BUILD})." >&2
     exit 1
   }
+}
+
+delete_instance()
+{
+  local INSTANCE_ID="$1"
+  log_stdout "Deleting instance ${INSTANCE_ID}."
+  corellium instance delete "${INSTANCE_ID}" || {
+    echo "Error, failed to delete instance ${INSTANCE_ID}." >&2
+    exit 1
+  }
+  log_stdout "Deleted instance ${INSTANCE_ID}."
 }
 
 start_instance()

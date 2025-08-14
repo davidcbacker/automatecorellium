@@ -30,13 +30,13 @@ log_stdout()
   done
 }
 
-ensure_instance_exists()
+does_instance_exist()
 {
   local INSTANCE_ID="$1"
   if ! corellium instance get --instance "${INSTANCE_ID}" |
     jq -e --arg id "${INSTANCE_ID}" 'select(.id == $id)' > /dev/null; then
     echo "Error, instance ${INSTANCE_ID} does not exist." >&2
-    exit 1
+    return 1
   fi
 }
 
@@ -45,7 +45,7 @@ start_instance()
   local INSTANCE_ID="$1"
   local TARGET_INSTANCE_STATUS_ON='on'
   local TARGET_INSTANCE_STATUS_CREATING='creating'
-  ensure_instance_exists "${INSTANCE_ID}"
+  does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in
     "${TARGET_INSTANCE_STATUS_ON}")
       log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_ON}."
@@ -68,7 +68,7 @@ stop_instance()
   local INSTANCE_ID="$1"
   local TARGET_INSTANCE_STATUS_OFF='off'
   local TARGET_INSTANCE_STATUS_CREATING='creating'
-  ensure_instance_exists "${INSTANCE_ID}"
+  does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in
     "${TARGET_INSTANCE_STATUS_OFF}")
       log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_OFF}."
@@ -93,7 +93,7 @@ soft_stop_instance()
 {
   local INSTANCE_ID="$1"
   local TARGET_INSTANCE_STATUS_OFF='off'
-  ensure_instance_exists "${INSTANCE_ID}"
+  does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in
     "${TARGET_INSTANCE_STATUS_OFF}")
       log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_OFF}."

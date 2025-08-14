@@ -56,11 +56,10 @@ jobs:
         with:
           cache: 'npm'
           node-version: 22
-      - name: Install Corellium CLI
+      - name: Install Corellium npm dependencies
         run: |
-          curl --silent https://status.npmjs.org | grep --quiet "All Systems Operational" ||
-            echo "The npm registry may be down"
-          npm install --global @corellium/corellium-cli
+          npm ci
+          echo "$(pwd)/node_modules/.bin" >> "${GITHUB_PATH}"
       - name: Log in to Corellium
         run: |
           corellium login \
@@ -70,8 +69,8 @@ jobs:
         timeout-minutes: 1
         run: |
           set -eu && source ./src/functions.sh
-          if does_instance_exist "${MATRIX_INSTANCE_ID}"; then
-            start_instance "${MATRIX_INSTANCE_ID}"
+          if does_instance_exist "${{ env.MATRIX_INSTANCE_ID }}"; then
+            start_instance "${{ env.MATRIX_INSTANCE_ID }}"
           else
             log_stdout "Creating instance."
             CREATED_MATRIX_INSTANCE_ID="$(create_instance \
@@ -185,7 +184,6 @@ jobs:
           MATRIX_INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.zip
         run: |
           set -eu && source ./src/functions.sh
-          npm install @corellium/corellium-api
           node ./src/zip_matrix_artifacts.js
           download_file_to_local_path \
             "${{ env.MATRIX_INSTANCE_ID }}" \

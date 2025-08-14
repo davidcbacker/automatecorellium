@@ -62,7 +62,7 @@ delete_instance()
 {
   local INSTANCE_ID="$1"
   log_stdout "Deleting instance ${INSTANCE_ID}."
-  corellium instance delete "${INSTANCE_ID}" || {
+  corellium instance delete "${INSTANCE_ID}" > /dev/null || {
     echo "Error, failed to delete instance ${INSTANCE_ID}." >&2
     exit 1
   }

@@ -80,16 +80,14 @@ jobs:
               "${{ vars.MATRIX_DEFAULT_FIRMWARE_BUILD }}" \
               "${{ vars.MATRIX_DEFAULT_PROJECT }}")"
             log_stdout "Created instance ${CREATED_MATRIX_INSTANCE_ID}."
-            log_stdout "Updating MATRIX_INSTANCE_ID environmental variable"
+            log_stdout 'Updating MATRIX_INSTANCE_ID environmental variable.'
             echo "MATRIX_INSTANCE_ID=${CREATED_MATRIX_INSTANCE_ID}" >> "${GITHUB_ENV}"
-            echo 'CREATED_MATRIX_INSTANCE=true' >> "${GITHUB_ENV}"
+            echo 'EPHEMERAL_MATRIX_INSTANCE=true' >> "${GITHUB_ENV}"
           fi
       - name: DEBUG test new env vars DELETE THIS BEFORE MERGING
         run: |
           echo "env.MATRIX_INSTANCE_ID=${{ env.MATRIX_INSTANCE_ID }}"
-          echo "MATRIX_INSTANCE_ID=${MATRIX_INSTANCE_ID}"
-          echo "env.CREATED_MATRIX_INSTANCE=${{ env.CREATED_MATRIX_INSTANCE }}"
-          echo "CREATED_MATRIX_INSTANCE=${CREATED_MATRIX_INSTANCE}"
+          echo "env.EPHEMERAL_MATRIX_INSTANCE=${{ env.EPHEMERAL_MATRIX_INSTANCE }}"
       - name: Install Appium dependencies
         run: |
           set -eu && source ./src/functions.sh
@@ -223,12 +221,10 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
-          if [ "${CREATED_MATRIX_INSTANCE:-}" = 'true' ]; then
-            echo "DEBUG - FIRST CONDITION MET"
-            delete_instance "${NEW_MATRIX_INSTANCE_ID}"
-          else
-            echo "DEBUG - SECOND CONDITION MET"
-            soft_stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          soft_stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          if [ "${EPHEMERAL_MATRIX_INSTANCE:-}" = 'true' ]; then
+            log_stdout 'Deleting ephemeral instance.'
+            delete_instance "${{ env.MATRIX_INSTANCE_ID }}"
           fi
       - name: Clean up Corellium auth and processes
         if: always()

@@ -172,9 +172,9 @@ jobs:
             if run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
               break
             elif [ "${failures}" -lt "${MAX_MATRIX_RUN_RETRIES}" ]; then
-              echo "[!] Warning - MATRIX failed on run $((failures + 1))"
+              log_warning "MATRIX failed on run $((failures + 1))"
             else
-              echo "[!] Error - MATRIX failed the max $((failures + 1)) times" >&2
+              log_error "MATRIX failed the max $((failures + 1)) times" >&2
               exit 1
             fi
           done

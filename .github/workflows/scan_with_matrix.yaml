@@ -69,16 +69,16 @@ jobs:
       - name: Start or create instance
         timeout-minutes: 1
         run: |
-          set -eu && source ./src/functions.sh
+          set -eux && source ./src/functions.sh
           if does_instance_exist "${{ env.MATRIX_INSTANCE_ID }}"; then
             start_instance "${{ env.MATRIX_INSTANCE_ID }}"
           else
             log_stdout "Creating instance."
             CREATED_MATRIX_INSTANCE_ID="$(create_instance \
-              "${{ env.DEFAULT_MATRIX_HARDWARE_FLAVOR }}" \
-              "${{ env.DEFAULT_MATRIX_FIRMWARE_VERSION }}" \
-              "${{ env.DEFAULT_MATRIX_FIRMWARE_BUILD }}" \
-              "${{ env.DEFAULT_MATRIX_PROJECT }}")"
+              "${{ env.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" \
+              "${{ env.MATRIX_DEFAULT_FIRMWARE_VERSION }}" \
+              "${{ env.MATRIX_DEFAULT_FIRMWARE_BUILD }}" \
+              "${{ env.MATRIX_DEFAULT_PROJECT }}")"
             log_stdout "Created instance ${CREATED_MATRIX_INSTANCE_ID}."
             log_stdout "Updating MATRIX_INSTANCE_ID environmental variable"
             echo "MATRIX_INSTANCE_ID=${CREATED_MATRIX_INSTANCE_ID}" >> "${GITHUB_ENV}"

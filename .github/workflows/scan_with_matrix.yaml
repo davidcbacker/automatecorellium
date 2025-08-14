@@ -67,6 +67,8 @@ jobs:
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Start or create instance
+        env:
+          MATRIX_DEFAULT_HARDWARE_FLAVOR: "${{ env.MATRIX_DEFAULT_HARDWARE_FLAVOR }}"
         timeout-minutes: 10
         run: |
           set -eux && source ./src/functions.sh

@@ -48,9 +48,11 @@ create_instance()
   local PROJECT_ID="$4"
   local NEW_INSTANCE_NAME
   NEW_INSTANCE_NAME="MATRIX Automation $(date '+%Y-%m-%d') ${RANDOM}"
+  # Avoid using --wait option here since it will wait for agent ready
+  # Better to create instance first then install local deps then wait
   corellium instance create "${HARDWARE_FLAVOR}" "${FIRMWARE_VERSION}" \
-    "${PROJECT_ID}" "${NEW_INSTANCE_NAME}" --os-build "${FIRMWARE_BUILD}" --wait || {
-    echo "Error, failed to create instance in project ${PROJECT_ID}." >&2
+    "${PROJECT_ID}" "${NEW_INSTANCE_NAME}" --os-build "${FIRMWARE_BUILD}" || {
+    echo "Error, failed to create new instance in project ${PROJECT_ID}." >&2
     echo "Error, hardware was ${HARDWARE_FLAVOR} running ${FIRMWARE_VERSION} (${FIRMWARE_BUILD})." >&2
     exit 1
   }

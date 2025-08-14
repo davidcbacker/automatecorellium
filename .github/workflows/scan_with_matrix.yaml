@@ -57,7 +57,9 @@ jobs:
           cache: 'npm'
           node-version: 22
       - name: Install Corellium npm dependencies
-        run: npm ci
+        run: |
+          npm ci
+          echo "$(pwd)/node_modules/.bin" >> ${GITHUB_PATH}
       - name: Log in to Corellium
         run: |
           corellium login \

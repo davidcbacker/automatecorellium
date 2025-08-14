@@ -73,13 +73,20 @@ jobs:
           if does_instance_exist "${{ env.MATRIX_INSTANCE_ID }}"; then
             start_instance "${{ env.MATRIX_INSTANCE_ID }}"
           else
-            NEW_MATRIX_INSTANCE_ID="$(create_instance \
+            CREATED_MATRIX_INSTANCE_ID="$(create_instance \
               "${{ env.DEFAULT_MATRIX_HARDWARE_FLAVOR }}" \
               "${{ env.DEFAULT_MATRIX_FIRMWARE_VERSION }}" \
               "${{ env.DEFAULT_MATRIX_PROJECT }}")"
             log_stdout "Saving new instance ID as environmental variable"
-            echo "NEW_MATRIX_INSTANCE_ID=${NEW_MATRIX_INSTANCE_ID}" >> "${GITHUB_ENV}"
+            echo "MATRIX_INSTANCE_ID=${CREATED_MATRIX_INSTANCE_ID}" >> "${GITHUB_ENV}"
+            echo 'CREATED_MATRIX_INSTANCE=true' >> "${GITHUB_ENV}"
           fi
+      - name: DEBUG test new env vars DELETE THIS BEFORE MERGING
+        run: |
+          echo "MATRIX_INSTANCE_ID=${MATRIX_INSTANCE_ID}"
+          echo "env.MATRIX_INSTANCE_ID=${{ env.MATRIX_INSTANCE_ID }}"
+          echo "CREATED_MATRIX_INSTANCE=${CREATED_MATRIX_INSTANCE}"
+          echo "env.CREATED_MATRIX_INSTANCE=${{ env.CREATED_MATRIX_INSTANCE }}"
       - name: Install OpenVPN, USBFlux, and Appium dependencies
         run: |
           set -eu && source ./src/functions.sh
@@ -205,7 +212,7 @@ jobs:
             matrix_report_*.json
           compression-level: 9
           if-no-files-found: error
-      - name: Stop instance
+      - name: Stop or delete instance
         if: always()
         timeout-minutes: 2
         env:
@@ -213,7 +220,13 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
-          soft_stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          if [ "${CREATED_MATRIX_INSTANCE}" = 'true' ]; then
+            echo "DEBUG - FIRST CONDITION MET"
+            delete_instance "${NEW_MATRIX_INSTANCE_ID}"
+          else
+            echo "DEBUG - SECOND CONDITION MET"
+            soft_stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          fi
       - name: Clean up Corellium auth and processes
         if: always()
         timeout-minutes: 1

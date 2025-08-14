@@ -217,10 +217,12 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
-          soft_stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
           if [ "${EPHEMERAL_MATRIX_INSTANCE:-}" = 'true' ]; then
             log_stdout 'Deleting ephemeral instance.'
+            stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
             delete_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          else
+            soft_stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
           fi
       - name: Clean up Corellium auth and processes
         if: always()

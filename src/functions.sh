@@ -37,13 +37,13 @@ log_error()
     for arg in "$@"; do
       printf '[!] %s  ERR: %s\n' \
         "${FRIENDLY_DATE}" \
-        "$@"
-      >&2
+        "$@" \
+        >&2
     done
   else
     printf '[!] %s  ERR: No argument supplied to log_error.\n' \
       "${FRIENDLY_DATE}" \
-    >&2
+      >&2
   fi
 }
 

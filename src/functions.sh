@@ -424,7 +424,7 @@ run_full_matrix_assessment()
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID="$2"
   handle_open_matrix_assessment "${INSTANCE_ID}"
-  log_stdout "Creating new MATRIX assessment"
+  log_stdout "Creating MATRIX assessment"
   local MATRIX_ASSESSMENT_ID
   MATRIX_ASSESSMENT_ID="$(create_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}")"
   if [ -z "${MATRIX_ASSESSMENT_ID}" ]; then

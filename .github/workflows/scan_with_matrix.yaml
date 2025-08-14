@@ -78,9 +78,9 @@ jobs:
             log_stdout "Creating instance."
             CREATED_MATRIX_INSTANCE_ID="$(create_instance \
               "${MATRIX_DEFAULT_HARDWARE_FLAVOR}" \
-              "${MATRIX_DEFAULT_FIRMWARE_VERSION}" \
-              "${MATRIX_DEFAULT_FIRMWARE_BUILD}" \
-              "${MATRIX_DEFAULT_PROJECT}")"
+              ${{ env.MATRIX_DEFAULT_FIRMWARE_VERSION }} \
+              "${{ env.MATRIX_DEFAULT_FIRMWARE_BUILD }}" \
+              "${{env.MATRIX_DEFAULT_PROJECT}}")"
             log_stdout "Created instance ${CREATED_MATRIX_INSTANCE_ID}."
             log_stdout "Updating MATRIX_INSTANCE_ID environmental variable"
             echo "MATRIX_INSTANCE_ID=${CREATED_MATRIX_INSTANCE_ID}" >> "${GITHUB_ENV}"

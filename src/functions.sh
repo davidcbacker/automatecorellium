@@ -776,7 +776,7 @@ connect_to_vpn_for_instance()
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
 
   if ! command -v openvpn; then
-    log_warn "Dependency openvpn not found. Attempting to install.'
+    log_warn 'Dependency openvpn not found. Attempting to install.'
     install_openvpn_dependency
   fi
   save_vpn_config_to_local_path "${INSTANCE_ID}" "${OVPN_CONFIG_PATH}"

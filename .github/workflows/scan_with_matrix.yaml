@@ -66,18 +66,31 @@ jobs:
           corellium login \
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
-      - name: Start instance
+      - name: Start or create instance
         timeout-minutes: 1
         run: |
           set -eu && source ./src/functions.sh
-          start_instance "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Install OpenVPN, USBFlux, and Appium dependencies
+          if does_instance_exist "${MATRIX_INSTANCE_ID}"; then
+            start_instance "${MATRIX_INSTANCE_ID}"
+          else
+            log_stdout "Creating instance."
+            CREATED_MATRIX_INSTANCE_ID="$(create_instance \
+              "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" \
+              "${{ vars.MATRIX_DEFAULT_FIRMWARE_VERSION }}" \
+              "${{ vars.MATRIX_DEFAULT_FIRMWARE_BUILD }}" \
+              "${{ vars.MATRIX_DEFAULT_PROJECT }}")"
+            log_stdout "Created instance ${CREATED_MATRIX_INSTANCE_ID}."
+            echo "MATRIX_INSTANCE_ID=${CREATED_MATRIX_INSTANCE_ID}" >> "${GITHUB_ENV}"
+            echo 'EPHEMERAL_MATRIX_INSTANCE=true' >> "${GITHUB_ENV}"
+            log_stdout 'Updated environmental variables for ephemeral instance.'
+          fi
+      - name: Install Appium dependencies
         run: |
           set -eu && source ./src/functions.sh
           install_openvpn_dependencies
           install_usbfluxd_and_dependencies
           install_appium_server_and_dependencies
-      - name: Unlock instance after successful boot
+      - name: Unlock instance after boot
         timeout-minutes: 20
         run: |
           set -eu && source ./src/functions.sh
@@ -196,7 +209,7 @@ jobs:
             matrix_report_*.json
           compression-level: 9
           if-no-files-found: error
-      - name: Stop instance
+      - name: Stop or delete instance
         if: always()
         timeout-minutes: 2
         env:
@@ -204,7 +217,13 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
-          soft_stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          if [ "${EPHEMERAL_MATRIX_INSTANCE:-}" = 'true' ]; then
+            log_stdout 'Deleting ephemeral instance.'
+            stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
+            delete_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          else
+            soft_stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          fi
       - name: Clean up Corellium auth and processes
         if: always()
         timeout-minutes: 1

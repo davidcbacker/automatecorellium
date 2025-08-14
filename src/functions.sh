@@ -30,14 +30,43 @@ log_stdout()
   done
 }
 
-ensure_instance_exists()
+does_instance_exist()
 {
   local INSTANCE_ID="$1"
-  if ! corellium instance get --instance "${INSTANCE_ID}" |
+  if ! corellium instance get --instance "${INSTANCE_ID}" 2> /dev/null |
     jq -e --arg id "${INSTANCE_ID}" 'select(.id == $id)' > /dev/null; then
     echo "Error, instance ${INSTANCE_ID} does not exist." >&2
-    exit 1
+    return 1
   fi
+}
+
+create_instance()
+{
+  local HARDWARE_FLAVOR="$1"
+  local FIRMWARE_VERSION="$2"
+  local FIRMWARE_BUILD="$3"
+  local PROJECT_ID="$4"
+  local NEW_INSTANCE_NAME
+  NEW_INSTANCE_NAME="MATRIX Automation $(date '+%Y-%m-%d') ${RANDOM}"
+  # Avoid using --wait option here since it will wait for agent ready
+  # Better to create instance first then install local deps then wait
+  corellium instance create "${HARDWARE_FLAVOR}" "${FIRMWARE_VERSION}" \
+    "${PROJECT_ID}" "${NEW_INSTANCE_NAME}" --os-build "${FIRMWARE_BUILD}" || {
+    echo "Error, failed to create new instance in project ${PROJECT_ID}." >&2
+    echo "Error, hardware was ${HARDWARE_FLAVOR} running ${FIRMWARE_VERSION} (${FIRMWARE_BUILD})." >&2
+    exit 1
+  }
+}
+
+delete_instance()
+{
+  local INSTANCE_ID="$1"
+  log_stdout "Deleting instance ${INSTANCE_ID}."
+  corellium instance delete "${INSTANCE_ID}" > /dev/null || {
+    echo "Error, failed to delete instance ${INSTANCE_ID}." >&2
+    exit 1
+  }
+  log_stdout "Deleted instance ${INSTANCE_ID}."
 }
 
 start_instance()
@@ -45,7 +74,7 @@ start_instance()
   local INSTANCE_ID="$1"
   local TARGET_INSTANCE_STATUS_ON='on'
   local TARGET_INSTANCE_STATUS_CREATING='creating'
-  ensure_instance_exists "${INSTANCE_ID}"
+  does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in
     "${TARGET_INSTANCE_STATUS_ON}")
       log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_ON}."
@@ -68,7 +97,7 @@ stop_instance()
   local INSTANCE_ID="$1"
   local TARGET_INSTANCE_STATUS_OFF='off'
   local TARGET_INSTANCE_STATUS_CREATING='creating'
-  ensure_instance_exists "${INSTANCE_ID}"
+  does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in
     "${TARGET_INSTANCE_STATUS_OFF}")
       log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_OFF}."
@@ -93,7 +122,7 @@ soft_stop_instance()
 {
   local INSTANCE_ID="$1"
   local TARGET_INSTANCE_STATUS_OFF='off'
-  ensure_instance_exists "${INSTANCE_ID}"
+  does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in
     "${TARGET_INSTANCE_STATUS_OFF}")
       log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_OFF}."

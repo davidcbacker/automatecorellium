@@ -174,7 +174,7 @@ jobs:
             elif [ "${failures}" -lt "${MAX_MATRIX_RUN_RETRIES}" ]; then
               log_warning "MATRIX failed on run $((failures + 1))"
             else
-              log_error "MATRIX failed the max $((failures + 1)) times" >&2
+              log_error "MATRIX failed the max $((failures + 1)) times"
               exit 1
             fi
           done

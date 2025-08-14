@@ -33,10 +33,15 @@ jobs:
       shell: ${{ steps.filter.outputs.shell }}
     steps:
     - uses: actions/checkout@v4
+    - name: DEBUG CHECK EVENT NAME
+      run: |
+          echo "DEBUG github.event_name is ${{ github.event_name }}"
+          echo "DEBUG conditional is ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}"
     - uses: dorny/paths-filter@v3
       id: filter
       with:
         filters: data/config/dorny-paths-filter.yaml
+        assumeChanges: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
         list-files: 'shell'
   corellium-matrixscan:
     name: Scan with MATRIX

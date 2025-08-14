@@ -69,7 +69,7 @@ jobs:
       - name: Start or create instance
         timeout-minutes: 10
         run: |
-          set -eux && source ./src/functions.sh
+          set -eu && source ./src/functions.sh
           if does_instance_exist "${MATRIX_INSTANCE_ID}"; then
             start_instance "${MATRIX_INSTANCE_ID}"
           else
@@ -80,14 +80,10 @@ jobs:
               "${{ vars.MATRIX_DEFAULT_FIRMWARE_BUILD }}" \
               "${{ vars.MATRIX_DEFAULT_PROJECT }}")"
             log_stdout "Created instance ${CREATED_MATRIX_INSTANCE_ID}."
-            log_stdout 'Updating MATRIX_INSTANCE_ID environmental variable.'
             echo "MATRIX_INSTANCE_ID=${CREATED_MATRIX_INSTANCE_ID}" >> "${GITHUB_ENV}"
             echo 'EPHEMERAL_MATRIX_INSTANCE=true' >> "${GITHUB_ENV}"
+            log_stdout 'Updated environmental variables for ephemeral instance.'
           fi
-      - name: DEBUG test new env vars DELETE THIS BEFORE MERGING
-        run: |
-          echo "env.MATRIX_INSTANCE_ID=${{ env.MATRIX_INSTANCE_ID }}"
-          echo "env.EPHEMERAL_MATRIX_INSTANCE=${{ env.EPHEMERAL_MATRIX_INSTANCE }}"
       - name: Install Appium dependencies
         run: |
           set -eu && source ./src/functions.sh

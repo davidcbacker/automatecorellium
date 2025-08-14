@@ -55,7 +55,7 @@ log_warn()
     for arg in "$@"; do
       printf '[!] %s WARN: %s\n' \
         "${FRIENDLY_DATE}" \
-        "$@"
+        "$@" \
         >&2
     done
   else

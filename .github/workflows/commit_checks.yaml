@@ -1,4 +1,4 @@
-name: Check the changes
+name: Static code checks
 
 on:
   push:

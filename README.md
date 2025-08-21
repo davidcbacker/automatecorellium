@@ -4,7 +4,7 @@
 
 See the current CI pass/fail status of dynamic and static checks.
 
-### HEAD of master Check
+### Most Recent Commit
 
 [![Static code checks](https://github.com/davidcbacker/automatecorellium/actions/workflows/commit_checks.yaml/badge.svg)](https://github.com/davidcbacker/automatecorellium/actions/workflows/commit_checks.yaml)
 

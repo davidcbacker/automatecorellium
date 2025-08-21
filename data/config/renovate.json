@@ -1,0 +1,11 @@
+{
+  "assignees": ["davidcbacker"],
+  "dependencyDashboard": false,
+  "internalChecksFilter": "strict",
+  "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
+  "minimumReleaseAge": "14 days",
+  "onboarding": false,
+  "platform": "github",
+  "rebaseWhen": "behind-base",
+  "repositories": ["davidcbacker/automatecorellium"]
+}

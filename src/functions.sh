@@ -15,19 +15,43 @@ check_env_vars()
 
 log_stdout()
 {
-  local friendly_date
-  friendly_date="$(date +'%Y-%m-%dT%H:%M:%S')"
-  if [ "$#" -eq 0 ]; then
-    printf '[!] %s ERROR: No argument supplied to log_stdout.\n' \
-      "${friendly_date}" \
-      >&2
+  local FRIENDLY_DATE
+  FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
+  if [ "$#" -gt 0 ]; then
+    for arg in "$@"; do
+      printf '[+] %s  INFO: %s\n' "${FRIENDLY_DATE}" "${arg}"
+    done
+  else
+    log_error 'No argument supplied to log_stdout.'
     exit 1
   fi
-  for arg in "$@"; do
-    printf '[+] %s  INFO: %s\n' \
-      "${friendly_date}" \
-      "${arg}"
-  done
+}
+
+log_error()
+{
+  local FRIENDLY_DATE
+  FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
+  if [ "$#" -gt 0 ]; then
+    for arg in "$@"; do
+      printf '[!] %s  ERR: %s\n' "${FRIENDLY_DATE}" "${arg}" >&2
+    done
+  else
+    printf '[!] %s  ERR: No argument supplied to log_error.\n' \
+      "${FRIENDLY_DATE}" >&2
+  fi
+}
+
+log_warn()
+{
+  local FRIENDLY_DATE
+  FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
+  if [ "$#" -gt 0 ]; then
+    for arg in "$@"; do
+      printf '[!] %s WARN: %s\n' "${FRIENDLY_DATE}" "${arg}" >&2
+    done
+  else
+    log_error 'No argument supplied to log_warn'
+  fi
 }
 
 does_instance_exist()
@@ -35,7 +59,7 @@ does_instance_exist()
   local INSTANCE_ID="$1"
   if ! corellium instance get --instance "${INSTANCE_ID}" 2> /dev/null |
     jq -e --arg id "${INSTANCE_ID}" 'select(.id == $id)' > /dev/null; then
-    echo "Error, instance ${INSTANCE_ID} does not exist." >&2
+    log_error "instance ${INSTANCE_ID} does not exist."
     return 1
   fi
 }
@@ -52,8 +76,8 @@ create_instance()
   # Better to create instance first then install local deps then wait
   corellium instance create "${HARDWARE_FLAVOR}" "${FIRMWARE_VERSION}" \
     "${PROJECT_ID}" "${NEW_INSTANCE_NAME}" --os-build "${FIRMWARE_BUILD}" || {
-    echo "Error, failed to create new instance in project ${PROJECT_ID}." >&2
-    echo "Error, hardware was ${HARDWARE_FLAVOR} running ${FIRMWARE_VERSION} (${FIRMWARE_BUILD})." >&2
+    log_error "Failed to create new instance in project ${PROJECT_ID}." >&2
+    log_error "Hardware was ${HARDWARE_FLAVOR} running ${FIRMWARE_VERSION} (${FIRMWARE_BUILD})." >&2
     exit 1
   }
 }
@@ -63,7 +87,7 @@ delete_instance()
   local INSTANCE_ID="$1"
   log_stdout "Deleting instance ${INSTANCE_ID}."
   corellium instance delete "${INSTANCE_ID}" > /dev/null || {
-    echo "Error, failed to delete instance ${INSTANCE_ID}." >&2
+    log_error "Failed to delete instance ${INSTANCE_ID}." >&2
     exit 1
   }
   log_stdout "Deleted instance ${INSTANCE_ID}."
@@ -147,11 +171,11 @@ get_instance_status()
   local INSTANCE_ID="$1"
   local GET_INSTANCE_RESPONSE_JSON INSTANCE_STATE
   GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
-    echo "Error, failed to get details for instance ${INSTANCE_ID}." >&2
+    log_error "Failed to get details for instance ${INSTANCE_ID}." >&2
     return
   }
   INSTANCE_STATE="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.state')" || {
-    echo "Error, failed to parse get details JSON response for instance ${INSTANCE_ID}." >&2
+    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}." >&2
     exit 1
   }
   echo "${INSTANCE_STATE}"
@@ -431,7 +455,7 @@ handle_open_matrix_assessment()
     local OPEN_MATRIX_ASSESSMENT_ID OPEN_MATRIX_ASSESSMENT_STATUS
     OPEN_MATRIX_ASSESSMENT_ID="$(echo "${OPEN_MATRIX_ASSESSMENT_JSON}" | jq -r '.id' | head -1)"
     OPEN_MATRIX_ASSESSMENT_STATUS="$(echo "${OPEN_MATRIX_ASSESSMENT_JSON}" | jq -r '.status' | head -1)"
-    echo "Warning, assessment ${OPEN_MATRIX_ASSESSMENT_ID} is currently ${OPEN_MATRIX_ASSESSMENT_STATUS}."
+    log_warn "Assessment ${OPEN_MATRIX_ASSESSMENT_ID} is currently ${OPEN_MATRIX_ASSESSMENT_STATUS}."
     case "${OPEN_MATRIX_ASSESSMENT_STATUS}" in
       'testing')
         log_stdout "Waiting until ${OPEN_MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETE}."
@@ -713,7 +737,7 @@ install_usbfluxd_and_dependencies()
     if command -v "${EXPECTED_BINARY}" > /dev/null; then
       log_stdout "Installed ${EXPECTED_BINARY} at $(command -v "${EXPECTED_BINARY}")."
     else
-      echo "Error, failed to install ${EXPECTED_BINARY}."
+      log_error "Failed to install ${EXPECTED_BINARY}."
       exit 1
     fi
   done
@@ -743,7 +767,7 @@ connect_to_vpn_for_instance()
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
 
   if ! command -v openvpn; then
-    log_stdout 'Warning - openvpn not found. Attempting to install.'
+    log_warn 'Dependency openvpn not found. Attempting to install.'
     install_openvpn_dependency
   fi
   save_vpn_config_to_local_path "${INSTANCE_ID}" "${OVPN_CONFIG_PATH}"

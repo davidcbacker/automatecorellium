@@ -23,21 +23,16 @@ jobs:
   changes:
     name: Check for file changes
     runs-on: ubuntu-latest
-    # permissions:
-    #   pull-requests: read
     outputs:
-      ci: ${{ steps.filter.outputs.ci }}
-      javascript: ${{ steps.filter.outputs.javascript }}
-      markdown: ${{ steps.filter.outputs.markdown }}
       matrix: ${{ steps.filter.outputs.matrix }}
       shell: ${{ steps.filter.outputs.shell }}
     steps:
-    - uses: actions/checkout@v4
-    - uses: dorny/paths-filter@v3
-      id: filter
-      with:
-        filters: data/config/dorny-paths-filter.yaml
-        list-files: 'shell'
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: data/config/dorny-paths-filter.yaml
+          list-files: 'shell'
   corellium-matrixscan:
     name: Scan with MATRIX
     needs: changes

@@ -1,5 +1,7 @@
 {
   "assignees": ["davidcbacker"],
+  "automerge": true,
+  "automergeStrategy": "squash",
   "dependencyDashboard": false,
   "enabled": true,
   "internalChecksFilter": "strict",

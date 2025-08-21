@@ -19,8 +19,8 @@ jobs:
       ci: ${{ steps.filter.outputs.ci }}
       javascript: ${{ steps.filter.outputs.javascript }}
       markdown: ${{ steps.filter.outputs.markdown }}
-      matrix: ${{ steps.filter.outputs.matrix }}
       shell: ${{ steps.filter.outputs.shell }}
+      static-lint: ${{ steps.filter.outputs.static-lint }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -47,7 +47,11 @@ jobs:
   javascript-lint:
     name: JavaScript linting
     needs: changes
-    if: ${{ needs.changes.outputs.javascript == 'true' }}
+    if: >-
+      ${{
+        needs.changes.outputs.javascript == 'true' ||
+        needs.changes.outputs.static-lint == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -62,7 +66,11 @@ jobs:
   shell-lint:
     name: Shell linting
     needs: changes
-    if: ${{ needs.changes.outputs.shell == 'true' }}
+    if: >-
+      ${{
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.static-lint == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code

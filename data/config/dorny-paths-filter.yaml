@@ -7,6 +7,8 @@ matrix:
   - 'data/wordlist.txt'
 shell:
   - 'src/*.sh'
+static-lint:
+  - '.github/workflows/commit_checks.yaml'
 javascript:
   - 'src/*.js'
 markdown:

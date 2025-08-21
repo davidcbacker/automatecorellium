@@ -95,7 +95,7 @@ jobs:
   yaml-lint:
     name: YAML linting
     needs: changes
-    if: needs.changes.outputs.ci == 'true'
+    if: ${{ needs.changes.outputs.ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code

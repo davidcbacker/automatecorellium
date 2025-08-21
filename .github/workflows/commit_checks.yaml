@@ -25,6 +25,8 @@ jobs:
     - uses: actions/checkout@v4
     - uses: dorny/paths-filter@v3
       id: filter
+      env:
+        LOG_LEVEL: 'debug'
       with:
         filters: data/config/dorny-paths-filter.yaml
         list-files: 'shell'

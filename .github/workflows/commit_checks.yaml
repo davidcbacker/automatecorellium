@@ -41,7 +41,7 @@ jobs:
       - name: Renovate
         uses: renovatebot/github-action@v41.0.14
         with:
-          configurationFile: '.github/renovate.json'
+          configurationFile: 'data/config/renovate.json'
           token: ${{ secrets.RENOVATE_TOKEN }}
 
   javascript-lint:

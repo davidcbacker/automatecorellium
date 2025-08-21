@@ -43,7 +43,7 @@ jobs:
         env:
           LOG_LEVEL: 'debug'
         with:
-          configurationFile: 'data/config/renovate-config.json'
+          configurationFile: '.github/renovate.json'
           token: ${{ secrets.RENOVATE_TOKEN }}
 
   javascript-lint:

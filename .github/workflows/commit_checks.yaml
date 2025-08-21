@@ -37,7 +37,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       - name: Run ESLint with SuperLinter
-        uses: super-linter/super-linter@v5
+        uses: super-linter/super-linter@v7
         env:
           VALIDATE_JAVASCRIPT_ES: true
   shell-lint:

@@ -19,9 +19,7 @@ log_stdout()
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
-      printf '[+] %s  INFO: %s\n' \
-        "${FRIENDLY_DATE}" \
-        "${arg}"
+      printf '[+] %s  INFO: %s\n' "${FRIENDLY_DATE}" "${arg}"
     done
   else
     log_error 'No argument supplied to log_stdout.'
@@ -35,15 +33,11 @@ log_error()
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
-      printf '[!] %s  ERR: %s\n' \
-        "${FRIENDLY_DATE}" \
-        "$@" \
-        >&2
+      printf '[!] %s  ERR: %s\n' "${FRIENDLY_DATE}" "${arg}" >&2
     done
   else
     printf '[!] %s  ERR: No argument supplied to log_error.\n' \
-      "${FRIENDLY_DATE}" \
-      >&2
+      "${FRIENDLY_DATE}" >&2
   fi
 }
 
@@ -53,10 +47,7 @@ log_warn()
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
-      printf '[!] %s WARN: %s\n' \
-        "${FRIENDLY_DATE}" \
-        "$@" \
-        >&2
+      printf '[!] %s WARN: %s\n' "${FRIENDLY_DATE}" "${arg}" >&2
     done
   else
     log_error 'No argument supplied to log_warn'

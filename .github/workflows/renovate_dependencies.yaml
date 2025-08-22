@@ -1,0 +1,29 @@
+name: Static code checks
+
+on:
+  push:
+    branches: master
+  pull_request:
+    branches: master
+  schedule:
+    - cron: "17 16 */14 * *"
+  workflow_dispatch:
+
+env:
+  RENOVATE_CONFIG_PATH: 'data/config/renovate.json'
+
+jobs:
+  dependencies-check:
+    name: Renovate dependencies
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Renovate
+        uses: renovatebot/github-action@v43.0.5
+        with:
+          configurationFile: ${{ env.RENOVATE_CONFIG_PATH }}
+          token: ${{ secrets.RENOVATE_TOKEN }}

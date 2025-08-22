@@ -59,7 +59,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Run ESLint with SuperLinter
-        uses: super-linter/super-linter@v5
+        uses: super-linter/super-linter@v7
         env:
           VALIDATE_JAVASCRIPT_ES: true
 

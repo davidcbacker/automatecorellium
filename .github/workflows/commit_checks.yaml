@@ -60,6 +60,7 @@ jobs:
         uses: super-linter/super-linter@v5
         env:
           VALIDATE_JAVASCRIPT_ES: true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   shell-lint:
     name: Shell linting

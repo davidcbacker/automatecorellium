@@ -27,7 +27,7 @@ jobs:
       matrix: ${{ steps.filter.outputs.matrix }}
       shell: ${{ steps.filter.outputs.shell }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -45,7 +45,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Pull the latest code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Install Node
         uses: actions/setup-node@v4
         with:

@@ -88,7 +88,7 @@ jobs:
               --case-indent
               --func-next-line
               --indent 2
-              --space-redirect
+              --space-redirects
         with: 
           sh_checker_checkbashisms_enable: true
 

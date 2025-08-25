@@ -27,21 +27,6 @@ jobs:
           filters: data/config/dorny-paths-filter.yaml
           list-files: 'shell'
 
-  dependencies-check:
-    name: Renovate dependencies
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-      - name: Renovate
-        uses: renovatebot/github-action@v43.0.7
-        with:
-          configurationFile: 'data/config/renovate.json'
-          token: ${{ secrets.RENOVATE_TOKEN }}
-
   javascript-lint:
     name: JavaScript linting
     needs: changes
@@ -90,7 +75,7 @@ jobs:
               --func-next-line
               --indent 2
               --space-redirects
-        with: 
+        with:
           sh_checker_checkbashisms_enable: true
 
   yaml-lint:

@@ -20,7 +20,7 @@ jobs:
       shell: ${{ steps.filter.outputs.shell }}
       static-lint: ${{ steps.filter.outputs.static-lint }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dorny/paths-filter@v3
         id: filter
         with:
@@ -38,7 +38,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
       - name: Run ESLint with SuperLinter
@@ -58,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Lint
         uses: luizm/action-sh-checker@v0.9.0
         env:
@@ -85,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Lint
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)

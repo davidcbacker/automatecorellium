@@ -88,7 +88,9 @@ jobs:
               --case-indent
               --func-next-line
               --indent 2
-              --space-redirects
+              --space-redirect
+        with: 
+          sh_checker_checkbashisms_enable: true
 
   yaml-lint:
     name: YAML linting

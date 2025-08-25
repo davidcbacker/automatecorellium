@@ -27,6 +27,7 @@ jobs:
           filters: data/config/dorny-paths-filter.yaml
           list-files: 'shell'
 
+
   javascript-lint:
     name: JavaScript linting
     needs: changes
@@ -44,6 +45,7 @@ jobs:
       - name: Run ESLint with SuperLinter
         uses: super-linter/super-linter@v5
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_JAVASCRIPT_ES: true
 
   shell-lint:
@@ -74,6 +76,7 @@ jobs:
               --func-next-line
               --indent 2
               --space-redirects
+
         with:
           sh_checker_checkbashisms_enable: true
 

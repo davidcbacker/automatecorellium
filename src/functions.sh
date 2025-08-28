@@ -15,11 +15,15 @@ check_env_vars()
 
 log_stdout()
 {
+  MAKE_CONSOLE_BLUE="$(tput setaf 4)"
+  MAKE_CONSOLE_NORMAL="$(tput sgr0)"
   local FRIENDLY_DATE
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
-      printf '[+] %s  INFO: %s\n' "${FRIENDLY_DATE}" "${arg}"
+      printf "${MAKE_CONSOLE_BLUE}"
+      printf '[+] %s INFO: %s\n' "${FRIENDLY_DATE}" "${arg}"
+      printf "${MAKE_CONSOLE_NORMAL}"
     done
   else
     log_error 'No argument supplied to log_stdout.'
@@ -29,30 +33,44 @@ log_stdout()
 
 log_error()
 {
+  MAKE_CONSOLE_RED="$(tput setaf 1)"
+  MAKE_CONSOLE_NORMAL="$(tput sgr0)"
   local FRIENDLY_DATE
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
+      printf "${MAKE_CONSOLE_RED}"
       printf '[!] %s  ERR: %s\n' "${FRIENDLY_DATE}" "${arg}" >&2
+      printf "${MAKE_CONSOLE_NORMAL}"
     done
   else
+    printf "${MAKE_CONSOLE_RED}"
     printf '[!] %s  ERR: No argument supplied to log_error.\n' \
       "${FRIENDLY_DATE}" >&2
+    printf "${MAKE_CONSOLE_NORMAL}"
   fi
 }
 
 log_warn()
 {
+  MAKE_CONSOLE_YELLOW="$(tput setaf 3)"
+  MAKE_CONSOLE_NORMAL="$(tput sgr0)"
   local FRIENDLY_DATE
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
+      printf "${MAKE_CONSOLE_YELLOW}"
       printf '[!] %s WARN: %s\n' "${FRIENDLY_DATE}" "${arg}" >&2
+      printf "${MAKE_CONSOLE_NORMAL}"
     done
   else
     log_error 'No argument supplied to log_warn'
+    exit 1
   fi
 }
+
+MAKE_CONSOLE_RED="$(tput setaf 1)"}"
+MAKE_CONSOLE_NORMAL="$(tput sgr0)"
 
 does_instance_exist()
 {

@@ -41,15 +41,19 @@ log_error()
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
-      printf "${MAKE_CONSOLE_RED}"
-      printf '[!] %s  ERR: %s\n' "${FRIENDLY_DATE}" "${arg}" >&2
-      printf "${MAKE_CONSOLE_NORMAL}"
+      printf '%s[!] %s  ERR: %s\n%s' \
+        "${MAKE_CONSOLE_RED}" \
+        "${FRIENDLY_DATE}" \
+        "${arg}" \
+        "${MAKE_CONSOLE_NORMAL}" \
+        >&2
     done
   else
-    printf "${MAKE_CONSOLE_RED}"
-    printf '[!] %s  ERR: No argument supplied to log_error.\n' \
-      "${FRIENDLY_DATE}" >&2
-    printf "${MAKE_CONSOLE_NORMAL}"
+    printf '%s[!] %s  ERR: No argument supplied to log_error.\n%s' \
+      "${MAKE_CONSOLE_RED}" \
+      "${FRIENDLY_DATE}" \
+      "${MAKE_CONSOLE_NORMAL}" \
+      >&2
   fi
 }
 
@@ -61,9 +65,12 @@ log_warn()
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
-      printf "${MAKE_CONSOLE_YELLOW}"
-      printf '[!] %s WARN: %s\n' "${FRIENDLY_DATE}" "${arg}" >&2
-      printf "${MAKE_CONSOLE_NORMAL}"
+      printf '[!] %s WARN: %s\n' "${}"  >&2
+        "${MAKE_CONSOLE_YELLOW}" \
+        "${FRIENDLY_DATE}" \
+        "${arg}" \
+        "${MAKE_CONSOLE_NORMAL}" \
+        >&2
     done
   else
     log_error 'No argument supplied to log_warn'

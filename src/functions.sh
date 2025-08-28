@@ -69,9 +69,6 @@ log_warn()
   fi
 }
 
-MAKE_CONSOLE_RED="$(tput setaf 1)"}"
-MAKE_CONSOLE_NORMAL="$(tput sgr0)"
-
 does_instance_exist()
 {
   local INSTANCE_ID="$1"

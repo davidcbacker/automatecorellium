@@ -5,6 +5,9 @@ on:
     - cron: '49 5 * * 1-5'
   workflow_dispatch:
 
+env:
+  TERM: xterm
+
 jobs:
   corellium-delete:
     name: Delete

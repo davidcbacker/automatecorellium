@@ -21,9 +21,11 @@ log_stdout()
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
-      printf "${MAKE_CONSOLE_BLUE}"
-      printf '[+] %s INFO: %s\n' "${FRIENDLY_DATE}" "${arg}"
-      printf "${MAKE_CONSOLE_NORMAL}"
+      printf '%s[+] %s INFO: %s\n%s' \
+        "${MAKE_CONSOLE_BLUE}" \
+        "${FRIENDLY_DATE}" \
+        "${arg}" \
+        "${MAKE_CONSOLE_NORMAL}"
     done
   else
     log_error 'No argument supplied to log_stdout.'

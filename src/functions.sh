@@ -65,7 +65,7 @@ log_warn()
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
-      printf '%s[!] %s WARN: %s\n%s' "${}"  >&2
+      printf '%s[!] %s WARN: %s\n%s' "${}"
         "${MAKE_CONSOLE_YELLOW}" \
         "${FRIENDLY_DATE}" \
         "${arg}" \

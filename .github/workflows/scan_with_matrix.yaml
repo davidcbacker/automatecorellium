@@ -129,7 +129,7 @@ jobs:
           appium_runner_success='false'
           for launch_attempt in $(seq 1 "${APPIUM_RUNNER_LAUNCH_RETRIES}"); do
             if ! launch_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"; then
-              echo "Failed to launch app during attempt ${launch_attempt}"
+              log_warning "Failed to launch app during attempt ${launch_attempt}"
               continue
             fi
             for curl_attempt in $(seq 1 "${APPIUM_RUNNER_CURL_RETRIES}"); do
@@ -144,7 +144,7 @@ jobs:
             done
           done
           if [ "${appium_runner_success}" != 'true' ]; then
-            echo 'FAILED TO ESTABLISH APPIUM COMMS' >&2
+            log_error 'Failed to establish comms with Appium runner app'
             exit 1
           fi
       - name: Install Corellium Cafe from URL

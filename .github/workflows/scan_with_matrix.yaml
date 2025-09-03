@@ -211,11 +211,11 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           if [ "${EPHEMERAL_MATRIX_INSTANCE:-}" = 'true' ]; then
-            log_stdout 'Deleting ephemeral instance.'
-            stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
-            delete_instance "${{ env.MATRIX_INSTANCE_ID }}"
+            log_stdout "Deleting ephemeral instance ${MATRIX_INSTANCE_ID}."
+            stop_instance "${MATRIX_INSTANCE_ID}"
+            delete_instance "${MATRIX_INSTANCE_ID}"
           else
-            soft_stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
+            soft_stop_instance "${MATRIX_INSTANCE_ID}"
           fi
       - name: Clean up Corellium auth and processes
         if: always()

@@ -55,6 +55,9 @@ start_instance()
       wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_ON}"
       log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_ON}."
       ;;
+    '')
+      log_error "Failed to get status for instance ${INSTANCE_ID}."
+      exit 1
     *)
       log_stdout "Starting instance ${INSTANCE_ID}"
       corellium instance start "${INSTANCE_ID}" --wait > /dev/null
@@ -81,6 +84,9 @@ stop_instance()
       corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
       log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_OFF}."
       ;;
+    '')
+      log_error "Failed to get status for instance ${INSTANCE_ID}."
+      exit 1
     *)
       log_stdout "Stopping instance ${INSTANCE_ID}"
       corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
@@ -98,6 +104,9 @@ soft_stop_instance()
     "${TARGET_INSTANCE_STATUS_OFF}")
       log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_OFF}."
       ;;
+    '')
+      log_error "Failed to get status for instance ${INSTANCE_ID}."
+      exit 1
     *)
       log_stdout "Stopping instance ${INSTANCE_ID}."
       check_env_vars
@@ -136,26 +145,29 @@ get_instance_services_ip()
 
 wait_until_agent_ready()
 {
-  local instance_id="$1"
+  local INSTANCE_ID="$1"
   local AGENT_READY_SLEEP_TIME='15'
   local INSTANCE_STATUS_ON='on'
-  local PROJECT_ID
-  PROJECT_ID="$(get_project_from_instance_id "${instance_id}")"
-
-  local instance_status
-  instance_status="$(get_instance_status "${instance_id}")"
-  local ready_status
-  ready_status="$(corellium ready --instance "${instance_id}" --project "${PROJECT_ID}" 2> /dev/null | jq -r '.ready')"
-
-  while [ "${ready_status}" != 'true' ]; do
-    if [ "${instance_status}" != "${INSTANCE_STATUS_ON}" ]; then
-      log_stdout "Instance is ${instance_status} not ${INSTANCE_STATUS_ON}. Exiting" >&2
-      exit 1
-    fi
-    log_stdout "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
+  local PROJECT_ID INSTANCE_STATUS AGENT_READY_STATUS
+  PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
+  INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
+  AGENT_READY_STATUS="$(corellium ready --instance "${INSTANCE_ID}" --project "${PROJECT_ID}" 2> /dev/null | jq -r '.ready')"
+  while [ "${AGENT_READY_STATUS}" != 'true' ]; do
+    case [ "${INSTANCE_STATUS}" in
+      '')
+        log_warning "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds." 
+        ;;
+      "${INSTANCE_STATUS_ON}")
+        log_stdout "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
+        ;;
+      *)
+        log_stdout "Instance is ${INSTANCE_STATUS} not ${INSTANCE_STATUS_ON}. Exiting" >&2
+        exit 1
+        ;;
+    esac
     sleep "${AGENT_READY_SLEEP_TIME}"
-    instance_status="$(get_instance_status "${instance_id}")"
-    ready_status="$(corellium ready --instance "${instance_id}" --project "${PROJECT_ID}" 2> /dev/null | jq -r '.ready')"
+    INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
+    AGENT_READY_STATUS="$(corellium ready --instance "${INSTANCE_ID}" --project "${PROJECT_ID}" 2> /dev/null | jq -r '.ready')"
   done
   log_stdout 'Virtual device agent is ready.'
 }
@@ -562,8 +574,12 @@ wait_for_instance_status()
 
   case "${TARGET_INSTANCE_STATUS}" in
     'on' | 'off') ;;
+    '')
+      log_error 'TARGET_INSTANCE_STATUS parameter cannot be empty.'
+      exit 1
+      ;;
     *)
-      echo "Unsupported target status: '${TARGET_INSTANCE_STATUS}'. Exiting." >&2
+      log_error "Unsupported target status: '${TARGET_INSTANCE_STATUS}'."
       exit 1
       ;;
   esac
@@ -571,7 +587,11 @@ wait_for_instance_status()
   local CURRENT_INSTANCE_STATUS
   CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
   while [ "${CURRENT_INSTANCE_STATUS}" != "${TARGET_INSTANCE_STATUS}" ]; do
-    log_stdout "Status is ${CURRENT_INSTANCE_STATUS} and target is ${TARGET_INSTANCE_STATUS}. Waiting ${SLEEP_TIME_DEFAULT} seconds."
+    if [ -z "${CURRENT_INSTANCE_STATUS}" ]; then
+      log_warning "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds." 
+    else
+      log_stdout "Status is ${CURRENT_INSTANCE_STATUS} and target is ${TARGET_INSTANCE_STATUS}. Waiting ${SLEEP_TIME_DEFAULT} seconds."
+    fi
     sleep "${SLEEP_TIME_DEFAULT}"
     CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
   done

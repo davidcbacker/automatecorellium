@@ -51,7 +51,7 @@ jobs:
         with:
           cache: 'npm'
           node-version: 22
-      - name: Install Corellium npm dependencies
+      - name: Install API dependencies
         run: |
           npm ci
           echo "$(pwd)/node_modules/.bin" >> "${GITHUB_PATH}"
@@ -78,7 +78,7 @@ jobs:
             echo 'EPHEMERAL_MATRIX_INSTANCE=true' >> "${GITHUB_ENV}"
             log_stdout 'Updated environmental variables for ephemeral instance.'
           fi
-      - name: Install Appium dependencies
+      - name: Install additional runner dependencies
         run: |
           set -eu && source ./src/functions.sh
           install_openvpn_dependencies

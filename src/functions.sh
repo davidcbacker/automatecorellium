@@ -156,7 +156,7 @@ wait_until_agent_ready()
   INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
   AGENT_READY_STATUS="$(corellium ready --instance "${INSTANCE_ID}" --project "${PROJECT_ID}" 2> /dev/null | jq -r '.ready')"
   while [ "${AGENT_READY_STATUS}" != 'true' ]; do
-    case [ "${INSTANCE_STATUS}" in
+    case "${INSTANCE_STATUS}" in
       '')
         log_warning "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds." 
         ;;

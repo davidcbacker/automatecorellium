@@ -211,7 +211,7 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           if [ "${EPHEMERAL_MATRIX_INSTANCE:-}" = 'true' ]; then
-            log_stdout "Deleting ephemeral instance ${MATRIX_INSTANCE_ID}."
+            log_stdout "Ready to delete ephemeral instance ${MATRIX_INSTANCE_ID}."
             stop_instance "${MATRIX_INSTANCE_ID}"
             delete_instance "${MATRIX_INSTANCE_ID}"
           else

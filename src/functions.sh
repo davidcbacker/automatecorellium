@@ -58,6 +58,7 @@ start_instance()
     '')
       log_error "Failed to get status for instance ${INSTANCE_ID}."
       exit 1
+      ;;
     *)
       log_stdout "Starting instance ${INSTANCE_ID}"
       corellium instance start "${INSTANCE_ID}" --wait > /dev/null
@@ -87,6 +88,7 @@ stop_instance()
     '')
       log_error "Failed to get status for instance ${INSTANCE_ID}."
       exit 1
+      ;;
     *)
       log_stdout "Stopping instance ${INSTANCE_ID}"
       corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
@@ -107,6 +109,7 @@ soft_stop_instance()
     '')
       log_error "Failed to get status for instance ${INSTANCE_ID}."
       exit 1
+      ;;
     *)
       log_stdout "Stopping instance ${INSTANCE_ID}."
       check_env_vars

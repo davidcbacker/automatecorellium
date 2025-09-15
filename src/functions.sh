@@ -604,7 +604,9 @@ save_vpn_config_to_local_path()
   local LOCAL_SAVE_PATH="$2"
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
+  log_stdout "Saving ovpn profile to ${LOCAL_SAVE_PATH}."
   corellium project vpnConfig --project "${PROJECT_ID}" --path "${LOCAL_SAVE_PATH}"
+  log_stdout "Saved ovpn profile to ${LOCAL_SAVE_PATH}."
 }
 
 wait_for_instance_status()
@@ -767,14 +769,18 @@ connect_to_vpn_for_instance()
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
 
   if ! command -v openvpn; then
-    log_warn 'Dependency openvpn not found. Attempting to install.'
+    log_warn 'Attempting to install openvpn dependency.'
     install_openvpn_dependency
   fi
+
   save_vpn_config_to_local_path "${INSTANCE_ID}" "${OVPN_CONFIG_PATH}"
+  log_stdout 'Connecting to Corellium project VPN.'
   sudo openvpn --config "${OVPN_CONFIG_PATH}" &
+  log_stdout 'Connected to Corellium project VPN.'
 
   # Wait for the tunnel to establish, find the VPN IPv4 address, and test the connection
   until ip addr show tap0 > /dev/null 2>&1; do sleep 0.1; done
+  log_stdout 'Found the project VPN tap0 interface.'
   local INSTANCE_VPN_IP
   INSTANCE_VPN_IP="$(ip addr show tap0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1)"
   until ping -c1 "${INSTANCE_VPN_IP}"; do sleep 0.1; done

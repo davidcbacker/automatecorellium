@@ -5,6 +5,9 @@ on:
     - cron: '50 11 * * 1-5'
   workflow_dispatch:
 
+env:
+  TERM: xterm
+
 jobs:
   corellium-start:
     name: Start devices

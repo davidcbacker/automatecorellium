@@ -15,11 +15,17 @@ check_env_vars()
 
 log_stdout()
 {
+  MAKE_CONSOLE_BLUE="$(tput setaf 4)"
+  MAKE_CONSOLE_NORMAL="$(tput sgr0)"
   local FRIENDLY_DATE
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
-      printf '[+] %s  INFO: %s\n' "${FRIENDLY_DATE}" "${arg}"
+      printf '%s[+] %s INFO: %s\n%s' \
+        "${MAKE_CONSOLE_BLUE}" \
+        "${FRIENDLY_DATE}" \
+        "${arg}" \
+        "${MAKE_CONSOLE_NORMAL}"
     done
   else
     log_error 'No argument supplied to log_stdout.'
@@ -29,28 +35,46 @@ log_stdout()
 
 log_error()
 {
+  MAKE_CONSOLE_RED="$(tput setaf 1)"
+  MAKE_CONSOLE_NORMAL="$(tput sgr0)"
   local FRIENDLY_DATE
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
-      printf '[!] %s  ERR: %s\n' "${FRIENDLY_DATE}" "${arg}" >&2
+      printf '%s[!] %s  ERR: %s\n%s' \
+        "${MAKE_CONSOLE_RED}" \
+        "${FRIENDLY_DATE}" \
+        "${arg}" \
+        "${MAKE_CONSOLE_NORMAL}" \
+        >&2
     done
   else
-    printf '[!] %s  ERR: No argument supplied to log_error.\n' \
-      "${FRIENDLY_DATE}" >&2
+    printf '%s[!] %s  ERR: No argument supplied to log_error.\n%s' \
+      "${MAKE_CONSOLE_RED}" \
+      "${FRIENDLY_DATE}" \
+      "${MAKE_CONSOLE_NORMAL}" \
+      >&2
   fi
 }
 
 log_warn()
 {
+  MAKE_CONSOLE_YELLOW="$(tput setaf 3)"
+  MAKE_CONSOLE_NORMAL="$(tput sgr0)"
   local FRIENDLY_DATE
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
-      printf '[!] %s WARN: %s\n' "${FRIENDLY_DATE}" "${arg}" >&2
+      printf '%s[!] %s WARN: %s\n%s' \
+        "${MAKE_CONSOLE_YELLOW}" \
+        "${FRIENDLY_DATE}" \
+        "${arg}" \
+        "${MAKE_CONSOLE_NORMAL}" \
+        >&2
     done
   else
     log_error 'No argument supplied to log_warn'
+    exit 1
   fi
 }
 
@@ -59,7 +83,7 @@ does_instance_exist()
   local INSTANCE_ID="$1"
   if ! corellium instance get --instance "${INSTANCE_ID}" 2> /dev/null |
     jq -e --arg id "${INSTANCE_ID}" 'select(.id == $id)' > /dev/null; then
-    log_error "instance ${INSTANCE_ID} does not exist."
+    log_warn "instance ${INSTANCE_ID} does not exist."
     return 1
   fi
 }

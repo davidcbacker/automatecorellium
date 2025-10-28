@@ -1,12 +1,10 @@
-name: Check the changes
+name: Static code checks
 
 on:
   push:
-    branches:
-      - master
+    branches: master
   pull_request:
-    branches:
-      - master
+    branches: master
   workflow_dispatch:
 
 jobs:
@@ -19,35 +17,48 @@ jobs:
       ci: ${{ steps.filter.outputs.ci }}
       javascript: ${{ steps.filter.outputs.javascript }}
       markdown: ${{ steps.filter.outputs.markdown }}
-      matrix: ${{ steps.filter.outputs.matrix }}
       shell: ${{ steps.filter.outputs.shell }}
+      static-lint: ${{ steps.filter.outputs.static-lint }}
     steps:
-    - uses: actions/checkout@v4
-    - uses: dorny/paths-filter@v3
-      id: filter
-      with:
-        filters: data/config/dorny-paths-filter.yaml
-        list-files: 'shell'
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: data/config/dorny-paths-filter.yaml
+          list-files: 'shell'
+
   javascript-lint:
     name: JavaScript linting
     needs: changes
-    if: ${{ needs.changes.outputs.javascript == 'true' }}
+    if: >-
+      ${{
+        needs.changes.outputs.javascript == 'true' ||
+        needs.changes.outputs.static-lint == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
       - name: Run ESLint with SuperLinter
-        uses: super-linter/super-linter@v5
+        uses: super-linter/super-linter@v8
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_JAVASCRIPT_ES: true
+
   shell-lint:
     name: Shell linting
     needs: changes
-    if: ${{ needs.changes.outputs.shell == 'true' }}
+    if: >-
+      ${{
+        needs.changes.outputs.shell == 'true' ||
+        needs.changes.outputs.static-lint == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Lint
         uses: luizm/action-sh-checker@v0.9.0
         env:
@@ -64,6 +75,9 @@ jobs:
               --func-next-line
               --indent 2
               --space-redirects
+        with:
+          sh_checker_checkbashisms_enable: true
+
   yaml-lint:
     name: YAML linting
     needs: changes
@@ -71,7 +85,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Lint
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)

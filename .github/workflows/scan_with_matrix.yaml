@@ -2,11 +2,11 @@ name: Scan with Corellium MATRIX
 
 on:
   push:
-    branches: [master]
+    branches: master
   pull_request:
-    branches: [master]
+    branches: master
   schedule:
-    - cron: "17 * * * *"
+    - cron: "17 */6 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -23,21 +23,16 @@ jobs:
   changes:
     name: Check for file changes
     runs-on: ubuntu-latest
-    # permissions:
-    #   pull-requests: read
     outputs:
-      ci: ${{ steps.filter.outputs.ci }}
-      javascript: ${{ steps.filter.outputs.javascript }}
-      markdown: ${{ steps.filter.outputs.markdown }}
       matrix: ${{ steps.filter.outputs.matrix }}
       shell: ${{ steps.filter.outputs.shell }}
     steps:
-    - uses: actions/checkout@v4
-    - uses: dorny/paths-filter@v3
-      id: filter
-      with:
-        filters: data/config/dorny-paths-filter.yaml
-        list-files: 'shell'
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: data/config/dorny-paths-filter.yaml
+          list-files: 'shell'
   corellium-matrixscan:
     name: Scan with MATRIX
     needs: changes
@@ -50,34 +45,46 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Pull the latest code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Install Node
         uses: actions/setup-node@v4
         with:
           cache: 'npm'
           node-version: 22
-      - name: Install Corellium CLI
+      - name: Install API dependencies
         run: |
-          curl --silent https://status.npmjs.org | grep --quiet "All Systems Operational" ||
-            echo "The npm registry may be down"
-          npm install --global @corellium/corellium-cli
+          npm ci
+          echo "$(pwd)/node_modules/.bin" >> "${GITHUB_PATH}"
       - name: Log in to Corellium
         run: |
           corellium login \
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
-      - name: Start instance
+      - name: Start or create instance
         timeout-minutes: 1
         run: |
           set -eu && source ./src/functions.sh
-          start_instance "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Install OpenVPN, USBFlux, and Appium dependencies
+          if does_instance_exist "${{ env.MATRIX_INSTANCE_ID }}"; then
+            start_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          else
+            log_stdout "Creating instance."
+            CREATED_MATRIX_INSTANCE_ID="$(create_instance \
+              "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" \
+              "${{ vars.MATRIX_DEFAULT_FIRMWARE_VERSION }}" \
+              "${{ vars.MATRIX_DEFAULT_FIRMWARE_BUILD }}" \
+              "${{ vars.MATRIX_DEFAULT_PROJECT }}")"
+            log_stdout "Created instance ${CREATED_MATRIX_INSTANCE_ID}."
+            echo "MATRIX_INSTANCE_ID=${CREATED_MATRIX_INSTANCE_ID}" >> "${GITHUB_ENV}"
+            echo 'EPHEMERAL_MATRIX_INSTANCE=true' >> "${GITHUB_ENV}"
+            log_stdout 'Updated environmental variables for ephemeral instance.'
+          fi
+      - name: Install additional runner dependencies
         run: |
           set -eu && source ./src/functions.sh
           install_openvpn_dependencies
           install_usbfluxd_and_dependencies
           install_appium_server_and_dependencies
-      - name: Unlock instance after successful boot
+      - name: Unlock instance after boot
         timeout-minutes: 20
         run: |
           set -eu && source ./src/functions.sh
@@ -122,7 +129,7 @@ jobs:
           appium_runner_success='false'
           for launch_attempt in $(seq 1 "${APPIUM_RUNNER_LAUNCH_RETRIES}"); do
             if ! launch_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"; then
-              echo "Failed to launch app during attempt ${launch_attempt}"
+              log_warning "Failed to launch app during attempt ${launch_attempt}"
               continue
             fi
             for curl_attempt in $(seq 1 "${APPIUM_RUNNER_CURL_RETRIES}"); do
@@ -137,7 +144,7 @@ jobs:
             done
           done
           if [ "${appium_runner_success}" != 'true' ]; then
-            echo 'FAILED TO ESTABLISH APPIUM COMMS' >&2
+            log_error 'Failed to establish comms with Appium runner app'
             exit 1
           fi
       - name: Install Corellium Cafe from URL
@@ -159,9 +166,9 @@ jobs:
             if run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
               break
             elif [ "${failures}" -lt "${MAX_MATRIX_RUN_RETRIES}" ]; then
-              echo "[!] Warning - MATRIX failed on run $((failures + 1))"
+              log_warning "MATRIX failed on run $((failures + 1))"
             else
-              echo "[!] Error - MATRIX failed the max $((failures + 1)) times" >&2
+              log_error "MATRIX failed the max $((failures + 1)) times"
               exit 1
             fi
           done
@@ -172,7 +179,6 @@ jobs:
           MATRIX_INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.zip
         run: |
           set -eu && source ./src/functions.sh
-          npm install @corellium/corellium-api
           node ./src/zip_matrix_artifacts.js
           download_file_to_local_path \
             "${{ env.MATRIX_INSTANCE_ID }}" \
@@ -196,7 +202,7 @@ jobs:
             matrix_report_*.json
           compression-level: 9
           if-no-files-found: error
-      - name: Stop instance
+      - name: Stop or delete instance
         if: always()
         timeout-minutes: 2
         env:
@@ -204,7 +210,13 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
-          soft_stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          if [ "${EPHEMERAL_MATRIX_INSTANCE:-}" = 'true' ]; then
+            log_stdout "Ready to delete ephemeral instance ${MATRIX_INSTANCE_ID}."
+            stop_instance "${MATRIX_INSTANCE_ID}"
+            delete_instance "${MATRIX_INSTANCE_ID}"
+          else
+            soft_stop_instance "${MATRIX_INSTANCE_ID}"
+          fi
       - name: Clean up Corellium auth and processes
         if: always()
         timeout-minutes: 1

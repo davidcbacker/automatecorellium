@@ -75,7 +75,6 @@ create_instance()
   # Avoid using --wait option here since it will wait for agent ready
   # Better to create instance first then install local deps then wait
 
-  
   if [ "${HARDWARE_FLAVOR}" = 'ranchu' ]; then
     echo "DEBUG FOUND RANCHU"
     CREATE_INSTANCE_REQUEST_DATA=$(
@@ -109,10 +108,10 @@ EOF
   echo "${CREATE_INSTANCE_REQUEST_DATA}"
 
   curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
-     -H "Accept: application/json" \
-     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
-     -H "Content-Type: application/json" \
-     -d "${CREATE_INSTANCE_REQUEST_DATA}" || {
+    -H "Accept: application/json" \
+    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d "${CREATE_INSTANCE_REQUEST_DATA}" || {
     log_error "Failed to create new instance in project ${PROJECT_ID}." >&2
     log_error "Hardware was ${HARDWARE_FLAVOR} running ${FIRMWARE_VERSION} (${FIRMWARE_BUILD})." >&2
     exit 1

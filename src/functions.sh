@@ -77,7 +77,9 @@ create_instance()
 
   
   if [ "${HARDWARE_FLAVOR}" = 'ranchu' ]; then
-    CREATE_INSTANCE_REQUEST_DATA=$(cat <<EOF
+    echo "DEBUG FOUND RANCHU"
+    CREATE_INSTANCE_REQUEST_DATA=$(
+      cat <<EOF
 {
   "project": "${PROJECT_ID}",
   "name": "${NEW_INSTANCE_NAME}",
@@ -87,9 +89,11 @@ create_instance()
   "bootOptions": {"cores": 4,"ram": 4096}
 }
 EOF
-)
+    )
   else
-    CREATE_INSTANCE_REQUEST_DATA=$(cat <<EOF
+    echo "DEBUG NOT RANCHU"
+    CREATE_INSTANCE_REQUEST_DATA=$(
+      cat <<EOF
 {
   "project": "${PROJECT_ID}",
   "name": "${NEW_INSTANCE_NAME}",
@@ -98,8 +102,11 @@ EOF
   "os-build": "${FIRMWARE_BUILD}"
 }
 EOF
-)
+    )
   fi
+
+  echo "DEBUG PRINTING THE CONTENTS OF REQUEST DATA"
+  echo "${CREATE_INSTANCE_REQUEST_DATA}"
 
   curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
      -H "Accept: application/json" \

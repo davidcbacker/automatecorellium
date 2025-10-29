@@ -57,7 +57,7 @@ log_warn()
 does_instance_exist()
 {
   local INSTANCE_ID="$1"
-  if ! corellium instance get --instance "${INSTANCE_ID}" 2> /dev/null |
+  if corellium instance get --instance "${INSTANCE_ID}" 2> /dev/null |
     jq -e --arg id "${INSTANCE_ID}" 'select(.id == $id)' > /dev/null; then
     return 0
   else

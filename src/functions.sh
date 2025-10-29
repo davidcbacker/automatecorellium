@@ -107,6 +107,7 @@ EOF
   echo "DEBUG PRINTING THE CONTENTS OF REQUEST DATA"
   echo "${CREATE_INSTANCE_REQUEST_DATA}"
 
+  check_env_vars
   curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
     -H "Accept: application/json" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \

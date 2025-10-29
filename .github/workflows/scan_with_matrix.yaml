@@ -62,6 +62,9 @@ jobs:
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Start or create instance
         timeout-minutes: 1
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
           if does_instance_exist "${{ env.MATRIX_INSTANCE_ID }}"; then

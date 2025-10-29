@@ -288,7 +288,7 @@ install_corellium_cafe_android()
   local CORELLIUM_CAFE_ANDROID_URL="https://www.corellium.com/hubfs/Corellium_Cafe.apk"
   local CORELLIUM_CAFE_BUNDLE_ID='com.corellium.cafe'
   kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_BUNDLE_ID}"
-  install_app_from_url "${INSTANCE_ID}" "${CORELLIUM_CAFE_IOS_URL}"
+  install_app_from_url "${INSTANCE_ID}" "${CORELLIUM_CAFE_ANDROID_URL}"
 }
 
 install_corellium_cafe_ios()

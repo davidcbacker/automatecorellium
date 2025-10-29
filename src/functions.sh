@@ -232,6 +232,13 @@ kill_app()
   fi
 }
 
+kill_corellium_cafe_android()
+{
+  local INSTANCE_ID="$1"
+  local CORELLIUM_CAFE_BUNDLE_ID='com.corellium.cafe'
+  kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_BUNDLE_ID}"
+}
+
 kill_corellium_cafe_ios()
 {
   local INSTANCE_ID="$1"
@@ -273,6 +280,15 @@ install_app_from_url()
     echo "Error installing app ${APP_FILENAME}. Exiting." >&2
     exit 1
   fi
+}
+
+install_corellium_cafe_android()
+{
+  local INSTANCE_ID="$1"
+  local CORELLIUM_CAFE_ANDROID_URL="https://www.corellium.com/hubfs/Corellium_Cafe.apk"
+  local CORELLIUM_CAFE_BUNDLE_ID='com.corellium.cafe'
+  kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_BUNDLE_ID}"
+  install_app_from_url "${INSTANCE_ID}" "${CORELLIUM_CAFE_IOS_URL}"
 }
 
 install_corellium_cafe_ios()
@@ -497,7 +513,14 @@ run_full_matrix_assessment()
   log_stdout "Downloaded reports for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 
-run_matrix_cafe_checks()
+run_matrix_cafe_checks_cafe_android()
+{
+  local INSTANCE_ID="$1"
+  local APP_BUNDLE_ID='com.corellium.cafe'
+  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
+}
+
+run_matrix_cafe_checks_cafe_ios()
 {
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID='com.corellium.Cafe'

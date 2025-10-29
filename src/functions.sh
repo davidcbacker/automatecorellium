@@ -78,7 +78,7 @@ create_instance()
   if [ "${HARDWARE_FLAVOR}" = 'ranchu' ]; then
     echo "DEBUG FOUND RANCHU"
     CREATE_INSTANCE_REQUEST_DATA=$(
-      cat <<EOF
+      cat << EOF
 {
   "project": "${PROJECT_ID}",
   "name": "${NEW_INSTANCE_NAME}",
@@ -92,7 +92,7 @@ EOF
   else
     echo "DEBUG NOT RANCHU"
     CREATE_INSTANCE_REQUEST_DATA=$(
-      cat <<EOF
+      cat << EOF
 {
   "project": "${PROJECT_ID}",
   "name": "${NEW_INSTANCE_NAME}",

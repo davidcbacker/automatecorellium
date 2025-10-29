@@ -63,7 +63,6 @@ does_instance_exist()
   else 
     log_warn "Instance ${INSTANCE_ID} does not exist."
     return 1
-  else
   fi
 }
 

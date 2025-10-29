@@ -89,7 +89,6 @@ create_instance()
 EOF
     )
   else
-    echo "DEBUG NOT RANCHU"
     CREATE_INSTANCE_REQUEST_DATA=$(
       cat << EOF
 {
@@ -103,15 +102,13 @@ EOF
     )
   fi
 
-  echo "DEBUG PRINTING THE CONTENTS OF REQUEST DATA"
-  echo "${CREATE_INSTANCE_REQUEST_DATA}"
-
   check_env_vars
   curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
     -H "Accept: application/json" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
     -H "Content-Type: application/json" \
-    -d "${CREATE_INSTANCE_REQUEST_DATA}" || {
+    -d "${CREATE_INSTANCE_REQUEST_DATA}" |
+    jq -r .id || {
     log_error "Failed to create new instance in project ${PROJECT_ID}." >&2
     log_error "Hardware was ${HARDWARE_FLAVOR} running ${FIRMWARE_VERSION} (${FIRMWARE_BUILD})." >&2
     exit 1

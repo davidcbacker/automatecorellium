@@ -96,7 +96,7 @@ EOF
   "name": "${NEW_INSTANCE_NAME}",
   "flavor": "${HARDWARE_FLAVOR}",
   "os": "${FIRMWARE_VERSION}",
-  "os-build": "${FIRMWARE_BUILD}"
+  "osbuild": "${FIRMWARE_BUILD}"
 }
 EOF
     )

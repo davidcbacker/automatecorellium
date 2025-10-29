@@ -513,14 +513,14 @@ run_full_matrix_assessment()
   log_stdout "Downloaded reports for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 
-run_matrix_cafe_checks_cafe_android()
+run_matrix_cafe_checks_android()
 {
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID='com.corellium.cafe'
   run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
 }
 
-run_matrix_cafe_checks_cafe_ios()
+run_matrix_cafe_checks_ios()
 {
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID='com.corellium.Cafe'

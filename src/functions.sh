@@ -76,7 +76,6 @@ create_instance()
   # Better to create instance first then install local deps then wait
 
   if [ "${HARDWARE_FLAVOR}" = 'ranchu' ]; then
-    echo "DEBUG FOUND RANCHU"
     CREATE_INSTANCE_REQUEST_DATA=$(
       cat << EOF
 {
@@ -84,7 +83,7 @@ create_instance()
   "name": "${NEW_INSTANCE_NAME}",
   "flavor": "${HARDWARE_FLAVOR}",
   "os": "${FIRMWARE_VERSION}",
-  "os-build": "${FIRMWARE_BUILD}",
+  "osbuild": "${FIRMWARE_BUILD}",
   "bootOptions": {"cores": 4,"ram": 4096}
 }
 EOF

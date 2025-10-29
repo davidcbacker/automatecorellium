@@ -74,14 +74,43 @@ create_instance()
   NEW_INSTANCE_NAME="MATRIX Automation $(date '+%Y-%m-%d') ${RANDOM}"
   # Avoid using --wait option here since it will wait for agent ready
   # Better to create instance first then install local deps then wait
-  corellium instance create "${HARDWARE_FLAVOR}" "${FIRMWARE_VERSION}" \
-    "${PROJECT_ID}" "${NEW_INSTANCE_NAME}" --os-build "${FIRMWARE_BUILD}" || {
+
+  
+  if [ "${HARDWARE_FLAVOR}" = 'ranchu' ]; then
+    CREATE_INSTANCE_REQUEST_DATA=$(cat <<EOF
+{
+  "project": "${PROJECT_ID}",
+  "name": "${NEW_INSTANCE_NAME}",
+  "flavor": "${HARDWARE_FLAVOR}",
+  "os": "${FIRMWARE_VERSION}",
+  "os-build": "${FIRMWARE_BUILD}",
+  "bootOptions": {"cores": 4,"ram": 4096}
+}
+EOF
+)
+  else
+    CREATE_INSTANCE_REQUEST_DATA=$(cat <<EOF
+{
+  "project": "${PROJECT_ID}",
+  "name": "${NEW_INSTANCE_NAME}",
+  "flavor": "${HARDWARE_FLAVOR}",
+  "os": "${FIRMWARE_VERSION}",
+  "os-build": "${FIRMWARE_BUILD}"
+}
+EOF
+)
+  fi
+
+  curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
+     -H "Accept: application/json" \
+     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
+     -H "Content-Type: application/json" \
+     -d "${CREATE_INSTANCE_REQUEST_DATA}" || {
     log_error "Failed to create new instance in project ${PROJECT_ID}." >&2
     log_error "Hardware was ${HARDWARE_FLAVOR} running ${FIRMWARE_VERSION} (${FIRMWARE_BUILD})." >&2
     exit 1
   }
 }
-
 delete_instance()
 {
   local INSTANCE_ID="$1"

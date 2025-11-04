@@ -32,7 +32,7 @@ async function execCommandOnInstance(agent, command) {
 
 async function isRanchu(corellium, instance_id) {
     try {
-        console.log(`Checking hardware type of instance ${instance_id}`);
+        console.log(`Checking hardware type of instance ${instance_id}.`);
         let instance = await corellium.getInstance(instance_id);
         if (!instance) {
             handleError(`Instance with ID ${instance_id} not found.`);

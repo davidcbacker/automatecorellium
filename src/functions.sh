@@ -746,7 +746,7 @@ install_openvpn_dependencies()
 install_adb_dependency()
 {
   sudo apt-get -qq update
-  sudo apt-get -qq install android-platform-tools
+  sudo apt-get -qq install adb
 
   if command -v adb > /dev/null; then
     log_stdout 'Installed adb dependency'

@@ -610,7 +610,8 @@ download_file_to_local_path()
 }
 
 # Upload a file to the Corellium server and print the image ID to stdout
-upload_image_from_local_path() {
+upload_image_from_local_path()
+{
   local INSTANCE_ID="$1"
   local LOCAL_FILE_PATH="$2"
   local PROJECT_ID

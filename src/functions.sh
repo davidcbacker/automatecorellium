@@ -47,7 +47,7 @@ log_warn()
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
-      printf '[!] %s WARN: %s\n' "${FRIENDLY_DATE}" "${arg}" >&2
+      printf '[!] %s  WARN: %s\n' "${FRIENDLY_DATE}" "${arg}" >&2
     done
   else
     log_error 'No argument supplied to log_warn'
@@ -76,14 +76,46 @@ create_instance()
   NEW_INSTANCE_NAME="MATRIX Automation $(date '+%Y-%m-%d') ${RANDOM}"
   # Avoid using --wait option here since it will wait for agent ready
   # Better to create instance first then install local deps then wait
-  corellium instance create "${HARDWARE_FLAVOR}" "${FIRMWARE_VERSION}" \
-    "${PROJECT_ID}" "${NEW_INSTANCE_NAME}" --os-build "${FIRMWARE_BUILD}" || {
+
+  if [ "${HARDWARE_FLAVOR}" = 'ranchu' ]; then
+    CREATE_INSTANCE_REQUEST_DATA=$(
+      cat << EOF
+{
+  "project": "${PROJECT_ID}",
+  "name": "${NEW_INSTANCE_NAME}",
+  "flavor": "${HARDWARE_FLAVOR}",
+  "os": "${FIRMWARE_VERSION}",
+  "osbuild": "${FIRMWARE_BUILD}",
+  "bootOptions": {"cores": 4,"ram": 4096}
+}
+EOF
+    )
+  else
+    CREATE_INSTANCE_REQUEST_DATA=$(
+      cat << EOF
+{
+  "project": "${PROJECT_ID}",
+  "name": "${NEW_INSTANCE_NAME}",
+  "flavor": "${HARDWARE_FLAVOR}",
+  "os": "${FIRMWARE_VERSION}",
+  "osbuild": "${FIRMWARE_BUILD}"
+}
+EOF
+    )
+  fi
+
+  check_env_vars
+  curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
+    -H "Accept: application/json" \
+    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d "${CREATE_INSTANCE_REQUEST_DATA}" |
+    jq -r .id || {
     log_error "Failed to create new instance in project ${PROJECT_ID}." >&2
     log_error "Hardware was ${HARDWARE_FLAVOR} running ${FIRMWARE_VERSION} (${FIRMWARE_BUILD})." >&2
     exit 1
   }
 }
-
 delete_instance()
 {
   local INSTANCE_ID="$1"
@@ -234,6 +266,13 @@ kill_app()
   fi
 }
 
+kill_corellium_cafe_android()
+{
+  local INSTANCE_ID="$1"
+  local CORELLIUM_CAFE_BUNDLE_ID='com.corellium.cafe'
+  kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_BUNDLE_ID}"
+}
+
 kill_corellium_cafe_ios()
 {
   local INSTANCE_ID="$1"
@@ -275,6 +314,15 @@ install_app_from_url()
     echo "Error installing app ${APP_FILENAME}. Exiting." >&2
     exit 1
   fi
+}
+
+install_corellium_cafe_android()
+{
+  local INSTANCE_ID="$1"
+  local CORELLIUM_CAFE_ANDROID_URL="https://www.corellium.com/hubfs/Corellium_Cafe.apk"
+  local CORELLIUM_CAFE_BUNDLE_ID='com.corellium.cafe'
+  kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_BUNDLE_ID}"
+  install_app_from_url "${INSTANCE_ID}" "${CORELLIUM_CAFE_ANDROID_URL}"
 }
 
 install_corellium_cafe_ios()
@@ -499,7 +547,14 @@ run_full_matrix_assessment()
   log_stdout "Downloaded reports for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 
-run_matrix_cafe_checks()
+run_matrix_cafe_checks_android()
+{
+  local INSTANCE_ID="$1"
+  local APP_BUNDLE_ID='com.corellium.cafe'
+  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
+}
+
+run_matrix_cafe_checks_ios()
 {
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID='com.corellium.Cafe'
@@ -685,7 +740,26 @@ install_openvpn_dependencies()
   log_stdout 'Installing openvpn.'
   sudo apt-get -qq update
   sudo apt-get -qq install --assume-yes --no-install-recommends openvpn
-  log_stdout 'Installed openvpn.'
+  if command -v openvpn > /dev/null; then
+    log_stdout 'Installed openvpn.'
+  else
+    log_error 'Failed to install openvpn dependency'
+    exit 1
+  fi
+}
+
+install_adb_dependency()
+{
+  log_stdout 'Installing adb.'
+  sudo apt-get -qq update
+  sudo apt-get -qq install adb
+
+  if command -v adb > /dev/null; then
+    log_stdout 'Installed adb.'
+  else
+    log_error 'Failed to install adb dependency'
+    exit 1
+  fi
 }
 
 install_usbfluxd_and_dependencies()
@@ -772,7 +846,7 @@ connect_to_vpn_for_instance()
   local INSTANCE_SERVICES_IP
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
 
-  if ! command -v openvpn; then
+  if ! command -v openvpn > /dev/null; then
     log_warn 'Attempting to install openvpn dependency.'
     install_openvpn_dependency
   fi
@@ -793,6 +867,27 @@ connect_to_vpn_for_instance()
   log_stdout 'Successfully pinged the instance services IP.'
 }
 
+connect_with_adb()
+{
+  local INSTANCE_ID="$1"
+  local INSTANCE_SERVICES_IP
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  local ADB_CONNECT_PORT='5001'
+  local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
+
+  if ! command -v adb > /dev/null; then
+    log_warn 'Attempting to install adb dependency.'
+    install_adb_dependency
+  fi
+
+  adb connect "${ADB_CONNECT_SOCKET}"
+  adb devices -l | grep -q "${ADB_CONNECT_SOCKET}" || {
+    log_error "Unable to connect to ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
+    adb devices -l
+    exit 1
+  }
+}
+
 run_usbfluxd_and_dependencies()
 {
   sudo systemctl start usbmuxd
@@ -808,4 +903,13 @@ add_instance_to_usbfluxd()
   local INSTANCE_SERVICES_IP
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   usbfluxctl add "${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
+}
+
+verify_usbflux_connection()
+{
+  until idevice_id --list; do sleep 0.1; done
+  idevicepair pair || {
+    log_error 'Unable to establish idevicepair'
+    exit 1
+  }
 }

@@ -62,6 +62,9 @@ jobs:
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Start or create instance
         timeout-minutes: 1
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
           if does_instance_exist "${{ env.MATRIX_INSTANCE_ID }}"; then
@@ -82,15 +85,19 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           install_openvpn_dependencies
-          install_usbfluxd_and_dependencies
+          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+            install_adb_dependency
+          else
+            install_usbfluxd_and_dependencies
+          fi
           install_appium_server_and_dependencies
-      - name: Unlock instance after boot
+      - name: Wait for instance agent ready
         timeout-minutes: 20
         run: |
           set -eu && source ./src/functions.sh
           start_instance "${{ env.MATRIX_INSTANCE_ID }}"
           wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
-          unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          # unlock_instance "${{ env.MATRIX_INSTANCE_ID }}" # only for iOS
       - name: Connect to project VPN
         timeout-minutes: 2
         run: |
@@ -98,62 +105,62 @@ jobs:
           connect_to_vpn_for_instance \
             "${{ env.MATRIX_INSTANCE_ID }}" \
             "${{ env.VPN_CONFIG_PATH }}"
-      - name: Connect to device over USB
+      - name: Connect to device
         timeout-minutes: 1
         run: |
           set -eu && source ./src/functions.sh
-          run_usbfluxd_and_dependencies
-          add_instance_to_usbfluxd "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Verify USB connection and pair
-        timeout-minutes: 1
-        run: |
-          until idevice_id --list; do sleep 0.1; done
-          idevicepair pair
+          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+            connect_with_adb "${{ env.MATRIX_INSTANCE_ID }}"
+          else
+            run_usbfluxd_and_dependencies
+            add_instance_to_usbfluxd "${{ env.MATRIX_INSTANCE_ID }}"
+            verify_usbflux_connection
+          fi
       # - name: Mount the device's Developer Disk Image
       #TODO: Uncomment this step after Appium Runner is stable to reduce rate limiting failures
       #   run: pymobiledevice3 mounter auto-mount
-      - name: Install Appium runner and check connection
-        continue-on-error: true
-        env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
-          APPIUM_DEFUALT_PORT: 8100
-          APPIUM_RUNNER_LAUNCH_RETRIES: 5
-          APPIUM_RUNNER_CURL_RETRIES: 60
-        timeout-minutes: 10
-        run: |
-          set -eu && source ./src/functions.sh
-          install_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"
-          matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
-          readonly APPIUM_TEST_URL="http://${matrix_instance_services_ip}:${APPIUM_DEFUALT_PORT}/status"
-          appium_runner_success='false'
-          for launch_attempt in $(seq 1 "${APPIUM_RUNNER_LAUNCH_RETRIES}"); do
-            if ! launch_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"; then
-              log_warning "Failed to launch app during attempt ${launch_attempt}"
-              continue
-            fi
-            for curl_attempt in $(seq 1 "${APPIUM_RUNNER_CURL_RETRIES}"); do
-              if curl --silent "${APPIUM_TEST_URL}" 2>/dev/null; then
-                appium_runner_success='true'
-                printf 'Appium runner comms succeeded on launch %s and curl attempt %s' \
-                  "${launch_attempt}" \
-                  "${curl_attempt}"
-                break 2
-              fi
-              sleep 0.1
-            done
-          done
-          if [ "${appium_runner_success}" != 'true' ]; then
-            log_error 'Failed to establish comms with Appium runner app'
-            exit 1
-          fi
+      # - name: Install Appium runner and check connection
+      #   continue-on-error: true
+      #   env:
+      #     CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+      #     CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+      #     APPIUM_DEFUALT_PORT: 8100
+      #     APPIUM_RUNNER_LAUNCH_RETRIES: 5
+      #     APPIUM_RUNNER_CURL_RETRIES: 60
+      #   timeout-minutes: 10
+      #   run: |
+      #     set -eu && source ./src/functions.sh
+      #     install_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"
+      #     matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
+      #     readonly APPIUM_TEST_URL="http://${matrix_instance_services_ip}:${APPIUM_DEFUALT_PORT}/status"
+      #     appium_runner_success='false'
+      #     for launch_attempt in $(seq 1 "${APPIUM_RUNNER_LAUNCH_RETRIES}"); do
+      #       if ! launch_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"; then
+      #         log_warning "Failed to launch app during attempt ${launch_attempt}"
+      #         continue
+      #       fi
+      #       for curl_attempt in $(seq 1 "${APPIUM_RUNNER_CURL_RETRIES}"); do
+      #         if curl --silent "${APPIUM_TEST_URL}" 2>/dev/null; then
+      #           appium_runner_success='true'
+      #           printf 'Appium runner comms succeeded on launch %s and curl attempt %s' \
+      #             "${launch_attempt}" \
+      #             "${curl_attempt}"
+      #           break 2
+      #         fi
+      #         sleep 0.1
+      #       done
+      #     done
+      #     if [ "${appium_runner_success}" != 'true' ]; then
+      #       log_error 'Failed to establish comms with Appium runner app'
+      #       exit 1
+      #     fi
       - name: Install Corellium Cafe from URL
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
-          install_corellium_cafe_ios "${{ env.MATRIX_INSTANCE_ID }}"
+          install_corellium_cafe_android "${{ env.MATRIX_INSTANCE_ID }}"
       - name: Run Corellium Cafe MATRIX assessment
         timeout-minutes: 40
         env:
@@ -163,7 +170,7 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           for ((failures=0; failures<=MAX_MATRIX_RUN_RETRIES; failures++)); do
-            if run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
+            if run_matrix_cafe_checks_android "${{ env.MATRIX_INSTANCE_ID }}"; then
               break
             elif [ "${failures}" -lt "${MAX_MATRIX_RUN_RETRIES}" ]; then
               log_warning "MATRIX failed on run $((failures + 1))"

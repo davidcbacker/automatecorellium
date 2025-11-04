@@ -343,7 +343,12 @@ create_matrix_assessment()
 {
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID="$2"
-  corellium matrix create-assessment --instance "${INSTANCE_ID}" --bundle "${APP_BUNDLE_ID}" | jq -r '.id'
+  local MATRIX_WORDLIST_ID="$3"
+  corellium matrix create-assessment \
+    --instance "${INSTANCE_ID}" \
+    --bundle "${APP_BUNDLE_ID}" \
+    --wordlist "${MATRIX_WORDLIST_ID}" |
+    jq -r '.id'
 }
 
 start_matrix_monitoring()
@@ -478,10 +483,11 @@ run_full_matrix_assessment()
 {
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID="$2"
+  local MATRIX_WORDLIST_ID="$3"
   handle_open_matrix_assessment "${INSTANCE_ID}"
   log_stdout "Creating MATRIX assessment"
   local MATRIX_ASSESSMENT_ID
-  MATRIX_ASSESSMENT_ID="$(create_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}")"
+  MATRIX_ASSESSMENT_ID="$(create_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}")"
   if [ -z "${MATRIX_ASSESSMENT_ID}" ]; then
     echo "Failed to create assessment" >&2
     return 1
@@ -502,8 +508,9 @@ run_full_matrix_assessment()
 run_matrix_cafe_checks()
 {
   local INSTANCE_ID="$1"
+  local MATRIX_WORDLIST_ID="$2"
   local APP_BUNDLE_ID='com.corellium.Cafe'
-  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
+  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}"
 }
 
 delete_unauthorized_devices()

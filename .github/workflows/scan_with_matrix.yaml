@@ -130,6 +130,10 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           install_corellium_cafe_android "${{ env.MATRIX_INSTANCE_ID }}"
+      - name: Run Appium session test
+        run: |
+          set -eu && source ./src/functions.sh
+          test_create_appium_session_cafe "${MATRIX_INSTANCE_ID}"
       - name: Upload MATRIX wordlist
         env:
           MATRIX_WORDLIST_PATH: './data/wordlist.txt'

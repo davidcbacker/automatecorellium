@@ -86,9 +86,9 @@ jobs:
           set -eu && source ./src/functions.sh
           install_openvpn_dependencies
           if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
-            install_usbfluxd_and_dependencies
+            install_adb_dependencies
           else
-            install_android_dependencies
+            install_usbfluxd_and_dependencies
           fi
           install_appium_server_and_dependencies
       - name: Wait for instance agent ready

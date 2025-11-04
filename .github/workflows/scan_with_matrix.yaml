@@ -110,8 +110,7 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
-            run_adb_connect "${{ env.MATRIX_INSTANCE_ID }}"
-            verify_adb_connection
+            connect_with_adb "${{ env.MATRIX_INSTANCE_ID }}"
           else
             run_usbfluxd_and_dependencies
             add_instance_to_usbfluxd "${{ env.MATRIX_INSTANCE_ID }}"

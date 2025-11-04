@@ -743,6 +743,19 @@ install_openvpn_dependencies()
   log_stdout 'Installed openvpn.'
 }
 
+install_adb_dependency()
+{
+  sudo apt-get -qq update
+  sudo apt-get -qq install android-platform-tools
+
+  if command -v adb >/dev/null; then
+    log_stdout 'Installed adb dependency'
+  else
+    log_error 'Failed to install adb dependency'
+    exit 1
+  fi
+}
+
 install_usbfluxd_and_dependencies()
 {
   local USBFLUXD_APT_DEPS=(
@@ -827,7 +840,7 @@ connect_to_vpn_for_instance()
   local INSTANCE_SERVICES_IP
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
 
-  if ! command -v openvpn; then
+  if ! command -v openvpn > /dev/null; then
     log_warn 'Attempting to install openvpn dependency.'
     install_openvpn_dependency
   fi
@@ -848,12 +861,39 @@ connect_to_vpn_for_instance()
   log_stdout 'Successfully pinged the instance services IP.'
 }
 
+run_adb_connect()
+{
+  local INSTANCE_ID="$1"
+  local INSTANCE_SERVICES_IP
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  local ADB_CONNECT_PORT='5001'
+  local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
+
+  if ! command -v adb > /dev/null;
+    log_warn 'Attempting to install adb dependency.'
+    install_adb_dependency
+  fi
+
+  adb connect "${ADB_CONNECT_SOCKET}"
+  adb devices -l | grep -q "${ADB_CONNECT_SOCKET}" || {
+    log_error "Unable to connect to ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
+    adb devices -l
+    exit 1
+  }
+}
+
 run_usbfluxd_and_dependencies()
 {
   sudo systemctl start usbmuxd
   sudo systemctl status usbmuxd
   sudo avahi-daemon &
   sudo usbfluxd -f -n &
+
+  until idevice_id --list; do sleep 0.1; done
+  idevicepair pair || {
+    log_error 'Unable to establish idevicepair'
+    exit 1
+  }
 }
 
 add_instance_to_usbfluxd()

@@ -47,7 +47,7 @@ log_warn()
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
-      printf '[!] %s WARN: %s\n' "${FRIENDLY_DATE}" "${arg}" >&2
+      printf '[!] %s  WARN: %s\n' "${FRIENDLY_DATE}" "${arg}" >&2
     done
   else
     log_error 'No argument supplied to log_warn'

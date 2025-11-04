@@ -973,7 +973,7 @@ test_create_appium_session()
   local INSTANCE_ID="$1"
   local APP_PACKAGE_NAME="$2"
   local DEFAULT_APPIUM_PORT='4723'
-  local DEFAULT_APPIUM_PORT='5001'
+  local DEFAULT_ADB_PORT='5001'
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
 
@@ -984,7 +984,7 @@ test_create_appium_session()
     "alwaysMatch": {
       "platformName": "Android",
       "appium:automationName": "UiAutomator2",
-      "appium:udid": "${INSTANCE_SERVICES_IP}:${DEFAULT_APPIUM_PORT}",
+      "appium:udid": "${INSTANCE_SERVICES_IP}:${DEFAULT_ADB_PORT}",
       "appium:deviceName": "Corellium",
       "appium:appPackage": "${APP_PACKAGE_NAME}",
       "appium:appActivity": ".ui.activities.MainActivity",

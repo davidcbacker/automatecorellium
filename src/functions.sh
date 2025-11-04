@@ -923,7 +923,7 @@ run_appium_server()
     --log-level info \
     --allow-insecure=uiautomator2:chromedriver_autodownload \
     --default-capabilities '{"appium:adbExecTimeout":60000}' &
-  until curl -s http://127.0.0.1:4723/status | jq -e '.value.ready == true' >/dev/null; do sleep 0.1; done
+  until curl -s http://127.0.0.1:4723/status | jq -e '.value.ready == true' > /dev/null; do sleep 0.1; done
   log_stdout 'Started appium.'
 }
 

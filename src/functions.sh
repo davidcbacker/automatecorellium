@@ -832,7 +832,7 @@ install_appium_server_and_dependencies()
   sudo apt-get -qq install --assume-yes --no-install-recommends libusb-dev
   python3 -m pip install -U pymobiledevice3
   log_stdout 'Installed appium dependencies.'
-  log_stdout 'Installing appium and xcuitest driver.'
+  log_stdout 'Installing appium and device driver.'
   npm install --location=global appium
   appium driver install uiautomator2
   #appium driver install xcuitest # for ios devices

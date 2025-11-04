@@ -15,7 +15,7 @@ concurrency:
 
 env:
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
-  MATRIX_RUNNER_ARTIFACTS_PATH: /home/runner/matrix_artifacts.zip
+  MATRIX_RUNNER_ARTIFACTS_PATH: /home/runner/matrix_artifacts.tar.gz
   MATRIX_INSTANCE_ID: ${{ github.event_name == 'schedule' && vars.MATRIX_AUTOMATION_INSTANCE
                         || vars.MATRIX_DEVELOPMENT_INSTANCE }}
 
@@ -164,7 +164,7 @@ jobs:
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
-          MATRIX_INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.zip
+          MATRIX_INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.tar.gz
         run: |
           set -eu && source ./src/functions.sh
           node ./src/zip_matrix_artifacts.js

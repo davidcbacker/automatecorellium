@@ -11,5 +11,6 @@ static-lint:
   - '.github/workflows/commit_checks.yaml'
 javascript:
   - 'src/*.js'
+  - 'src/util/*.js'
 markdown:
   - '*.md'

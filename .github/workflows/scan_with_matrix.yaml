@@ -166,7 +166,7 @@ jobs:
           MATRIX_WORDLIST_PATH: './data/wordlist.txt'
         run: |
           set -eu && source ./src/functions.sh
-          CREATED_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${MATRIX_WORDLIST_PATH}")"
+          CREATED_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${MATRIX_INSATNCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_stdout "Created new wordlist image with ID ${CREATED_MATRIX_WORDLIST_ID}."
           echo "MATRIX_WORDLIST_ID=${CREATED_MATRIX_WORDLIST_ID}" >> "${GITHUB_ENV}"
       - name: Run Corellium Cafe MATRIX assessment

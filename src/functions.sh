@@ -686,7 +686,7 @@ upload_image_from_local_path()
     exit 1
   }
 
-  echo "${create_image_response}" | jq -r '.id' || {
+  echo "${create_image_response}" | jq -r '.[0].id' || {
     log_error 'Failed to parse JSON repsonse for image ID.'
   }
 }

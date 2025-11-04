@@ -122,7 +122,7 @@ jobs:
         timeout-minutes: 1
         run: |
           set -eu && source ./src/functions.sh
-          start_appium_server
+          run_appium_server
           test_create_appium_session_cafe "${MATRIX_INSTANCE_ID}"
       # - name: Mount the device's Developer Disk Image
       #TODO: Uncomment this step after Appium Runner is stable to reduce rate limiting failures

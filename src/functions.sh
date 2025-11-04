@@ -869,7 +869,7 @@ connect_with_adb()
   local ADB_CONNECT_PORT='5001'
   local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
 
-  if ! command -v adb > /dev/null;
+  if ! command -v adb > /dev/null; then
     log_warn 'Attempting to install adb dependency.'
     install_adb_dependency
   fi

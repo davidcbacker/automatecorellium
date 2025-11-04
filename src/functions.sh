@@ -923,7 +923,7 @@ run_appium_server()
     --log-level info \
     --allow-insecure=uiautomator2:chromedriver_autodownload \
     --default-capabilities '{"appium:adbExecTimeout":60000}'
-  log_stdout 'Starting appium.
+  log_stdout 'Starting appium.'
 }
 
 test_create_appium_session_cafe()

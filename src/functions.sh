@@ -866,10 +866,11 @@ install_appium_server_and_dependencies()
   sudo apt-get -qq install --assume-yes --no-install-recommends libusb-dev
   python3 -m pip install -U pymobiledevice3
   log_stdout 'Installed appium dependencies.'
-  log_stdout 'Installing appium and xcuitest driver.'
+  log_stdout 'Installing appium and device driver.'
   npm install --location=global appium
-  appium driver install xcuitest
-  log_stdout 'Installed appium and xcuitest driver.'
+  appium driver install uiautomator2
+  #appium driver install xcuitest # for ios devices
+  log_stdout 'Installed appium and device driver.'
 }
 
 connect_to_vpn_for_instance()
@@ -946,4 +947,62 @@ verify_usbflux_connection()
     log_error 'Unable to establish idevicepair'
     exit 1
   }
+}
+
+run_appium_server()
+{
+  log_stdout 'Starting appium.'
+  appium \
+    --port 4723 \
+    --log-level info \
+    --allow-insecure=uiautomator2:chromedriver_autodownload \
+    --default-capabilities '{"appium:adbExecTimeout":60000}' &
+  until curl -s http://127.0.0.1:4723/status | jq -e '.value.ready == true' > /dev/null; do sleep 0.1; done
+  log_stdout 'Started appium.'
+}
+
+test_create_appium_session_cafe()
+{
+  local INSTANCE_ID="$1"
+  local CAFE_PAGKAGE_NAME='com.corellium.cafe'
+  test_create_appium_session "${INSTANCE_ID}" "${CAFE_PAGKAGE_NAME}"
+}
+
+test_create_appium_session()
+{
+  local INSTANCE_ID="$1"
+  local APP_PACKAGE_NAME="$2"
+  local DEFAULT_APPIUM_PORT='4723'
+  local DEFAULT_ADB_PORT='5001'
+  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+
+  APPIUM_SESSION_JSON_PAYLOAD=$(
+    cat << EOF
+{
+  "capabilities": {
+    "alwaysMatch": {
+      "platformName": "Android",
+      "appium:automationName": "UiAutomator2",
+      "appium:udid": "${INSTANCE_SERVICES_IP}:${DEFAULT_ADB_PORT}",
+      "appium:deviceName": "Corellium",
+      "appium:appPackage": "${APP_PACKAGE_NAME}",
+      "appium:appActivity": ".ui.activities.MainActivity",
+      "appium:noReset": false,
+      "appium:systemPort": 8200
+    },
+    "firstMatch": [{}]
+  }
+}
+EOF
+  )
+
+  echo "DEBUG PRINTING JSON PAYLOAD"
+  echo "${APPIUM_SESSION_JSON_PAYLOAD}"
+
+  log_stdout 'Starting appium session.'
+  curl --retry 100 -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
+    -H "Content-Type: application/json" \
+    -d "${APPIUM_SESSION_JSON_PAYLOAD}"
+  log_stdout 'Started appium session.'
 }

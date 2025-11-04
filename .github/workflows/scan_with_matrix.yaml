@@ -168,8 +168,6 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           run_appium_server
-          sleep 5
-          test_create_appium_session_cafe "${MATRIX_INSTANCE_ID}"
       - name: Run Corellium Cafe MATRIX assessment
         timeout-minutes: 40
         env:

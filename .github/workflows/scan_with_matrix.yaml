@@ -118,6 +118,12 @@ jobs:
             add_instance_to_usbfluxd "${{ env.MATRIX_INSTANCE_ID }}"
             verify_usbflux_connection
           fi
+      - name: Start Appium and create session
+        timeout-minutes: 1
+        run: |
+          set -eu && source ./src/functions.sh
+          start_appium_server
+          test_create_appium_session "${MATRIX_INSTANCE_ID}"
       # - name: Mount the device's Developer Disk Image
       #TODO: Uncomment this step after Appium Runner is stable to reduce rate limiting failures
       #   run: pymobiledevice3 mounter auto-mount

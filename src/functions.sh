@@ -740,16 +740,22 @@ install_openvpn_dependencies()
   log_stdout 'Installing openvpn.'
   sudo apt-get -qq update
   sudo apt-get -qq install --assume-yes --no-install-recommends openvpn
-  log_stdout 'Installed openvpn.'
+  if command -v openvpn > /dev/null; then
+    log_stdout 'Installed openvpn.'
+  else
+    log_error 'Failed to install openvpn dependency'
+    exit 1
+  fi
 }
 
 install_adb_dependency()
 {
+  log_stdout 'Installing adb.'
   sudo apt-get -qq update
   sudo apt-get -qq install adb
 
   if command -v adb > /dev/null; then
-    log_stdout 'Installed adb dependency'
+    log_stdout 'Installed adb.'
   else
     log_error 'Failed to install adb dependency'
     exit 1

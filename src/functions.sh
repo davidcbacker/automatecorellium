@@ -556,8 +556,9 @@ run_full_matrix_assessment()
 run_matrix_cafe_checks_android()
 {
   local INSTANCE_ID="$1"
+  local MATRIX_WORDLIST_ID="$2"
   local APP_BUNDLE_ID='com.corellium.cafe'
-  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
+  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}"
 }
 
 run_matrix_cafe_checks_ios()

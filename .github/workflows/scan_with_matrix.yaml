@@ -85,7 +85,11 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           install_openvpn_dependencies
-          install_usbfluxd_and_dependencies
+          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+            install_usbfluxd_and_dependencies
+          else
+            install_android_dependencies
+          fi
           install_appium_server_and_dependencies
       - name: Wait for instance agent ready
         timeout-minutes: 20
@@ -101,17 +105,27 @@ jobs:
           connect_to_vpn_for_instance \
             "${{ env.MATRIX_INSTANCE_ID }}" \
             "${{ env.VPN_CONFIG_PATH }}"
-      - name: Connect to device over USB
+      - name: Connect to device
         timeout-minutes: 1
         run: |
           set -eu && source ./src/functions.sh
-          run_usbfluxd_and_dependencies
-          add_instance_to_usbfluxd "${{ env.MATRIX_INSTANCE_ID }}"
+          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+            run_adb_connect "${{ env.MATRIX_INSTANCE_ID }}"
+          else
+            run_usbfluxd_and_dependencies
+            add_instance_to_usbfluxd "${{ env.MATRIX_INSTANCE_ID }}"
+          fi
       - name: Verify USB connection and pair
         timeout-minutes: 1
         run: |
-          until idevice_id --list; do sleep 0.1; done
-          idevicepair pair
+          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+            verify_adb_connection
+          else
+            verify_usbflux_connection
+            until idevice_id --list; do sleep 0.1; done
+            idevicepair pair
+          fi
+          
       # - name: Mount the device's Developer Disk Image
       #TODO: Uncomment this step after Appium Runner is stable to reduce rate limiting failures
       #   run: pymobiledevice3 mounter auto-mount

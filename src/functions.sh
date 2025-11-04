@@ -943,7 +943,7 @@ test_create_appium_session()
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
 
   APPIUM_SESSION_JSON_PAYLOAD=$(
-    cat <<EOF
+    cat << EOF
 {
   "capabilities": {
     "alwaysMatch": {

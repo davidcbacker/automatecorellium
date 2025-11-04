@@ -167,7 +167,7 @@ jobs:
           MATRIX_INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.tar.gz
         run: |
           set -eu && source ./src/functions.sh
-          node ./src/zip_matrix_artifacts.js
+          node ./src/util/compress_matrix_artifacts.js
           download_file_to_local_path \
             "${{ env.MATRIX_INSTANCE_ID }}" \
             "${MATRIX_INSTANCE_ARTIFACTS_PATH}" \

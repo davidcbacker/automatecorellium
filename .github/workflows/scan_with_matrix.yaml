@@ -86,7 +86,7 @@ jobs:
           set -eu && source ./src/functions.sh
           install_openvpn_dependencies
           if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
-            install_adb_dependencies
+            install_adb_dependency
           else
             install_usbfluxd_and_dependencies
           fi

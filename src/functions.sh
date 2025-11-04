@@ -963,9 +963,9 @@ test_create_appium_session()
 EOF
   )
 
-  log_stdout 'Starting appium session.
+  log_stdout 'Starting appium session.'
   curl -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
     -H "Content-Type: application/json" \
     -d "$JSON_PAYLOAD"
-  log_stdout 'Started appium session.
+  log_stdout 'Started appium session.'
 }

@@ -861,7 +861,7 @@ connect_to_vpn_for_instance()
   log_stdout 'Successfully pinged the instance services IP.'
 }
 
-run_adb_connect()
+connect_with_adb()
 {
   local INSTANCE_ID="$1"
   local INSTANCE_SERVICES_IP
@@ -888,12 +888,6 @@ run_usbfluxd_and_dependencies()
   sudo systemctl status usbmuxd
   sudo avahi-daemon &
   sudo usbfluxd -f -n &
-
-  until idevice_id --list; do sleep 0.1; done
-  idevicepair pair || {
-    log_error 'Unable to establish idevicepair'
-    exit 1
-  }
 }
 
 add_instance_to_usbfluxd()
@@ -903,4 +897,13 @@ add_instance_to_usbfluxd()
   local INSTANCE_SERVICES_IP
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   usbfluxctl add "${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
+}
+
+verify_usbflux_connection()
+{
+  until idevice_id --list; do sleep 0.1; done
+  idevicepair pair || {
+    log_error 'Unable to establish idevicepair'
+    exit 1
+  }
 }

@@ -609,6 +609,30 @@ download_file_to_local_path()
     -o "${LOCAL_SAVE_PATH}"
 }
 
+# Upload a file to the Corellium server and print the image ID to stdout
+upload_image_from_local_path() {
+  local INSTANCE_ID="$1"
+  local LOCAL_FILE_PATH="$2"
+  local PROJECT_ID
+  PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
+  local IMAGE_NAME="$(basename "${LOCAL_FILE_PATH}")"
+  local IMAGE_TYPE='extension'
+  local IMAGE_ENCODING='plain'
+
+  # return the created image ID
+  local create_image_response="$(corellium image create \
+    --project "${PROJECT_ID}" \
+    --instance "${INSTANCE_ID}" \
+    "${IMAGE_NAME}" "${IMAGE_TYPE}" "${IMAGE_ENCODING}" "${LOCAL_FILE_PATH}")" || {
+    log_error "Failed to upload image for ${LOCAL_FILE_PATH}."
+    exit 1
+  }
+
+  echo "${create_image_response}" | jq -r '.id' || {
+    log_error 'Failed to parse JSON repsonse for image ID.'
+  }
+}
+
 save_vpn_config_to_local_path()
 {
   local INSTANCE_ID="$1"

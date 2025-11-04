@@ -130,10 +130,6 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           install_corellium_cafe_android "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Test Appium connection
-        timeout-minutes: 1
-        run: |
-          echo "hello"
       - name: Run Corellium Cafe MATRIX assessment
         timeout-minutes: 40
         env:

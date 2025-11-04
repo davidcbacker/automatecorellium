@@ -942,7 +942,8 @@ test_create_appium_session()
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
 
-  APPIUM_SESSION_JSON_PAYLOAD=$(cat <<EOF
+  APPIUM_SESSION_JSON_PAYLOAD=$(
+    cat <<EOF
 {
   "capabilities": {
     "alwaysMatch": {
@@ -959,7 +960,7 @@ test_create_appium_session()
   }
 }
 EOF
-)
+  )
 
   log_stdout 'Starting appium session.
   curl -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \

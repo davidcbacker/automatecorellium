@@ -391,7 +391,12 @@ create_matrix_assessment()
 {
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID="$2"
-  corellium matrix create-assessment --instance "${INSTANCE_ID}" --bundle "${APP_BUNDLE_ID}" | jq -r '.id'
+  local MATRIX_WORDLIST_ID="$3"
+  corellium matrix create-assessment \
+    --instance "${INSTANCE_ID}" \
+    --bundle "${APP_BUNDLE_ID}" \
+    --wordlist "${MATRIX_WORDLIST_ID}" |
+    jq -r '.id'
 }
 
 start_matrix_monitoring()
@@ -526,10 +531,11 @@ run_full_matrix_assessment()
 {
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID="$2"
+  local MATRIX_WORDLIST_ID="$3"
   handle_open_matrix_assessment "${INSTANCE_ID}"
   log_stdout "Creating MATRIX assessment"
   local MATRIX_ASSESSMENT_ID
-  MATRIX_ASSESSMENT_ID="$(create_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}")"
+  MATRIX_ASSESSMENT_ID="$(create_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}")"
   if [ -z "${MATRIX_ASSESSMENT_ID}" ]; then
     echo "Failed to create assessment" >&2
     return 1
@@ -550,15 +556,17 @@ run_full_matrix_assessment()
 run_matrix_cafe_checks_android()
 {
   local INSTANCE_ID="$1"
+  local MATRIX_WORDLIST_ID="$2"
   local APP_BUNDLE_ID='com.corellium.cafe'
-  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
+  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}"
 }
 
 run_matrix_cafe_checks_ios()
 {
   local INSTANCE_ID="$1"
+  local MATRIX_WORDLIST_ID="$2"
   local APP_BUNDLE_ID='com.corellium.Cafe'
-  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
+  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}"
 }
 
 delete_unauthorized_devices()
@@ -655,6 +663,32 @@ download_file_to_local_path()
     -H "Accept: application/octet-stream" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
     -o "${LOCAL_SAVE_PATH}"
+}
+
+# Upload a file to the Corellium server and print the image ID to stdout
+upload_image_from_local_path()
+{
+  local INSTANCE_ID="$1"
+  local LOCAL_FILE_PATH="$2"
+  local PROJECT_ID IMAGE_NAME
+  PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
+  IMAGE_NAME="$(basename "${LOCAL_FILE_PATH}")"
+  local IMAGE_TYPE='extension'
+  local IMAGE_ENCODING='plain'
+
+  # return the created image ID
+  local create_image_response
+  create_image_response="$(corellium image create \
+    --project "${PROJECT_ID}" \
+    --instance "${INSTANCE_ID}" \
+    "${IMAGE_NAME}" "${IMAGE_TYPE}" "${IMAGE_ENCODING}" "${LOCAL_FILE_PATH}")" || {
+    log_error "Failed to upload image for ${LOCAL_FILE_PATH}."
+    exit 1
+  }
+
+  echo "${create_image_response}" | jq -r '.[0].id' || {
+    log_error 'Failed to parse JSON repsonse for image ID.'
+  }
 }
 
 save_vpn_config_to_local_path()

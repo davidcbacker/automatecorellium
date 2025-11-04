@@ -748,7 +748,7 @@ install_adb_dependency()
   sudo apt-get -qq update
   sudo apt-get -qq install android-platform-tools
 
-  if command -v adb >/dev/null; then
+  if command -v adb > /dev/null; then
     log_stdout 'Installed adb dependency'
   else
     log_error 'Failed to install adb dependency'

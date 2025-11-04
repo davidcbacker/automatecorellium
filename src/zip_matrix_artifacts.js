@@ -30,12 +30,28 @@ async function execCommandOnInstance(agent, command) {
     }
 }
 
+async function isRanchu(corellium, instance_id) {
+    try {
+        console.log(`Checking hardware type of instance ${instance_id}`);
+        let instance = await corellium.getInstance(instance_id);
+        if (!instance) {
+            handleError(`Instance with ID ${instance_id} not found.`);
+        } else if (instance.flavor == 'ranchu') {
+            console.log('Found ranchu.')
+            return true;
+        } else {
+            console.log('Not ranchu.')
+            return false;
+        }
+    } catch (error) {
+        console.error('ERROR in isRanchu:', error);
+        process.exit(1);
+    }
+}
+
 async function main() {
     try {
         console.log(`Starting the script at ${new Date().toISOString()}.`);
-        const zipInputArtifactsDir = '/tmp/artifacts/';
-        const zipInputAssessmentsDir = '/tmp/assessment.*/';
-        const zipOutputPath = '/tmp/matrix_artifacts.zip';
 
         const corellium = new Corellium({
             endpoint: CORELLIUM_API_ENDPOINT_ORIGIN,
@@ -54,6 +70,11 @@ async function main() {
         } else if (instance.state !== INSTANCE_STATE_ON) {
             handleError(`Instance with ID ${MATRIX_INSTANCE_ID} is not in the ON state.`);
         }
+
+        const tmpDirectoryPath = await isRanchu(corellium, MATRIX_INSTANCE_ID) ? '/data/local/tmp' : '/tmp';
+        const zipInputArtifactsDir = `${tmpDirectoryPath}/artifacts/`;
+        const zipInputAssessmentsDir = `${tmpDirectoryPath}/assessment.*/`;
+        const zipOutputPath = '/tmp/matrix_artifacts.zip'; // output zip to /tmpto simplify CI/CD implementation
 
         const agent = await instance.agent();
         if (!agent) {

@@ -917,13 +917,13 @@ verify_usbflux_connection()
 
 run_appium_server()
 {
-  log_stdout 'Starting appium.
+  log_stdout 'Starting appium.'
   appium \
     --port 4723 \
     --log-level info \
     --allow-insecure=uiautomator2:chromedriver_autodownload \
     --default-capabilities '{"appium:adbExecTimeout":60000}'
-  log_stdout 'Starting appium.'
+  log_stdout 'Started appium.'
 }
 
 test_create_appium_session_cafe()

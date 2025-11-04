@@ -922,7 +922,8 @@ run_appium_server()
     --port 4723 \
     --log-level info \
     --allow-insecure=uiautomator2:chromedriver_autodownload \
-    --default-capabilities '{"appium:adbExecTimeout":60000}'
+    --default-capabilities '{"appium:adbExecTimeout":60000}' &
+  sleep 2
   log_stdout 'Started appium.'
 }
 

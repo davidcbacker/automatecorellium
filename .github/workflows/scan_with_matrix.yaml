@@ -93,6 +93,11 @@ jobs:
             install_usbfluxd_and_dependencies
           fi
           install_appium_server_and_dependencies
+      - name: Start Appium server
+        timeout-minutes: 1
+        run: |
+          set -eu && source ./src/functions.sh
+          run_appium_server
       - name: Wait for instance agent ready
         timeout-minutes: 20
         run: |
@@ -163,11 +168,6 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           install_corellium_cafe_android "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Start Appium and create session
-        timeout-minutes: 1
-        run: |
-          set -eu && source ./src/functions.sh
-          run_appium_server
       - name: Run Corellium Cafe MATRIX assessment
         timeout-minutes: 40
         env:

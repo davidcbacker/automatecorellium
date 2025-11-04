@@ -74,7 +74,7 @@ async function main() {
         const tmpDirectoryPath = await isRanchu(corellium, MATRIX_INSTANCE_ID) ? '/data/local/tmp' : '/tmp';
         const zipInputArtifactsDir = `${tmpDirectoryPath}/artifacts/`;
         const zipInputAssessmentsDir = `${tmpDirectoryPath}/assessment.*/`;
-        const zipOutputPath = '/tmp/matrix_artifacts.zip'; // output zip to /tmpto simplify CI/CD implementation
+        const zipOutputPath = '/tmp/matrix_artifacts.tar.gz'; // outputting to /tmp simplifies our CI/CD implementation
 
         const agent = await instance.agent();
         if (!agent) {
@@ -83,8 +83,7 @@ async function main() {
         await agent.ready();
         console.log(`Agent for instance ${MATRIX_INSTANCE_ID} is ready.`);
 
-        await execCommandOnInstance(agent, 'apt -qq install -y zip');
-        await execCommandOnInstance(agent, `zip -r ${zipOutputPath} ${zipInputArtifactsDir} ${zipInputAssessmentsDir}`);
+        await execCommandOnInstance(agent, `tar -czvf ${zipOutputPath} ${zipInputArtifactsDir} ${zipInputAssessmentsDir}`);
         await execCommandOnInstance(agent, `ls -l ${zipOutputPath}`);
         await execCommandOnInstance(agent, `sha256sum ${zipOutputPath}`);
 

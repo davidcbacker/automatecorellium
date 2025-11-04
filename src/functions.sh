@@ -967,7 +967,7 @@ EOF
   echo "${APPIUM_SESSION_JSON_PAYLOAD}"
 
   log_stdout 'Starting appium session.'
-  curl --retry 10 -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
+  curl --retry 100 -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
     -H "Content-Type: application/json" \
     -d "${APPIUM_SESSION_JSON_PAYLOAD}"
   log_stdout 'Started appium session.'

@@ -118,13 +118,6 @@ jobs:
             add_instance_to_usbfluxd "${{ env.MATRIX_INSTANCE_ID }}"
             verify_usbflux_connection
           fi
-      - name: Start Appium and create session
-        timeout-minutes: 1
-        run: |
-          set -eu && source ./src/functions.sh
-          run_appium_server
-          sleep 5
-          test_create_appium_session_cafe "${MATRIX_INSTANCE_ID}"
       # - name: Mount the device's Developer Disk Image
       #TODO: Uncomment this step after Appium Runner is stable to reduce rate limiting failures
       #   run: pymobiledevice3 mounter auto-mount
@@ -170,6 +163,13 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           install_corellium_cafe_android "${{ env.MATRIX_INSTANCE_ID }}"
+      - name: Start Appium and create session
+        timeout-minutes: 1
+        run: |
+          set -eu && source ./src/functions.sh
+          run_appium_server
+          sleep 5
+          test_create_appium_session_cafe "${MATRIX_INSTANCE_ID}"
       - name: Run Corellium Cafe MATRIX assessment
         timeout-minutes: 40
         env:

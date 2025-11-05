@@ -1053,4 +1053,3 @@ run_appium_interactions_template()
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   python3 src/util/appium_interactions_template.py "${INSTANCE_SERVICES_IP}"
 }
-

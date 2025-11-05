@@ -104,7 +104,6 @@ def run_app_automation():
 
         # ==== END OF COPY-PASTE SECTION ====
 
-        sleep(2)
         print("All steps executed on Corellium Android device.")
 
     except Exception as e:

@@ -40,7 +40,6 @@ def run_app_automation():
 
         # ==== END OF COPY-PASTE SECTION ====
 
-        sleep(2)
         print("All steps executed on Corellium Android device.")
 
     except Exception as e:
@@ -48,7 +47,7 @@ def run_app_automation():
         raise
 
     finally:
-        print("Terminating app and closing session.")
+        print("Closing appium session.")
         driver.quit()
 
 if __name__ == "__main__":

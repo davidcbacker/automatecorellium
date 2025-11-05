@@ -1,12 +1,8 @@
 name: Dependencies check
 
 on:
-  push:
-    branches: master
-  pull_request:
-    branches: master
   schedule:
-    - cron: "17 16 */14 * *"
+    - cron: "17 16 * * *"
   workflow_dispatch:
 
 env:
@@ -23,7 +19,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
       - name: Renovate
-        uses: renovatebot/github-action@v43.0.10
+        uses: renovatebot/github-action@v43.0.18
         with:
           configurationFile: ${{ env.RENOVATE_CONFIG_PATH }}
           token: ${{ secrets.RENOVATE_TOKEN }}

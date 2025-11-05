@@ -557,7 +557,7 @@ run_full_matrix_assessment()
   fi
   log_stdout "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
-  run_appium_interactions_cafe
+  run_appium_interactions_cafe "${INSTANCE_ID}"
   log_stdout 'DEBUG sleeping for 10 seconds.'
   sleep 10
   log_stdout 'DEBUG finished sleeping.'

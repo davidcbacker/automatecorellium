@@ -1,5 +1,5 @@
 """
-Automate Corellium virtual device interactions using Appium.
+Automate Corellium virtual device interactions using Appium on Android apps.
 """
 
 from time import sleep

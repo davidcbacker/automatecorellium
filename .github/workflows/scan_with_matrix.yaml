@@ -224,8 +224,8 @@ jobs:
             MainThread
             adb
             appium
-            openvpn
             avahi-daemon
+            openvpn
             usbfluxd
           )
           for FILE_PATH in "${FILES_TO_DELETE[@]}"; do

@@ -9,8 +9,8 @@ default_services_ip = '10.11.1.1'
 default_adb_port = '5001'
 
 # ==== CONSTANTS: TARGET APP ====
-target_app_package = 'com.corellium.cafe'
-target_app_activity = '.ui.activities.MainActivity'
+target_app_package = 'com.yourpackage.name'
+target_app_activity = '.MainActivity'
 
 # ==== CONSTANTS: APPIUM SERVER ====
 appium_server_ip = '127.0.0.1'
@@ -51,13 +51,13 @@ if __name__ == "__main__":
     match len(argv):
         case 1:
             corellium_device_appium_udid = f'{default_services_ip}:{default_adb_port}'
-            print(f"Defaulting to Corellium device at {corellium_device_appium_udid}.")
+            print(f'Defaulting to Corellium device at {corellium_device_appium_udid}.')
         case 2:
             target_device_services_ip = argv[1]
             corellium_device_appium_udid = f'{target_device_services_ip}:{default_adb_port}'
-            print(f"Running cafe app test on device at {corellium_device_appium_udid}...")
+            print(f'Running cafe app test on device at {corellium_device_appium_udid}.')
         case _:
-            print("ERROR: Please provide zero or pass in the Corellium device services IP.")
+            print('ERROR: Please provide zero args or pass in the Corellium device services IP.')
             exit(1)
 
     run_cafe_app_test()

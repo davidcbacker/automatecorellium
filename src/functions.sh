@@ -391,7 +391,12 @@ create_matrix_assessment()
 {
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID="$2"
-  corellium matrix create-assessment --instance "${INSTANCE_ID}" --bundle "${APP_BUNDLE_ID}" | jq -r '.id'
+  local MATRIX_WORDLIST_ID="$3"
+  corellium matrix create-assessment \
+    --instance "${INSTANCE_ID}" \
+    --bundle "${APP_BUNDLE_ID}" \
+    --wordlist "${MATRIX_WORDLIST_ID}" |
+    jq -r '.id'
 }
 
 start_matrix_monitoring()
@@ -526,10 +531,11 @@ run_full_matrix_assessment()
 {
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID="$2"
+  local MATRIX_WORDLIST_ID="$3"
   handle_open_matrix_assessment "${INSTANCE_ID}"
   log_stdout "Creating MATRIX assessment"
   local MATRIX_ASSESSMENT_ID
-  MATRIX_ASSESSMENT_ID="$(create_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}")"
+  MATRIX_ASSESSMENT_ID="$(create_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}")"
   if [ -z "${MATRIX_ASSESSMENT_ID}" ]; then
     echo "Failed to create assessment" >&2
     return 1
@@ -550,15 +556,17 @@ run_full_matrix_assessment()
 run_matrix_cafe_checks_android()
 {
   local INSTANCE_ID="$1"
+  local MATRIX_WORDLIST_ID="$2"
   local APP_BUNDLE_ID='com.corellium.cafe'
-  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
+  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}"
 }
 
 run_matrix_cafe_checks_ios()
 {
   local INSTANCE_ID="$1"
+  local MATRIX_WORDLIST_ID="$2"
   local APP_BUNDLE_ID='com.corellium.Cafe'
-  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
+  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}"
 }
 
 delete_unauthorized_devices()
@@ -655,6 +663,32 @@ download_file_to_local_path()
     -H "Accept: application/octet-stream" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
     -o "${LOCAL_SAVE_PATH}"
+}
+
+# Upload a file to the Corellium server and print the image ID to stdout
+upload_image_from_local_path()
+{
+  local INSTANCE_ID="$1"
+  local LOCAL_FILE_PATH="$2"
+  local PROJECT_ID IMAGE_NAME
+  PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
+  IMAGE_NAME="$(basename "${LOCAL_FILE_PATH}")"
+  local IMAGE_TYPE='extension'
+  local IMAGE_ENCODING='plain'
+
+  # return the created image ID
+  local create_image_response
+  create_image_response="$(corellium image create \
+    --project "${PROJECT_ID}" \
+    --instance "${INSTANCE_ID}" \
+    "${IMAGE_NAME}" "${IMAGE_TYPE}" "${IMAGE_ENCODING}" "${LOCAL_FILE_PATH}")" || {
+    log_error "Failed to upload image for ${LOCAL_FILE_PATH}."
+    exit 1
+  }
+
+  echo "${create_image_response}" | jq -r '.[0].id' || {
+    log_error 'Failed to parse JSON repsonse for image ID.'
+  }
 }
 
 save_vpn_config_to_local_path()
@@ -830,12 +864,13 @@ install_appium_server_and_dependencies()
   log_stdout 'Installing appium dependencies.'
   sudo apt-get -qq update
   sudo apt-get -qq install --assume-yes --no-install-recommends libusb-dev
-  python3 -m pip install -U pymobiledevice3
+  #python3 -m pip install -U pymobiledevice3 # for ios devices
   log_stdout 'Installed appium dependencies.'
-  log_stdout 'Installing appium and xcuitest driver.'
+  log_stdout 'Installing appium and device driver.'
   npm install --location=global appium
-  appium driver install xcuitest
-  log_stdout 'Installed appium and xcuitest driver.'
+  appium driver install uiautomator2
+  #appium driver install xcuitest # for ios devices
+  log_stdout 'Installed appium and device driver.'
 }
 
 connect_to_vpn_for_instance()
@@ -912,4 +947,62 @@ verify_usbflux_connection()
     log_error 'Unable to establish idevicepair'
     exit 1
   }
+}
+
+run_appium_server()
+{
+  log_stdout 'Starting appium.'
+  appium \
+    --port 4723 \
+    --log-level info \
+    --allow-insecure=uiautomator2:chromedriver_autodownload \
+    --default-capabilities '{"appium:adbExecTimeout":60000}' &
+  until curl -s http://127.0.0.1:4723/status | jq -e '.value.ready == true' > /dev/null; do sleep 0.1; done
+  log_stdout 'Started appium.'
+}
+
+test_create_appium_session_cafe()
+{
+  local INSTANCE_ID="$1"
+  local CAFE_PAGKAGE_NAME='com.corellium.cafe'
+  test_create_appium_session "${INSTANCE_ID}" "${CAFE_PAGKAGE_NAME}"
+}
+
+test_create_appium_session()
+{
+  local INSTANCE_ID="$1"
+  local APP_PACKAGE_NAME="$2"
+  local DEFAULT_APPIUM_PORT='4723'
+  local DEFAULT_ADB_PORT='5001'
+  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+
+  APPIUM_SESSION_JSON_PAYLOAD=$(
+    cat << EOF
+{
+  "capabilities": {
+    "alwaysMatch": {
+      "platformName": "Android",
+      "appium:automationName": "UiAutomator2",
+      "appium:udid": "${INSTANCE_SERVICES_IP}:${DEFAULT_ADB_PORT}",
+      "appium:deviceName": "Corellium",
+      "appium:appPackage": "${APP_PACKAGE_NAME}",
+      "appium:appActivity": ".ui.activities.MainActivity",
+      "appium:noReset": false,
+      "appium:systemPort": 8200
+    },
+    "firstMatch": [{}]
+  }
+}
+EOF
+  )
+
+  echo "DEBUG PRINTING JSON PAYLOAD"
+  echo "${APPIUM_SESSION_JSON_PAYLOAD}"
+
+  log_stdout 'Starting appium session.'
+  curl --retry 100 -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
+    -H "Content-Type: application/json" \
+    -d "${APPIUM_SESSION_JSON_PAYLOAD}"
+  log_stdout 'Started appium session.'
 }

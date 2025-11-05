@@ -26,6 +26,7 @@ jobs:
     outputs:
       javascript: ${{ steps.filter.outputs.javascript }}
       matrix: ${{ steps.filter.outputs.matrix }}
+      python: ${{ steps.filter.outputs.python }}
       shell: ${{ steps.filter.outputs.shell }}
     steps:
       - uses: actions/checkout@v5

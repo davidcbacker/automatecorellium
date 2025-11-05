@@ -221,6 +221,8 @@ jobs:
             "${{ env.VPN_CONFIG_PATH }}"
           )
           readonly PROCS_TO_KILL=(
+            MainThread
+            adb
             appium
             openvpn
             avahi-daemon

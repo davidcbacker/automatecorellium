@@ -221,6 +221,7 @@ jobs:
             "${{ env.VPN_CONFIG_PATH }}"
           )
           readonly PROCS_TO_KILL=(
+            appium
             openvpn
             avahi-daemon
             usbfluxd
@@ -235,5 +236,7 @@ jobs:
             if pgrep "${PROCESS}" > /dev/null 2>&1; then
               echo "[+] Killing ${PROCESS}"
               sudo killall "${PROCESS}"
+              echo "[+] Killed ${PROCESS}"
             fi
           done
+          command -v adb > /dev/null && adb disconnect

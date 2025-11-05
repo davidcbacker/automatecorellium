@@ -50,8 +50,8 @@ def run_app_automation():
         el4 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
         el4.click()
 
+        sleep(5)
         el5 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
-        el5.wait_until_clickable(timeout=10)
         el5.click()
 
         el6 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")

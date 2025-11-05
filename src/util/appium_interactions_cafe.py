@@ -29,7 +29,7 @@ def run_app_automation():
     options.set_capability('appium:udid', CORELLIUM_DEVICE_APPIUM_UDID)
     options.set_capability('appium:appPackage', TARGET_APP_PACKAGE)
     options.set_capability('appium:appActivity', TARGET_APP_ACTIVITY)
-    options.set_capability('appium:noReset', False) # set to true for MATRIX runs
+    options.set_capability('appium:noReset', True)
 
     try:
         print("Starting session...")
@@ -50,6 +50,7 @@ def run_app_automation():
         el4 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
         el4.click()
 
+        sleep(5)
         el5 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
         el5.click()
 
@@ -103,7 +104,6 @@ def run_app_automation():
 
         # ==== END OF COPY-PASTE SECTION ====
 
-        sleep(2)
         print("All steps executed on Corellium Android device.")
 
     except Exception as e:
@@ -111,8 +111,7 @@ def run_app_automation():
         raise
 
     finally:
-        print("Terminating app and closing session.")
-        driver.terminate_app(TARGET_APP_PACKAGE) # remove this line for MATRIX runs
+        print("Closing appium session.")
         driver.quit()
 
 if __name__ == "__main__":

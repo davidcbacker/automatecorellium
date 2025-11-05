@@ -29,7 +29,7 @@ def run_app_automation():
     options.set_capability('appium:udid', CORELLIUM_DEVICE_APPIUM_UDID)
     options.set_capability('appium:appPackage', TARGET_APP_PACKAGE)
     options.set_capability('appium:appActivity', TARGET_APP_ACTIVITY)
-    options.set_capability('appium:noReset', False) # set to true for MATRIX runs
+    options.set_capability('appium:noReset', True)
 
     try:
         print("Starting session...")
@@ -49,7 +49,6 @@ def run_app_automation():
 
     finally:
         print("Terminating app and closing session.")
-        driver.terminate_app(TARGET_APP_PACKAGE) # remove this line for MATRIX runs
         driver.quit()
 
 if __name__ == "__main__":

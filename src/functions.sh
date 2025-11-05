@@ -557,8 +557,10 @@ run_full_matrix_assessment()
   fi
   log_stdout "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
-  # TODO: add app interactions
+  run_appium_interactions_cafe
+  log_stdout 'DEBUG sleeping for 10 seconds.'
   sleep 10
+  log_stdout 'DEBUG finished sleeping.'
   stop_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   log_stdout "Completed MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
@@ -1029,4 +1031,25 @@ EOF
     -H "Content-Type: application/json" \
     -d "${APPIUM_SESSION_JSON_PAYLOAD}"
   log_stdout 'Started appium session.'
+
+  log_stdout 'DEBUG SLEEPING UNTIL SESSION TIMEOUT'
+  sleep 65
+  log_stdout 'DEBUG FINISHED SLEEP'
 }
+
+run_appium_interactions_cafe()
+{
+  local INSTANCE_ID="$1"
+  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  python3 src/util/appium_interactions_cafe.py "${INSTANCE_SERVICES_IP}"
+}
+
+run_appium_interactions_template()
+{
+  local INSTANCE_ID="$1"
+  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  python3 src/util/appium_interactions_template.py "${INSTANCE_SERVICES_IP}"
+}
+

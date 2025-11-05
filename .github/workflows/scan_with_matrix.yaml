@@ -16,7 +16,7 @@ concurrency:
 env:
   TERM: xterm
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
-  MATRIX_RUNNER_ARTIFACTS_PATH: /home/runner/matrix_artifacts.zip
+  MATRIX_RUNNER_ARTIFACTS_PATH: /home/runner/matrix_artifacts.tar.gz
   MATRIX_INSTANCE_ID: ${{ github.event_name == 'schedule' && vars.MATRIX_AUTOMATION_INSTANCE
                         || vars.MATRIX_DEVELOPMENT_INSTANCE }}
 
@@ -25,7 +25,9 @@ jobs:
     name: Check for file changes
     runs-on: ubuntu-latest
     outputs:
+      javascript: ${{ steps.filter.outputs.javascript }}
       matrix: ${{ steps.filter.outputs.matrix }}
+      python: ${{ steps.filter.outputs.python }}
       shell: ${{ steps.filter.outputs.shell }}
     steps:
       - uses: actions/checkout@v5
@@ -39,6 +41,7 @@ jobs:
     needs: changes
     if: >-
       ${{
+        needs.changes.outputs.javascript == 'true' ||
         needs.changes.outputs.matrix == 'true' ||
         needs.changes.outputs.shell == 'true'
       }}
@@ -48,11 +51,11 @@ jobs:
       - name: Pull the latest code
         uses: actions/checkout@v5
       - name: Install Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           cache: 'npm'
-          node-version: 22
-      - name: Install Corellium npm dependencies
+          node-version: 24
+      - name: Install API dependencies
         run: |
           npm ci
           echo "$(pwd)/node_modules/.bin" >> "${GITHUB_PATH}"
@@ -63,6 +66,9 @@ jobs:
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Start or create instance
         timeout-minutes: 1
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
           if does_instance_exist "${{ env.MATRIX_INSTANCE_ID }}"; then
@@ -79,19 +85,28 @@ jobs:
             echo 'EPHEMERAL_MATRIX_INSTANCE=true' >> "${GITHUB_ENV}"
             log_stdout 'Updated environmental variables for ephemeral instance.'
           fi
-      - name: Install Appium dependencies
+      - name: Install additional runner dependencies
         run: |
           set -eu && source ./src/functions.sh
           install_openvpn_dependencies
-          install_usbfluxd_and_dependencies
+          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+            install_adb_dependency
+          else
+            install_usbfluxd_and_dependencies
+          fi
           install_appium_server_and_dependencies
-      - name: Unlock instance after boot
+      - name: Start Appium server
+        timeout-minutes: 1
+        run: |
+          set -eu && source ./src/functions.sh
+          run_appium_server
+      - name: Wait for instance agent ready
         timeout-minutes: 20
         run: |
           set -eu && source ./src/functions.sh
           start_instance "${{ env.MATRIX_INSTANCE_ID }}"
           wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
-          unlock_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          # unlock_instance "${{ env.MATRIX_INSTANCE_ID }}" # only for iOS
       - name: Connect to project VPN
         timeout-minutes: 2
         run: |
@@ -99,54 +114,16 @@ jobs:
           connect_to_vpn_for_instance \
             "${{ env.MATRIX_INSTANCE_ID }}" \
             "${{ env.VPN_CONFIG_PATH }}"
-      - name: Connect to device over USB
+      - name: Connect to device
         timeout-minutes: 1
         run: |
           set -eu && source ./src/functions.sh
-          run_usbfluxd_and_dependencies
-          add_instance_to_usbfluxd "${{ env.MATRIX_INSTANCE_ID }}"
-      - name: Verify USB connection and pair
-        timeout-minutes: 1
-        run: |
-          until idevice_id --list; do sleep 0.1; done
-          idevicepair pair
-      # - name: Mount the device's Developer Disk Image
-      #TODO: Uncomment this step after Appium Runner is stable to reduce rate limiting failures
-      #   run: pymobiledevice3 mounter auto-mount
-      - name: Install Appium runner and check connection
-        continue-on-error: true
-        env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
-          APPIUM_DEFUALT_PORT: 8100
-          APPIUM_RUNNER_LAUNCH_RETRIES: 5
-          APPIUM_RUNNER_CURL_RETRIES: 60
-        timeout-minutes: 10
-        run: |
-          set -eu && source ./src/functions.sh
-          install_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"
-          matrix_instance_services_ip="$(get_instance_services_ip "${{ env.MATRIX_INSTANCE_ID }}")"
-          readonly APPIUM_TEST_URL="http://${matrix_instance_services_ip}:${APPIUM_DEFUALT_PORT}/status"
-          appium_runner_success='false'
-          for launch_attempt in $(seq 1 "${APPIUM_RUNNER_LAUNCH_RETRIES}"); do
-            if ! launch_appium_runner_ios "${{ env.MATRIX_INSTANCE_ID }}"; then
-              echo "Failed to launch app during attempt ${launch_attempt}"
-              continue
-            fi
-            for curl_attempt in $(seq 1 "${APPIUM_RUNNER_CURL_RETRIES}"); do
-              if curl --silent "${APPIUM_TEST_URL}" 2>/dev/null; then
-                appium_runner_success='true'
-                printf 'Appium runner comms succeeded on launch %s and curl attempt %s' \
-                  "${launch_attempt}" \
-                  "${curl_attempt}"
-                break 2
-              fi
-              sleep 0.1
-            done
-          done
-          if [ "${appium_runner_success}" != 'true' ]; then
-            echo 'FAILED TO ESTABLISH APPIUM COMMS' >&2
-            exit 1
+          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+            connect_with_adb "${{ env.MATRIX_INSTANCE_ID }}"
+          else
+            run_usbfluxd_and_dependencies
+            add_instance_to_usbfluxd "${{ env.MATRIX_INSTANCE_ID }}"
+            verify_usbflux_connection
           fi
       - name: Install Corellium Cafe from URL
         env:
@@ -154,7 +131,19 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
-          install_corellium_cafe_ios "${{ env.MATRIX_INSTANCE_ID }}"
+          install_corellium_cafe_android "${{ env.MATRIX_INSTANCE_ID }}"
+      - name: Run Appium session test
+        run: |
+          set -eu && source ./src/functions.sh
+          test_create_appium_session_cafe "${MATRIX_INSTANCE_ID}"
+      - name: Upload MATRIX wordlist
+        env:
+          MATRIX_WORDLIST_PATH: './data/wordlist.txt'
+        run: |
+          set -eu && source ./src/functions.sh
+          CREATED_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${MATRIX_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          log_stdout "Created new wordlist image with ID ${CREATED_MATRIX_WORDLIST_ID}."
+          echo "MATRIX_WORDLIST_ID=${CREATED_MATRIX_WORDLIST_ID}" >> "${GITHUB_ENV}"
       - name: Run Corellium Cafe MATRIX assessment
         timeout-minutes: 40
         env:
@@ -164,7 +153,7 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           for ((failures=0; failures<=MAX_MATRIX_RUN_RETRIES; failures++)); do
-            if run_matrix_cafe_checks "${{ env.MATRIX_INSTANCE_ID }}"; then
+            if run_matrix_cafe_checks_android "${{ env.MATRIX_INSTANCE_ID }}" "${MATRIX_WORDLIST_ID}"; then
               break
             elif [ "${failures}" -lt "${MAX_MATRIX_RUN_RETRIES}" ]; then
               log_warning "MATRIX failed on run $((failures + 1))"
@@ -177,14 +166,18 @@ jobs:
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
-          MATRIX_INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.zip
+          MATRIX_INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.tar.gz
         run: |
           set -eu && source ./src/functions.sh
-          node ./src/zip_matrix_artifacts.js
+          log_stdout 'Compressing MATRIX runtime artifacts.'
+          node ./src/util/compress_matrix_artifacts.js
+          log_stdout 'Compressed MATRIX runtime artifacts.'
+          log_stdout 'Downloading MATRIX runtime artifacts from VM to CI runner.'
           download_file_to_local_path \
             "${{ env.MATRIX_INSTANCE_ID }}" \
             "${MATRIX_INSTANCE_ARTIFACTS_PATH}" \
             "${MATRIX_RUNNER_ARTIFACTS_PATH}"
+          log_stdout 'Downloaded MATRIX runtime artifacts from VM to CI runner.'
           ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
       - name: Upload MATRIX runtime artifacts
@@ -212,11 +205,11 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           if [ "${EPHEMERAL_MATRIX_INSTANCE:-}" = 'true' ]; then
-            log_stdout 'Deleting ephemeral instance.'
-            stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
-            delete_instance "${{ env.MATRIX_INSTANCE_ID }}"
+            log_stdout "Ready to delete ephemeral instance ${MATRIX_INSTANCE_ID}."
+            stop_instance "${MATRIX_INSTANCE_ID}"
+            delete_instance "${MATRIX_INSTANCE_ID}"
           else
-            soft_stop_instance "${{ env.MATRIX_INSTANCE_ID }}"
+            soft_stop_instance "${MATRIX_INSTANCE_ID}"
           fi
       - name: Clean up Corellium auth and processes
         if: always()

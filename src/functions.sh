@@ -65,7 +65,7 @@ log_warn()
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
-      printf '%s[!] %s WARN: %s\n%s' \
+      printf '%s[!] %s  WARN: %s\n%s' \
         "${MAKE_CONSOLE_YELLOW}" \
         "${FRIENDLY_DATE}" \
         "${arg}" \
@@ -81,9 +81,11 @@ log_warn()
 does_instance_exist()
 {
   local INSTANCE_ID="$1"
-  if ! corellium instance get --instance "${INSTANCE_ID}" 2> /dev/null |
+  if corellium instance get --instance "${INSTANCE_ID}" 2> /dev/null |
     jq -e --arg id "${INSTANCE_ID}" 'select(.id == $id)' > /dev/null; then
-    log_warn "instance ${INSTANCE_ID} does not exist."
+    return 0
+  else
+    log_warn "Instance ${INSTANCE_ID} does not exist."
     return 1
   fi
 }
@@ -98,14 +100,46 @@ create_instance()
   NEW_INSTANCE_NAME="MATRIX Automation $(date '+%Y-%m-%d') ${RANDOM}"
   # Avoid using --wait option here since it will wait for agent ready
   # Better to create instance first then install local deps then wait
-  corellium instance create "${HARDWARE_FLAVOR}" "${FIRMWARE_VERSION}" \
-    "${PROJECT_ID}" "${NEW_INSTANCE_NAME}" --os-build "${FIRMWARE_BUILD}" || {
+
+  if [ "${HARDWARE_FLAVOR}" = 'ranchu' ]; then
+    CREATE_INSTANCE_REQUEST_DATA=$(
+      cat << EOF
+{
+  "project": "${PROJECT_ID}",
+  "name": "${NEW_INSTANCE_NAME}",
+  "flavor": "${HARDWARE_FLAVOR}",
+  "os": "${FIRMWARE_VERSION}",
+  "osbuild": "${FIRMWARE_BUILD}",
+  "bootOptions": {"cores": 4,"ram": 4096}
+}
+EOF
+    )
+  else
+    CREATE_INSTANCE_REQUEST_DATA=$(
+      cat << EOF
+{
+  "project": "${PROJECT_ID}",
+  "name": "${NEW_INSTANCE_NAME}",
+  "flavor": "${HARDWARE_FLAVOR}",
+  "os": "${FIRMWARE_VERSION}",
+  "osbuild": "${FIRMWARE_BUILD}"
+}
+EOF
+    )
+  fi
+
+  check_env_vars
+  curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
+    -H "Accept: application/json" \
+    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
+    -H "Content-Type: application/json" \
+    -d "${CREATE_INSTANCE_REQUEST_DATA}" |
+    jq -r .id || {
     log_error "Failed to create new instance in project ${PROJECT_ID}." >&2
     log_error "Hardware was ${HARDWARE_FLAVOR} running ${FIRMWARE_VERSION} (${FIRMWARE_BUILD})." >&2
     exit 1
   }
 }
-
 delete_instance()
 {
   local INSTANCE_ID="$1"
@@ -131,6 +165,10 @@ start_instance()
       log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_CREATING}. Waiting for ${TARGET_INSTANCE_STATUS_ON} state."
       wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_ON}"
       log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_ON}."
+      ;;
+    '')
+      log_error "Failed to get status for instance ${INSTANCE_ID}."
+      exit 1
       ;;
     *)
       log_stdout "Starting instance ${INSTANCE_ID}"
@@ -158,6 +196,10 @@ stop_instance()
       corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
       log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_OFF}."
       ;;
+    '')
+      log_error "Failed to get status for instance ${INSTANCE_ID}."
+      exit 1
+      ;;
     *)
       log_stdout "Stopping instance ${INSTANCE_ID}"
       corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
@@ -174,6 +216,10 @@ soft_stop_instance()
   case "$(get_instance_status "${INSTANCE_ID}")" in
     "${TARGET_INSTANCE_STATUS_OFF}")
       log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_OFF}."
+      ;;
+    '')
+      log_error "Failed to get status for instance ${INSTANCE_ID}."
+      exit 1
       ;;
     *)
       log_stdout "Stopping instance ${INSTANCE_ID}."
@@ -213,26 +259,29 @@ get_instance_services_ip()
 
 wait_until_agent_ready()
 {
-  local instance_id="$1"
+  local INSTANCE_ID="$1"
   local AGENT_READY_SLEEP_TIME='15'
   local INSTANCE_STATUS_ON='on'
-  local PROJECT_ID
-  PROJECT_ID="$(get_project_from_instance_id "${instance_id}")"
-
-  local instance_status
-  instance_status="$(get_instance_status "${instance_id}")"
-  local ready_status
-  ready_status="$(corellium ready --instance "${instance_id}" --project "${PROJECT_ID}" 2> /dev/null | jq -r '.ready')"
-
-  while [ "${ready_status}" != 'true' ]; do
-    if [ "${instance_status}" != "${INSTANCE_STATUS_ON}" ]; then
-      log_stdout "Instance is ${instance_status} not ${INSTANCE_STATUS_ON}. Exiting" >&2
-      exit 1
-    fi
-    log_stdout "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
+  local PROJECT_ID INSTANCE_STATUS AGENT_READY_STATUS
+  PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
+  INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
+  AGENT_READY_STATUS="$(corellium ready --instance "${INSTANCE_ID}" --project "${PROJECT_ID}" 2> /dev/null | jq -r '.ready')"
+  while [ "${AGENT_READY_STATUS}" != 'true' ]; do
+    case "${INSTANCE_STATUS}" in
+      '')
+        log_warning "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
+        ;;
+      "${INSTANCE_STATUS_ON}")
+        log_stdout "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
+        ;;
+      *)
+        log_stdout "Instance is ${INSTANCE_STATUS} not ${INSTANCE_STATUS_ON}. Exiting" >&2
+        exit 1
+        ;;
+    esac
     sleep "${AGENT_READY_SLEEP_TIME}"
-    instance_status="$(get_instance_status "${instance_id}")"
-    ready_status="$(corellium ready --instance "${instance_id}" --project "${PROJECT_ID}" 2> /dev/null | jq -r '.ready')"
+    INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
+    AGENT_READY_STATUS="$(corellium ready --instance "${INSTANCE_ID}" --project "${PROJECT_ID}" 2> /dev/null | jq -r '.ready')"
   done
   log_stdout 'Virtual device agent is ready.'
 }
@@ -254,6 +303,13 @@ kill_app()
       exit 1
     fi
   fi
+}
+
+kill_corellium_cafe_android()
+{
+  local INSTANCE_ID="$1"
+  local CORELLIUM_CAFE_BUNDLE_ID='com.corellium.cafe'
+  kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_BUNDLE_ID}"
 }
 
 kill_corellium_cafe_ios()
@@ -297,6 +353,15 @@ install_app_from_url()
     echo "Error installing app ${APP_FILENAME}. Exiting." >&2
     exit 1
   fi
+}
+
+install_corellium_cafe_android()
+{
+  local INSTANCE_ID="$1"
+  local CORELLIUM_CAFE_ANDROID_URL="https://www.corellium.com/hubfs/Corellium_Cafe.apk"
+  local CORELLIUM_CAFE_BUNDLE_ID='com.corellium.cafe'
+  kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_BUNDLE_ID}"
+  install_app_from_url "${INSTANCE_ID}" "${CORELLIUM_CAFE_ANDROID_URL}"
 }
 
 install_corellium_cafe_ios()
@@ -365,7 +430,12 @@ create_matrix_assessment()
 {
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID="$2"
-  corellium matrix create-assessment --instance "${INSTANCE_ID}" --bundle "${APP_BUNDLE_ID}" | jq -r '.id'
+  local MATRIX_WORDLIST_ID="$3"
+  corellium matrix create-assessment \
+    --instance "${INSTANCE_ID}" \
+    --bundle "${APP_BUNDLE_ID}" \
+    --wordlist "${MATRIX_WORDLIST_ID}" |
+    jq -r '.id'
 }
 
 start_matrix_monitoring()
@@ -500,18 +570,21 @@ run_full_matrix_assessment()
 {
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID="$2"
+  local MATRIX_WORDLIST_ID="$3"
   handle_open_matrix_assessment "${INSTANCE_ID}"
   log_stdout "Creating MATRIX assessment"
   local MATRIX_ASSESSMENT_ID
-  MATRIX_ASSESSMENT_ID="$(create_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}")"
+  MATRIX_ASSESSMENT_ID="$(create_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}")"
   if [ -z "${MATRIX_ASSESSMENT_ID}" ]; then
     echo "Failed to create assessment" >&2
     return 1
   fi
   log_stdout "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
-  # TODO: add app interactions
+  run_appium_interactions_cafe "${INSTANCE_ID}"
+  log_stdout 'DEBUG sleeping for 10 seconds.'
   sleep 10
+  log_stdout 'DEBUG finished sleeping.'
   stop_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   log_stdout "Completed MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
@@ -521,11 +594,20 @@ run_full_matrix_assessment()
   log_stdout "Downloaded reports for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 
-run_matrix_cafe_checks()
+run_matrix_cafe_checks_android()
 {
   local INSTANCE_ID="$1"
+  local MATRIX_WORDLIST_ID="$2"
+  local APP_BUNDLE_ID='com.corellium.cafe'
+  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}"
+}
+
+run_matrix_cafe_checks_ios()
+{
+  local INSTANCE_ID="$1"
+  local MATRIX_WORDLIST_ID="$2"
   local APP_BUNDLE_ID='com.corellium.Cafe'
-  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
+  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}"
 }
 
 delete_unauthorized_devices()
@@ -580,12 +662,14 @@ delete_unauthorized_devices()
 
 start_demo_instances()
 {
+  local INSTANCE_START_SLEEP_TIME='30'
   local INSTANCES_TO_START=()
   while IFS= read -r line; do
     INSTANCES_TO_START+=("$(echo "${line}" | tr -d '\r\n')")
   done <<< "${START_INSTANCES}"
   for INSTANCE_ID in "${INSTANCES_TO_START[@]}"; do
     start_instance "${INSTANCE_ID}"
+    sleep "${INSTANCE_START_SLEEP_TIME}"
   done
 }
 
@@ -622,13 +706,41 @@ download_file_to_local_path()
     -o "${LOCAL_SAVE_PATH}"
 }
 
+# Upload a file to the Corellium server and print the image ID to stdout
+upload_image_from_local_path()
+{
+  local INSTANCE_ID="$1"
+  local LOCAL_FILE_PATH="$2"
+  local PROJECT_ID IMAGE_NAME
+  PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
+  IMAGE_NAME="$(basename "${LOCAL_FILE_PATH}")"
+  local IMAGE_TYPE='extension'
+  local IMAGE_ENCODING='plain'
+
+  # return the created image ID
+  local create_image_response
+  create_image_response="$(corellium image create \
+    --project "${PROJECT_ID}" \
+    --instance "${INSTANCE_ID}" \
+    "${IMAGE_NAME}" "${IMAGE_TYPE}" "${IMAGE_ENCODING}" "${LOCAL_FILE_PATH}")" || {
+    log_error "Failed to upload image for ${LOCAL_FILE_PATH}."
+    exit 1
+  }
+
+  echo "${create_image_response}" | jq -r '.[0].id' || {
+    log_error 'Failed to parse JSON repsonse for image ID.'
+  }
+}
+
 save_vpn_config_to_local_path()
 {
   local INSTANCE_ID="$1"
   local LOCAL_SAVE_PATH="$2"
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
+  log_stdout "Saving ovpn profile to ${LOCAL_SAVE_PATH}."
   corellium project vpnConfig --project "${PROJECT_ID}" --path "${LOCAL_SAVE_PATH}"
+  log_stdout "Saved ovpn profile to ${LOCAL_SAVE_PATH}."
 }
 
 wait_for_instance_status()
@@ -639,8 +751,12 @@ wait_for_instance_status()
 
   case "${TARGET_INSTANCE_STATUS}" in
     'on' | 'off') ;;
+    '')
+      log_error 'TARGET_INSTANCE_STATUS parameter cannot be empty.'
+      exit 1
+      ;;
     *)
-      echo "Unsupported target status: '${TARGET_INSTANCE_STATUS}'. Exiting." >&2
+      log_error "Unsupported target status: '${TARGET_INSTANCE_STATUS}'."
       exit 1
       ;;
   esac
@@ -648,7 +764,11 @@ wait_for_instance_status()
   local CURRENT_INSTANCE_STATUS
   CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
   while [ "${CURRENT_INSTANCE_STATUS}" != "${TARGET_INSTANCE_STATUS}" ]; do
-    log_stdout "Status is ${CURRENT_INSTANCE_STATUS} and target is ${TARGET_INSTANCE_STATUS}. Waiting ${SLEEP_TIME_DEFAULT} seconds."
+    if [ -z "${CURRENT_INSTANCE_STATUS}" ]; then
+      log_warning "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
+    else
+      log_stdout "Status is ${CURRENT_INSTANCE_STATUS} and target is ${TARGET_INSTANCE_STATUS}. Waiting ${SLEEP_TIME_DEFAULT} seconds."
+    fi
     sleep "${SLEEP_TIME_DEFAULT}"
     CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
   done
@@ -671,6 +791,7 @@ wait_for_assessment_status()
   esac
 
   local CURRENT_ASSESSMENT_STATUS LAST_ASSESSMENT_STATUS ASSESSMENT_STATUS_SLEEP_TIME
+  LAST_ASSESSMENT_STATUS='UNDEFINED'
   CURRENT_ASSESSMENT_STATUS="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
   while [ "${CURRENT_ASSESSMENT_STATUS}" != "${TARGET_ASSESSMENT_STATUS}" ]; do
     case "${CURRENT_ASSESSMENT_STATUS}" in
@@ -703,7 +824,26 @@ install_openvpn_dependencies()
   log_stdout 'Installing openvpn.'
   sudo apt-get -qq update
   sudo apt-get -qq install --assume-yes --no-install-recommends openvpn
-  log_stdout 'Installed openvpn.'
+  if command -v openvpn > /dev/null; then
+    log_stdout 'Installed openvpn.'
+  else
+    log_error 'Failed to install openvpn dependency'
+    exit 1
+  fi
+}
+
+install_adb_dependency()
+{
+  log_stdout 'Installing adb.'
+  sudo apt-get -qq update
+  sudo apt-get -qq install adb
+
+  if command -v adb > /dev/null; then
+    log_stdout 'Installed adb.'
+  else
+    log_error 'Failed to install adb dependency'
+    exit 1
+  fi
 }
 
 install_usbfluxd_and_dependencies()
@@ -774,12 +914,14 @@ install_appium_server_and_dependencies()
   log_stdout 'Installing appium dependencies.'
   sudo apt-get -qq update
   sudo apt-get -qq install --assume-yes --no-install-recommends libusb-dev
-  python3 -m pip install -U pymobiledevice3
+  #python3 -m pip install -U pymobiledevice3 # for ios devices
+  python3 -m pip install -U Appium-Python-Client
   log_stdout 'Installed appium dependencies.'
-  log_stdout 'Installing appium and xcuitest driver.'
+  log_stdout 'Installing appium and device driver.'
   npm install --location=global appium
-  appium driver install xcuitest
-  log_stdout 'Installed appium and xcuitest driver.'
+  appium driver install uiautomator2
+  #appium driver install xcuitest # for ios devices
+  log_stdout 'Installed appium and device driver.'
 }
 
 connect_to_vpn_for_instance()
@@ -790,21 +932,46 @@ connect_to_vpn_for_instance()
   local INSTANCE_SERVICES_IP
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
 
-  if ! command -v openvpn; then
-    log_warn 'Dependency openvpn not found. Attempting to install.'
+  if ! command -v openvpn > /dev/null; then
+    log_warn 'Attempting to install openvpn dependency.'
     install_openvpn_dependency
   fi
+
   save_vpn_config_to_local_path "${INSTANCE_ID}" "${OVPN_CONFIG_PATH}"
+  log_stdout 'Connecting to Corellium project VPN.'
   sudo openvpn --config "${OVPN_CONFIG_PATH}" &
+  log_stdout 'Connected to Corellium project VPN.'
 
   # Wait for the tunnel to establish, find the VPN IPv4 address, and test the connection
   until ip addr show tap0 > /dev/null 2>&1; do sleep 0.1; done
+  log_stdout 'Found the project VPN tap0 interface.'
   local INSTANCE_VPN_IP
   INSTANCE_VPN_IP="$(ip addr show tap0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1)"
   until ping -c1 "${INSTANCE_VPN_IP}"; do sleep 0.1; done
   log_stdout 'Successfully pinged the project VPN IP.'
   until ping -c1 "${INSTANCE_SERVICES_IP}"; do sleep 0.1; done
   log_stdout 'Successfully pinged the instance services IP.'
+}
+
+connect_with_adb()
+{
+  local INSTANCE_ID="$1"
+  local INSTANCE_SERVICES_IP
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  local ADB_CONNECT_PORT='5001'
+  local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
+
+  if ! command -v adb > /dev/null; then
+    log_warn 'Attempting to install adb dependency.'
+    install_adb_dependency
+  fi
+
+  adb connect "${ADB_CONNECT_SOCKET}"
+  adb devices -l | grep -q "${ADB_CONNECT_SOCKET}" || {
+    log_error "Unable to connect to ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
+    adb devices -l
+    exit 1
+  }
 }
 
 run_usbfluxd_and_dependencies()
@@ -822,4 +989,93 @@ add_instance_to_usbfluxd()
   local INSTANCE_SERVICES_IP
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   usbfluxctl add "${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
+}
+
+verify_usbflux_connection()
+{
+  until idevice_id --list; do sleep 0.1; done
+  idevicepair pair || {
+    log_error 'Unable to establish idevicepair'
+    exit 1
+  }
+}
+
+run_appium_server()
+{
+  log_stdout 'Starting appium.'
+  appium \
+    --port 4723 \
+    --log-level info \
+    --allow-insecure=uiautomator2:chromedriver_autodownload \
+    --default-capabilities '{"appium:adbExecTimeout":60000}' &
+  until curl -s http://127.0.0.1:4723/status | jq -e '.value.ready == true' > /dev/null; do sleep 0.1; done
+  log_stdout 'Started appium.'
+}
+
+test_create_appium_session_cafe()
+{
+  local INSTANCE_ID="$1"
+  local CAFE_PAGKAGE_NAME='com.corellium.cafe'
+  test_create_appium_session "${INSTANCE_ID}" "${CAFE_PAGKAGE_NAME}"
+}
+
+test_create_appium_session()
+{
+  local INSTANCE_ID="$1"
+  local APP_PACKAGE_NAME="$2"
+  local DEFAULT_APPIUM_PORT='4723'
+  local DEFAULT_ADB_PORT='5001'
+  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+
+  APPIUM_SESSION_JSON_PAYLOAD=$(
+    cat << EOF
+{
+  "capabilities": {
+    "alwaysMatch": {
+      "platformName": "Android",
+      "appium:automationName": "UiAutomator2",
+      "appium:udid": "${INSTANCE_SERVICES_IP}:${DEFAULT_ADB_PORT}",
+      "appium:deviceName": "Corellium",
+      "appium:appPackage": "${APP_PACKAGE_NAME}",
+      "appium:appActivity": ".ui.activities.MainActivity",
+      "appium:noReset": false,
+      "appium:systemPort": 8200
+    },
+    "firstMatch": [{}]
+  }
+}
+EOF
+  )
+
+  echo "DEBUG PRINTING JSON PAYLOAD"
+  echo "${APPIUM_SESSION_JSON_PAYLOAD}"
+
+  log_stdout 'Starting appium session.'
+  curl --retry 100 -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
+    -H "Content-Type: application/json" \
+    -d "${APPIUM_SESSION_JSON_PAYLOAD}"
+  log_stdout 'Started appium session.'
+
+  log_stdout 'DEBUG SLEEPING UNTIL SESSION TIMEOUT'
+  sleep 65
+  log_stdout 'DEBUG FINISHED SLEEP'
+}
+
+run_appium_interactions_cafe()
+{
+  local INSTANCE_ID="$1"
+  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  log_stdout 'Starting automated Appium interactions.'
+  python3 src/util/appium_interactions_cafe.py "${INSTANCE_SERVICES_IP}"
+  log_stdout 'Finished automated Appium interactions.'
+}
+
+run_appium_interactions_template()
+{
+  local INSTANCE_ID="$1"
+  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  python3 src/util/appium_interactions_template.py "${INSTANCE_SERVICES_IP}"
 }

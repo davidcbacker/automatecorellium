@@ -5,11 +5,13 @@ ci:
 matrix:
   - '.github/workflows/scan_with_matrix.yaml'
   - 'data/wordlist.txt'
+python:
+ - '*.py'
 shell:
   - 'src/*.sh'
 static-lint:
   - '.github/workflows/commit_checks.yaml'
 javascript:
-  - 'src/*.js'
+  - 'src/util/*.js'
 markdown:
   - '*.md'

@@ -14,6 +14,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  TERM: xterm
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
   MATRIX_RUNNER_ARTIFACTS_PATH: /home/runner/matrix_artifacts.tar.gz
   MATRIX_INSTANCE_ID: ${{ github.event_name == 'schedule' && vars.MATRIX_AUTOMATION_INSTANCE

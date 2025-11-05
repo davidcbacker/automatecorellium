@@ -864,7 +864,7 @@ install_appium_server_and_dependencies()
   log_stdout 'Installing appium dependencies.'
   sudo apt-get -qq update
   sudo apt-get -qq install --assume-yes --no-install-recommends libusb-dev
-  python3 -m pip install -U pymobiledevice3
+  #python3 -m pip install -U pymobiledevice3 # for ios devices
   log_stdout 'Installed appium dependencies.'
   log_stdout 'Installing appium and device driver.'
   npm install --location=global appium

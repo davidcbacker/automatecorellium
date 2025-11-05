@@ -167,11 +167,15 @@ jobs:
           MATRIX_INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.tar.gz
         run: |
           set -eu && source ./src/functions.sh
+          log_stdout 'Compressing MATRIX runtime artifacts.'
           node ./src/util/compress_matrix_artifacts.js
+          log_stdout 'Compressed MATRIX runtime artifacts.'
+          log_stdout 'Downloading MATRIX runtime artifacts from VM to CI runner.'
           download_file_to_local_path \
             "${{ env.MATRIX_INSTANCE_ID }}" \
             "${MATRIX_INSTANCE_ARTIFACTS_PATH}" \
             "${MATRIX_RUNNER_ARTIFACTS_PATH}"
+          log_stdout 'Downloaded MATRIX runtime artifacts from VM to CI runner.'
           ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
       - name: Upload MATRIX runtime artifacts

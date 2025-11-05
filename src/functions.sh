@@ -966,7 +966,10 @@ connect_with_adb()
     install_adb_dependency
   fi
 
+  log_stdout "Connecting over adb to ${ADB_CONNECT_SOCKET}."
   adb connect "${ADB_CONNECT_SOCKET}"
+  log_stdout "Connected over adb to ${ADB_CONNECT_SOCKET}."
+  log_stdout 'Listing connected adb devices.'
   adb devices -l | grep -q "${ADB_CONNECT_SOCKET}" || {
     log_error "Unable to connect to ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
     adb devices -l

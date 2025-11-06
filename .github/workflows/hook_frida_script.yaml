@@ -68,6 +68,7 @@ jobs:
         timeout-minutes: 20
         run: |
           set -eu && source ./src/functions.sh
+          set -x
           start_instance "${{ env.CORELLIUM_INSTANCE_ID }}"
           wait_until_agent_ready "${{ env.CORELLIUM_INSTANCE_ID }}"
           [ "${{ vars.ANDROID_HARDWARE_FLAVOR }}" != 'ranchu' ] &&

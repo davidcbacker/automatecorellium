@@ -34,7 +34,7 @@ def run_app_automation():
     try:
         print("Starting session...")
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
-        driver.implicitly_wait(15)
+        driver.implicitly_wait(15000)
         print("Successfully loaded target app.")
 
         # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====

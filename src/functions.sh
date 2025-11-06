@@ -1057,20 +1057,20 @@ run_appium_server()
   log_stdout 'Started appium.'
 }
 
-test_create_appium_session_cafe()
+open_appium_session_cafe()
 {
   local INSTANCE_ID="$1"
   local CAFE_PAGKAGE_NAME='com.corellium.cafe'
-  test_create_appium_session "${INSTANCE_ID}" "${CAFE_PAGKAGE_NAME}"
+  open_appium_session "${INSTANCE_ID}" "${CAFE_PAGKAGE_NAME}"
 }
 
-test_create_appium_session()
+open_appium_session()
 {
   local INSTANCE_ID="$1"
   local APP_PACKAGE_NAME="$2"
   local DEFAULT_APPIUM_PORT='4723'
   local DEFAULT_ADB_PORT='5001'
-  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
+  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
 
   APPIUM_SESSION_JSON_PAYLOAD=$(
@@ -1093,18 +1093,39 @@ test_create_appium_session()
 EOF
   )
 
-  echo "DEBUG PRINTING JSON PAYLOAD"
-  echo "${APPIUM_SESSION_JSON_PAYLOAD}"
-
-  log_stdout 'Starting appium session.'
-  curl --silent --retry 100 -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
+  OPEN_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent --retry 5 \
+    -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
     -H "Content-Type: application/json" \
-    -d "${APPIUM_SESSION_JSON_PAYLOAD}"
-  log_stdout 'Started appium session.'
+    -d "${APPIUM_SESSION_JSON_PAYLOAD}")" || {
+    log_error 'Failed to open appium session.'
+    exit 1
+  }
+  OPENED_SESSION_ID="$(echo "${OPEN_APPIUM_SESSION_JSON_RESPONSE}" | jq -r '.value.sessionId')" || {
+    log_error 'Failed to parse open appium session JSON response.'
+    exit 1
+  }
+  echo "${OPENED_SESSION_ID}"
+}
 
-  log_stdout 'DEBUG SLEEPING UNTIL SESSION TIMEOUT'
-  sleep 65
-  log_stdout 'DEBUG FINISHED SLEEP'
+close_appium_session()
+{
+  local SESSION_ID="$1"
+  local DEFAULT_APPIUM_PORT='4723'
+  local APPIUM_API_SESSION_URL="http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session/${SESSION_ID}"
+  curl --silent -X DELETE "${APPIUM_API_SESSION_URL}" \
+    -H "Content-Type: application/json" > /dev/null || {
+    log_error 'Failed to close session.'
+    exit 1
+  }
+
+  # Verify that the session ID is invalid
+  local GET_APPIUM_SESSION_JSON_RESPONSE
+  GET_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent -X GET "${APPIUM_API_SESSION_URL}")"
+  if ! echo "${GET_APPIUM_SESSION_JSON_RESPONSE}" | jq -e '.value.error == "invalid session id"' > /dev/null; then
+    echo "${GET_APPIUM_SESSION_JSON_RESPONSE}"
+    log_error "Appium session ${SESSION_ID} is still valid after close."
+    exit 1
+  fi
 }
 
 run_appium_interactions_cafe()

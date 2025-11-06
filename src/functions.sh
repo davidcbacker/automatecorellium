@@ -1040,7 +1040,7 @@ run_frida_script_usb()
   local FRIDA_TIMEOUT_SECONDS='60'
   log_stdout "Launching frida script with ${APP_PACKAGE_NAME}."
   timeout "${FRIDA_TIMEOUT_SECONDS}" frida -U \
-    -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}" || 
+    -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}" ||
     log_stdout "Stopped frida process after ${FRIDA_TIMEOUT_SECONDS} seconds."
 }
 

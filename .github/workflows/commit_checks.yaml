@@ -63,6 +63,7 @@ jobs:
       - name: Lint python scripts
         run: |
           for python_script in $(git ls-files '*.py'); do
+            echo "Linting ${python_script}."
             pylint "${python_script}" \
               --disable duplicate-code \
               --disable import-error \

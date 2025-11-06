@@ -113,6 +113,7 @@ def run_app_automation():
         driver.quit()
 
 if __name__ == "__main__":
+    corellium_device_appium_udid = ''
     match len(sys.argv):
         case 1:
             corellium_device_appium_udid = f'{DEFAULT_SERVICES_IP}:{DEFAULT_ADB_PORT}'

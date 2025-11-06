@@ -1016,11 +1016,11 @@ run_appium_server()
   log_stdout 'Started appium.'
 }
 
-test_create_appium_session_cafe()
+open_appium_session_cafe()
 {
   local INSTANCE_ID="$1"
   local CAFE_PAGKAGE_NAME='com.corellium.cafe'
-  test_create_appium_session "${INSTANCE_ID}" "${CAFE_PAGKAGE_NAME}"
+  open_appium_session "${INSTANCE_ID}" "${CAFE_PAGKAGE_NAME}"
 }
 
 open_appium_session()

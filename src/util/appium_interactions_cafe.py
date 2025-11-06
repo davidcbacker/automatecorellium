@@ -34,6 +34,7 @@ def run_app_automation():
     try:
         print("Starting session...")
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
+        driver.implicitly_wait(5)
         print("Successfully loaded target app.")
 
         # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====
@@ -50,14 +51,12 @@ def run_app_automation():
         el4 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
         el4.click()
 
-        sleep(5)
         el5 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
         el5.click()
 
         el6 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
         el6.click()
 
-        sleep(5)
         el7 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
         el7.click()
 

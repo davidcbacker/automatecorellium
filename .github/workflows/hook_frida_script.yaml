@@ -103,7 +103,7 @@ jobs:
           run_frida_ps_usb
       - name: Run frida hook
         env:
-          FRIDA_SCRIPT_PATH: src/util/frida_script_cafe.js
+          FRIDA_SCRIPT_PATH: src/util/frida_script_android_cafe.js
         run: |
           set -eu && source ./src/functions.sh
           run_frida_script_usb "${CORELLIUM_CAFE_PACKAGE_ANDROID}" "${FRIDA_SCRIPT_PATH}"

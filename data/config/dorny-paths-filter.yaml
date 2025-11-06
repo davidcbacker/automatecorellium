@@ -6,7 +6,7 @@ matrix:
   - '.github/workflows/scan_with_matrix.yaml'
   - 'data/wordlist.txt'
 python:
- - '*.py'
+ - 'src/util/*.py'
 shell:
   - 'src/*.sh'
 static-lint:

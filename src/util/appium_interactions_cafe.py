@@ -20,12 +20,12 @@ APPIUM_SERVER_IP = '127.0.0.1'
 APPIUM_SERVER_PORT = '4723'
 APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
 
-def run_app_automation():
+def run_app_automation(udid: str):
     '''Launch the app and interact using Appium commands.'''
     options = UiAutomator2Options()
     options.set_capability('platformName', 'Android')
     options.set_capability('appium:automationName', 'UiAutomator2')
-    options.set_capability('appium:udid', corellium_device_appium_udid)
+    options.set_capability('appium:udid', udid)
     options.set_capability('appium:appPackage', TARGET_APP_PACKAGE)
     options.set_capability('appium:appActivity', TARGET_APP_ACTIVITY)
     options.set_capability('appium:noReset', True)
@@ -108,12 +108,12 @@ def run_app_automation():
     except Exception as e:
         print(f"TEST FAILED: {e}")
         raise
+
     finally:
         print("Closing appium session.")
         driver.quit()
 
 if __name__ == "__main__":
-    corellium_device_appium_udid = ''
     match len(sys.argv):
         case 1:
             corellium_device_appium_udid = f'{DEFAULT_SERVICES_IP}:{DEFAULT_ADB_PORT}'
@@ -126,4 +126,4 @@ if __name__ == "__main__":
             print('ERROR: Please provide zero or pass in the Corellium device services IP.')
             sys.exit(1)
 
-    run_app_automation()
+    run_app_automation(corellium_device_appium_udid)

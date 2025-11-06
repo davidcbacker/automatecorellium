@@ -97,9 +97,10 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           install_corellium_cafe_android "${{ env.CORELLIUM_INSTANCE_ID }}"
-      - name: Run frida-ps
+      - name: Launch Cafe and run frida-ps
         run: |
           set -eu && source ./src/functions.sh
+          launch_app "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE_ANDROID}"
           run_frida_ps_usb
       - name: Run frida hook
         env:

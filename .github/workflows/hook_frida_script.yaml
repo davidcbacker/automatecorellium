@@ -12,7 +12,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-#  TERM: xterm
+  TERM: xterm
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
 
 jobs:

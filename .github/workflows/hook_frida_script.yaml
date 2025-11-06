@@ -110,7 +110,9 @@ jobs:
           FRIDA_SCRIPT_PATH: src/util/frida_script_android_cafe.js
         run: |
           set -eu && source ./src/functions.sh
-          run_frida_script_usb "${CORELLIUM_CAFE_PACKAGE_ANDROID}" "${FRIDA_SCRIPT_PATH}"
+          # Frida scripts run indefinitely, so set 60 second process timeout
+          timeout 60 run_frida_script_usb \
+            "${CORELLIUM_CAFE_PACKAGE_ANDROID}" "${FRIDA_SCRIPT_PATH}" || true
       - name: Stop or delete instance
         if: always()
         timeout-minutes: 2

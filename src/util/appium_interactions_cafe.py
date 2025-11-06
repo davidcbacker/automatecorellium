@@ -109,7 +109,6 @@ def run_app_automation():
     except Exception as e:
         print(f"TEST FAILED: {e}")
         raise
-
     finally:
         print("Closing appium session.")
         driver.quit()

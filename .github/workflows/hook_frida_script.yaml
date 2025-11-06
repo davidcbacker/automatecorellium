@@ -108,3 +108,18 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           run_frida_hook_usb "${CORELLIUM_CAFE_PACKAGE_ANDROID}" "${FRIDA_SCRIPT_PATH}"
+      - name: Stop or delete instance
+        if: always()
+        timeout-minutes: 2
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+        run: |
+          set -eu && source ./src/functions.sh
+          if [ "${EPHEMERAL_CORELLIUM_INSTANCE:-}" = 'true' ]; then
+            log_stdout "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
+            stop_instance "${CORELLIUM_INSTANCE_ID}"
+            delete_instance "${CORELLIUM_INSTANCE_ID}"
+          else
+            soft_stop_instance "${CORELLIUM_INSTANCE_ID}"
+          fi

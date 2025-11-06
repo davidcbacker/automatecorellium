@@ -764,7 +764,7 @@ wait_for_instance_status()
     if [ -z "${CURRENT_INSTANCE_STATUS}" ]; then
       log_warning "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
     else
-      log_stdout "Status is ${CURRENT_INSTANCE_STATUS} and target is ${TARGET_INSTANCE_STATUS}. Waiting ${SLEEP_TIME_DEFAULT} seconds."
+      log_stdout "Status is ${CURRENT_INSTANCE_STATUS}, waiting for ${TARGET_INSTANCE_STATUS}."
     fi
     sleep "${SLEEP_TIME_DEFAULT}"
     CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"

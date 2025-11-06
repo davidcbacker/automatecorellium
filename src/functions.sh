@@ -1036,6 +1036,7 @@ run_frida_script_usb()
 {
   local APP_PACKAGE_NAME="$1"
   local FRIDA_SCRIPT_PATH="$2"
+  # Frida scripts run indefinitely, so set 60 second process timeout
   local FRIDA_TIMEOUT_SECONDS='60' # default time to hook
   timeout "${FRIDA_TEIMOUT_SECONDS}" frida -U \
     -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}" || true

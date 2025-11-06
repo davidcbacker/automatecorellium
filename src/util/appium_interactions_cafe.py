@@ -115,7 +115,7 @@ def run_app_automation():
 if __name__ == "__main__":
     match len(sys.argv):
         case 1:
-            corelliumDeviceAppiumUdid = f'{DEFAULT_SERVICES_IP}:{DEFAULT_ADB_PORT}'
+            corellium_device_appium_udid = f'{DEFAULT_SERVICES_IP}:{DEFAULT_ADB_PORT}'
             print(f'Defaulting to Corellium device at {DEFAULT_SERVICES_IP}.')
         case 2:
             TARGET_DEVICE_SERVICES_IP = sys.argv[1]

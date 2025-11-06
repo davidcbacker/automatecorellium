@@ -1055,7 +1055,7 @@ EOF
   OPEN_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent --retry 100 \
     -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
     -H "Content-Type: application/json" \
-    -d "${APPIUM_SESSION_JSON_PAYLOAD}") || {
+    -d "${APPIUM_SESSION_JSON_PAYLOAD}")" || {
     log_error 'Failed to open appium session.'
     exit 1
   }

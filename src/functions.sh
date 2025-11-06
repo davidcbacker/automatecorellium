@@ -1029,7 +1029,7 @@ open_appium_session()
   local APP_PACKAGE_NAME="$2"
   local DEFAULT_APPIUM_PORT='4723'
   local DEFAULT_ADB_PORT='5001'
-  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD OPENED_SESSION_ID
+  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
 
   APPIUM_SESSION_JSON_PAYLOAD=$(
@@ -1052,7 +1052,7 @@ open_appium_session()
 EOF
   )
 
-  OPEN_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent --retry 100 \
+  OPEN_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent --retry 5 \
     -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
     -H "Content-Type: application/json" \
     -d "${APPIUM_SESSION_JSON_PAYLOAD}")" || {
@@ -1070,12 +1070,20 @@ close_appium_session()
 {
   local SESSION_ID="$1"
   local DEFAULT_APPIUM_PORT='4723'
-  local CLOSE_SESSION_URL="http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session/${SESSION_ID}"
-  curl --silent --retry 100 -X DELETE "${CLOSE_SESSION_URL}" \
+  local APPIUM_API_SESSION_URL="http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session/${SESSION_ID}"
+  curl --silent -X DELETE "${APPIUM_API_SESSION_URL}" > /dev/null \
     -H "Content-Type: application/json" || {
     log_error 'Failed to close session.'
     exit 1
   }
+
+  # Verify that the session ID is invalid
+  local GET_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent -X GET "${APPIUM_API_SESSION_URL}")"
+  if ! echo "${GET_APPIUM_SESSION_JSON_RESPONSE}" | jq -e '.value.error == "invalid session id"' > /dev/null; then
+    echo "${GET_APPIUM_SESSION_JSON_RESPONSE}"
+    log_error "Appium session ${SESSION_ID} is not invalid after close."
+    exit 1
+  fi
 }
 
 run_appium_interactions_cafe()

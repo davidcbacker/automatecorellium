@@ -582,9 +582,6 @@ run_full_matrix_assessment()
   log_stdout "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   run_appium_interactions_cafe "${INSTANCE_ID}"
-  log_stdout 'DEBUG sleeping for 10 seconds.'
-  sleep 10
-  log_stdout 'DEBUG finished sleeping.'
   stop_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   log_stdout "Completed MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
@@ -1050,8 +1047,7 @@ run_appium_server()
   appium \
     --port 4723 \
     --log-level info \
-    --allow-insecure=uiautomator2:chromedriver_autodownload \
-    --default-capabilities '{"appium:adbExecTimeout":60000}' &
+    --allow-insecure=uiautomator2:chromedriver_autodownload &
   until curl --silent http://127.0.0.1:4723/status |
     jq -e '.value.ready == true' > /dev/null; do sleep 0.1; done
   log_stdout 'Started appium.'

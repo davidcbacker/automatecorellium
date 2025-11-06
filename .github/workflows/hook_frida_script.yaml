@@ -13,7 +13,7 @@ concurrency:
 
 env:
   TERM: xterm
-  CORELLIUM_CAFE_PACKAGE_ANDROID: com.corellim.cafe
+  CORELLIUM_CAFE_PACKAGE_ANDROID: com.corellium.cafe
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
 
 jobs:

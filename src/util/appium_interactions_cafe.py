@@ -2,7 +2,6 @@
 Automate Corellium virtual device interactions using Appium on Corellium Cafe Android app.
 """
 
-from time import sleep
 import sys
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
@@ -57,7 +56,6 @@ def run_app_automation():
         el6 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
         el6.click()
 
-        sleep(5)
         el7 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
         el7.click()
 

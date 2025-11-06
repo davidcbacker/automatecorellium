@@ -234,6 +234,7 @@ jobs:
               rm -f "${{ env.CORELLIUM_CLI_PROFILE }}"
             fi
           done
+          command -v adb > /dev/null && adb disconnect
           for PROCESS in "${PROCS_TO_KILL[@]}"; do
             if pgrep "${PROCESS}" > /dev/null 2>&1; then
               echo "[+] Killing ${PROCESS}"
@@ -241,4 +242,3 @@ jobs:
               echo "[+] Killed ${PROCESS}"
             fi
           done
-          command -v adb > /dev/null && adb disconnect

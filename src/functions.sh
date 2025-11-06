@@ -1070,14 +1070,12 @@ close_appium_session()
 {
   local SESSION_ID="$1"
   local DEFAULT_APPIUM_PORT='4723'
-  log_stdout "Closing appium session ${SESSION_ID}"
   local CLOSE_SESSION_URL="http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session/${SESSION_ID}"
   curl --silent --retry 100 -X DELETE "${CLOSE_SESSION_URL}" \
     -H "Content-Type: application/json" || {
-    log_error 'Faield to close session'
+    log_error 'Failed to close session.'
     exit 1
   }
-  log_stdout "Closed appium session ${SESSION_ID}"
 }
 
 run_appium_interactions_cafe()

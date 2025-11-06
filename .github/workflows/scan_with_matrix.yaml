@@ -222,8 +222,11 @@ jobs:
             "${{ env.VPN_CONFIG_PATH }}"
           )
           readonly PROCS_TO_KILL=(
-            openvpn
+            MainThread
+            adb
+            appium
             avahi-daemon
+            openvpn
             usbfluxd
           )
           for FILE_PATH in "${FILES_TO_DELETE[@]}"; do
@@ -232,9 +235,11 @@ jobs:
               rm -f "${{ env.CORELLIUM_CLI_PROFILE }}"
             fi
           done
+          command -v adb > /dev/null && adb disconnect
           for PROCESS in "${PROCS_TO_KILL[@]}"; do
             if pgrep "${PROCESS}" > /dev/null 2>&1; then
               echo "[+] Killing ${PROCESS}"
               sudo killall "${PROCESS}"
+              echo "[+] Killed ${PROCESS}"
             fi
           done

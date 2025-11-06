@@ -1071,8 +1071,8 @@ close_appium_session()
   local SESSION_ID="$1"
   local DEFAULT_APPIUM_PORT='4723'
   local APPIUM_API_SESSION_URL="http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session/${SESSION_ID}"
-  curl --silent -X DELETE "${APPIUM_API_SESSION_URL}" > /dev/null \
-    -H "Content-Type: application/json" || {
+  curl --silent -X DELETE "${APPIUM_API_SESSION_URL}" \
+    -H "Content-Type: application/json" > /dev/null || {
     log_error 'Failed to close session.'
     exit 1
   }

@@ -97,7 +97,7 @@ create_instance()
   local FIRMWARE_BUILD="$3"
   local PROJECT_ID="$4"
   local NEW_INSTANCE_NAME
-  NEW_INSTANCE_NAME="MATRIX Automation $(date '+%Y-%m-%d') ${RANDOM}"
+  NEW_INSTANCE_NAME="Corellium Automation $(date '+%Y-%m-%d') ${RANDOM}"
   # Avoid using --wait option here since it will wait for agent ready
   # Better to create instance first then install local deps then wait
 

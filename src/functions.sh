@@ -305,20 +305,6 @@ kill_app()
   fi
 }
 
-kill_corellium_cafe_android()
-{
-  local INSTANCE_ID="$1"
-  local CORELLIUM_CAFE_BUNDLE_ID='com.corellium.cafe'
-  kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_BUNDLE_ID}"
-}
-
-kill_corellium_cafe_ios()
-{
-  local INSTANCE_ID="$1"
-  local CORELLIUM_CAFE_BUNDLE_ID='com.corellium.Cafe'
-  kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_BUNDLE_ID}"
-}
-
 get_project_from_instance_id()
 {
   local INSTANCE_ID="$1"
@@ -353,24 +339,6 @@ install_app_from_url()
     echo "Error installing app ${APP_FILENAME}. Exiting." >&2
     exit 1
   fi
-}
-
-install_corellium_cafe_android()
-{
-  local INSTANCE_ID="$1"
-  local CORELLIUM_CAFE_ANDROID_URL="https://www.corellium.com/hubfs/Corellium_Cafe.apk"
-  local CORELLIUM_CAFE_BUNDLE_ID='com.corellium.cafe'
-  kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_BUNDLE_ID}"
-  install_app_from_url "${INSTANCE_ID}" "${CORELLIUM_CAFE_ANDROID_URL}"
-}
-
-install_corellium_cafe_ios()
-{
-  local INSTANCE_ID="$1"
-  local CORELLIUM_CAFE_IOS_URL="https://www.corellium.com/hubfs/Corellium_Cafe.ipa"
-  local CORELLIUM_CAFE_BUNDLE_ID='com.corellium.Cafe'
-  kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_BUNDLE_ID}"
-  install_app_from_url "${INSTANCE_ID}" "${CORELLIUM_CAFE_IOS_URL}"
 }
 
 install_appium_runner_ios()
@@ -591,22 +559,6 @@ run_full_matrix_assessment()
   log_stdout "Downloaded reports for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 
-run_matrix_cafe_checks_android()
-{
-  local INSTANCE_ID="$1"
-  local MATRIX_WORDLIST_ID="$2"
-  local APP_BUNDLE_ID='com.corellium.cafe'
-  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}"
-}
-
-run_matrix_cafe_checks_ios()
-{
-  local INSTANCE_ID="$1"
-  local MATRIX_WORDLIST_ID="$2"
-  local APP_BUNDLE_ID='com.corellium.Cafe'
-  run_full_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}"
-}
-
 delete_unauthorized_devices()
 {
   if [[ -z "${AUTHORIZED_INSTANCES}" ]]; then
@@ -764,7 +716,7 @@ wait_for_instance_status()
     if [ -z "${CURRENT_INSTANCE_STATUS}" ]; then
       log_warning "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
     else
-      log_stdout "Status is ${CURRENT_INSTANCE_STATUS} and target is ${TARGET_INSTANCE_STATUS}. Waiting ${SLEEP_TIME_DEFAULT} seconds."
+      log_stdout "Status is ${CURRENT_INSTANCE_STATUS}, waiting for ${TARGET_INSTANCE_STATUS}."
     fi
     sleep "${SLEEP_TIME_DEFAULT}"
     CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
@@ -1051,13 +1003,6 @@ run_appium_server()
   until curl --silent http://127.0.0.1:4723/status |
     jq -e '.value.ready == true' > /dev/null; do sleep 0.1; done
   log_stdout 'Started appium.'
-}
-
-open_appium_session_cafe()
-{
-  local INSTANCE_ID="$1"
-  local CAFE_PAGKAGE_NAME='com.corellium.cafe'
-  open_appium_session "${INSTANCE_ID}" "${CAFE_PAGKAGE_NAME}"
 }
 
 open_appium_session()

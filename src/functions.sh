@@ -846,6 +846,15 @@ install_adb_dependency()
   fi
 }
 
+install_frida_dependencies()
+{
+  log_stdout 'Installing frida.'
+  local TARGET_FRIDA_VERSION='17.2.15'
+  python3 -m pip install -U "frida==${TARGET_FRIDA_VERSION}" frida-tools
+  log_stdout 'Installed frida.'
+  # python3 -m pip install -U objection # Objection does not support Frida 17 yet
+}
+
 install_usbfluxd_and_dependencies()
 {
   local USBFLUXD_APT_DEPS=(
@@ -1001,6 +1010,33 @@ verify_usbflux_connection()
     log_error 'Unable to establish idevicepair'
     exit 1
   }
+}
+
+run_frida_ps_network()
+{
+  local INSTANCE_ID="$1"
+  local GET_INSTANCE_JSON_RESPONSE
+  GET_INSTANCE_JSON_RESPONSE="$(corellium instance get --instance "${INSTANCE_ID}")"
+  if echo "${GET_INSTANCE_JSON_RESPONSE}" | jq -e '.flavor != ranchu' > /dev/null &&
+    ! echo "${GET_INSTANCE_JSON_RESPONSE}" | grep Port | grep -q 27042; then
+    log_error "Port 27042 must be forwarded and exposed on instance ${INSTANCE_ID}."
+    exit 1
+  fi
+  local INSTANCE_SERVICES_IP
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  frida-ps -H "${INSTANCE_SERVICES_IP}" -a
+}
+
+run_frida_ps_usb()
+{
+  frida-ps -Ua
+}
+
+run_frida_script_usb()
+{
+  local APP_PACKAGE_NAME="$1"
+  local FRIDA_SCRIPT_PATH="$2"
+  frida -U -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}"
 }
 
 run_appium_server()

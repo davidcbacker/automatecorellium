@@ -43,6 +43,7 @@ jobs:
       ${{
         needs.changes.outputs.javascript == 'true' ||
         needs.changes.outputs.matrix == 'true' ||
+        needs.changes.outputs.python == 'true' ||
         needs.changes.outputs.shell == 'true'
       }}
     runs-on: ubuntu-latest

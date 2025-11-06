@@ -1038,8 +1038,10 @@ run_frida_script_usb()
   local FRIDA_SCRIPT_PATH="$2"
   # Frida scripts run indefinitely, so set 60 second process timeout
   local FRIDA_TIMEOUT_SECONDS='60'
+  log_stdout "Launching frida script with ${APP_PACKAGE_NAME}."
   timeout "${FRIDA_TIMEOUT_SECONDS}" frida -U \
-    -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}" || true
+    -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}" || 
+    log_stdout "Stopped frida process after ${FRIDA_TIMEOUT_SECONDS} seconds."
 }
 
 run_appium_server()

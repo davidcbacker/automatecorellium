@@ -948,9 +948,9 @@ connect_to_vpn_for_instance()
   local INSTANCE_VPN_IP
   INSTANCE_VPN_IP="$(ip addr show tap0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1)"
   until ping -c1 "${INSTANCE_VPN_IP}"; do sleep 0.1; done
-  log_stdout 'Successfully pinged the project VPN IP.'
+  log_stdout 'Successful ping to the project VPN IP.'
   until ping -c1 "${INSTANCE_SERVICES_IP}"; do sleep 0.1; done
-  log_stdout 'Successfully pinged the instance services IP.'
+  log_stdout 'Successful ping to the instance services IP.'
 }
 
 connect_with_adb()

@@ -1,4 +1,4 @@
-name: Run Frida script with Corellium Cafe
+name: Run Frida script
 
 on:
   push:

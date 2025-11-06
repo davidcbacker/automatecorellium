@@ -1056,7 +1056,7 @@ EOF
 
   log_stdout 'Sleeping until session timeout'
   sleep 25
-  log_stdout 'Finished sleep.
+  log_stdout 'Finished sleep.'
 }
 
 run_appium_interactions_cafe()

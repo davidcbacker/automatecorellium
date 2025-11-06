@@ -43,6 +43,7 @@ jobs:
       ${{
         needs.changes.outputs.javascript == 'true' ||
         needs.changes.outputs.matrix == 'true' ||
+        needs.changes.outputs.python == 'true' ||
         needs.changes.outputs.shell == 'true'
       }}
     runs-on: ubuntu-latest
@@ -132,6 +133,15 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           install_corellium_cafe_android "${{ env.MATRIX_INSTANCE_ID }}"
+      - name: Run Appium session test
+        run: |
+          set -eu && source ./src/functions.sh
+          log_stdout 'Opening Appium session.'
+          OPEN_APPIUM_SESSION_ID="$(open_appium_session_cafe "${MATRIX_INSTANCE_ID}")"
+          log_stdout "Opened Apipum session ${OPEN_APPIUM_SESSION_ID}."
+          log_stdout "Closing Appium session ${OPEN_APPIUM_SESSION_ID}."
+          close_appium_session "${OPEN_APPIUM_SESSION_ID}"
+          log_stdout "Closed Appium session ${OPEN_APPIUM_SESSION_ID}."
       - name: Upload MATRIX wordlist
         env:
           MATRIX_WORDLIST_PATH: './data/wordlist.txt'

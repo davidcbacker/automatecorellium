@@ -97,7 +97,7 @@ create_instance()
   local FIRMWARE_BUILD="$3"
   local PROJECT_ID="$4"
   local NEW_INSTANCE_NAME
-  NEW_INSTANCE_NAME="MATRIX Automation $(date '+%Y-%m-%d') ${RANDOM}"
+  NEW_INSTANCE_NAME="Corellium Automation $(date '+%Y-%m-%d') ${RANDOM}"
   # Avoid using --wait option here since it will wait for agent ready
   # Better to create instance first then install local deps then wait
 
@@ -843,6 +843,15 @@ install_adb_dependency()
   fi
 }
 
+install_frida_dependencies()
+{
+  log_stdout 'Installing frida.'
+  local TARGET_FRIDA_VERSION='17.2.15'
+  python3 -m pip install -U "frida==${TARGET_FRIDA_VERSION}" frida-tools
+  log_stdout 'Installed frida.'
+  # python3 -m pip install -U objection # Objection does not support Frida 17 yet
+}
+
 install_usbfluxd_and_dependencies()
 {
   local USBFLUXD_APT_DEPS=(
@@ -1000,6 +1009,33 @@ verify_usbflux_connection()
   }
 }
 
+run_frida_ps_network()
+{
+  local INSTANCE_ID="$1"
+  local GET_INSTANCE_JSON_RESPONSE
+  GET_INSTANCE_JSON_RESPONSE="$(corellium instance get --instance "${INSTANCE_ID}")"
+  if echo "${GET_INSTANCE_JSON_RESPONSE}" | jq -e '.flavor != ranchu' > /dev/null &&
+    ! echo "${GET_INSTANCE_JSON_RESPONSE}" | grep Port | grep -q 27042; then
+    log_error "Port 27042 must be forwarded and exposed on instance ${INSTANCE_ID}."
+    exit 1
+  fi
+  local INSTANCE_SERVICES_IP
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  frida-ps -H "${INSTANCE_SERVICES_IP}" -a
+}
+
+run_frida_ps_usb()
+{
+  frida-ps -Ua
+}
+
+run_frida_script_usb()
+{
+  local APP_PACKAGE_NAME="$1"
+  local FRIDA_SCRIPT_PATH="$2"
+  frida -U -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}"
+}
+
 run_appium_server()
 {
   log_stdout 'Starting appium.'
@@ -1012,20 +1048,20 @@ run_appium_server()
   log_stdout 'Started appium.'
 }
 
-test_create_appium_session_cafe()
+open_appium_session_cafe()
 {
   local INSTANCE_ID="$1"
   local CAFE_PAGKAGE_NAME='com.corellium.cafe'
-  test_create_appium_session "${INSTANCE_ID}" "${CAFE_PAGKAGE_NAME}"
+  open_appium_session "${INSTANCE_ID}" "${CAFE_PAGKAGE_NAME}"
 }
 
-test_create_appium_session()
+open_appium_session()
 {
   local INSTANCE_ID="$1"
   local APP_PACKAGE_NAME="$2"
   local DEFAULT_APPIUM_PORT='4723'
   local DEFAULT_ADB_PORT='5001'
-  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
+  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
 
   APPIUM_SESSION_JSON_PAYLOAD=$(
@@ -1048,15 +1084,39 @@ test_create_appium_session()
 EOF
   )
 
-  log_stdout 'Starting appium session.'
-  curl --silent --retry 100 -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
+  OPEN_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent --retry 5 \
+    -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
     -H "Content-Type: application/json" \
-    -d "${APPIUM_SESSION_JSON_PAYLOAD}"
-  log_stdout 'Started appium session.'
+    -d "${APPIUM_SESSION_JSON_PAYLOAD}")" || {
+    log_error 'Failed to open appium session.'
+    exit 1
+  }
+  OPENED_SESSION_ID="$(echo "${OPEN_APPIUM_SESSION_JSON_RESPONSE}" | jq -r '.value.sessionId')" || {
+    log_error 'Failed to parse open appium session JSON response.'
+    exit 1
+  }
+  echo "${OPENED_SESSION_ID}"
+}
 
-  log_stdout 'Sleeping until session timeout'
-  sleep 25
-  log_stdout 'Finished sleep.'
+close_appium_session()
+{
+  local SESSION_ID="$1"
+  local DEFAULT_APPIUM_PORT='4723'
+  local APPIUM_API_SESSION_URL="http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session/${SESSION_ID}"
+  curl --silent -X DELETE "${APPIUM_API_SESSION_URL}" \
+    -H "Content-Type: application/json" > /dev/null || {
+    log_error 'Failed to close session.'
+    exit 1
+  }
+
+  # Verify that the session ID is invalid
+  local GET_APPIUM_SESSION_JSON_RESPONSE
+  GET_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent -X GET "${APPIUM_API_SESSION_URL}")"
+  if ! echo "${GET_APPIUM_SESSION_JSON_RESPONSE}" | jq -e '.value.error == "invalid session id"' > /dev/null; then
+    echo "${GET_APPIUM_SESSION_JSON_RESPONSE}"
+    log_error "Appium session ${SESSION_ID} is still valid after close."
+    exit 1
+  fi
 }
 
 run_appium_interactions_cafe()

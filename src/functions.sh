@@ -129,7 +129,7 @@ EOF
   fi
 
   check_env_vars
-  curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
+  curl --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
     -H "Accept: application/json" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
     -H "Content-Type: application/json" \
@@ -1011,7 +1011,8 @@ run_appium_server()
     --log-level info \
     --allow-insecure=uiautomator2:chromedriver_autodownload \
     --default-capabilities '{"appium:adbExecTimeout":60000}' &
-  until curl -s http://127.0.0.1:4723/status | jq -e '.value.ready == true' > /dev/null; do sleep 0.1; done
+  until curl --silent http://127.0.0.1:4723/status |
+    jq -e '.value.ready == true' > /dev/null; do sleep 0.1; done
   log_stdout 'Started appium.'
 }
 
@@ -1055,7 +1056,7 @@ EOF
   echo "${APPIUM_SESSION_JSON_PAYLOAD}"
 
   log_stdout 'Starting appium session.'
-  curl --retry 100 -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
+  curl --silent --retry 100 -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
     -H "Content-Type: application/json" \
     -d "${APPIUM_SESSION_JSON_PAYLOAD}"
   log_stdout 'Started appium session.'

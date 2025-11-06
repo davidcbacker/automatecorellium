@@ -1,0 +1,128 @@
+name: Run Frida script with Corellium Cafe
+
+on:
+  schedule:
+    - cron: "18 */6 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: 'frida'
+  cancel-in-progress: false
+
+env:
+#  TERM: xterm
+  VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
+
+jobs:
+  changes:
+    name: Check for file changes
+    runs-on: ubuntu-latest
+    outputs:
+      javascript: ${{ steps.filter.outputs.javascript }}
+      matrix: ${{ steps.filter.outputs.matrix }}
+      python: ${{ steps.filter.outputs.python }}
+      shell: ${{ steps.filter.outputs.shell }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: data/config/dorny-paths-filter.yaml
+          list-files: 'shell'
+  corellium-matrixscan:
+    name: Scan with MATRIX
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.javascript == 'true' ||
+        needs.changes.outputs.matrix == 'true' ||
+        needs.changes.outputs.python == 'true' ||
+        needs.changes.outputs.shell == 'true'
+      }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Pull the latest code
+        uses: actions/checkout@v5
+      - name: Install Node
+        uses: actions/setup-node@v6
+        with:
+          cache: 'npm'
+          node-version: 24
+      - name: Install API dependencies
+        run: |
+          npm ci
+          echo "$(pwd)/node_modules/.bin" >> "${GITHUB_PATH}"
+      - name: Log in to Corellium
+        run: |
+          corellium login \
+            --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
+            --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
+      - name: Start or create instance
+        timeout-minutes: 1
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+        run: |
+          set -eu && source ./src/functions.sh
+          log_stdout "Creating ephemeralinstance."
+          CREATED_CORELLIUM_INSTANCE_ID="$(create_instance \
+            "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" \
+            "${{ vars.MATRIX_DEFAULT_FIRMWARE_VERSION }}" \
+            "${{ vars.MATRIX_DEFAULT_FIRMWARE_BUILD }}" \
+            "${{ vars.MATRIX_DEFAULT_PROJECT }}")"
+          log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
+          echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
+          echo 'EPHEMERAL_CORELLIUM_INSTANCE=true' >> "${GITHUB_ENV}"
+          log_stdout 'Updated environmental variables for ephemeral instance.'
+      - name: Install additional runner dependencies
+        run: |
+          set -eu && source ./src/functions.sh
+          install_openvpn_dependencies
+          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+            install_adb_dependency
+          else
+            install_usbfluxd_and_dependencies
+          fi
+          install_frida_dependencies
+      - name: Wait for instance agent ready
+        timeout-minutes: 20
+        run: |
+          set -eu && source ./src/functions.sh
+          start_instance "${{ env.CORELLIUM_INSTANCE_ID }}"
+          wait_until_agent_ready "${{ env.CORELLIUM_INSTANCE_ID }}"
+          [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" != 'ranchu' ] &&
+            unlock_instance "${{ env.CORELLIUM_INSTANCE_ID }}"
+      - name: Connect to project VPN
+        timeout-minutes: 2
+        run: |
+          set -eu && source ./src/functions.sh
+          connect_to_vpn_for_instance \
+            "${{ env.CORELLIUM_INSTANCE_ID }}" \
+            "${{ env.VPN_CONFIG_PATH }}"
+      - name: Connect to device
+        timeout-minutes: 1
+        run: |
+          set -eu && source ./src/functions.sh
+          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+            connect_with_adb "${{ env.CORELLIUM_INSTANCE_ID }}"
+          else
+            run_usbfluxd_and_dependencies
+            add_instance_to_usbfluxd "${{ env.CORELLIUM_INSTANCE_ID }}"
+            verify_usbflux_connection
+          fi
+      - name: Install Corellium Cafe from URL
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+        run: |
+          set -eu && source ./src/functions.sh
+          install_corellium_cafe_android "${{ env.CORELLIUM_INSTANCE_ID }}"
+      - name: Run frida-ps
+        run: |
+          set -eu && source ./src/functions.sh
+          run_frida_ps "${CORELLIUM_INSTANCE_ID}"
+      - name: Run Appium session test
+        run: |
+          set -eu && source ./src/functions.sh
+          test_create_appium_session_cafe "${MATRIX_INSTANCE_ID}"

@@ -20,10 +20,10 @@ env:
   MATRIX_INSTANCE_ID: ${{ github.event_name == 'schedule'
                         && vars.MATRIX_AUTOMATION_INSTANCE
                         || vars.MATRIX_DEVELOPMENT_INSTANCE }}
-  CORELLIUM_CAFE_PACKAGE: ${{ vars.DEFAULT_MATRIX_HARDWARE_FLAVOR == 'ranchu'
+  CORELLIUM_CAFE_PACKAGE: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
                             && 'com.corellium.cafe'
                             || 'com.corellium.Cafe' }}
-  CORELLIUM_CAFE_SOURCE_URL: ${{ vars.DEFAULT_MATRIX_HARDWARE_FLAVOR == 'ranchu'
+  CORELLIUM_CAFE_SOURCE_URL: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
                             && 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
                             || 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa' }}
 

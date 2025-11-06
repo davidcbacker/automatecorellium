@@ -79,8 +79,8 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
-          if does_instance_exist "${{ env.MATRIX_INSTANCE_ID }}"; then
-            start_instance "${{ env.MATRIX_INSTANCE_ID }}"
+          if does_instance_exist "${MATRIX_INSTANCE_ID}"; then
+            start_instance "${MATRIX_INSTANCE_ID}"
           else
             log_stdout "Creating instance."
             CREATED_MATRIX_INSTANCE_ID="$(create_instance \
@@ -112,25 +112,25 @@ jobs:
         timeout-minutes: 20
         run: |
           set -eu && source ./src/functions.sh
-          start_instance "${{ env.MATRIX_INSTANCE_ID }}"
-          wait_until_agent_ready "${{ env.MATRIX_INSTANCE_ID }}"
-          # unlock_instance "${{ env.MATRIX_INSTANCE_ID }}" # only for iOS
+          start_instance "${MATRIX_INSTANCE_ID}"
+          wait_until_agent_ready "${MATRIX_INSTANCE_ID}"
+          # unlock_instance "${MATRIX_INSTANCE_ID}" # only for iOS
       - name: Connect to project VPN
         timeout-minutes: 2
         run: |
           set -eu && source ./src/functions.sh
           connect_to_vpn_for_instance \
-            "${{ env.MATRIX_INSTANCE_ID }}" \
-            "${{ env.VPN_CONFIG_PATH }}"
+            "${MATRIX_INSTANCE_ID}" \
+            "${VPN_CONFIG_PATH}"
       - name: Connect to device
         timeout-minutes: 1
         run: |
           set -eu && source ./src/functions.sh
           if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
-            connect_with_adb "${{ env.MATRIX_INSTANCE_ID }}"
+            connect_with_adb "${MATRIX_INSTANCE_ID}"
           else
             run_usbfluxd_and_dependencies
-            add_instance_to_usbfluxd "${{ env.MATRIX_INSTANCE_ID }}"
+            add_instance_to_usbfluxd "${MATRIX_INSTANCE_ID}"
             verify_usbflux_connection
           fi
       - name: Install Corellium Cafe from URL
@@ -167,7 +167,7 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           for ((failures=0; failures<=MAX_MATRIX_RUN_RETRIES; failures++)); do
-            if run_full_matrix_assessment "${{ env.MATRIX_INSTANCE_ID }}" \
+            if run_full_matrix_assessment "${MATRIX_INSTANCE_ID}" \
               "${CORELLIUM_CAFE_PACKAGE}" "${MATRIX_WORDLIST_ID}"; then
               break
             elif [ "${failures}" -lt "${MAX_MATRIX_RUN_RETRIES}" ]; then
@@ -189,7 +189,7 @@ jobs:
           log_stdout 'Compressed MATRIX runtime artifacts.'
           log_stdout 'Downloading MATRIX runtime artifacts from VM to CI runner.'
           download_file_to_local_path \
-            "${{ env.MATRIX_INSTANCE_ID }}" \
+            "${MATRIX_INSTANCE_ID}" \
             "${MATRIX_INSTANCE_ARTIFACTS_PATH}" \
             "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           log_stdout 'Downloaded MATRIX runtime artifacts from VM to CI runner.'
@@ -233,8 +233,8 @@ jobs:
           CORELLIUM_CLI_PROFILE: '/home/runner/.config/.corellium/profile.json'
         run: |
           readonly FILES_TO_DELETE=(
-            "${{ env.CORELLIUM_CLI_PROFILE }}"
-            "${{ env.VPN_CONFIG_PATH }}"
+            "${CORELLIUM_CLI_PROFILE}"
+            "${VPN_CONFIG_PATH}"
           )
           readonly PROCS_TO_KILL=(
             MainThread
@@ -247,7 +247,7 @@ jobs:
           for FILE_PATH in "${FILES_TO_DELETE[@]}"; do
             if [ -f "${FILE_PATH}" ]; then
               echo "[+] Deleting ${FILE_PATH}"
-              rm -f "${{ env.CORELLIUM_CLI_PROFILE }}"
+              rm -f "${FILE_PATH}"
             fi
           done
           command -v adb > /dev/null && adb disconnect

@@ -1078,7 +1078,8 @@ close_appium_session()
   }
 
   # Verify that the session ID is invalid
-  local GET_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent -X GET "${APPIUM_API_SESSION_URL}")"
+  local GET_APPIUM_SESSION_JSON_RESPONSE
+  GET_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent -X GET "${APPIUM_API_SESSION_URL}")"
   if ! echo "${GET_APPIUM_SESSION_JSON_RESPONSE}" | jq -e '.value.error == "invalid session id"' > /dev/null; then
     echo "${GET_APPIUM_SESSION_JSON_RESPONSE}"
     log_error "Appium session ${SESSION_ID} is still valid after close."

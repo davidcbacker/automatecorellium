@@ -13,6 +13,7 @@ concurrency:
 
 env:
   TERM: xterm
+  CORELLIUM_CAFE_PACKAGE_ANDROID: com.corellim.cafe
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
 
 jobs:
@@ -100,4 +101,10 @@ jobs:
       - name: Run frida-ps
         run: |
           set -eu && source ./src/functions.sh
-          run_frida_ps "${CORELLIUM_INSTANCE_ID}"
+          run_frida_ps_usb
+      - name: Run frida hook
+        env:
+          FRIDA_SCRIPT_PATH: src/util/frida_script_cafe.js
+        run: |
+          set -eu && source ./src/functions.sh
+          run_frida_hook_usb "${CORELLIUM_CAFE_PACKAGE_ANDROID}" "${FRIDA_SCRIPT_PATH}"

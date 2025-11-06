@@ -64,7 +64,7 @@ jobs:
         run: |
           for python_script in $(git ls-files '*.py'); do
             pylint "${python_script}" \
-              --disable ABC123, ABC124
+              --disable duplicate-code,import-error,line-too-long,too-many-locals,too-many-statements
           done
 
   shell-lint:

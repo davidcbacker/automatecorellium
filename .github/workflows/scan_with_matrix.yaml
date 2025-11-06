@@ -238,7 +238,7 @@ jobs:
           for FILE_PATH in "${FILES_TO_DELETE[@]}"; do
             if [ -f "${FILE_PATH}" ]; then
               echo "[+] Deleting ${FILE_PATH}"
-              rm -f "${{ env.CORELLIUM_CLI_PROFILE }}"
+              rm -f "${FILE_PATH}"
             fi
           done
           command -v adb > /dev/null && adb disconnect

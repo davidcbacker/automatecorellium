@@ -64,7 +64,11 @@ jobs:
         run: |
           for python_script in $(git ls-files '*.py'); do
             pylint "${python_script}" \
-              --disable duplicate-code,import-error,line-too-long,too-many-locals,too-many-statements
+              --disable duplicate-code \
+              --disable import-error \
+              --disable line-too-long \
+              --disable too-many-locals \
+              --disable too-many-statements
           done
 
   shell-lint:

@@ -139,8 +139,8 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
-          kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
-          install_app_from_url "${INSTANCE_ID}" "${CORELLIUM_CAFE_SOURCE_URL}"
+          kill_app "${MATRIX_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
+          install_app_from_url "${MATRIX_INSTANCE_ID}" "${CORELLIUM_CAFE_SOURCE_URL}"
       - name: Run Appium session test
         run: |
           set -eu && source ./src/functions.sh

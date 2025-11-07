@@ -7,6 +7,7 @@ import sys
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from appium.webdriver.common.appiumby import AppiumBy
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 
 # ==== CONSTANTS: CORELLIUM DEVICE ====
 DEFAULT_SERVICES_IP = '10.11.1.1'

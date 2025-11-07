@@ -937,10 +937,16 @@ connect_with_adb()
 
 run_usbfluxd_and_dependencies()
 {
+  log_stdout 'Starting usbmuxd service.'
   sudo systemctl start usbmuxd
   sudo systemctl status usbmuxd
+  log_stdout 'Started usbmuxd service.'
+  log_stdout 'Started avahi-daemon.'
   sudo avahi-daemon &
+  log_stdout 'Starting avahi-daemon.'
+  log_stdout 'Starting usbfluxd.'
   sudo usbfluxd -f -n &
+  log_stdout 'Started usbfluxd.'
 }
 
 add_instance_to_usbfluxd()
@@ -949,16 +955,23 @@ add_instance_to_usbfluxd()
   local USBFLUXD_PORT='5000'
   local INSTANCE_SERVICES_IP
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
-  usbfluxctl add "${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
+  local INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
+  log_stdout "Adding device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
+  usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"
+  log_stdout "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
 }
 
 verify_usbflux_connection()
 {
+  log_stdout "Waiting for idevice_id to show USB device."
   until idevice_id --list; do sleep 0.1; done
+  log_stdout "idevice_id shows USB connection."
+  log_stdout "Pairing USB device."
   idevicepair pair || {
     log_error 'Unable to establish idevicepair'
     exit 1
   }
+  log_stdout "Paired USB device."
 }
 
 run_frida_ps_network()

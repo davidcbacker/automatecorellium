@@ -102,7 +102,7 @@ jobs:
           set -eu && source ./src/functions.sh
           connect_to_vpn_for_instance \
             "${CORELLIUM_INSTANCE_ID}" \
-            "${VPN_CONFIG_PATH}"
+            "${{ env.VPN_CONFIG_PATH }}"
       - name: Connect to device
         timeout-minutes: 1
         run: |

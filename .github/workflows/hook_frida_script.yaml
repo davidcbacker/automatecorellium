@@ -149,7 +149,7 @@ jobs:
       - name: Run frida hook
         timeout-minutes: 2
         env:
-          FRIDA_SCRIPT_PATH: src/util/frida_script_android_cafe.js
+          FRIDA_SCRIPT_PATH: src/util/frida_script_example.js
         run: |
           set -eu && source ./src/functions.sh
           run_frida_script_usb "${CORELLIUM_CAFE_PACKAGE}" "${FRIDA_SCRIPT_PATH}"

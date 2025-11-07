@@ -22,12 +22,12 @@ APPIUM_SERVER_PORT = '4723'
 APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
 APPIUM_DRIVER_IMPLICITLY_WAIT_FOR_ELEMENT = 5000 # milliseconds
 
-def run_app_automation():
+def run_app_automation(udid: str):
     '''Launch the app and interact using Appium commands.'''
     options = UiAutomator2Options()
     options.set_capability('platformName', 'Android')
     options.set_capability('appium:automationName', 'UiAutomator2')
-    options.set_capability('appium:udid', CORELLIUM_DEVICE_APPIUM_UDID)
+    options.set_capability('appium:udid', udid)
     options.set_capability('appium:appPackage', TARGET_APP_PACKAGE)
     options.set_capability('appium:appActivity', TARGET_APP_ACTIVITY)
     options.set_capability('appium:noReset', True)
@@ -56,14 +56,14 @@ def run_app_automation():
 if __name__ == "__main__":
     match len(sys.argv):
         case 1:
-            CORELLIUM_DEVICE_APPIUM_UDID = f'{DEFAULT_SERVICES_IP}:{DEFAULT_ADB_PORT}'
+            corellium_device_appium_udid = f'{DEFAULT_SERVICES_IP}:{DEFAULT_ADB_PORT}'
             print(f'Defaulting to Corellium device at {DEFAULT_SERVICES_IP}.')
         case 2:
             TARGET_DEVICE_SERVICES_IP = sys.argv[1]
-            CORELLIUM_DEVICE_APPIUM_UDID = f'{TARGET_DEVICE_SERVICES_IP}:{DEFAULT_ADB_PORT}'
-            print(f'Running app test on device at {CORELLIUM_DEVICE_APPIUM_UDID}...')
+            corellium_device_appium_udid = f'{TARGET_DEVICE_SERVICES_IP}:{DEFAULT_ADB_PORT}'
+            print(f'Running app test on device at {corellium_device_appium_udid}...')
         case _:
             print('ERROR: Please provide zero or pass in the Corellium device services IP.')
             sys.exit(1)
 
-    run_app_automation()
+    run_app_automation(corellium_device_appium_udid)

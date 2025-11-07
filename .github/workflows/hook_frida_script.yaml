@@ -35,7 +35,7 @@ jobs:
           list-files: 'shell'
 
   frida:
-    name: Run Frida script
+    name: Run Frida script on ${{ matrix.os }}
     needs: changes
     if: ${{ needs.changes.outputs.frida == 'true' }}
     runs-on: ubuntu-latest

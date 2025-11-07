@@ -6,7 +6,7 @@ on:
   push:
     branches: master
   schedule:
-    - cron: "18 */6 * * *"
+    - cron: "18 06 * * *"
   workflow_dispatch:
 
 concurrency:
@@ -14,8 +14,13 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  CORELLIUM_CAFE_PACKAGE: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
+                            && 'com.corellium.cafe'
+                            || 'com.corellium.Cafe' }}
+  CORELLIUM_CAFE_SOURCE_URL: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
+                               && 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
+                               || 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa' }}
   TERM: xterm
-  CORELLIUM_CAFE_PACKAGE_ANDROID: com.corellium.cafe
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
 
 jobs:
@@ -87,26 +92,26 @@ jobs:
         timeout-minutes: 20
         run: |
           set -eu && source ./src/functions.sh
-          start_instance "${{ env.CORELLIUM_INSTANCE_ID }}"
-          wait_until_agent_ready "${{ env.CORELLIUM_INSTANCE_ID }}"
+          start_instance "${CORELLIUM_INSTANCE_ID}"
+          wait_until_agent_ready "${CORELLIUM_INSTANCE_ID}"
           [ "${{ vars.ANDROID_HARDWARE_FLAVOR }}" == 'ranchu' ] ||
-            unlock_instance "${{ env.CORELLIUM_INSTANCE_ID }}"
+            unlock_instance "${CORELLIUM_INSTANCE_ID}"
       - name: Connect to project VPN
         timeout-minutes: 2
         run: |
           set -eu && source ./src/functions.sh
           connect_to_vpn_for_instance \
-            "${{ env.CORELLIUM_INSTANCE_ID }}" \
+            "${CORELLIUM_INSTANCE_ID}" \
             "${{ env.VPN_CONFIG_PATH }}"
       - name: Connect to device
         timeout-minutes: 1
         run: |
           set -eu && source ./src/functions.sh
           if [ "${{ vars.ANDROID_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
-            connect_with_adb "${{ env.CORELLIUM_INSTANCE_ID }}"
+            connect_with_adb "${CORELLIUM_INSTANCE_ID}"
           else
             run_usbfluxd_and_dependencies
-            add_instance_to_usbfluxd "${{ env.CORELLIUM_INSTANCE_ID }}"
+            add_instance_to_usbfluxd "${CORELLIUM_INSTANCE_ID}"
             verify_usbflux_connection
           fi
       - name: Install Corellium Cafe from URL
@@ -116,7 +121,8 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
-          install_corellium_cafe_android "${{ env.CORELLIUM_INSTANCE_ID }}"
+          kill_app "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
+          install_app_from_url "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_SOURCE_URL}"
       - name: Launch Cafe and run frida-ps
         timeout-minutes: 1
         env:
@@ -124,7 +130,7 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
-          launch_app "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE_ANDROID}"
+          launch_app "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
           run_frida_ps_usb
       - name: Run frida hook
         timeout-minutes: 2
@@ -132,7 +138,7 @@ jobs:
           FRIDA_SCRIPT_PATH: src/util/frida_script_android_cafe.js
         run: |
           set -eu && source ./src/functions.sh
-          run_frida_script_usb "${CORELLIUM_CAFE_PACKAGE_ANDROID}" "${FRIDA_SCRIPT_PATH}"
+          run_frida_script_usb "${CORELLIUM_CAFE_PACKAGE}" "${FRIDA_SCRIPT_PATH}"
       - name: Stop or delete instance
         if: always()
         timeout-minutes: 2

@@ -14,8 +14,13 @@ concurrency:
   cancel-in-progress: false
 
 env:
+  CORELLIUM_CAFE_PACKAGE: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
+                            && 'com.corellium.cafe'
+                            || 'com.corellium.Cafe' }}
+  CORELLIUM_CAFE_SOURCE_URL: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
+                               && 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
+                               || 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa' }}
   TERM: xterm
-  CORELLIUM_CAFE_PACKAGE_ANDROID: com.corellium.cafe
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
 
 jobs:

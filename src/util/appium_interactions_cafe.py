@@ -2,6 +2,7 @@
 Automate Corellium virtual device interactions using Appium on Corellium Cafe Android app.
 """
 
+import time
 import sys
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
@@ -31,7 +32,7 @@ def run_app_automation():
     options.set_capability('appium:noReset', True)
 
     try:
-        print("Starting session...")
+        print("Starting session at: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
         driver.implicitly_wait(5000)
         print("Successfully loaded target app.")
@@ -137,7 +138,7 @@ def run_app_automation():
         sys.exit(1)
 
     finally:
-        print("Closing appium session and leaving app open.")
+        print("Closing appium session at: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         driver.quit()
 
 if __name__ == "__main__":

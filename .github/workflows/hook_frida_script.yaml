@@ -36,7 +36,7 @@ jobs:
 
   frida:
     name: Run Frida
-    if: needs.changes.outputs.frida == 'true'
+    if: ${{ needs.changes.outputs.frida == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:

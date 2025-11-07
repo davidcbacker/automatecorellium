@@ -20,6 +20,7 @@ TARGET_APP_ACTIVITY = '.MainActivity'
 APPIUM_SERVER_IP = '127.0.0.1'
 APPIUM_SERVER_PORT = '4723'
 APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
+APPIUM_DRIVER_IMPLICITLY_WAIT_FOR_ELEMENT = 5000 # milliseconds
 
 def run_app_automation():
     '''Launch the app and interact using Appium commands.'''
@@ -32,9 +33,10 @@ def run_app_automation():
     options.set_capability('appium:noReset', True)
 
     try:
-        print("Starting session...")
+        print("Starting session at: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
-        driver.implicitly_wait(5000)
+        driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT_FOR_ELEMENT)
         print("Successfully loaded target app.")
 
         # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====
@@ -48,7 +50,7 @@ def run_app_automation():
         sys.exit(1)
 
     finally:
-        print("Closing appium session.")
+        print("Closing appium session at: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         driver.quit()
 
 if __name__ == "__main__":

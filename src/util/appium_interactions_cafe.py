@@ -108,7 +108,7 @@ def run_app_automation():
 
     except Exception as e:
         print(f"TEST FAILED: {e}")
-        raise
+        sys.exit(1)
 
     finally:
         print("Closing appium session at: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))

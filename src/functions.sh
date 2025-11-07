@@ -266,7 +266,7 @@ is_agent_ready()
     log_error 'Failed to get agent ready.'
     exit 1
   }
-  AGENT_READY_STATUS="$(echo "${AGENT_READY_JSON_RESPONSE | jq -r '.ready')" || {
+  AGENT_READY_STATUS="$(echo "${AGENT_READY_JSON_RESPONSE}" | jq -r '.ready')" || {
     log_error 'Failed to parse agent ready JSON response.'
     exit 1
   }

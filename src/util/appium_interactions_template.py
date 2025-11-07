@@ -2,7 +2,6 @@
 Automate Corellium virtual device interactions using Appium on Android apps.
 """
 
-from time import sleep
 import sys
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
@@ -34,7 +33,7 @@ def run_app_automation():
     try:
         print("Starting session...")
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
-        driver.implicitly_wait(5)
+        driver.implicitly_wait(5000)
         print("Successfully loaded target app.")
 
         # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====
@@ -45,7 +44,7 @@ def run_app_automation():
 
     except Exception as e:
         print(f"TEST FAILED: {e}")
-        raise
+        sys.exit(1)
 
     finally:
         print("Closing appium session.")

@@ -127,10 +127,6 @@ def run_app_automation(udid: str):
         print(f"StaleElementReferenceException: {e}")
         sys.exit(1)
 
-    except Exception as e:
-        print(f"General Exception: {e}")
-        sys.exit(1)
-
     finally:
         print("Closing appium session at: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         driver.quit()

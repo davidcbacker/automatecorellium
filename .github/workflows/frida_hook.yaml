@@ -44,16 +44,16 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        os: [iOS, Android]
+        os: [Android, iOS]
         include:
-          - os: iOS
-            hardware_flavor: 'iphone17pm'
-            firmware_version: '26.0.1'
-            firmware_build: '23A355'
           - os: Android
             hardware_flavor: 'ranchu'
             firmware_version: '16.0.0'
             firmware_build: 'r2 userdebug'
+          - os: iOS
+            hardware_flavor: 'iphone17pm'
+            firmware_version: '26.0.1'
+            firmware_build: '23A355'
     steps:
       - name: Pull the latest code
         uses: actions/checkout@v5

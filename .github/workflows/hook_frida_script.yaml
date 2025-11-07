@@ -106,26 +106,26 @@ jobs:
         timeout-minutes: 20
         run: |
           set -eu && source ./src/functions.sh
-          start_instance "${{ env.CORELLIUM_INSTANCE_ID }}"
-          wait_until_agent_ready "${{ env.CORELLIUM_INSTANCE_ID }}"
+          start_instance "${CORELLIUM_INSTANCE_ID}"
+          wait_until_agent_ready "${CORELLIUM_INSTANCE_ID}"
           [ "${{ matrix.hardware_flavor }}" == 'ranchu' ] ||
-            unlock_instance "${{ env.CORELLIUM_INSTANCE_ID }}"
+            unlock_instance "${CORELLIUM_INSTANCE_ID}"
       - name: Connect to project VPN
         timeout-minutes: 2
         run: |
           set -eu && source ./src/functions.sh
           connect_to_vpn_for_instance \
-            "${{ env.CORELLIUM_INSTANCE_ID }}" \
+            "${CORELLIUM_INSTANCE_ID}" \
             "${{ env.VPN_CONFIG_PATH }}"
       - name: Connect to device
         timeout-minutes: 1
         run: |
           set -eu && source ./src/functions.sh
           if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
-            connect_with_adb "${{ env.CORELLIUM_INSTANCE_ID }}"
+            connect_with_adb "${CORELLIUM_INSTANCE_ID}"
           else
             run_usbfluxd_and_dependencies
-            add_instance_to_usbfluxd "${{ env.CORELLIUM_INSTANCE_ID }}"
+            add_instance_to_usbfluxd "${CORELLIUM_INSTANCE_ID}"
             verify_usbflux_connection
           fi
       - name: Install Corellium Cafe from URL

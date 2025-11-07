@@ -106,8 +106,13 @@ def run_app_automation(udid: str):
 
         print("All steps executed on Corellium Android device.")
 
+    except StaleElementReferenceException as e:
+        print("Unable to find_element - increase wait time or adjust element matching.")
+        print(f"StaleElementReferenceException: {e}")
+        sys.exit(1)
+    
     except Exception as e:
-        print(f"TEST FAILED: {e}")
+        print(f"General Exception: {e}")
         sys.exit(1)
 
     finally:

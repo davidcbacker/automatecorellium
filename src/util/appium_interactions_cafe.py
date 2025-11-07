@@ -7,6 +7,7 @@ import sys
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from appium.webdriver.common.appiumby import AppiumBy
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 
 # ==== CONSTANTS: CORELLIUM DEVICE ====
 DEFAULT_SERVICES_IP = '10.11.1.1'
@@ -106,11 +107,26 @@ def run_app_automation(udid: str):
 
         print("All steps executed on Corellium Android device.")
 
+    except NoSuchElementException as e:
+        print("Thrown when element could not be found.")
+        print("If you encounter this exception, you may want to check the following:")
+        print("  * Check your selector used in your find_by...")
+        print("  * Element may not yet be on the screen at the time of the find operation,")
+        print("    write a wait wrapper to wait for an element to appear.")
+        print(f"NoSuchElementException: {e}")
+        sys.exit(1)
+
     except StaleElementReferenceException as e:
-        print("Unable to find_element - increase wait time or adjust element matching.")
+        print('Thrown when a reference to an element is now "stale".')
+        print("Possible causes of StaleElementReferenceException include, but not limited to:")
+        print("  * You are no longer on the same page, or the page may have refreshed since the element")
+        print("    was located.")
+        print("  * The element may have been removed and re-added to the screen, since it was located.")
+        print("    Such as an element being relocated.")
+        print("  * Element may have been inside an iframe or another context which was refreshed.")
         print(f"StaleElementReferenceException: {e}")
         sys.exit(1)
-    
+
     except Exception as e:
         print(f"General Exception: {e}")
         sys.exit(1)

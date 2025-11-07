@@ -50,56 +50,83 @@ def run_app_automation():
         el4 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
         el4.click()
 
-        el5 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
+        el5 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
         el5.click()
 
-        el6 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
+        el6 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Blog\")")
         el6.click()
 
-        el7 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
+        el7 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
         el7.click()
 
-        el8 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
+        el8 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"The Corellium Resource Library \")")
         el8.click()
 
-        el9 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText")
-        el9.send_keys("Myfirstname")
+        el9 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
+        el9.click()
 
-        el10 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText")
-        el10.send_keys("Mylastname")
+        el10 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Home\")")
+        el10.click()
 
-        el11 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText")
-        el11.send_keys("3216540987")
+        el11 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
+        el11.click()
 
-        el12 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
+        el12 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
         el12.click()
 
-        el13 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber")
-        el13.send_keys("2345678901234567")
+        el13 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
+        el13.click()
 
-        el14 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration")
-        el14.send_keys("1234")
+        el14 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
+        el14.click()
 
-        el15 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV")
-        el15.send_keys("135")
+        el15 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
+        el15.click()
 
-        el16 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
-        el16.send_keys("65432")
+        el16 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
+        el16.click()
 
-        el17 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
+        el17 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
         el17.click()
 
-        el18 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode")
-        el18.send_keys("65432")
+        el18 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText")
+        el18.send_keys("Myfirstname")
 
-        el19 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
-        el19.click()
+        el19 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText")
+        el19.send_keys("Mylastname")
 
-        el20 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvSubmitOrder")
-        el20.click()
+        el20 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText")
+        el20.send_keys("3216540987")
 
-        el21 = driver.find_element(by=AppiumBy.ID, value="android:id/button1")
+        el21 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
         el21.click()
+
+        el22 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber")
+        el22.send_keys("2345678901234567")
+
+        el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration")
+        el23.send_keys("1234")
+
+        el24 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV")
+        el24.send_keys("135")
+
+        el25 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
+        el25.send_keys("65432")
+
+        el26 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
+        el26.click()
+
+        el27 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode")
+        el27.send_keys("65432")
+
+        el28 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
+        el28.click()
+
+        el29 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvSubmitOrder")
+        el29.click()
+
+        el30 = driver.find_element(by=AppiumBy.ID, value="android:id/button1")
+        el30.click()
 
         # ==== END OF COPY-PASTE SECTION ====
 
@@ -107,10 +134,10 @@ def run_app_automation():
 
     except Exception as e:
         print(f"TEST FAILED: {e}")
-        raise
+        sys.exit(1)
 
     finally:
-        print("Closing appium session.")
+        print("Closing appium session and leaving app open.")
         driver.quit()
 
 if __name__ == "__main__":

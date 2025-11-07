@@ -1,6 +1,10 @@
 name: Run Frida script
 
 on:
+  pull_request:
+    branches: master
+  push:
+    branches: master
   schedule:
     - cron: "18 */6 * * *"
   workflow_dispatch:
@@ -15,6 +19,21 @@ env:
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
 
 jobs:
+  changes:
+    name: Check for file changes
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      frida: ${{ steps.filter.outputs.frida }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: data/config/dorny-paths-filter.yaml
+          list-files: 'shell'
+
   frida:
     name: Run Frida
     runs-on: ubuntu-latest

@@ -144,7 +144,7 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
-          launch_app "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE_ANDROID}"
+          launch_app "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
           run_frida_ps_usb
       - name: Run frida hook
         timeout-minutes: 2
@@ -152,7 +152,7 @@ jobs:
           FRIDA_SCRIPT_PATH: src/util/frida_script_android_cafe.js
         run: |
           set -eu && source ./src/functions.sh
-          run_frida_script_usb "${CORELLIUM_CAFE_PACKAGE_ANDROID}" "${FRIDA_SCRIPT_PATH}"
+          run_frida_script_usb "${CORELLIUM_CAFE_PACKAGE}" "${FRIDA_SCRIPT_PATH}"
       - name: Stop or delete instance
         if: always()
         timeout-minutes: 2

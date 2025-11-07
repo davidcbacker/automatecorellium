@@ -2,9 +2,13 @@ ci:
   - '.github/workflows/*.yaml'
   - '.github/workflows/*.yml'
   - 'data/config/**'
+frida:
+  - '.github/workflows/hook_frida_script.yaml'  
+  - 'src/util/frida_script_*.js'
 matrix:
   - '.github/workflows/scan_with_matrix.yaml'
   - 'data/wordlist.txt'
+  - 'src/util/appium_interactions_cafe.py'
 python:
  - 'src/util/*.py'
 shell:

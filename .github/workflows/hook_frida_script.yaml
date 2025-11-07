@@ -130,7 +130,8 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           set -eu && source ./src/functions.sh
-          install_corellium_cafe_android "${{ env.CORELLIUM_INSTANCE_ID }}"
+          kill_app "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
+          install_app_from_url "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_SOURCE_URL}"
       - name: Launch Cafe and run frida-ps
         timeout-minutes: 1
         env:

@@ -182,6 +182,7 @@ stop_instance()
 {
   local INSTANCE_ID="$1"
   local TARGET_INSTANCE_STATUS_OFF='off'
+  local TARGET_INSTANCE_STATUS_OFF='on'
   local TARGET_INSTANCE_STATUS_CREATING='creating'
   does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in

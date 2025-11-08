@@ -734,7 +734,7 @@ wait_for_instance_status()
     if [ -z "${CURRENT_INSTANCE_STATUS}" ]; then
       log_warning "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
     else
-      log_stdout "Status is ${CURRENT_INSTANCE_STATUS}, waiting for ${TARGET_INSTANCE_STATUS}."
+      log_stdout "Instance status is ${CURRENT_INSTANCE_STATUS}, waiting for ${TARGET_INSTANCE_STATUS}."
     fi
     sleep "${SLEEP_TIME_DEFAULT}"
     CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
@@ -778,7 +778,7 @@ wait_for_assessment_status()
         ;;
     esac
 
-    log_stdout "Status is ${CURRENT_ASSESSMENT_STATUS} and target is ${TARGET_ASSESSMENT_STATUS}. Waiting ${ASSESSMENT_STATUS_SLEEP_TIME} seconds."
+    log_stdout "Assessment status is ${CURRENT_ASSESSMENT_STATUS}, waiting for ${TARGET_ASSESSMENT_STATUS}."
     sleep "${ASSESSMENT_STATUS_SLEEP_TIME}"
 
     LAST_ASSESSMENT_STATUS="${CURRENT_ASSESSMENT_STATUS}"

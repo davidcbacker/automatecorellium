@@ -7,6 +7,7 @@ import sys
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from appium.webdriver.common.appiumby import AppiumBy
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
 
 # ==== CONSTANTS: CORELLIUM DEVICE ====
 DEFAULT_SERVICES_IP = '10.11.1.1'
@@ -21,12 +22,12 @@ APPIUM_SERVER_IP = '127.0.0.1'
 APPIUM_SERVER_PORT = '4723'
 APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
 
-def run_app_automation():
+def run_app_automation(udid: str):
     '''Launch the app and interact using Appium commands.'''
     options = UiAutomator2Options()
     options.set_capability('platformName', 'Android')
     options.set_capability('appium:automationName', 'UiAutomator2')
-    options.set_capability('appium:udid', corellium_device_appium_udid)
+    options.set_capability('appium:udid', udid)
     options.set_capability('appium:appPackage', TARGET_APP_PACKAGE)
     options.set_capability('appium:appActivity', TARGET_APP_ACTIVITY)
     options.set_capability('appium:noReset', True)
@@ -106,8 +107,24 @@ def run_app_automation():
 
         print("All steps executed on Corellium Android device.")
 
-    except Exception as e:
-        print(f"TEST FAILED: {e}")
+    except NoSuchElementException as e:
+        print("Thrown when element could not be found.")
+        print("If you encounter this exception, you may want to check the following:")
+        print("  * Check your selector used in your find_by...")
+        print("  * Element may not yet be on the screen at the time of the find operation,")
+        print("    write a wait wrapper to wait for an element to appear.")
+        print(f"NoSuchElementException: {e}")
+        sys.exit(1)
+
+    except StaleElementReferenceException as e:
+        print('Thrown when a reference to an element is now "stale".')
+        print("Possible causes of StaleElementReferenceException include, but not limited to:")
+        print("  * You are no longer on the same page, or the page may have refreshed since the element")
+        print("    was located.")
+        print("  * The element may have been removed and re-added to the screen, since it was located.")
+        print("    Such as an element being relocated.")
+        print("  * Element may have been inside an iframe or another context which was refreshed.")
+        print(f"StaleElementReferenceException: {e}")
         sys.exit(1)
 
     finally:
@@ -117,7 +134,7 @@ def run_app_automation():
 if __name__ == "__main__":
     match len(sys.argv):
         case 1:
-            corelliumDeviceAppiumUdid = f'{DEFAULT_SERVICES_IP}:{DEFAULT_ADB_PORT}'
+            corellium_device_appium_udid = f'{DEFAULT_SERVICES_IP}:{DEFAULT_ADB_PORT}'
             print(f'Defaulting to Corellium device at {DEFAULT_SERVICES_IP}.')
         case 2:
             TARGET_DEVICE_SERVICES_IP = sys.argv[1]
@@ -127,4 +144,4 @@ if __name__ == "__main__":
             print('ERROR: Please provide zero or pass in the Corellium device services IP.')
             sys.exit(1)
 
-    run_app_automation()
+    run_app_automation(corellium_device_appium_udid)

@@ -35,7 +35,7 @@ def run_app_automation(udid: str):
 
     try:
         print("Starting session at: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-        
+
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
         driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT_FOR_ELEMENT)
         print("Successfully loaded target app.")

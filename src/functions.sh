@@ -154,17 +154,17 @@ delete_instance()
 start_instance()
 {
   local INSTANCE_ID="$1"
-  local TARGET_INSTANCE_STATUS_ON='on'
-  local TARGET_INSTANCE_STATUS_CREATING='creating'
+  local INSTANCE_STATUS_ON='on'
+  local INSTANCE_STATUS_CREATING='creating'
   does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in
-    "${TARGET_INSTANCE_STATUS_ON}")
-      log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_ON}."
+    "${INSTANCE_STATUS_ON}")
+      log_stdout "Instance ${INSTANCE_ID} is already ${INSTANCE_STATUS_ON}."
       ;;
-    "${TARGET_INSTANCE_STATUS_CREATING}")
-      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_CREATING}. Waiting for ${TARGET_INSTANCE_STATUS_ON} state."
-      wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_ON}"
-      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_ON}."
+    "${GET_INSTANCE_STATUS_CREATING}")
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_CREATING}, waiting for ${INSTANCE_STATUS_ON} state."
+      wait_for_instance_status "${INSTANCE_ID}" "${INSTANCE_STATUS_ON}"
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
       ;;
     '')
       log_error "Failed to get status for instance ${INSTANCE_ID}."
@@ -173,7 +173,7 @@ start_instance()
     *)
       log_stdout "Starting instance ${INSTANCE_ID}"
       corellium instance start "${INSTANCE_ID}" --wait > /dev/null
-      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_ON}."
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
       ;;
   esac
 }
@@ -181,20 +181,21 @@ start_instance()
 stop_instance()
 {
   local INSTANCE_ID="$1"
-  local TARGET_INSTANCE_STATUS_OFF='off'
-  local TARGET_INSTANCE_STATUS_CREATING='creating'
+  local INSTANCE_STATUS_OFF='off'
+  local INSTANCE_STATUS_ON='on'
+  local INSTANCE_STATUS_CREATING='creating'
   does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in
-    "${TARGET_INSTANCE_STATUS_OFF}")
-      log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_OFF}."
+    "${INSTANCE_STATUS_OFF}")
+      log_stdout "Instance ${INSTANCE_ID} is already ${INSTANCE_STATUS_OFF}."
       ;;
-    "${TARGET_INSTANCE_STATUS_CREATING}")
-      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_CREATING}. Waiting for ${TARGET_INSTANCE_STATUS_ON} state."
-      wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_ON}"
-      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_ON}."
+    "${INSTANCE_STATUS_CREATING}")
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_CREATING}. Waiting for ${INSTANCE_STATUS_ON} state."
+      wait_for_instance_status "${INSTANCE_ID}" "${INSTANCE_STATUS_ON}"
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
       log_stdout "Stopping instance ${INSTANCE_ID}"
       corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
-      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_OFF}."
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_OFF}."
       ;;
     '')
       log_error "Failed to get status for instance ${INSTANCE_ID}."
@@ -203,7 +204,7 @@ stop_instance()
     *)
       log_stdout "Stopping instance ${INSTANCE_ID}"
       corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
-      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_OFF}."
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_OFF}."
       ;;
   esac
 }
@@ -211,11 +212,11 @@ stop_instance()
 soft_stop_instance()
 {
   local INSTANCE_ID="$1"
-  local TARGET_INSTANCE_STATUS_OFF='off'
+  local INSTANCE_STATUS_OFF='off'
   does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in
-    "${TARGET_INSTANCE_STATUS_OFF}")
-      log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_OFF}."
+    "${INSTANCE_STATUS_OFF}")
+      log_stdout "Instance ${INSTANCE_ID} is already ${INSTANCE_STATUS_OFF}."
       ;;
     '')
       log_error "Failed to get status for instance ${INSTANCE_ID}."
@@ -229,9 +230,9 @@ soft_stop_instance()
         -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
         -H "Content-Type: application/json" \
         -d '{"soft":true}'
-      log_stdout "Soft stopped instance ${INSTANCE_ID}. Waiting for ${TARGET_INSTANCE_STATUS_OFF} state."
-      wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_OFF}"
-      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_OFF}."
+      log_stdout "Soft stopped instance ${INSTANCE_ID}. Waiting for ${INSTANCE_STATUS_OFF} state."
+      wait_for_instance_status "${INSTANCE_ID}" "${INSTANCE_STATUS_OFF}"
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_OFF}."
       ;;
   esac
 }

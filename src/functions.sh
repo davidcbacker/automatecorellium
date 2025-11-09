@@ -161,7 +161,7 @@ start_instance()
     "${INSTANCE_STATUS_ON}")
       log_stdout "Instance ${INSTANCE_ID} is already ${INSTANCE_STATUS_ON}."
       ;;
-    "${GET_INSTANCE_STATUS_CREATING}")
+    "${INSTANCE_STATUS_CREATING}")
       log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_CREATING}, waiting for ${INSTANCE_STATUS_ON} state."
       wait_for_instance_status "${INSTANCE_ID}" "${INSTANCE_STATUS_ON}"
       log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."

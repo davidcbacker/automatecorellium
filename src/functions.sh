@@ -263,9 +263,7 @@ is_agent_ready()
   local PROJECT_ID="$2"
   local AGENT_READY_JSON_RESPONSE AGENT_READY_STATUS
   AGENT_READY_JSON_RESPONSE="$(corellium ready --instance "${INSTANCE_ID}" --project "${PROJECT_ID}" 2> /dev/null)" || {
-    echo "DEBUG AGENT_READY_JSON_RESPONSE=${AGENT_READY_JSON_RESPONSE"}
-    log_error 'Failed to get agent ready.'
-    exit 1
+    return 1 # corellium ready exits with nonzero status if agent isn't ready
   }
   AGENT_READY_STATUS="$(echo "${AGENT_READY_JSON_RESPONSE}" | jq -r '.ready')" || {
     log_error 'Failed to parse agent ready JSON response.'

@@ -1,4 +1,4 @@
-name: Static code checks
+name: Lint code changes
 
 on:
   push:
@@ -17,6 +17,7 @@ jobs:
       ci: ${{ steps.filter.outputs.ci }}
       javascript: ${{ steps.filter.outputs.javascript }}
       markdown: ${{ steps.filter.outputs.markdown }}
+      python: ${{ steps.filter.outputs.python }}
       shell: ${{ steps.filter.outputs.shell }}
       static-lint: ${{ steps.filter.outputs.static-lint }}
     steps:
@@ -46,6 +47,35 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_JAVASCRIPT_ES: true
+
+  python-lint:
+    name: Python linting
+    needs: changes
+    if: ${{ needs.changes.outputs.python == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Install pylint
+        run: python -m pip install pylint
+      - name: Lint python scripts
+        run: |
+          echo 'DEBUG LISTING PY'
+          git ls-files '*.py'
+          echo 'DEBUG LOOPING RESULTS'
+          for python_script in $(git ls-files '*.py'); do
+            echo "Linting ${python_script}."
+            pylint "${python_script}" \
+              --disable duplicate-code \
+              --disable import-error \
+              --disable line-too-long \
+              --disable too-many-locals \
+              --disable too-many-statements \
+              --disable unused-import
+            echo "Linted ${python_script}."
+          done
 
   shell-lint:
     name: Shell linting

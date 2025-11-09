@@ -154,17 +154,17 @@ delete_instance()
 start_instance()
 {
   local INSTANCE_ID="$1"
-  local TARGET_INSTANCE_STATUS_ON='on'
-  local TARGET_INSTANCE_STATUS_CREATING='creating'
+  local INSTANCE_STATUS_ON='on'
+  local INSTANCE_STATUS_CREATING='creating'
   does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in
-    "${TARGET_INSTANCE_STATUS_ON}")
-      log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_ON}."
+    "${INSTANCE_STATUS_ON}")
+      log_stdout "Instance ${INSTANCE_ID} is already ${INSTANCE_STATUS_ON}."
       ;;
-    "${TARGET_INSTANCE_STATUS_CREATING}")
-      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_CREATING}. Waiting for ${TARGET_INSTANCE_STATUS_ON} state."
-      wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_ON}"
-      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_ON}."
+    "${GET_INSTANCE_STATUS_CREATING}")
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_CREATING}, waiting for ${INSTANCE_STATUS_ON} state."
+      wait_for_instance_status "${INSTANCE_ID}" "${INSTANCE_STATUS_ON}"
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
       ;;
     '')
       log_error "Failed to get status for instance ${INSTANCE_ID}."
@@ -173,7 +173,7 @@ start_instance()
     *)
       log_stdout "Starting instance ${INSTANCE_ID}"
       corellium instance start "${INSTANCE_ID}" --wait > /dev/null
-      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_ON}."
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
       ;;
   esac
 }
@@ -181,20 +181,21 @@ start_instance()
 stop_instance()
 {
   local INSTANCE_ID="$1"
-  local TARGET_INSTANCE_STATUS_OFF='off'
-  local TARGET_INSTANCE_STATUS_CREATING='creating'
+  local INSTANCE_STATUS_OFF='off'
+  local INSTANCE_STATUS_ON='on'
+  local INSTANCE_STATUS_CREATING='creating'
   does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in
-    "${TARGET_INSTANCE_STATUS_OFF}")
-      log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_OFF}."
+    "${INSTANCE_STATUS_OFF}")
+      log_stdout "Instance ${INSTANCE_ID} is already ${INSTANCE_STATUS_OFF}."
       ;;
-    "${TARGET_INSTANCE_STATUS_CREATING}")
-      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_CREATING}. Waiting for ${TARGET_INSTANCE_STATUS_ON} state."
-      wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_ON}"
-      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_ON}."
+    "${INSTANCE_STATUS_CREATING}")
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_CREATING}. Waiting for ${INSTANCE_STATUS_ON} state."
+      wait_for_instance_status "${INSTANCE_ID}" "${INSTANCE_STATUS_ON}"
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
       log_stdout "Stopping instance ${INSTANCE_ID}"
       corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
-      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_OFF}."
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_OFF}."
       ;;
     '')
       log_error "Failed to get status for instance ${INSTANCE_ID}."
@@ -203,7 +204,7 @@ stop_instance()
     *)
       log_stdout "Stopping instance ${INSTANCE_ID}"
       corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
-      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_OFF}."
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_OFF}."
       ;;
   esac
 }
@@ -211,11 +212,11 @@ stop_instance()
 soft_stop_instance()
 {
   local INSTANCE_ID="$1"
-  local TARGET_INSTANCE_STATUS_OFF='off'
+  local INSTANCE_STATUS_OFF='off'
   does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in
-    "${TARGET_INSTANCE_STATUS_OFF}")
-      log_stdout "Instance ${INSTANCE_ID} is already ${TARGET_INSTANCE_STATUS_OFF}."
+    "${INSTANCE_STATUS_OFF}")
+      log_stdout "Instance ${INSTANCE_ID} is already ${INSTANCE_STATUS_OFF}."
       ;;
     '')
       log_error "Failed to get status for instance ${INSTANCE_ID}."
@@ -229,9 +230,9 @@ soft_stop_instance()
         -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
         -H "Content-Type: application/json" \
         -d '{"soft":true}'
-      log_stdout "Soft stopped instance ${INSTANCE_ID}. Waiting for ${TARGET_INSTANCE_STATUS_OFF} state."
-      wait_for_instance_status "${INSTANCE_ID}" "${TARGET_INSTANCE_STATUS_OFF}"
-      log_stdout "Instance ${INSTANCE_ID} is ${TARGET_INSTANCE_STATUS_OFF}."
+      log_stdout "Soft stopped instance ${INSTANCE_ID}. Waiting for ${INSTANCE_STATUS_OFF} state."
+      wait_for_instance_status "${INSTANCE_ID}" "${INSTANCE_STATUS_OFF}"
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_OFF}."
       ;;
   esac
 }
@@ -257,16 +258,34 @@ get_instance_services_ip()
   corellium instance get --instance "${instance_id}" | jq -r '.serviceIp'
 }
 
+is_agent_ready()
+{
+  local INSTANCE_ID="$1"
+  local PROJECT_ID="$2"
+  local AGENT_READY_JSON_RESPONSE AGENT_READY_STATUS
+  AGENT_READY_JSON_RESPONSE="$(corellium ready --instance "${INSTANCE_ID}" --project "${PROJECT_ID}" 2> /dev/null)" || {
+    return 1 # corellium ready exits with nonzero status if agent isn't ready
+  }
+  AGENT_READY_STATUS="$(echo "${AGENT_READY_JSON_RESPONSE}" | jq -r '.ready')" || {
+    log_error 'Failed to parse agent ready JSON response.'
+    exit 1
+  }
+  if [ "${AGENT_READY_STATUS}" = 'true' ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 wait_until_agent_ready()
 {
   local INSTANCE_ID="$1"
   local AGENT_READY_SLEEP_TIME='15'
   local INSTANCE_STATUS_ON='on'
-  local PROJECT_ID INSTANCE_STATUS AGENT_READY_STATUS
+  local PROJECT_ID INSTANCE_STATUS
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
-  AGENT_READY_STATUS="$(corellium ready --instance "${INSTANCE_ID}" --project "${PROJECT_ID}" 2> /dev/null | jq -r '.ready')"
-  while [ "${AGENT_READY_STATUS}" != 'true' ]; do
+  while ! is_agent_ready "${INSTANCE_ID}" "${PROJECT_ID}"; do
     case "${INSTANCE_STATUS}" in
       '')
         log_warning "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
@@ -281,7 +300,6 @@ wait_until_agent_ready()
     esac
     sleep "${AGENT_READY_SLEEP_TIME}"
     INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
-    AGENT_READY_STATUS="$(corellium ready --instance "${INSTANCE_ID}" --project "${PROJECT_ID}" 2> /dev/null | jq -r '.ready')"
   done
   log_stdout 'Virtual device agent is ready.'
 }
@@ -716,7 +734,7 @@ wait_for_instance_status()
     if [ -z "${CURRENT_INSTANCE_STATUS}" ]; then
       log_warning "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
     else
-      log_stdout "Status is ${CURRENT_INSTANCE_STATUS}, waiting for ${TARGET_INSTANCE_STATUS}."
+      log_stdout "Instance status is ${CURRENT_INSTANCE_STATUS}, waiting for ${TARGET_INSTANCE_STATUS}."
     fi
     sleep "${SLEEP_TIME_DEFAULT}"
     CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
@@ -760,7 +778,7 @@ wait_for_assessment_status()
         ;;
     esac
 
-    log_stdout "Status is ${CURRENT_ASSESSMENT_STATUS} and target is ${TARGET_ASSESSMENT_STATUS}. Waiting ${ASSESSMENT_STATUS_SLEEP_TIME} seconds."
+    log_stdout "Assessment status is ${CURRENT_ASSESSMENT_STATUS}, waiting for ${TARGET_ASSESSMENT_STATUS}."
     sleep "${ASSESSMENT_STATUS_SLEEP_TIME}"
 
     LAST_ASSESSMENT_STATUS="${CURRENT_ASSESSMENT_STATUS}"

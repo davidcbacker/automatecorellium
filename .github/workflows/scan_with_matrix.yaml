@@ -108,6 +108,14 @@ jobs:
         run: |
           set -eu && source ./src/functions.sh
           run_appium_server
+      - name: Upload MATRIX wordlist
+        env:
+          MATRIX_WORDLIST_PATH: './data/wordlist.txt'
+        run: |
+          set -eu && source ./src/functions.sh
+          CREATED_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${MATRIX_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          log_stdout "Created new wordlist image with ID ${CREATED_MATRIX_WORDLIST_ID}."
+          echo "MATRIX_WORDLIST_ID=${CREATED_MATRIX_WORDLIST_ID}" >> "${GITHUB_ENV}"
       - name: Wait for instance agent ready
         timeout-minutes: 20
         run: |
@@ -150,14 +158,6 @@ jobs:
           log_stdout "Closing Appium session ${OPEN_APPIUM_SESSION_ID}."
           close_appium_session "${OPEN_APPIUM_SESSION_ID}"
           log_stdout "Closed Appium session ${OPEN_APPIUM_SESSION_ID}."
-      - name: Upload MATRIX wordlist
-        env:
-          MATRIX_WORDLIST_PATH: './data/wordlist.txt'
-        run: |
-          set -eu && source ./src/functions.sh
-          CREATED_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${MATRIX_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_stdout "Created new wordlist image with ID ${CREATED_MATRIX_WORDLIST_ID}."
-          echo "MATRIX_WORDLIST_ID=${CREATED_MATRIX_WORDLIST_ID}" >> "${GITHUB_ENV}"
       - name: Run Corellium Cafe MATRIX assessment
         timeout-minutes: 40
         env:
@@ -196,14 +196,14 @@ jobs:
           ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
       - name: Upload MATRIX runtime artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: matrix-runtime-artifacts
           path: ${{ env.MATRIX_RUNNER_ARTIFACTS_PATH }}
           compression-level: 9
           if-no-files-found: error
       - name: Upload MATRIX report artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: matrix-reports
           path: |

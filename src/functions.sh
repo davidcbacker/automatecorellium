@@ -258,16 +258,34 @@ get_instance_services_ip()
   corellium instance get --instance "${instance_id}" | jq -r '.serviceIp'
 }
 
+is_agent_ready()
+{
+  local INSTANCE_ID="$1"
+  local PROJECT_ID="$2"
+  local AGENT_READY_JSON_RESPONSE AGENT_READY_STATUS
+  AGENT_READY_JSON_RESPONSE="$(corellium ready --instance "${INSTANCE_ID}" --project "${PROJECT_ID}" 2> /dev/null)" || {
+    return 1 # corellium ready exits with nonzero status if agent isn't ready
+  }
+  AGENT_READY_STATUS="$(echo "${AGENT_READY_JSON_RESPONSE}" | jq -r '.ready')" || {
+    log_error 'Failed to parse agent ready JSON response.'
+    exit 1
+  }
+  if [ "${AGENT_READY_STATUS}" = 'true' ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 wait_until_agent_ready()
 {
   local INSTANCE_ID="$1"
   local AGENT_READY_SLEEP_TIME='15'
   local INSTANCE_STATUS_ON='on'
-  local PROJECT_ID INSTANCE_STATUS AGENT_READY_STATUS
+  local PROJECT_ID INSTANCE_STATUS
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
-  AGENT_READY_STATUS="$(corellium ready --instance "${INSTANCE_ID}" --project "${PROJECT_ID}" 2> /dev/null | jq -r '.ready')"
-  while [ "${AGENT_READY_STATUS}" != 'true' ]; do
+  while ! is_agent_ready "${INSTANCE_ID}" "${PROJECT_ID}"; do
     case "${INSTANCE_STATUS}" in
       '')
         log_warning "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
@@ -282,7 +300,6 @@ wait_until_agent_ready()
     esac
     sleep "${AGENT_READY_SLEEP_TIME}"
     INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
-    AGENT_READY_STATUS="$(corellium ready --instance "${INSTANCE_ID}" --project "${PROJECT_ID}" 2> /dev/null | jq -r '.ready')"
   done
   log_stdout 'Virtual device agent is ready.'
 }

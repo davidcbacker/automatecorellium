@@ -288,7 +288,7 @@ wait_until_agent_ready()
   while ! is_agent_ready "${INSTANCE_ID}" "${PROJECT_ID}"; do
     case "${INSTANCE_STATUS}" in
       '')
-        log_warning "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
+        log_warn "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
         ;;
       "${INSTANCE_STATUS_ON}")
         log_stdout "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
@@ -732,7 +732,7 @@ wait_for_instance_status()
   CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
   while [ "${CURRENT_INSTANCE_STATUS}" != "${TARGET_INSTANCE_STATUS}" ]; do
     if [ -z "${CURRENT_INSTANCE_STATUS}" ]; then
-      log_warning "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
+      log_warn "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
     else
       log_stdout "Instance status is ${CURRENT_INSTANCE_STATUS}, waiting for ${TARGET_INSTANCE_STATUS}."
     fi

@@ -26,13 +26,13 @@ APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
 
 # ==== CONSTANTS: APPIUM DRIVER ====
 APPIUM_DRIVER_IMPLICITLY_WAIT=5 # seconds
-APPIUM_DRIVER_EXPLICITLY_WAIT=20 # seconds
+APPIUM_DRIVER_DEFAULT_EXPLICIT_WAIT=20 # seconds
 
-def wait_until_clickable(wait, element, timeout=20):
-    '''Wait for a webdriver element to be clickable'''
+def wait_until_clickable(by, value, wait, timeout=APPIUM_DRIVER_DEFAULT_EXPLICIT_WAIT):
+    '''Wait for a webdriver locator to be clickable'''
     try:
-        wait.until(element_to_be_clickable(element))
-        return
+        clickable_element = wait.until(element_to_be_clickable(element))
+        return clickable_element
     except TimeoutException as e:
         print("Thrown when a command does not complete in enough time.")
         print(f"Element not clickable after {timeout} seconds.")
@@ -54,7 +54,7 @@ def run_app_automation(udid: str):
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
         print("Successfully loaded target app.")
         driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT * 1000)
-        webdriver_wait = WebDriverWait(driver, APPIUM_DRIVER_EXPLICITLY_WAIT)
+        driver_wait = WebDriverWait(driver, APPIUM_DRIVER_EXPLICITLY_WAIT, ignored_exceptions=[StaleElementReferenceException])
         print("Starting app interaction steps.")
 
         # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====
@@ -77,8 +77,8 @@ def run_app_automation(udid: str):
         el6 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
         el6.click()
 
-        el7 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
-        wait_until_clickable(webdriver_wait, el7)
+        el7 = wait_until_clickable(by=AppiumBy.ACCESSIBILITY_ID, value="Cart", driver_wait)
+        #el7 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
         el7.click()
 
         el8 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")

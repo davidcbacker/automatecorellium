@@ -74,7 +74,7 @@ jobs:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
-          set -eu && source ./src/functions.sh
+          source ./src/functions.sh && set -euo pipefail
           log_stdout "Creating ephemeral instance."
           CREATED_CORELLIUM_INSTANCE_ID="$(create_instance \
             "${{ vars.ANDROID_HARDWARE_FLAVOR }}" \
@@ -86,7 +86,7 @@ jobs:
           log_stdout 'Saved ephemeral instance ID as environmental variable.'
       - name: Install additional runner dependencies
         run: |
-          set -eu && source ./src/functions.sh
+          source ./src/functions.sh && set -euo pipefail
           install_openvpn_dependencies
           if [ "${{ vars.ANDROID_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
             install_adb_dependency
@@ -97,7 +97,7 @@ jobs:
       - name: Wait for instance agent ready
         timeout-minutes: 20
         run: |
-          set -eu && source ./src/functions.sh
+          source ./src/functions.sh && set -euo pipefail
           start_instance "${CORELLIUM_INSTANCE_ID}"
           wait_until_agent_ready "${CORELLIUM_INSTANCE_ID}"
           [ "${{ vars.ANDROID_HARDWARE_FLAVOR }}" == 'ranchu' ] ||
@@ -105,14 +105,14 @@ jobs:
       - name: Connect to project VPN
         timeout-minutes: 2
         run: |
-          set -eu && source ./src/functions.sh
+          source ./src/functions.sh && set -euo pipefail
           connect_to_vpn_for_instance \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ env.VPN_CONFIG_PATH }}"
       - name: Connect to device
         timeout-minutes: 1
         run: |
-          set -eu && source ./src/functions.sh
+          source ./src/functions.sh && set -euo pipefail
           if [ "${{ vars.ANDROID_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
             connect_with_adb "${CORELLIUM_INSTANCE_ID}"
           else
@@ -126,7 +126,7 @@ jobs:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
-          set -eu && source ./src/functions.sh
+          source ./src/functions.sh && set -euo pipefail
           kill_app "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
           install_app_from_url "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_SOURCE_URL}"
       - name: Launch Cafe and run frida-ps
@@ -135,7 +135,7 @@ jobs:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
-          set -eu && source ./src/functions.sh
+          source ./src/functions.sh && set -euo pipefail
           launch_app "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
           run_frida_ps_usb
       - name: Run frida hook
@@ -143,13 +143,13 @@ jobs:
         env:
           FRIDA_SCRIPT_PATH: src/util/frida_script_android_cafe.js
         run: |
-          set -eu && source ./src/functions.sh
+          source ./src/functions.sh && set -euo pipefail
           run_frida_script_usb "${CORELLIUM_CAFE_PACKAGE}" "${FRIDA_SCRIPT_PATH}"
       - name: Stop or delete instance
         if: always()
         timeout-minutes: 2
         run: |
-          set -eu && source ./src/functions.sh
+          source ./src/functions.sh && set -euo pipefail
           log_stdout "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
           stop_instance "${CORELLIUM_INSTANCE_ID}"
           delete_instance "${CORELLIUM_INSTANCE_ID}"

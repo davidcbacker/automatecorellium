@@ -31,5 +31,5 @@ jobs:
         env:
           START_INSTANCES: ${{ vars.START_INSTANCES }}
         run: |
-          set -eu && source ./src/functions.sh
+          source ./src/functions.sh && set -euo pipefail
           start_demo_instances

@@ -36,9 +36,6 @@ def wait_until_clickable(wait, element, timeout=20):
         print("Thrown when a command does not complete in enough time.")
         print(f"Element not clickable after {timeout} seconds.")
         print(f"TimeoutException: {e}")
-        screenshot_path="element_not_clickable.png"
-        driver.save_screenshot(screenshot_path)
-        print(f"Saved debug screenshot at path {screenshot_path}")
         sys.exit(1)
 
 def run_app_automation(udid: str):

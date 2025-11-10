@@ -69,10 +69,12 @@ def run_app_automation(udid: str):
         el7.click()
 
         print('DEBUG WAITING FOR BLOG PAGE TO LOAD')
-
         sleep(10)
+
         screenshot_path: str = os.path.join(os.getcwd(), "corellium_cafe_blog_page.png")
+        print(f"Saving screenshot to {screenshot_path}")
         driver.save_screenshot(screenshot_path)
+
         el8 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"The Corellium Resource Library \")")
         print('DEBUG CLICKING ON BLOG PAGE HEADER')
         el8.click()

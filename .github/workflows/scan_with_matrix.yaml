@@ -161,6 +161,7 @@ jobs:
           log_stdout 'Opening Appium session.'
           OPEN_APPIUM_SESSION_ID="$(open_appium_session "${MATRIX_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}")"
           log_stdout "Opened Apipum session ${OPEN_APPIUM_SESSION_ID}."
+          sleep 5
           log_stdout "Closing Appium session ${OPEN_APPIUM_SESSION_ID}."
           close_appium_session "${OPEN_APPIUM_SESSION_ID}"
           log_stdout "Closed Appium session ${OPEN_APPIUM_SESSION_ID}."

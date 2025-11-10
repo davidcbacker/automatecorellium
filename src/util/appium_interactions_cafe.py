@@ -79,7 +79,6 @@ def run_app_automation(udid: str):
         el6.click()
 
         el7 = wait_until_clickable(by=AppiumBy.ACCESSIBILITY_ID, value="Cart", wait=driver_wait)
-        #el7 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
         el7.click()
 
         el8 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")

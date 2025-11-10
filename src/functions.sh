@@ -971,9 +971,9 @@ add_instance_to_usbfluxd()
 {
   local INSTANCE_ID="$1"
   local USBFLUXD_PORT='5000'
-  local INSTANCE_SERVICES_IP
+  local INSTANCE_SERVICES_IP INSTANCE_USBFLUXD_SOCKET
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
-  local INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
+  INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
   log_stdout "Adding device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
   usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"
   log_stdout "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."

@@ -26,8 +26,9 @@ APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
 
 # ==== CONSTANTS: APPIUM DRIVER ====
 APPIUM_DRIVER_IMPLICITLY_WAIT=5 # seconds
+APPIUM_DRIVER_EXPLICITLY_WAIT=20 # seconds
 
-def wait_until_clickable(wait, locator_by, locator_value, timeout=20):
+def wait_until_clickable(wait, locator_by, locator_value):
     '''Wait for a webdriver locator to be clickable'''
     try:
         element_locator = (locator_by, locator_value)

@@ -226,7 +226,9 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           source ./src/functions.sh && set -euo pipefail
-          if [ "${EPHEMERAL_MATRIX_INSTANCE:-}" = 'true' ]; then
+          if [ -z "${MATRIX_INSTANCE_ID:-}" ]; then
+            log_warning 'MATRIX_INSTANCE_ID is not set.'
+          elif [ "${EPHEMERAL_MATRIX_INSTANCE:-}" = 'true' ]; then
             log_stdout "Ready to delete ephemeral instance ${MATRIX_INSTANCE_ID}."
             stop_instance "${MATRIX_INSTANCE_ID}"
             delete_instance "${MATRIX_INSTANCE_ID}"

@@ -52,23 +52,38 @@ def run_app_automation(udid: str):
         el4 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
         el4.click()
 
+        print('DEBUG OPENING MENU')
+
         el5 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
         el5.click()
 
+        print('DEBUG CLICKING ON BLOG MENU ITEM')
+        
         el6 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Blog\")")
         el6.click()
+
+        print('DEBUG CLICKING ON BLOG BUTTON ON BLOG PAGE')
 
         el7 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
         el7.click()
 
+        print('DEBUG WAITING FOR BLOG PAGE TO LOAD')
+
         el8 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"The Corellium Resource Library \")")
+        print('DEBUG CLICKING ON BLOG PAGE HEADER')
         el8.click()
+
+        print('DEBUG OPENING MENU AGAIN')
 
         el9 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
         el9.click()
 
+        print('DEBUG CLICKING ON HOME MENU ITEM')
+
         el10 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Home\")")
         el10.click()
+
+        print('DEBUG SUCCESS - BLOG IS FINISHED CONTINUING NOW WITH SCRIPT ')
 
         el11 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
         el11.click()

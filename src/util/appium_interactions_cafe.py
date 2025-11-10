@@ -31,7 +31,8 @@ APPIUM_DRIVER_DEFAULT_EXPLICIT_WAIT=20 # seconds
 def wait_until_clickable(wait, by, value, timeout=APPIUM_DRIVER_DEFAULT_EXPLICIT_WAIT):
     '''Wait for a webdriver locator to be clickable'''
     try:
-        clickable_element = wait.until(element_to_be_clickable(element))
+        element_locator = (locator_by, locator_value)
+        clickable_element = wait.until(element_to_be_clickable(element_locator))
         return clickable_element
     except TimeoutException as e:
         print("Thrown when a command does not complete in enough time.")

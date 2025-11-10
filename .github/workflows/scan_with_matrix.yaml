@@ -84,7 +84,7 @@ jobs:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
-          set -eu && source ./src/functions.sh
+          set -eup && source ./src/functions.sh
           if does_instance_exist "${MATRIX_INSTANCE_ID}"; then
             start_instance "${MATRIX_INSTANCE_ID}"
           else
@@ -101,7 +101,7 @@ jobs:
           fi
       - name: Install additional runner dependencies
         run: |
-          set -eu && source ./src/functions.sh
+          set -eup && source ./src/functions.sh
           install_openvpn_dependencies
           if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
             install_adb_dependency
@@ -112,34 +112,34 @@ jobs:
       - name: Start Appium server
         timeout-minutes: 1
         run: |
-          set -eu && source ./src/functions.sh
+          set -eup && source ./src/functions.sh
           run_appium_server
       - name: Upload MATRIX wordlist
         env:
           MATRIX_WORDLIST_PATH: './data/wordlist.txt'
         run: |
-          set -eu && source ./src/functions.sh
+          set -eup && source ./src/functions.sh
           CREATED_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${MATRIX_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_stdout "Created new wordlist image with ID ${CREATED_MATRIX_WORDLIST_ID}."
           echo "MATRIX_WORDLIST_ID=${CREATED_MATRIX_WORDLIST_ID}" >> "${GITHUB_ENV}"
       - name: Wait for instance agent ready
         timeout-minutes: 20
         run: |
-          set -eu && source ./src/functions.sh
+          set -eup && source ./src/functions.sh
           start_instance "${MATRIX_INSTANCE_ID}"
           wait_until_agent_ready "${MATRIX_INSTANCE_ID}"
           # unlock_instance "${MATRIX_INSTANCE_ID}" # only for iOS
       - name: Connect to project VPN
         timeout-minutes: 2
         run: |
-          set -eu && source ./src/functions.sh
+          set -eup && source ./src/functions.sh
           connect_to_vpn_for_instance \
             "${MATRIX_INSTANCE_ID}" \
             "${{ env.VPN_CONFIG_PATH }}"
       - name: Connect to device
         timeout-minutes: 1
         run: |
-          set -eu && source ./src/functions.sh
+          set -eup && source ./src/functions.sh
           if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
             connect_with_adb "${MATRIX_INSTANCE_ID}"
           else
@@ -152,12 +152,12 @@ jobs:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
-          set -eu && source ./src/functions.sh
+          set -eup && source ./src/functions.sh
           kill_app "${MATRIX_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
           install_app_from_url "${MATRIX_INSTANCE_ID}" "${CORELLIUM_CAFE_SOURCE_URL}"
       - name: Run Appium session test
         run: |
-          set -eu && source ./src/functions.sh
+          set -eup && source ./src/functions.sh
           log_stdout 'Opening Appium session.'
           OPEN_APPIUM_SESSION_ID="$(open_appium_session "${MATRIX_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}")"
           log_stdout "Opened Apipum session ${OPEN_APPIUM_SESSION_ID}."
@@ -171,7 +171,7 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
           MAX_MATRIX_RUN_RETRIES: 2
         run: |
-          set -eu && source ./src/functions.sh
+          set -eup && source ./src/functions.sh
           for ((failures=0; failures<=MAX_MATRIX_RUN_RETRIES; failures++)); do
             if run_full_matrix_assessment "${MATRIX_INSTANCE_ID}" \
               "${CORELLIUM_CAFE_PACKAGE}" "${MATRIX_WORDLIST_ID}"; then
@@ -189,7 +189,7 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
           MATRIX_INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.tar.gz
         run: |
-          set -eu && source ./src/functions.sh
+          set -eup && source ./src/functions.sh
           log_stdout 'Compressing MATRIX runtime artifacts.'
           node ./src/util/compress_matrix_artifacts.js
           log_stdout 'Compressed MATRIX runtime artifacts.'
@@ -224,7 +224,7 @@ jobs:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
-          set -eu && source ./src/functions.sh
+          set -eup && source ./src/functions.sh
           if [ "${EPHEMERAL_MATRIX_INSTANCE:-}" = 'true' ]; then
             log_stdout "Ready to delete ephemeral instance ${MATRIX_INSTANCE_ID}."
             stop_instance "${MATRIX_INSTANCE_ID}"

@@ -25,7 +25,8 @@ APPIUM_SERVER_PORT = '4723'
 APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
 
 # ==== CONSTANTS: APPIUM DRIVER ====
-APPIUM_DRIVER_IMPLICITLY_WAIT=5000 # milliseconds
+APPIUM_DRIVER_IMPLICITLY_WAIT=5 # seconds
+APPIUM_DRIVER_EXPLICITLY_WAIT=20 # seconds
 
 def wait_until_clickable(wait, element, timeout=20):
     '''Wait for a webdriver element to be clickable'''
@@ -51,9 +52,10 @@ def run_app_automation(udid: str):
     try:
         print("Starting session at: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
-        driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT)
-        webdriver_wait = WebDriverWait(driver, 20)
         print("Successfully loaded target app.")
+        driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT * 1000)
+        webdriver_wait = WebDriverWait(driver, APPIUM_DRIVER_EXPLICITLY_WAIT)
+        print("Starting app interaction steps.")
 
         # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====
 

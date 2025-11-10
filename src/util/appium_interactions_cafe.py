@@ -36,7 +36,7 @@ def wait_until_clickable(wait, locator_by, locator_value):
         return clickable_element
     except TimeoutException as e:
         print("Thrown when a command does not complete in enough time.")
-        print(f"Element not clickable after {timeout} seconds.")
+        print(f"Element not clickable after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
         print(f"TimeoutException: {e}")
         sys.exit(1)
 

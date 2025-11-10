@@ -51,8 +51,13 @@ jobs:
       - name: Install Node
         uses: actions/setup-node@v6
         with:
-          cache: 'npm'
+          cache: npm
           node-version: 24
+      - name: Install Python
+        uses: actions/setup-python@v6
+        with:
+          cache: pip
+          python-version: '3.13'
       - name: Install API dependencies
         run: |
           npm ci

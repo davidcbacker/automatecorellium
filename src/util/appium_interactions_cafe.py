@@ -7,7 +7,8 @@ import sys
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from appium.webdriver.common.appiumby import AppiumBy
-from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
+from selenium.webdriver.support.expected_conditions import element_to_be_clickable
 
 # ==== CONSTANTS: CORELLIUM DEVICE ====
 DEFAULT_SERVICES_IP = '10.11.1.1'
@@ -22,6 +23,9 @@ APPIUM_SERVER_IP = '127.0.0.1'
 APPIUM_SERVER_PORT = '4723'
 APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
 
+# ==== CONSTANTS: APPIUM DRIVER ====
+APPIUM_DRIVER_IMPLICITLY_WAIT=5000 # milliseconds
+
 def run_app_automation(udid: str):
     '''Launch the app and interact using Appium commands.'''
     options = UiAutomator2Options()
@@ -35,7 +39,8 @@ def run_app_automation(udid: str):
     try:
         print("Starting session at: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
-        driver.implicitly_wait(5000)
+        driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT)
+        webdriver_wait = WebDriverWait(driver, 20)
         print("Successfully loaded target app.")
 
         # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====
@@ -59,6 +64,12 @@ def run_app_automation(udid: str):
         el6.click()
 
         el7 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
+        try:
+            webdriver_wait.until(element_to_be_clickable(el7))
+        except TimeoutException as e:
+            print("Thrown when a command does not complete in enough time.")
+            print(f"TimeoutException: {e}")
+            sys.exit(1)
         el7.click()
 
         el8 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")

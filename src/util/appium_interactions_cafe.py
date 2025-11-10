@@ -58,7 +58,7 @@ def run_app_automation(udid: str):
         el5.click()
 
         print('DEBUG CLICKING ON BLOG MENU ITEM')
-        
+
         el6 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Blog\")")
         el6.click()
 

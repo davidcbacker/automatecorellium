@@ -27,6 +27,20 @@ APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
 # ==== CONSTANTS: APPIUM DRIVER ====
 APPIUM_DRIVER_IMPLICITLY_WAIT=5000 # milliseconds
 
+def wait_until_clickable(wait, element, timeout=20):
+    '''Wait for a webdriver element to be clickable'''
+    try:
+        wait.until(element_to_be_clickable(element))
+        return
+    except TimeoutException as e:
+        print("Thrown when a command does not complete in enough time.")
+        print(f"Element not clickable after {timeout} seconds.")
+        print(f"TimeoutException: {e}")
+        screenshot_path="element_not_clickable.png"
+        driver.save_screenshot(screenshot_path)
+        print(f"Saved debug screenshot at path {screenshot_path}")
+        sys.exit(1)
+
 def run_app_automation(udid: str):
     '''Launch the app and interact using Appium commands.'''
     options = UiAutomator2Options()
@@ -65,12 +79,7 @@ def run_app_automation(udid: str):
         el6.click()
 
         el7 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
-        try:
-            webdriver_wait.until(element_to_be_clickable(el7))
-        except TimeoutException as e:
-            print("Thrown when a command does not complete in enough time.")
-            print(f"TimeoutException: {e}")
-            sys.exit(1)
+        wait_until_clickable(webdriver_wait, el7)
         el7.click()
 
         el8 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")

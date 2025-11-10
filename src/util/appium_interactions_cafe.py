@@ -28,7 +28,7 @@ APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
 APPIUM_DRIVER_IMPLICITLY_WAIT=5 # seconds
 APPIUM_DRIVER_DEFAULT_EXPLICIT_WAIT=20 # seconds
 
-def wait_until_clickable(by, value, wait, timeout=APPIUM_DRIVER_DEFAULT_EXPLICIT_WAIT):
+def wait_until_clickable(wait, by, value, timeout=APPIUM_DRIVER_DEFAULT_EXPLICIT_WAIT):
     '''Wait for a webdriver locator to be clickable'''
     try:
         clickable_element = wait.until(element_to_be_clickable(element))
@@ -77,7 +77,7 @@ def run_app_automation(udid: str):
         el6 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
         el6.click()
 
-        el7 = wait_until_clickable(by=AppiumBy.ACCESSIBILITY_ID, value="Cart", driver_wait)
+        el7 = wait_until_clickable(driver_wait, AppiumBy.ACCESSIBILITY_ID, "Cart")
         #el7 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
         el7.click()
 

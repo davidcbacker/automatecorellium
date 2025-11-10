@@ -31,6 +31,6 @@ jobs:
         env:
           STOP_INSTANCES: ${{ vars.STOP_INSTANCES }}
         run: |
-          set -eu && source ./src/functions.sh
+          source ./src/functions.sh && set -euo pipefail
           stop_demo_instances
 

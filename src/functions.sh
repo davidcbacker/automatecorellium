@@ -1126,7 +1126,7 @@ run_appium_interactions_cafe()
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   log_stdout 'Starting automated Appium interactions.'
-  python3 src/util/appium_interactions_cafe.py "${INSTANCE_SERVICES_IP}"
+  PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe.py "${INSTANCE_SERVICES_IP}"
   log_stdout 'Finished automated Appium interactions.'
 }
 

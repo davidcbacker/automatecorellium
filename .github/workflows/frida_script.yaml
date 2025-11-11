@@ -31,6 +31,7 @@ jobs:
       pull-requests: read
     outputs:
       frida: ${{ steps.filter.outputs.frida }}
+      shell: ${{ steps.filter.outputs.shell }}
     steps:
       - uses: actions/checkout@v5
       - uses: dorny/paths-filter@v3
@@ -42,7 +43,11 @@ jobs:
   frida:
     name: Run Frida script on ${{ matrix.os }}
     needs: changes
-    if: ${{ needs.changes.outputs.frida == 'true' }}
+    if: >-
+      ${{
+        needs.changes.outputs.frida == 'true' ||
+        needs.changes.outputs.shell == 'true'
+      }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -135,7 +140,7 @@ jobs:
           else
             run_usbfluxd_and_dependencies
             add_instance_to_usbfluxd "${CORELLIUM_INSTANCE_ID}"
-            verify_usbflux_connection
+            verify_usbflux_connection "${CORELLIUM_INSTANCE_ID}"
           fi
       - name: Install Corellium Cafe from URL
         timeout-minutes: 2

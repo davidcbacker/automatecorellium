@@ -254,8 +254,32 @@ get_instance_status()
 
 get_instance_services_ip()
 {
-  local instance_id="$1"
-  corellium instance get --instance "${instance_id}" | jq -r '.serviceIp'
+  local INSTANCE_ID="$1"
+  local GET_INSTANCE_RESPONSE_JSON INSTANCE_SERVICES_IP
+  GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
+    log_error "Failed to get details for instance ${INSTANCE_ID}." >&2
+    exit 1
+  }
+  INSTANCE_SERVICES_IP="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.serviceIp')" || {
+    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}." >&2
+    exit 1
+  }
+  echo "${INSTANCE_SERVICES_IP}"
+}
+
+get_instance_udid()
+{
+  local INSTANCE_ID="$1"
+  local GET_INSTANCE_RESPONSE_JSON INSTANCE_UDID
+  GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
+    log_error "Failed to get details for instance ${INSTANCE_ID}." >&2
+    exit 1
+  }
+  INSTANCE_UDID="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.bootOptions.udid')" || {
+    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}." >&2
+    exit 1
+  }
+  echo "${INSTANCE_UDID}"
 }
 
 is_agent_ready()
@@ -981,15 +1005,21 @@ add_instance_to_usbfluxd()
 
 verify_usbflux_connection()
 {
-  log_stdout "Waiting for idevice_id to show USB device."
-  until idevice_id --list; do sleep 0.1; done
-  log_stdout "idevice_id shows USB connection."
-  log_stdout "Pairing USB device."
-  idevicepair pair || {
-    log_error 'Unable to establish idevicepair'
+  local INSTANCE_ID="$1"
+  local INSTANCE_UDID
+  INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
+  log_stdout 'Checking for usb connection with idevice_id.'
+  until idevice_id "${INSTANCE_UDID}"; do sleep 0.1; done
+  log_stdout 'Found usb connection with idevice_id.'
+  log_stdout 'Pairing to Corellium device with idevicepair.'
+  until idevicepair --udid "${INSTANCE_UDID}" pair; do sleep 1; done
+  log_stdout 'Paired to Corellium device with idevicepair.'
+  log_stdout 'Validing pairing to Corellium device with idevicepair.'
+  idevicepair --udid "${INSTANCE_UDID}" validate || {
+    log_error 'Failed to validate that device is paired to host.'
     exit 1
   }
-  log_stdout "Paired USB device."
+  log_stdout 'Validated pairing to Corellium device with idevicepair.'
 }
 
 run_frida_ps_network()

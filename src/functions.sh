@@ -787,6 +787,7 @@ wait_for_assessment_status()
       '')
         log_warn "Failed to get instance status. Checking again in ${SLEEP_TIME_DEFAULT} seconds."
         ASSESSMENT_STATUS_SLEEP_TIME="${SLEEP_TIME_DEFAULT}"
+        ;;
       'failed')
         echo "Detected a failed run. Last state was '${LAST_ASSESSMENT_STATUS}'. Exiting." >&2
         return 1

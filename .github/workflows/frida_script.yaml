@@ -31,6 +31,7 @@ jobs:
       pull-requests: read
     outputs:
       frida: ${{ steps.filter.outputs.frida }}
+      shell: ${{ steps.filter.outputs.shell }}
     steps:
       - uses: actions/checkout@v5
       - uses: dorny/paths-filter@v3
@@ -42,7 +43,11 @@ jobs:
   frida:
     name: Run Frida script
     needs: changes
-    if: ${{ needs.changes.outputs.frida == 'true' }}
+    if: >-
+      ${{
+        needs.changes.outputs.frida == 'true' ||
+        needs.changes.outputs.shell == 'true'
+      }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:

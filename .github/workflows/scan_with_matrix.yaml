@@ -145,7 +145,7 @@ jobs:
           else
             run_usbfluxd_and_dependencies
             add_instance_to_usbfluxd "${MATRIX_INSTANCE_ID}"
-            verify_usbflux_connection
+            verify_usbflux_connection "${MATRIX_INSTANCE_ID}"
           fi
       - name: Install Corellium Cafe from URL
         env:

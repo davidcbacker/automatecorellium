@@ -123,7 +123,7 @@ jobs:
           else
             run_usbfluxd_and_dependencies
             add_instance_to_usbfluxd "${CORELLIUM_INSTANCE_ID}"
-            verify_usbflux_connection
+            verify_usbflux_connection "${CORELLIUM_INSTANCE_ID}"
           fi
       - name: Install Corellium Cafe from URL
         timeout-minutes: 2

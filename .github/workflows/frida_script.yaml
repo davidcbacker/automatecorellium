@@ -83,7 +83,7 @@ jobs:
             "${{ vars.MATRIX_DEFAULT_PROJECT }}")"
           log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
           echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
-          log_stdout 'Saved instance ID as environmental variable.'
+          log_stdout 'Saved ephemeral instance ID as environmental variable.'
       - name: Install additional runner dependencies
         run: |
           source ./src/functions.sh && set -euo pipefail
@@ -153,9 +153,11 @@ jobs:
           if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
             log_warning 'CORELLIUM_INSTANCE_ID is not set.'
           else
-            log_stdout "Ready to delete instance ${CORELLIUM_INSTANCE_ID}."
+            log_stdout "Stopping ephemeral instance ${CORELLIUM_INSTANCE_ID}."
             stop_instance "${CORELLIUM_INSTANCE_ID}"
+            log_stdout "Deleting ephemeral instance ${CORELLIUM_INSTANCE_ID}."
             delete_instance "${CORELLIUM_INSTANCE_ID}"
+            log_stdout "Deleted ephemeral instance ${CORELLIUM_INSTANCE_ID}."
           fi
       - name: Clean up Corellium auth and processes
         if: always()

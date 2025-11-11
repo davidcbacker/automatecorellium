@@ -756,9 +756,7 @@ wait_for_instance_status()
   CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
   while [ "${CURRENT_INSTANCE_STATUS}" != "${TARGET_INSTANCE_STATUS}" ]; do
     if [ -z "${CURRENT_INSTANCE_STATUS}" ]; then
-      log_warn "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
-    else
-      log_stdout "Instance status is ${CURRENT_INSTANCE_STATUS}, waiting for ${TARGET_INSTANCE_STATUS}."
+      log_warn "Failed to get instance status. Checking again in ${SLEEP_TIME_DEFAULT} seconds."
     fi
     sleep "${SLEEP_TIME_DEFAULT}"
     CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
@@ -771,7 +769,7 @@ wait_for_assessment_status()
   local ASSESSMENT_ID="$2"
   local TARGET_ASSESSMENT_STATUS="$3"
   local SLEEP_TIME_DEFAULT='5'
-  local SLEEP_TIME_FOR_TESTING='60'
+  local SLEEP_TIME_FOR_TESTING='20'
 
   case "${TARGET_ASSESSMENT_STATUS}" in
     'complete' | 'failed' | 'monitoring' | 'readyForTesting' | 'startMonitoring' | 'stopMonitoring' | 'testing') ;;
@@ -786,6 +784,9 @@ wait_for_assessment_status()
   CURRENT_ASSESSMENT_STATUS="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
   while [ "${CURRENT_ASSESSMENT_STATUS}" != "${TARGET_ASSESSMENT_STATUS}" ]; do
     case "${CURRENT_ASSESSMENT_STATUS}" in
+      '')
+        log_warn "Failed to get instance status. Checking again in ${SLEEP_TIME_DEFAULT} seconds."
+        ASSESSMENT_STATUS_SLEEP_TIME="${SLEEP_TIME_DEFAULT}"
       'failed')
         echo "Detected a failed run. Last state was '${LAST_ASSESSMENT_STATUS}'. Exiting." >&2
         return 1
@@ -801,10 +802,7 @@ wait_for_assessment_status()
         ASSESSMENT_STATUS_SLEEP_TIME="${SLEEP_TIME_DEFAULT}"
         ;;
     esac
-
-    log_stdout "Assessment status is ${CURRENT_ASSESSMENT_STATUS}, waiting for ${TARGET_ASSESSMENT_STATUS}."
     sleep "${ASSESSMENT_STATUS_SLEEP_TIME}"
-
     LAST_ASSESSMENT_STATUS="${CURRENT_ASSESSMENT_STATUS}"
     CURRENT_ASSESSMENT_STATUS="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
   done

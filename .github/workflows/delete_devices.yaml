@@ -31,5 +31,5 @@ jobs:
         env:
           AUTHORIZED_INSTANCES: ${{ vars.AUTHORIZED_INSTANCES }}
         run: |
-          set -eu && source ./src/functions.sh
+          source ./src/functions.sh && set -euo pipefail
           delete_unauthorized_devices

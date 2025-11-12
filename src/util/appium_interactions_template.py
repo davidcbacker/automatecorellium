@@ -11,22 +11,40 @@ from selenium.common.exceptions import NoSuchElementException, StaleElementRefer
 from selenium.webdriver.support.expected_conditions import element_to_be_clickable
 from selenium.webdriver.support.ui import WebDriverWait
 
-# ==== CONSTANTS: CORELLIUM DEVICE ====
+# =====================================
+# ==== BEGIN CONSTANTS DEFINITIONS ====
+# =====================================
+
+# ==== CORELLIUM DEVICE ====
 DEFAULT_SERVICES_IP = '10.11.1.1'
 DEFAULT_ADB_PORT = '5001'
 
-# ==== CONSTANTS: TARGET APP ====
+# ==== TARGET APP ====
 TARGET_APP_PACKAGE = 'com.mypackage.name'
 TARGET_APP_ACTIVITY = '.MainActivity'
 
-# ==== CONSTANTS: APPIUM SERVER ====
+# ==== APPIUM SERVER ====
 APPIUM_SERVER_IP = '127.0.0.1'
 APPIUM_SERVER_PORT = '4723'
 APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
 
-# ==== CONSTANTS: APPIUM DRIVER ====
+# ==== APPIUM DRIVER ====
 APPIUM_DRIVER_IMPLICITLY_WAIT=5 # seconds
 APPIUM_DRIVER_EXPLICITLY_WAIT=20 # seconds
+
+# =====================================
+# ===== END CONSTANTS DEFINITIONS =====
+# =====================================
+
+
+def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
+    '''Interact with the target app using Appium commands.'''
+
+    # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====
+
+
+
+    # ==== END OF COPY-PASTE SECTION ====
 
 def wait_until_clickable(by, value, wait):
     '''Wait for a webdriver locator to be clickable'''
@@ -56,13 +74,9 @@ def run_app_automation(udid: str):
         print("Successfully loaded target app.")
         driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT * 1000)
         # To wait for an element, pass in driver_wait as the `wait` parameter for wait_until_clickable()
-        # driver_wait = WebDriverWait(driver, APPIUM_DRIVER_EXPLICITLY_WAIT, ignored_exceptions=[StaleElementReferenceException])
+        driver_wait = WebDriverWait(driver, APPIUM_DRIVER_EXPLICITLY_WAIT, ignored_exceptions=[StaleElementReferenceException])
         print("Starting app interaction steps.")
-
-        # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====
-
-        # ==== END OF COPY-PASTE SECTION ====
-
+        interact_with_app(driver, driver_wait)
         print("All steps executed on Corellium Android device.")
 
     except NoSuchElementException as e:

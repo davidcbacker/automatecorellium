@@ -14,12 +14,6 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  CORELLIUM_CAFE_PACKAGE: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
-                            && 'com.corellium.cafe'
-                            || 'com.corellium.Cafe' }}
-  CORELLIUM_CAFE_SOURCE_URL: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
-                               && 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
-                               || 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa' }}
   TERM: xterm
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
 
@@ -41,7 +35,7 @@ jobs:
           list-files: 'shell'
 
   frida:
-    name: Run Frida script
+    name: Run Frida script on ${{ matrix.os }}
     needs: changes
     if: >-
       ${{
@@ -50,6 +44,25 @@ jobs:
       }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        # os: [Android, iOS]
+        os: [iOS, Android]
+        include:
+          - os: Android
+            hardware_flavor: ranchu
+            firmware_version: 16.0.0
+            firmware_build: 'r2 userdebug'
+            corellium_cafe_app_id: com.corellium.cafe
+            corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
+          - os: iOS
+            hardware_flavor: iphone17pm
+            firmware_version: 26.0.1
+            firmware_build: 23A355
+            corellium_cafe_app_id: com.corellium.Cafe
+            corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
     steps:
       - name: Pull the latest code
         uses: actions/checkout@v5
@@ -80,11 +93,13 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           source ./src/functions.sh && set -euo pipefail
+          echo 'DEBUG ENABLING XTRACE'
+          set -x
           log_stdout "Creating ephemeral instance."
           CREATED_CORELLIUM_INSTANCE_ID="$(create_instance \
-            "${{ vars.ANDROID_HARDWARE_FLAVOR }}" \
-            "${{ vars.ANDROID_FIRMWARE_VERSION }}" \
-            "${{ vars.ANDROID_FIRMWARE_BUILD }}" \
+            "${{ matrix.hardware_flavor }}" \
+            "${{ matrix.firmware_version }}" \
+            "${{ matrix.firmware_build }}" \
             "${{ vars.MATRIX_DEFAULT_PROJECT }}")"
           log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
           echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
@@ -93,7 +108,7 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           install_openvpn_dependencies
-          if [ "${{ vars.ANDROID_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+          if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
             install_adb_dependency
           else
             install_usbfluxd_and_dependencies
@@ -105,7 +120,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           start_instance "${CORELLIUM_INSTANCE_ID}"
           wait_until_agent_ready "${CORELLIUM_INSTANCE_ID}"
-          [ "${{ vars.ANDROID_HARDWARE_FLAVOR }}" == 'ranchu' ] ||
+          [ "${{ matrix.hardware_flavor }}" == 'ranchu' ] ||
             unlock_instance "${CORELLIUM_INSTANCE_ID}"
       - name: Connect to project VPN
         timeout-minutes: 2
@@ -118,7 +133,7 @@ jobs:
         timeout-minutes: 1
         run: |
           source ./src/functions.sh && set -euo pipefail
-          if [ "${{ vars.ANDROID_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+          if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
             connect_with_adb "${CORELLIUM_INSTANCE_ID}"
           else
             run_usbfluxd_and_dependencies
@@ -132,8 +147,8 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           source ./src/functions.sh && set -euo pipefail
-          kill_app "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
-          install_app_from_url "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_SOURCE_URL}"
+          kill_app "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_app_id }}"
+          install_app_from_url "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_source_url }}"
       - name: Launch Cafe and run frida-ps
         timeout-minutes: 1
         env:
@@ -141,15 +156,15 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           source ./src/functions.sh && set -euo pipefail
-          launch_app "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
+          launch_app "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_app_id }}"
           run_frida_ps_usb
       - name: Run frida hook
         timeout-minutes: 2
         env:
-          FRIDA_SCRIPT_PATH: src/util/frida_script_android_cafe.js
+          FRIDA_SCRIPT_PATH: src/util/frida_script_example.js
         run: |
           source ./src/functions.sh && set -euo pipefail
-          run_frida_script_usb "${CORELLIUM_CAFE_PACKAGE}" "${FRIDA_SCRIPT_PATH}"
+          run_frida_script_usb "${{ matrix.corellium_cafe_app_id }}" "${FRIDA_SCRIPT_PATH}"
       - name: Stop or delete instance
         if: always()
         timeout-minutes: 2

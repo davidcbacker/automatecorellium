@@ -218,6 +218,11 @@ jobs:
             matrix_report_*.json
           compression-level: 9
           if-no-files-found: error
+      - name: Esnure failed status of MATRIX storage check
+        run: |
+          set -euo pipefail
+          cat matrix_report_*.json | jq -e \
+            '.results[] | select(.id == "masvs-storage-1-android-12") | .outcome == "fail"'
       - name: Stop or delete instance
         if: always()
         timeout-minutes: 2

@@ -41,6 +41,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     '''Interact with the target app using Appium commands.'''
 
     # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====
+
     el1 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText")
     el1.send_keys("Username123")
 
@@ -103,11 +104,11 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
 
     el21 = driver.find_element(by=AppiumBy.ID, value="android:id/button1")
     el21.click()
+
     # ==== END OF COPY-PASTE SECTION ====
 
 def wait_until_clickable(by, value, wait):
     '''Wait for a webdriver locator to be clickable'''
-
     try:
         element_locator = (by, value)
         clickable_element = wait.until(element_to_be_clickable(element_locator))
@@ -120,7 +121,6 @@ def wait_until_clickable(by, value, wait):
 
 def run_app_automation(udid: str):
     '''Launch the app and interact using Appium commands.'''
-
     options = UiAutomator2Options()
     options.set_capability('platformName', 'Android')
     options.set_capability('appium:automationName', 'UiAutomator2')

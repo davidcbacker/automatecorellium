@@ -218,7 +218,7 @@ jobs:
             matrix_report_*.json
           compression-level: 9
           if-no-files-found: error
-      - name: Esnure failed status of MATRIX storage check
+      - name: Ensure failed status of MATRIX storage check
         run: |
           set -euo pipefail
           cat matrix_report_*.json | jq -e \

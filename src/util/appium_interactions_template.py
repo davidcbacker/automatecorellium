@@ -55,7 +55,8 @@ def run_app_automation(udid: str):
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
         print("Successfully loaded target app.")
         driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT * 1000)
-        driver_wait = WebDriverWait(driver, APPIUM_DRIVER_EXPLICITLY_WAIT, ignored_exceptions=[StaleElementReferenceException])
+        # To wait for an element, pass in driver_wait as the `wait` parameter for wait_until_clickable()
+        # driver_wait = WebDriverWait(driver, APPIUM_DRIVER_EXPLICITLY_WAIT, ignored_exceptions=[StaleElementReferenceException])
         print("Starting app interaction steps.")
 
         # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====

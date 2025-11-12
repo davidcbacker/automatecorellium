@@ -790,11 +790,11 @@ wait_for_assessment_status()
         ;;
       'failed')
         echo "Detected a failed run. Last state was '${LAST_ASSESSMENT_STATUS}'. Exiting." >&2
-        return 1
+        exit 1
         ;;
       'monitoring')
         echo 'Cannot wait when status is monitoring. Exiting.' >&2
-        return 1
+        exit 1
         ;;
       'testing')
         ASSESSMENT_STATUS_SLEEP_TIME="${SLEEP_TIME_FOR_TESTING}"

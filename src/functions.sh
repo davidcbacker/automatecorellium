@@ -1119,7 +1119,7 @@ close_appium_session()
     exit 1
   }
 
-  # Verify that the session ID is invalid
+  # Verify that the session ID is now invalid
   local GET_APPIUM_SESSION_JSON_RESPONSE
   GET_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent -X GET "${APPIUM_API_SESSION_URL}")"
   if ! echo "${GET_APPIUM_SESSION_JSON_RESPONSE}" | jq -e '.value.error == "invalid session id"' > /dev/null; then
@@ -1144,5 +1144,7 @@ run_appium_interactions_template()
   local INSTANCE_ID="$1"
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  log_stdout 'Starting automated Appium interactions.'
   python3 src/util/appium_interactions_template.py "${INSTANCE_SERVICES_IP}"
+  log_stdout 'Finished automated Appium interactions.'
 }

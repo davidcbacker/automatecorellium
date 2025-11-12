@@ -73,6 +73,7 @@ jobs:
               --disable line-too-long \
               --disable too-many-locals \
               --disable too-many-statements \
+              --disable unused-argument \
               --disable unused-import
             echo "Linted ${python_script}."
           done

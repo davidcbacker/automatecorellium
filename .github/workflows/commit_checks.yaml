@@ -51,7 +51,11 @@ jobs:
   python-lint:
     name: Python linting
     needs: changes
-    if: ${{ needs.changes.outputs.python == 'true' }}
+    if: >-
+      ${{
+        needs.changes.outputs.python == 'true' ||
+        needs.changes.outputs.static-lint == 'true'
+      }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code

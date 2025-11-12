@@ -51,7 +51,7 @@ def run_app_automation(udid: str):
     options.set_capability('appium:noReset', True)
 
     try:
-        print("Starting session at: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        print("Starting session at:", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
         print("Successfully loaded target app.")
         driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT * 1000)
@@ -148,7 +148,7 @@ def run_app_automation(udid: str):
         sys.exit(1)
 
     finally:
-        print("Closing appium session at: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        print("Closing appium session at:", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         driver.quit()
 
 if __name__ == "__main__":

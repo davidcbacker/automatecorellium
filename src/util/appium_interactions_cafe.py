@@ -77,7 +77,8 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     screenshot_path: str = os.path.join(os.getcwd(), "corellium_cafe_blog_page.png")
     print(f"Saving screenshot to {screenshot_path}")
     driver.save_screenshot(screenshot_path)
-
+    print('DEBUG SAVED SCREENSHOT TO PATH')
+    
     el8 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"The Corellium Resource Library \")")
     print('DEBUG CLICKING ON BLOG PAGE HEADER')
     el8.click()

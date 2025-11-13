@@ -591,7 +591,7 @@ run_full_matrix_assessment()
   fi
   log_stdout "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
-  run_appium_interactions_cafe "${INSTANCE_ID}"
+  run_appium_interactions_template "${INSTANCE_ID}"
   stop_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   log_stdout "Completed MATRIX assessment ${MATRIX_ASSESSMENT_ID}."

@@ -83,7 +83,6 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     driver.save_screenshot(screenshot_path)
     print('DEBUG SAVED SCREENSHOT TO PATH')
 
-
     print('DEBUG OPENING MENU AGAIN')
 
     el9 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")

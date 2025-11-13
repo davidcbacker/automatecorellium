@@ -182,20 +182,6 @@ jobs:
         id: matrix-run-2
         if: steps.matrix-run-1.outcome == 'failure'
         timeout-minutes: 20
-        continue-on-error: true
-        env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
-        run: |
-          source ./src/functions.sh && set -euo pipefail
-          run_full_matrix_assessment\
-            "${MATRIX_INSTANCE_ID}" \
-            "${CORELLIUM_CAFE_PACKAGE}" \
-            "${MATRIX_WORDLIST_ID}"
-      - name: Retry MATRIX assessment if failed again
-        id: matrix-run-3
-        if: ${{ steps.matrix-run-1.outcome == 'failure' && steps.matrix-run-2.outcome == 'failure' }}
-        timeout-minutes: 20
         continue-on-error: false
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}

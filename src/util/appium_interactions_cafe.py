@@ -55,22 +55,16 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el4 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
     el4.click()
 
-    print('DEBUG OPENING MENU')
-
     el5 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
     el5.click()
-
-    print('DEBUG CLICKING ON BLOG MENU ITEM')
 
     el6 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Blog\")")
     el6.click()
 
-    print('DEBUG CLICKING ON BLOG BUTTON ON BLOG PAGE')
-
     el7 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
     el7.click()
 
-    print('DEBUG WAITING FOR BLOG PAGE TO LOAD')
+    print('Waiting 10 seconds for blog page to load')
     time.sleep(10)
     # instead of sleep, figure out a way to confirm that the blog page loaded with find_element or wait_until_clickable
     # el8 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"The Corellium Resource Library \")")
@@ -83,17 +77,11 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     driver.save_screenshot(blog_screenshot_path)
     print('DEBUG SAVED SCREENSHOT TO PATH')
 
-    print('DEBUG OPENING MENU AGAIN')
-
     el9 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
     el9.click()
 
-    print('DEBUG CLICKING ON HOME MENU ITEM')
-
     el10 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Home\")")
     el10.click()
-
-    print('DEBUG SUCCESS - BLOG IS FINISHED CONTINUING NOW WITH SCRIPT ')
 
     el11 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
     el11.click()
@@ -101,44 +89,35 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el12 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
     el12.click()
 
-    el13 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
+    el13 = wait_until_clickable(by=AppiumBy.ACCESSIBILITY_ID, value="Cart", wait=driver_wait)
     el13.click()
 
-    el14 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
+    el14 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
     el14.click()
 
-    el15 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
-    el15.click()
+    el15 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText")
+    el15.send_keys("Myfirstname")
 
-    el16 = wait_until_clickable(by=AppiumBy.ACCESSIBILITY_ID, value="Cart", wait=driver_wait)
-    el16.click()
+    el16 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText")
+    el16.send_keys("Mylastname")
 
-    el17 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
-    el17.click()
+    el17 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText")
+    el17.send_keys("3216540987")
 
-    el18 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText")
-    el18.send_keys("Myfirstname")
+    el18 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
+    el18.click()
 
-    el19 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText")
-    el19.send_keys("Mylastname")
+    el19 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber")
+    el19.send_keys("2345678901234567")
 
-    el20 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText")
-    el20.send_keys("3216540987")
+    el20 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration")
+    el20.send_keys("1234")
 
-    el21 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
-    el21.click()
+    el21 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV")
+    el21.send_keys("135")
 
-    el22 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber")
-    el22.send_keys("2345678901234567")
-
-    el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration")
-    el23.send_keys("1234")
-
-    el24 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV")
-    el24.send_keys("135")
-
-    el25 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
-    el25.send_keys("65432")
+    el22 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
+    el22.send_keys("65432")
 
     print('DEBUG GENERATING SCREENSHOT PATH')
     order_screenshot_path: str = os.path.join(os.getcwd(), "corellium_cafe_order_page.png")
@@ -146,20 +125,20 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     driver.save_screenshot(order_screenshot_path)
     print('DEBUG SAVED SCREENSHOT TO PATH')
 
-    el26 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
+    el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
+    el23.click()
+
+    el24 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode")
+    el24.send_keys("65432")
+
+    el25 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
+    el25.click()
+
+    el26 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvSubmitOrder")
     el26.click()
 
-    el27 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode")
-    el27.send_keys("65432")
-
-    el28 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
-    el28.click()
-
-    el29 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvSubmitOrder")
-    el29.click()
-
-    el30 = driver.find_element(by=AppiumBy.ID, value="android:id/button1")
-    el30.click()
+    el27 = driver.find_element(by=AppiumBy.ID, value="android:id/button1")
+    el27.click()
 
     # ==== END OF COPY-PASTE SECTION ====
 

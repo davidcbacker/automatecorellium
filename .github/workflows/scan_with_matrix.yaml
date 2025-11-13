@@ -188,7 +188,8 @@ jobs:
           done
       - name: Find corellium_cafe_blog_page.png
         if: always()
-        run: find / -type f -name corellium_cafe_blog_page.png 2>/dev/null
+        run: |
+          find . -type f -name corellium_cafe_blog_page.png 2>/dev/null
       - name: Download MATRIX runtime artifacts from VM
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}

@@ -165,8 +165,6 @@ jobs:
           log_stdout "Closing Appium session ${OPEN_APPIUM_SESSION_ID}."
           close_appium_session "${OPEN_APPIUM_SESSION_ID}"
           log_stdout "Closed Appium session ${OPEN_APPIUM_SESSION_ID}."
-      - name: pwd PRINT WORKING DIRECTORY
-        run: pwd
       - name: Run Corellium Cafe MATRIX assessment
         timeout-minutes: 40
         env:
@@ -204,12 +202,13 @@ jobs:
           log_stdout 'Downloaded MATRIX runtime artifacts from VM to CI runner.'
           ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
-      - name: Upload Corellium Cafe blog screenshots
+      - name: Upload Appium screenshot for ${{ env.CORELLIUM_CAFE_PACKAGE }}
         uses: actions/upload-artifact@v5
         with:
-          name: appium-cafe-screenshots
+          name: appium-screenshots-${{ env.CORELLIUM_CAFE_PACKAGE }}
           path: |
             corellium_cafe_blog_page.png
+            corellium_cafe_order_page.png
           compression-level: 9
           if-no-files-found: error
       - name: Upload MATRIX runtime artifacts

@@ -165,6 +165,8 @@ jobs:
           log_stdout "Closing Appium session ${OPEN_APPIUM_SESSION_ID}."
           close_appium_session "${OPEN_APPIUM_SESSION_ID}"
           log_stdout "Closed Appium session ${OPEN_APPIUM_SESSION_ID}."
+      - name: pwd PRINT WORKING DIRECTORY
+        run: pwd
       - name: Run Corellium Cafe MATRIX assessment
         timeout-minutes: 40
         env:

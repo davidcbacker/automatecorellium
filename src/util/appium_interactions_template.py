@@ -7,21 +7,56 @@ import sys
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from appium.webdriver.common.appiumby import AppiumBy
-from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
+from selenium.webdriver.support.expected_conditions import element_to_be_clickable
+from selenium.webdriver.support.ui import WebDriverWait
 
-# ==== CONSTANTS: CORELLIUM DEVICE ====
+# =====================================
+# ==== BEGIN CONSTANTS DEFINITIONS ====
+# =====================================
+
+# ==== CORELLIUM DEVICE ====
 DEFAULT_SERVICES_IP = '10.11.1.1'
 DEFAULT_ADB_PORT = '5001'
 
-# ==== CONSTANTS: TARGET APP ====
+# ==== TARGET APP ====
 TARGET_APP_PACKAGE = 'com.mypackage.name'
 TARGET_APP_ACTIVITY = '.MainActivity'
 
-# ==== CONSTANTS: APPIUM SERVER ====
+# ==== APPIUM SERVER ====
 APPIUM_SERVER_IP = '127.0.0.1'
 APPIUM_SERVER_PORT = '4723'
 APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
-APPIUM_DRIVER_IMPLICITLY_WAIT_FOR_ELEMENT = 5000 # milliseconds
+
+# ==== APPIUM DRIVER ====
+APPIUM_DRIVER_IMPLICITLY_WAIT=5 # seconds
+APPIUM_DRIVER_EXPLICITLY_WAIT=20 # seconds
+
+# =====================================
+# ===== END CONSTANTS DEFINITIONS =====
+# =====================================
+
+
+def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
+    '''Interact with the target app using Appium commands.'''
+
+    # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====
+
+
+
+    # ==== END OF COPY-PASTE SECTION ====
+
+def wait_until_clickable(by, value, wait):
+    '''Wait for a webdriver locator to be clickable'''
+    try:
+        element_locator = (by, value)
+        clickable_element = wait.until(element_to_be_clickable(element_locator))
+        return clickable_element
+    except TimeoutException as e:
+        print("Thrown when a command does not complete in enough time.")
+        print(f"Element not clickable after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
+        print(f"TimeoutException: {e}")
+        sys.exit(1)
 
 def run_app_automation(udid: str):
     '''Launch the app and interact using Appium commands.'''
@@ -34,16 +69,14 @@ def run_app_automation(udid: str):
     options.set_capability('appium:noReset', True)
 
     try:
-        print("Starting session at: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-
+        print("Starting session at:", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
-        driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT_FOR_ELEMENT)
         print("Successfully loaded target app.")
-
-        # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====
-
-        # ==== END OF COPY-PASTE SECTION ====
-
+        driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT * 1000)
+        # To wait for an element, pass in driver_wait as the `wait` parameter for wait_until_clickable()
+        driver_wait = WebDriverWait(driver, APPIUM_DRIVER_EXPLICITLY_WAIT, ignored_exceptions=[StaleElementReferenceException])
+        print("Starting app interaction steps.")
+        interact_with_app(driver, driver_wait)
         print("All steps executed on Corellium Android device.")
 
     except NoSuchElementException as e:
@@ -67,7 +100,7 @@ def run_app_automation(udid: str):
         sys.exit(1)
 
     finally:
-        print("Closing appium session at: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        print("Closing appium session at:", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         driver.quit()
 
 if __name__ == "__main__":

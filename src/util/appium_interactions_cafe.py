@@ -8,20 +8,165 @@ import sys
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from appium.webdriver.common.appiumby import AppiumBy
-from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException
+from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
+from selenium.webdriver.support.expected_conditions import element_to_be_clickable
+from selenium.webdriver.support.ui import WebDriverWait
 
-# ==== CONSTANTS: CORELLIUM DEVICE ====
+# =====================================
+# ==== BEGIN CONSTANTS DEFINITIONS ====
+# =====================================
+
+# ==== CORELLIUM DEVICE ====
 DEFAULT_SERVICES_IP = '10.11.1.1'
 DEFAULT_ADB_PORT = '5001'
 
-# ==== CONSTANTS: TARGET APP ====
+# ==== TARGET APP ====
 TARGET_APP_PACKAGE = 'com.corellium.cafe'
 TARGET_APP_ACTIVITY = '.ui.activities.MainActivity'
 
-# ==== CONSTANTS: APPIUM SERVER ====
+# ==== APPIUM SERVER ====
 APPIUM_SERVER_IP = '127.0.0.1'
 APPIUM_SERVER_PORT = '4723'
 APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
+
+# ==== APPIUM DRIVER ====
+APPIUM_DRIVER_IMPLICITLY_WAIT=5 # seconds
+APPIUM_DRIVER_EXPLICITLY_WAIT=20 # seconds
+
+# =====================================
+# ===== END CONSTANTS DEFINITIONS =====
+# =====================================
+
+
+def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
+    '''Interact with the target app using Appium commands.'''
+
+    # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====
+
+    el1 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText")
+    el1.send_keys("Username123")
+
+    el2 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText")
+    el2.send_keys("Password123")
+
+    el3 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
+    el3.click()
+    
+    el4 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
+    el4.click()
+
+    print('DEBUG OPENING MENU')
+
+    el5 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
+    el5.click()
+
+    print('DEBUG CLICKING ON BLOG MENU ITEM')
+
+    el6 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Blog\")")
+    el6.click()
+
+    print('DEBUG CLICKING ON BLOG BUTTON ON BLOG PAGE')
+
+    el7 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
+    el7.click()
+
+    print('DEBUG WAITING FOR BLOG PAGE TO LOAD')
+    time.sleep(10)
+
+    print('DEBUG GENERATING SCREENSHOT PATH')
+    screenshot_path: str = os.path.join(os.getcwd(), "corellium_cafe_blog_page.png")
+    print(f"Saving screenshot to {screenshot_path}")
+    driver.save_screenshot(screenshot_path)
+
+    el8 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"The Corellium Resource Library \")")
+    print('DEBUG CLICKING ON BLOG PAGE HEADER')
+    el8.click()
+
+    print('DEBUG OPENING MENU AGAIN')
+
+    el9 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
+    el9.click()
+
+    print('DEBUG CLICKING ON HOME MENU ITEM')
+
+    el10 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Home\")")
+    el10.click()
+
+    print('DEBUG SUCCESS - BLOG IS FINISHED CONTINUING NOW WITH SCRIPT ')
+
+    el11 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
+    el11.click()
+
+    el12 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
+    el12.click()
+
+    el13 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
+    el13.click()
+
+    el14 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
+    el14.click()
+
+    el15 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
+    el15.click()
+
+    el16 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
+    el16.click()
+
+    el17 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
+    el17.click()
+
+    el18 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText")
+    el18.send_keys("Myfirstname")
+
+    el19 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText")
+    el19.send_keys("Mylastname")
+
+    el20 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText")
+    el20.send_keys("3216540987")
+
+    el21 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
+    el21.click()
+
+    el22 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber")
+    el22.send_keys("2345678901234567")
+
+    el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration")
+    el23.send_keys("1234")
+
+    el24 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV")
+    el24.send_keys("135")
+
+    el25 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
+    el25.send_keys("65432")
+
+    el26 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
+    el26.click()
+
+    el27 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode")
+    el27.send_keys("65432")
+
+    el28 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
+    el28.click()
+
+    el29 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvSubmitOrder")
+    el29.click()
+
+    el30 = driver.find_element(by=AppiumBy.ID, value="android:id/button1")
+    el30.click()
+
+    # ==== END OF COPY-PASTE SECTION ====
+
+def wait_until_clickable(by, value, wait):
+    '''Wait for a webdriver locator to be clickable'''
+    try:
+        element_locator = (by, value)
+        clickable_element = wait.until(element_to_be_clickable(element_locator))
+        return clickable_element
+    except TimeoutException as e:
+        print("Thrown when a command does not complete in enough time.")
+        print(f"Element not clickable after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
+        print(f"TimeoutException: {e}")
+        sys.exit(1)
 
 def run_app_automation(udid: str):
     '''Launch the app and interact using Appium commands.'''
@@ -34,125 +179,13 @@ def run_app_automation(udid: str):
     options.set_capability('appium:noReset', True)
 
     try:
-        print("Starting session at: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        print("Starting session at:", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
-        driver.implicitly_wait(5000)
         print("Successfully loaded target app.")
-
-        # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====
-
-        el1 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText")
-        el1.send_keys("Username123")
-
-        el2 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText")
-        el2.send_keys("Password123")
-
-        el3 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
-        el3.click()
-
-        el4 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
-        el4.click()
-
-        print('DEBUG OPENING MENU')
-
-        el5 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
-        el5.click()
-
-        print('DEBUG CLICKING ON BLOG MENU ITEM')
-
-        el6 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Blog\")")
-        el6.click()
-
-        print('DEBUG CLICKING ON BLOG BUTTON ON BLOG PAGE')
-
-        el7 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
-        el7.click()
-
-        print('DEBUG WAITING FOR BLOG PAGE TO LOAD')
-        time.sleep(10)
-
-        screenshot_path: str = os.path.join(os.getcwd(), "corellium_cafe_blog_page.png")
-        print(f"Saving screenshot to {screenshot_path}")
-        driver.save_screenshot(screenshot_path)
-
-        el8 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"The Corellium Resource Library \")")
-        print('DEBUG CLICKING ON BLOG PAGE HEADER')
-        el8.click()
-
-        print('DEBUG OPENING MENU AGAIN')
-
-        el9 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
-        el9.click()
-
-        print('DEBUG CLICKING ON HOME MENU ITEM')
-
-        el10 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Home\")")
-        el10.click()
-
-        print('DEBUG SUCCESS - BLOG IS FINISHED CONTINUING NOW WITH SCRIPT ')
-
-        el11 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
-        el11.click()
-
-        el12 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
-        el12.click()
-
-        el13 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
-        el13.click()
-
-        el14 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
-        el14.click()
-
-        el15 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
-        el15.click()
-
-        el16 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
-        el16.click()
-
-        el17 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
-        el17.click()
-
-        el18 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText")
-        el18.send_keys("Myfirstname")
-
-        el19 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText")
-        el19.send_keys("Mylastname")
-
-        el20 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText")
-        el20.send_keys("3216540987")
-
-        el21 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
-        el21.click()
-
-        el22 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber")
-        el22.send_keys("2345678901234567")
-
-        el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration")
-        el23.send_keys("1234")
-
-        el24 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV")
-        el24.send_keys("135")
-
-        el25 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
-        el25.send_keys("65432")
-
-        el26 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
-        el26.click()
-
-        el27 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode")
-        el27.send_keys("65432")
-
-        el28 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
-        el28.click()
-
-        el29 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvSubmitOrder")
-        el29.click()
-
-        el30 = driver.find_element(by=AppiumBy.ID, value="android:id/button1")
-        el30.click()
-
-        # ==== END OF COPY-PASTE SECTION ====
-
+        driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT * 1000)
+        driver_wait = WebDriverWait(driver, APPIUM_DRIVER_EXPLICITLY_WAIT, ignored_exceptions=[StaleElementReferenceException])
+        print("Starting app interaction steps.")
+        interact_with_app(driver, driver_wait)
         print("All steps executed on Corellium Android device.")
 
     except NoSuchElementException as e:
@@ -176,7 +209,7 @@ def run_app_automation(udid: str):
         sys.exit(1)
 
     finally:
-        print("Closing appium session at: ", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        print("Closing appium session at:", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         driver.quit()
 
 if __name__ == "__main__":

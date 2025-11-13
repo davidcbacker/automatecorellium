@@ -254,8 +254,32 @@ get_instance_status()
 
 get_instance_services_ip()
 {
-  local instance_id="$1"
-  corellium instance get --instance "${instance_id}" | jq -r '.serviceIp'
+  local INSTANCE_ID="$1"
+  local GET_INSTANCE_RESPONSE_JSON INSTANCE_SERVICES_IP
+  GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
+    log_error "Failed to get details for instance ${INSTANCE_ID}." >&2
+    exit 1
+  }
+  INSTANCE_SERVICES_IP="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.serviceIp')" || {
+    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}." >&2
+    exit 1
+  }
+  echo "${INSTANCE_SERVICES_IP}"
+}
+
+get_instance_udid()
+{
+  local INSTANCE_ID="$1"
+  local GET_INSTANCE_RESPONSE_JSON INSTANCE_UDID
+  GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
+    log_error "Failed to get details for instance ${INSTANCE_ID}." >&2
+    exit 1
+  }
+  INSTANCE_UDID="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.bootOptions.udid')" || {
+    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}." >&2
+    exit 1
+  }
+  echo "${INSTANCE_UDID}"
 }
 
 is_agent_ready()
@@ -732,9 +756,7 @@ wait_for_instance_status()
   CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
   while [ "${CURRENT_INSTANCE_STATUS}" != "${TARGET_INSTANCE_STATUS}" ]; do
     if [ -z "${CURRENT_INSTANCE_STATUS}" ]; then
-      log_warn "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
-    else
-      log_stdout "Instance status is ${CURRENT_INSTANCE_STATUS}, waiting for ${TARGET_INSTANCE_STATUS}."
+      log_warn "Failed to get instance status. Checking again in ${SLEEP_TIME_DEFAULT} seconds."
     fi
     sleep "${SLEEP_TIME_DEFAULT}"
     CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
@@ -747,7 +769,7 @@ wait_for_assessment_status()
   local ASSESSMENT_ID="$2"
   local TARGET_ASSESSMENT_STATUS="$3"
   local SLEEP_TIME_DEFAULT='5'
-  local SLEEP_TIME_FOR_TESTING='60'
+  local SLEEP_TIME_FOR_TESTING='20'
 
   case "${TARGET_ASSESSMENT_STATUS}" in
     'complete' | 'failed' | 'monitoring' | 'readyForTesting' | 'startMonitoring' | 'stopMonitoring' | 'testing') ;;
@@ -762,13 +784,17 @@ wait_for_assessment_status()
   CURRENT_ASSESSMENT_STATUS="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
   while [ "${CURRENT_ASSESSMENT_STATUS}" != "${TARGET_ASSESSMENT_STATUS}" ]; do
     case "${CURRENT_ASSESSMENT_STATUS}" in
+      '')
+        log_warn "Failed to get instance status. Checking again in ${SLEEP_TIME_DEFAULT} seconds."
+        ASSESSMENT_STATUS_SLEEP_TIME="${SLEEP_TIME_DEFAULT}"
+        ;;
       'failed')
         echo "Detected a failed run. Last state was '${LAST_ASSESSMENT_STATUS}'. Exiting." >&2
-        return 1
+        exit 1
         ;;
       'monitoring')
         echo 'Cannot wait when status is monitoring. Exiting.' >&2
-        return 1
+        exit 1
         ;;
       'testing')
         ASSESSMENT_STATUS_SLEEP_TIME="${SLEEP_TIME_FOR_TESTING}"
@@ -777,10 +803,7 @@ wait_for_assessment_status()
         ASSESSMENT_STATUS_SLEEP_TIME="${SLEEP_TIME_DEFAULT}"
         ;;
     esac
-
-    log_stdout "Assessment status is ${CURRENT_ASSESSMENT_STATUS}, waiting for ${TARGET_ASSESSMENT_STATUS}."
     sleep "${ASSESSMENT_STATUS_SLEEP_TIME}"
-
     LAST_ASSESSMENT_STATUS="${CURRENT_ASSESSMENT_STATUS}"
     CURRENT_ASSESSMENT_STATUS="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
   done
@@ -955,28 +978,47 @@ connect_with_adb()
 
 run_usbfluxd_and_dependencies()
 {
+  log_stdout 'Starting usbmuxd service.'
   sudo systemctl start usbmuxd
   sudo systemctl status usbmuxd
+  log_stdout 'Started usbmuxd service.'
+  log_stdout 'Started avahi-daemon.'
   sudo avahi-daemon &
+  log_stdout 'Starting avahi-daemon.'
+  log_stdout 'Starting usbfluxd.'
   sudo usbfluxd -f -n &
+  log_stdout 'Started usbfluxd.'
 }
 
 add_instance_to_usbfluxd()
 {
   local INSTANCE_ID="$1"
   local USBFLUXD_PORT='5000'
-  local INSTANCE_SERVICES_IP
+  local INSTANCE_SERVICES_IP INSTANCE_USBFLUXD_SOCKET
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
-  usbfluxctl add "${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
+  INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
+  log_stdout "Adding device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
+  usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"
+  log_stdout "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
 }
 
 verify_usbflux_connection()
 {
-  until idevice_id --list; do sleep 0.1; done
-  idevicepair pair || {
-    log_error 'Unable to establish idevicepair'
+  local INSTANCE_ID="$1"
+  local INSTANCE_UDID
+  INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
+  log_stdout 'Checking for usb connection with idevice_id.'
+  until idevice_id "${INSTANCE_UDID}"; do sleep 0.1; done
+  log_stdout 'Found usb connection with idevice_id.'
+  log_stdout 'Pairing to Corellium device with idevicepair.'
+  until idevicepair --udid "${INSTANCE_UDID}" pair; do sleep 1; done
+  log_stdout 'Paired to Corellium device with idevicepair.'
+  log_stdout 'Validing pairing to Corellium device with idevicepair.'
+  idevicepair --udid "${INSTANCE_UDID}" validate || {
+    log_error 'Failed to validate that device is paired to host.'
     exit 1
   }
+  log_stdout 'Validated pairing to Corellium device with idevicepair.'
 }
 
 run_frida_ps_network()
@@ -1077,7 +1119,7 @@ close_appium_session()
     exit 1
   }
 
-  # Verify that the session ID is invalid
+  # Verify that the session ID is now invalid
   local GET_APPIUM_SESSION_JSON_RESPONSE
   GET_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent -X GET "${APPIUM_API_SESSION_URL}")"
   if ! echo "${GET_APPIUM_SESSION_JSON_RESPONSE}" | jq -e '.value.error == "invalid session id"' > /dev/null; then
@@ -1093,7 +1135,7 @@ run_appium_interactions_cafe()
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   log_stdout 'Starting automated Appium interactions.'
-  python3 src/util/appium_interactions_cafe.py "${INSTANCE_SERVICES_IP}"
+  PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe.py "${INSTANCE_SERVICES_IP}"
   log_stdout 'Finished automated Appium interactions.'
 }
 
@@ -1102,5 +1144,7 @@ run_appium_interactions_template()
   local INSTANCE_ID="$1"
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  log_stdout 'Starting automated Appium interactions.'
   python3 src/util/appium_interactions_template.py "${INSTANCE_SERVICES_IP}"
+  log_stdout 'Finished automated Appium interactions.'
 }

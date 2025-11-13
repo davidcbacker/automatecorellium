@@ -166,7 +166,7 @@ jobs:
           close_appium_session "${OPEN_APPIUM_SESSION_ID}"
           log_stdout "Closed Appium session ${OPEN_APPIUM_SESSION_ID}."
       - name: Run Corellium Cafe MATRIX assessment
-        timeout-minutes: 40
+        timeout-minutes: 20
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}

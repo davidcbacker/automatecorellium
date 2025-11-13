@@ -78,9 +78,9 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     # el8.click()
 
     print('DEBUG GENERATING SCREENSHOT PATH')
-    screenshot_path: str = os.path.join(os.getcwd(), "corellium_cafe_blog_page.png")
-    print(f"Saving screenshot to {screenshot_path}")
-    driver.save_screenshot(screenshot_path)
+    blog_screenshot_path: str = os.path.join(os.getcwd(), "corellium_cafe_blog_page.png")
+    print(f"Saving screenshot to {blog_screenshot_path}")
+    driver.save_screenshot(blog_screenshot_path)
     print('DEBUG SAVED SCREENSHOT TO PATH')
 
     print('DEBUG OPENING MENU AGAIN')
@@ -139,6 +139,12 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
 
     el25 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
     el25.send_keys("65432")
+
+    print('DEBUG GENERATING SCREENSHOT PATH')
+    order_screenshot_path: str = os.path.join(os.getcwd(), "corellium_cafe_order_page.png")
+    print(f"Saving screenshot to {order_screenshot_path}")
+    driver.save_screenshot(order_screenshot_path)
+    print('DEBUG SAVED SCREENSHOT TO PATH')
 
     el26 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
     el26.click()

@@ -42,7 +42,34 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
 
     # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====
 
-
+    el1 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText")
+    el1.send_keys("Username123")
+    el2 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText")
+    el2.send_keys("Password123")
+    el3 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
+    el3.click()
+    el4 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
+    el4.click()
+    el5 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
+    el5.click()
+    el6 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
+    el6.click()
+    el7 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Cart")
+    el7.click()
+    el8 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
+    el8.click()
+    el9 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText")
+    el9.send_keys("Myfirstname")
+    el10 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText")
+    el10.send_keys("Mylastname")
+    el11 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText")
+    el11.send_keys("3216540987")
+    el12 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
+    el12.click()
+    el13 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber")
+    el13.send_keys("2345678901234567")
+    el14 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
+    el14.click()
 
     # ==== END OF COPY-PASTE SECTION ====
 

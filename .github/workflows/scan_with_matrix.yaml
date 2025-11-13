@@ -186,10 +186,6 @@ jobs:
               exit 1
             fi
           done
-      - name: Find corellium_cafe_blog_page.png
-        if: always()
-        run: |
-          find . -type f -name corellium_cafe_blog_page.png 2>/dev/null || true
       - name: Download MATRIX runtime artifacts from VM
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
@@ -208,6 +204,14 @@ jobs:
           log_stdout 'Downloaded MATRIX runtime artifacts from VM to CI runner.'
           ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
+      - name: Upload Corellium Cafe blog screenshots
+        uses: actions/upload-artifact@v5
+        with:
+          name: appium-cafe-screenshots
+          path: |
+            corellium_cafe_blog_page.png
+          compression-level: 9
+          if-no-files-found: error
       - name: Upload MATRIX runtime artifacts
         uses: actions/upload-artifact@v5
         with:

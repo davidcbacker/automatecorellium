@@ -51,7 +51,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
 
     el3 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
     el3.click()
-    
+
     el4 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
     el4.click()
 

@@ -200,10 +200,12 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           source ./src/functions.sh && set -euo pipefail
+          RETRY_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${MATRIX_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          log_stdout "Created new wordlist image with ID ${RETRY_MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment\
             "${MATRIX_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
-            "${MATRIX_WORDLIST_ID}"
+            "${RETRY_MATRIX_WORDLIST_ID}"
       - name: Download MATRIX runtime artifacts from VM
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}

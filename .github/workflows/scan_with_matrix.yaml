@@ -63,6 +63,18 @@ jobs:
         with:
           cache: 'npm'
           node-version: 24
+      - name: Check Node package lock
+        run: |
+          npm install --package-lock-only
+          if ! git diff --quiet package-lock.json; then
+            {
+              echo "ERROR:  package-lock.json is out of sync with dependencies."
+              echo "TO FIX: Run 'npm install --package-lock-only' and commit."
+              echo -e "\n\nDIFF:\n"
+              git diff package-lock.json
+            } >&2
+            exit 1
+          fi
       - name: Install Python
         uses: actions/setup-python@v6
         with:

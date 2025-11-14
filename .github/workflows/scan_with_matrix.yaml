@@ -63,6 +63,18 @@ jobs:
         with:
           cache: 'npm'
           node-version: 24
+      - name: Check Node package lock
+        run: |
+          npm install --package-lock-only --quiet
+          if ! git diff --quiet package-lock.json; then
+            {
+              echo -e "\nERROR:\n  Your package-lock.json is out of sync with dependencies."
+              echo -e "\nTO FIX:\n  Run 'npm install --package-lock-only' and commit changes."
+              echo -e "\nGIT DIFF RESULTS:\n"
+              git diff package-lock.json
+            } >&2
+            exit 1
+          fi
       - name: Install Python
         uses: actions/setup-python@v6
         with:
@@ -202,23 +214,14 @@ jobs:
           log_stdout 'Downloaded MATRIX runtime artifacts from VM to CI runner.'
           ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
-      - name: Upload Appium screenshot for ${{ env.CORELLIUM_CAFE_PACKAGE }}
-        uses: actions/upload-artifact@v5
-        with:
-          name: appium-screenshots-${{ env.CORELLIUM_CAFE_PACKAGE }}
-          path: |
-            corellium_cafe_blog_page.png
-            corellium_cafe_order_page.png
-          compression-level: 9
-          if-no-files-found: error
-      - name: Upload MATRIX runtime artifacts
+      - name: Upload artifacts - MATRIX runtime artifacts
         uses: actions/upload-artifact@v5
         with:
           name: matrix-runtime-artifacts
           path: ${{ env.MATRIX_RUNNER_ARTIFACTS_PATH }}
           compression-level: 9
           if-no-files-found: error
-      - name: Upload MATRIX report artifacts
+      - name: Upload artifact - MATRIX reports
         uses: actions/upload-artifact@v5
         with:
           name: matrix-reports
@@ -227,6 +230,15 @@ jobs:
             matrix_report_*.json
           compression-level: 9
           if-no-files-found: error
+      - name: Upload artifact - Appium screenshots
+        uses: actions/upload-artifact@v5
+        with:
+          name: appium-screenshots
+          path: |
+            corellium_cafe_blog_page.png
+            corellium_cafe_order_page.png
+          compression-level: 9
+          if-no-files-found: error          
       - name: Ensure failed status of MATRIX storage check
         run: |
           set -euo pipefail

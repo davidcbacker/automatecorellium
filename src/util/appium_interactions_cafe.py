@@ -2,9 +2,9 @@
 Automate Corellium virtual device interactions using Appium on Corellium Cafe Android app.
 """
 
-import time
 import os
 import sys
+import time
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from appium.webdriver.common.appiumby import AppiumBy
@@ -119,12 +119,8 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el22 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
     el22.send_keys("65432")
 
-    print('DEBUG GENERATING SCREENSHOT PATH')
-    order_screenshot_path: str = os.path.join(os.getcwd(), "corellium_cafe_order_page.png")
-    print(f"Saving screenshot to {order_screenshot_path}")
-    driver.save_screenshot(order_screenshot_path)
-    print('DEBUG SAVED SCREENSHOT TO PATH')
-
+    save_screenshot(driver, "corellium_cafe_order_page.png")
+    
     el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
     el23.click()
 
@@ -153,6 +149,13 @@ def wait_until_clickable(by, value, wait):
         print(f"Element not clickable after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
         print(f"TimeoutException: {e}")
         sys.exit(1)
+
+def save_screenshot(driver: webdriver.Remote, filename: str):
+    '''Capture a screenshot and save to working directory'''
+    screenshot_path: str = os.path.join(os.getcwd(), filename)
+    print(f"Screenshot path is {screenshot_path}.")
+    driver.save_screenshot(screenshot_path)
+    print("Saved screenshot.")
 
 def run_app_automation(udid: str):
     '''Launch the app and interact using Appium commands.'''

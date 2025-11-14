@@ -202,14 +202,14 @@ jobs:
           log_stdout 'Downloaded MATRIX runtime artifacts from VM to CI runner.'
           ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
-      - name: Upload MATRIX runtime artifacts
+      - name: Upload artifacts - MATRIX runtime artifacts
         uses: actions/upload-artifact@v5
         with:
           name: matrix-runtime-artifacts
           path: ${{ env.MATRIX_RUNNER_ARTIFACTS_PATH }}
           compression-level: 9
           if-no-files-found: error
-      - name: Upload MATRIX report artifacts
+      - name: Upload artifact - MATRIX reports
         uses: actions/upload-artifact@v5
         with:
           name: matrix-reports
@@ -218,10 +218,10 @@ jobs:
             matrix_report_*.json
           compression-level: 9
           if-no-files-found: error
-      - name: Upload Appium screenshot for ${{ env.CORELLIUM_CAFE_PACKAGE }}
+      - name: Upload artifact - Appium screenshots
         uses: actions/upload-artifact@v5
         with:
-          name: appium-screenshot-${{ env.CORELLIUM_CAFE_PACKAGE }}
+          name: appium-screenshots
           path: |
             corellium_cafe_order_page.png
           compression-level: 9

@@ -125,9 +125,9 @@ def wait_until_clickable(by, value, wait):
 def save_screenshot(driver: webdriver.Remote, filename: str):
     '''Capture a screenshot and save to working directory'''
     screenshot_path: str = os.path.join(os.getcwd(), filename)
-    print(f"Saving screenshot to {screenshot_path}.")
+    print(f"Screenshot path is {screenshot_path}.")
     driver.save_screenshot(screenshot_path)
-    print(f"Saving screenshot to {screenshot_path}.")
+    print(f"Saved screenshot.")
 
 def run_app_automation(udid: str):
     '''Launch the app and interact using Appium commands.'''

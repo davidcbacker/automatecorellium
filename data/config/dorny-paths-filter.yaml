@@ -10,7 +10,9 @@ matrix:
   - 'data/wordlist.txt'
   - 'src/util/appium_interactions_cafe.py'
 python:
- - 'src/util/*.py'
+  - 'requirements-pip-appium.txt'
+  - 'requirements-pip-frida.txt'
+  - 'src/util/*.py'
 shell:
   - 'src/*.sh'
 static-lint:

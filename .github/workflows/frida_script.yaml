@@ -1,4 +1,4 @@
-name: Run Frida script
+name: Run Frida demo
 
 on:
   pull_request:
@@ -36,7 +36,7 @@ jobs:
           list-files: 'shell'
 
   frida:
-    name: Run Frida script on ${{ matrix.os }}
+    name: Run Frida on ${{ matrix.os }}
     needs: changes
     if: >-
       ${{

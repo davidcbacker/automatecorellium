@@ -116,7 +116,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el22.send_keys("65432")
 
     save_screenshot(driver, "corellium_cafe_order_page.png")
-    
+
     el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
     el23.click()
 

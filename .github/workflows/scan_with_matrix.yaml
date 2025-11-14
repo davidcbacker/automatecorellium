@@ -65,7 +65,7 @@ jobs:
           node-version: 24
       - name: Check Node package lock
         run: |
-          npm install --package-lock-only --quiet
+          npm install --package-lock-only --quiet --no-audit --no-fund
           if ! git diff --quiet package-lock.json; then
             {
               echo -e "\nERROR:\n  Your package-lock.json is out of sync with dependencies."

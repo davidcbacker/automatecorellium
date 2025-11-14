@@ -198,6 +198,7 @@ jobs:
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          MATRIX_WORDLIST_PATH: './data/wordlist.txt'
         run: |
           source ./src/functions.sh && set -euo pipefail
           RETRY_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${MATRIX_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"

@@ -16,6 +16,8 @@ shell:
 static-lint:
   - '.github/workflows/commit_checks.yaml'
 javascript:
+  - 'package.json'
+  - 'package-lock.json'
   - 'src/util/*.js'
 markdown:
   - '*.md'

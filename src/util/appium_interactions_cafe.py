@@ -2,8 +2,9 @@
 Automate Corellium virtual device interactions using Appium on Corellium Cafe Android app.
 """
 
-import time
+import os
 import sys
+import time
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from appium.webdriver.common.appiumby import AppiumBy

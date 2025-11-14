@@ -71,11 +71,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     # print('DEBUG CLICKING ON BLOG PAGE HEADER')
     # el8.click()
 
-    print('DEBUG GENERATING SCREENSHOT PATH')
-    blog_screenshot_path: str = os.path.join(os.getcwd(), "corellium_cafe_blog_page.png")
-    print(f"Saving screenshot to {blog_screenshot_path}")
-    driver.save_screenshot(blog_screenshot_path)
-    print('DEBUG SAVED SCREENSHOT TO PATH')
+    save_screenshot(driver, "corellium_cafe_blog_page.png")
 
     el9 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
     el9.click()

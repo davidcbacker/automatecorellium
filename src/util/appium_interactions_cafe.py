@@ -55,58 +55,82 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el4 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
     el4.click()
 
-    el5 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
+    el5 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
     el5.click()
 
-    el6 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
+    el6 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Blog\")")
     el6.click()
 
-    el7 = wait_until_clickable(by=AppiumBy.ACCESSIBILITY_ID, value="Cart", wait=driver_wait)
+    el7 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
     el7.click()
 
-    el8 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
-    el8.click()
+    print('Waiting 10 seconds for blog page to load')
+    time.sleep(10)
+    # instead of sleep, figure out a way to confirm that the blog page loaded with find_element or wait_until_clickable
+    # el8 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"The Corellium Resource Library \")")
+    # print('DEBUG CLICKING ON BLOG PAGE HEADER')
+    # el8.click()
 
-    el9 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText")
-    el9.send_keys("Myfirstname")
+    save_screenshot(driver, "corellium_cafe_blog_page.png")
 
-    el10 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText")
-    el10.send_keys("Mylastname")
+    el9 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
+    el9.click()
 
-    el11 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText")
-    el11.send_keys("3216540987")
+    el10 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Home\")")
+    el10.click()
 
-    el12 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
+    el11 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
+    el11.click()
+
+    el12 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
     el12.click()
 
-    el13 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber")
-    el13.send_keys("2345678901234567")
+    el13 = wait_until_clickable(by=AppiumBy.ACCESSIBILITY_ID, value="Cart", wait=driver_wait)
+    el13.click()
 
-    el14 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration")
-    el14.send_keys("1234")
+    el14 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
+    el14.click()
 
-    el15 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV")
-    el15.send_keys("135")
+    el15 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText")
+    el15.send_keys("Myfirstname")
 
-    el16 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
-    el16.send_keys("65432")
+    el16 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText")
+    el16.send_keys("Mylastname")
+
+    el17 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText")
+    el17.send_keys("3216540987")
+
+    el18 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
+    el18.click()
+
+    el19 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber")
+    el19.send_keys("2345678901234567")
+
+    el20 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration")
+    el20.send_keys("1234")
+
+    el21 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV")
+    el21.send_keys("135")
+
+    el22 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
+    el22.send_keys("65432")
 
     save_screenshot(driver, "corellium_cafe_order_page.png")
 
-    el17 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
-    el17.click()
+    el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
+    el23.click()
 
-    el18 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode")
-    el18.send_keys("65432")
+    el24 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode")
+    el24.send_keys("65432")
 
-    el19 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
-    el19.click()
+    el25 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
+    el25.click()
 
-    el20 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvSubmitOrder")
-    el20.click()
+    el26 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvSubmitOrder")
+    el26.click()
 
-    el21 = driver.find_element(by=AppiumBy.ID, value="android:id/button1")
-    el21.click()
+    el27 = driver.find_element(by=AppiumBy.ID, value="android:id/button1")
+    el27.click()
 
     # ==== END OF COPY-PASTE SECTION ====
 

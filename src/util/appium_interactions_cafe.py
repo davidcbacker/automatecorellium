@@ -127,7 +127,7 @@ def save_screenshot(driver: webdriver.Remote, filename: str):
     screenshot_path: str = os.path.join(os.getcwd(), filename)
     print(f"Screenshot path is {screenshot_path}.")
     driver.save_screenshot(screenshot_path)
-    print(f"Saved screenshot.")
+    print("Saved screenshot.")
 
 def run_app_automation(udid: str):
     '''Launch the app and interact using Appium commands.'''

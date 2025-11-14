@@ -238,7 +238,7 @@ jobs:
             corellium_cafe_blog_page.png
             corellium_cafe_order_page.png
           compression-level: 9
-          if-no-files-found: error          
+          if-no-files-found: error
       - name: Ensure failed status of MATRIX storage check
         run: |
           set -euo pipefail

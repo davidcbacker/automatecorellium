@@ -122,7 +122,7 @@ def wait_until_clickable(by, value, wait):
         print(f"TimeoutException: {e}")
         sys.exit(1)
 
-def save_screenshot(driver: Webdriver.Remote, filename: str):
+def save_screenshot(driver: webdriver.Remote, filename: str):
     '''Capture a screenshot and save to working directory'''
     screenshot_path: str = os.path.join(os.getcwd(), filename)
     print(f"Saving screenshot to {screenshot_path}.")

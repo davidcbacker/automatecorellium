@@ -177,25 +177,33 @@ jobs:
           log_stdout "Closing Appium session ${OPEN_APPIUM_SESSION_ID}."
           close_appium_session "${OPEN_APPIUM_SESSION_ID}"
           log_stdout "Closed Appium session ${OPEN_APPIUM_SESSION_ID}."
-      - name: Run Corellium Cafe MATRIX assessment
+      - name: Run MATRIX assessment
+        id: matrix-run-1
         timeout-minutes: 20
+        continue-on-error: true
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
-          MAX_MATRIX_RUN_RETRIES: 2
         run: |
           source ./src/functions.sh && set -euo pipefail
-          for ((failures=0; failures<=MAX_MATRIX_RUN_RETRIES; failures++)); do
-            if run_full_matrix_assessment "${MATRIX_INSTANCE_ID}" \
-              "${CORELLIUM_CAFE_PACKAGE}" "${MATRIX_WORDLIST_ID}"; then
-              break
-            elif [ "${failures}" -lt "${MAX_MATRIX_RUN_RETRIES}" ]; then
-              log_warning "MATRIX failed on run $((failures + 1))"
-            else
-              log_error "MATRIX failed the max $((failures + 1)) times"
-              exit 1
-            fi
-          done
+          run_full_matrix_assessment\
+            "${MATRIX_INSTANCE_ID}" \
+            "${CORELLIUM_CAFE_PACKAGE}" \
+            "${MATRIX_WORDLIST_ID}"
+      - name: Retry MATRIX assessment if failed
+        id: matrix-run-2
+        if: steps.matrix-run-1.outcome == 'failure'
+        timeout-minutes: 20
+        continue-on-error: false
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          run_full_matrix_assessment\
+            "${MATRIX_INSTANCE_ID}" \
+            "${CORELLIUM_CAFE_PACKAGE}" \
+            "${MATRIX_WORDLIST_ID}"
       - name: Download MATRIX runtime artifacts from VM
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}

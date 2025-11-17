@@ -600,7 +600,6 @@ run_full_matrix_assessment()
   kill_app "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   download_matrix_report_to_local_path "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" 'html' "matrix_report_${MATRIX_ASSESSMENT_ID}.html"
   download_matrix_report_to_local_path "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" 'json' "matrix_report_${MATRIX_ASSESSMENT_ID}.json"
-  log_stdout "Downloaded reports for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 
 delete_unauthorized_devices()

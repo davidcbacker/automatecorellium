@@ -1045,7 +1045,7 @@ run_frida_script_usb()
 {
   local APP_PACKAGE_NAME="$1"
   local FRIDA_SCRIPT_PATH="$2"
-  log_stdout "Spawning ${APP_PACKAGE_NAME} app with Frida script $(basename "${FRIDA_SCRIPT_PATH}")."
+  log_stdout "Spawning app ${APP_PACKAGE_NAME} with Frida script $(basename "${FRIDA_SCRIPT_PATH}")."
 
   if [ "${CI:-false}" = 'true' ]; then
     local FRIDA_TIMEOUT_SECONDS='10'

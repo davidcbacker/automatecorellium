@@ -5,10 +5,12 @@ ci:
 frida:
   - '.github/workflows/frida_script.yaml'  
   - 'src/util/frida_script_*.js'
+  - 'src/util/frida_script_example.js'
 matrix:
   - '.github/workflows/scan_with_matrix.yaml'
   - 'data/wordlist.txt'
   - 'src/util/appium_interactions_cafe.py'
+  - 'src/util/compress_matrix_artifacts.js'
 python:
   - 'requirements-pip-appium.txt'
   - 'requirements-pip-frida.txt'
@@ -21,5 +23,8 @@ javascript:
   - 'package.json'
   - 'package-lock.json'
   - 'src/util/*.js'
+javascript-deps:
+  - 'package.json'
+  - 'package-lock.json'
 markdown:
   - '*.md'

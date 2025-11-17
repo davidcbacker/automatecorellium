@@ -1053,7 +1053,7 @@ run_frida_script_usb()
     timeout "${FRIDA_TIMEOUT_SECONDS}" \
       frida -U -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}" || {
       local FAILURE_EXIT_STATUS="$?"
-      if [ "${FAILURE_EXIT_STATUS}" -eq 127 ]; then
+      if [ "${FAILURE_EXIT_STATUS}" -eq 124 ]; then
         log_stdout "Frida successfully timed out after ${FRIDA_TIMEOUT_SECONDS} seconds."
       else
         log_error "Unknown exit status ${FAILURE_EXIT_STATUS}."

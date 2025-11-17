@@ -20,8 +20,8 @@ DEFAULT_SERVICES_IP = '10.11.1.1'
 DEFAULT_ADB_PORT = '5001'
 
 # ==== TARGET APP ====
-TARGET_APP_PACKAGE = 'com.mypackage.name'
-TARGET_APP_ACTIVITY = '.MainActivity'
+TARGET_APP_PACKAGE = 'com.mypackage.name' # <----- UPDATE THIS FOR YOUR APP
+TARGET_APP_ACTIVITY = '.MainActivity'     # <----- UPDATE THIS FOR YOUR APP
 
 # ==== APPIUM SERVER ====
 APPIUM_SERVER_IP = '127.0.0.1'

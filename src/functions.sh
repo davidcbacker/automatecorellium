@@ -1056,7 +1056,7 @@ run_frida_script_usb()
       if [ "${FAILURE_EXIT_STATUS}" -eq 127 ]; then
         log_stdout "Frida successfully timed out after ${FRIDA_TIMEOUT_SECONDS} seconds."
       else
-        log_error "Unknown exit status "${FAILURE_EXIT_STATUS}."
+        log_error "Unknown exit status ${FAILURE_EXIT_STATUS}."
         exit 1
       fi
     }

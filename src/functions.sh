@@ -202,7 +202,7 @@ stop_instance()
       exit 1
       ;;
     *)
-      log_stdout "Stopping instance ${INSTANCE_ID}"
+      log_stdout "Stopping instance ${INSTANCE_ID}."
       corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
       log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_OFF}."
       ;;
@@ -334,12 +334,12 @@ kill_app()
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID="$2"
   if [ "$(is_app_running "${INSTANCE_ID}" "${APP_BUNDLE_ID}")" = 'true' ]; then
-    log_stdout "Killing running app ${APP_BUNDLE_ID}"
+    log_stdout "Killing running app ${APP_BUNDLE_ID}."
     if curl --silent -X POST \
       "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/app/apps/${APP_BUNDLE_ID}/kill" \
       -H "Accept: application/json" \
       -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"; then
-      log_stdout "Killed running app ${APP_BUNDLE_ID}"
+      log_stdout "Killed running app ${APP_BUNDLE_ID}."
     else
       log_error "Failed to kill app ${APP_BUNDLE_ID}."
       exit 1
@@ -371,12 +371,12 @@ install_app_from_url()
     exit 1
   fi
 
-  log_stdout "Installing ${APP_FILENAME}"
+  log_stdout "Installing ${APP_FILENAME}."
   if corellium apps install \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \
     --app "${APP_FILENAME}" > /dev/null; then
-    log_stdout "Installed ${APP_FILENAME}"
+    log_stdout "Installed ${APP_FILENAME}."
   else
     log_error "Failed to install app ${APP_FILENAME}."
     exit 1
@@ -399,12 +399,12 @@ launch_app()
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   kill_app "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
-  log_stdout "Launching app ${APP_BUNDLE_ID}"
+  log_stdout "Launching app ${APP_BUNDLE_ID}."
   if corellium apps open \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \
     --bundle "${APP_BUNDLE_ID}" > /dev/null; then
-    log_stdout "Launched app ${APP_BUNDLE_ID}"
+    log_stdout "Launched app ${APP_BUNDLE_ID}."
   else
     log_error "Failed to launch app ${APP_BUNDLE_ID}."
     exit 1

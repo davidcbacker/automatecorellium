@@ -178,9 +178,9 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           run_frida_script_usb "${{ matrix.corellium_cafe_app_id }}" "${FRIDA_SCRIPT_PATH}"
-      - name: Stop or delete instance
+      - name: Delete instance
         if: always()
-        timeout-minutes: 2
+        timeout-minutes: 15
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then

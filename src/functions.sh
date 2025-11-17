@@ -135,8 +135,8 @@ EOF
     -H "Content-Type: application/json" \
     -d "${CREATE_INSTANCE_REQUEST_DATA}" |
     jq -r .id || {
-    log_error "Failed to create new instance in project ${PROJECT_ID}." >&2
-    log_error "Hardware was ${HARDWARE_FLAVOR} running ${FIRMWARE_VERSION} (${FIRMWARE_BUILD})." >&2
+    log_error "Failed to create new instance in project ${PROJECT_ID}."
+    log_error "Hardware was ${HARDWARE_FLAVOR} running ${FIRMWARE_VERSION} (${FIRMWARE_BUILD})."
     exit 1
   }
 }
@@ -145,7 +145,7 @@ delete_instance()
   local INSTANCE_ID="$1"
   log_stdout "Deleting instance ${INSTANCE_ID}."
   corellium instance delete "${INSTANCE_ID}" > /dev/null || {
-    log_error "Failed to delete instance ${INSTANCE_ID}." >&2
+    log_error "Failed to delete instance ${INSTANCE_ID}."
     exit 1
   }
   log_stdout "Deleted instance ${INSTANCE_ID}."
@@ -242,11 +242,11 @@ get_instance_status()
   local INSTANCE_ID="$1"
   local GET_INSTANCE_RESPONSE_JSON INSTANCE_STATE
   GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
-    log_error "Failed to get details for instance ${INSTANCE_ID}." >&2
+    log_error "Failed to get details for instance ${INSTANCE_ID}."
     return
   }
   INSTANCE_STATE="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.state')" || {
-    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}." >&2
+    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
     exit 1
   }
   echo "${INSTANCE_STATE}"
@@ -257,11 +257,11 @@ get_instance_services_ip()
   local INSTANCE_ID="$1"
   local GET_INSTANCE_RESPONSE_JSON INSTANCE_SERVICES_IP
   GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
-    log_error "Failed to get details for instance ${INSTANCE_ID}." >&2
+    log_error "Failed to get details for instance ${INSTANCE_ID}."
     exit 1
   }
   INSTANCE_SERVICES_IP="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.serviceIp')" || {
-    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}." >&2
+    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
     exit 1
   }
   echo "${INSTANCE_SERVICES_IP}"
@@ -272,11 +272,11 @@ get_instance_udid()
   local INSTANCE_ID="$1"
   local GET_INSTANCE_RESPONSE_JSON INSTANCE_UDID
   GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
-    log_error "Failed to get details for instance ${INSTANCE_ID}." >&2
+    log_error "Failed to get details for instance ${INSTANCE_ID}."
     exit 1
   }
   INSTANCE_UDID="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.bootOptions.udid')" || {
-    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}." >&2
+    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
     exit 1
   }
   echo "${INSTANCE_UDID}"
@@ -318,7 +318,7 @@ wait_until_agent_ready()
         log_stdout "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
         ;;
       *)
-        log_stdout "Instance is ${INSTANCE_STATUS} not ${INSTANCE_STATUS_ON}." >&2
+        log_stdout "Instance is ${INSTANCE_STATUS} not ${INSTANCE_STATUS_ON}."
         exit 1
         ;;
     esac

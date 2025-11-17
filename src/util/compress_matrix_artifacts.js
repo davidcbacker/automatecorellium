@@ -72,8 +72,8 @@ async function main() {
         }
 
         const tmpDirectoryPath = await isRanchu(corellium, MATRIX_INSTANCE_ID) ? '/data/local/tmp' : '/tmp';
-        const zipInputArtifactsDir = `${tmpDirectoryPath}/artifacts/`;
-        const zipInputAssessmentsDir = `${tmpDirectoryPath}/assessment.*/`;
+        const zipInputArtifactsDir = `${tmpDirectoryPath}/artifacts`;
+        const zipInputAssessmentsDir = `${tmpDirectoryPath}/assessment.??????`;
         const zipOutputPath = '/tmp/matrix_artifacts.tar.gz'; // outputting to /tmp simplifies our CI/CD implementation
 
         const agent = await instance.agent();

@@ -5,10 +5,10 @@
 check_env_vars()
 {
   if [ -z "${CORELLIUM_API_ENDPOINT}" ]; then
-    echo "CORELLIUM_API_ENDPOINT not set." >&2
+    log_error 'CORELLIUM_API_ENDPOINT not set.'
     exit 1
   elif [ -z "${CORELLIUM_API_TOKEN}" ]; then
-    echo "CORELLIUM_API_TOKEN not set." >&2
+    log_error 'CORELLIUM_API_TOKEN not set.'
     exit 1
   fi
 }
@@ -341,7 +341,7 @@ kill_app()
       -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"; then
       log_stdout "Killed running app ${APP_BUNDLE_ID}"
     else
-      echo "Error killing app ${APP_BUNDLE_ID}. Exiting." >&2
+      log_error "Failed to kill app ${APP_BUNDLE_ID}."
       exit 1
     fi
   fi
@@ -367,7 +367,7 @@ install_app_from_url()
   if wget --quiet "${APP_URL}"; then
     log_stdout "Downloaded ${APP_FILENAME}"
   else
-    echo "Error downloading app ${APP_FILENAME}. Exiting." >&2
+    log_error "Failed to downloading app ${APP_FILENAME}."
     exit 1
   fi
 
@@ -378,7 +378,7 @@ install_app_from_url()
     --app "${APP_FILENAME}" > /dev/null; then
     log_stdout "Installed ${APP_FILENAME}"
   else
-    echo "Error installing app ${APP_FILENAME}. Exiting." >&2
+    log_error "Failed to install app ${APP_FILENAME}."
     exit 1
   fi
 }
@@ -406,7 +406,7 @@ launch_app()
     --bundle "${APP_BUNDLE_ID}" > /dev/null; then
     log_stdout "Launched app ${APP_BUNDLE_ID}"
   else
-    echo "Error launching app ${APP_BUNDLE_ID}. Exiting." >&2
+    log_error "Failed to launch app ${APP_BUNDLE_ID}."
     exit 1
   fi
 }
@@ -586,7 +586,7 @@ run_full_matrix_assessment()
   local MATRIX_ASSESSMENT_ID
   MATRIX_ASSESSMENT_ID="$(create_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}")"
   if [ -z "${MATRIX_ASSESSMENT_ID}" ]; then
-    echo "Failed to create assessment" >&2
+    log_error "Failed to create assessment."
     return 1
   fi
   log_stdout "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
@@ -615,13 +615,13 @@ delete_unauthorized_devices()
 
   local CORELLIUM_DEVICES_JSON ALL_EXISTING_DEVICES
   CORELLIUM_DEVICES_JSON="$(corellium list)" || {
-    echo "Error getting device list" >&2
+    log_error 'Failed to get device list.'
     exit 1
   }
   # disable lint check since all values are assumed to be UUIDs
   #shellcheck disable=SC2207
   ALL_EXISTING_DEVICES=($(echo "${CORELLIUM_DEVICES_JSON}" | jq -r '.[].id')) || {
-    echo "Error parsing device list" >&2
+    log_error 'Failed to parse device list.'
     exit 1
   }
 
@@ -747,7 +747,7 @@ wait_for_instance_status()
       exit 1
       ;;
     *)
-      log_error "Unsupported target status: '${TARGET_INSTANCE_STATUS}'."
+      log_error "Unsupported target instance status '${TARGET_INSTANCE_STATUS}'."
       exit 1
       ;;
   esac
@@ -774,7 +774,7 @@ wait_for_assessment_status()
   case "${TARGET_ASSESSMENT_STATUS}" in
     'complete' | 'failed' | 'monitoring' | 'readyForTesting' | 'startMonitoring' | 'stopMonitoring' | 'testing') ;;
     *)
-      echo "Unsupported target status: '${TARGET_ASSESSMENT_STATUS}'. Exiting." >&2
+      log_error "Unsupported target assessment status '${TARGET_ASSESSMENT_STATUS}'."
       exit 1
       ;;
   esac
@@ -789,11 +789,11 @@ wait_for_assessment_status()
         ASSESSMENT_STATUS_SLEEP_TIME="${SLEEP_TIME_DEFAULT}"
         ;;
       'failed')
-        echo "Detected a failed run. Last state was '${LAST_ASSESSMENT_STATUS}'. Exiting." >&2
+        log_error "Detected a failed run. Last state was '${LAST_ASSESSMENT_STATUS}'."
         exit 1
         ;;
       'monitoring')
-        echo 'Cannot wait when status is monitoring. Exiting.' >&2
+        log_error 'Cannot wait when status is monitoring.'
         exit 1
         ;;
       'testing')
@@ -1045,12 +1045,18 @@ run_frida_script_usb()
 {
   local APP_PACKAGE_NAME="$1"
   local FRIDA_SCRIPT_PATH="$2"
-  # Frida scripts run indefinitely, so set 60 second process timeout
-  local FRIDA_TIMEOUT_SECONDS='60'
-  log_stdout "Launching frida script with ${APP_PACKAGE_NAME}."
-  timeout "${FRIDA_TIMEOUT_SECONDS}" frida -U \
-    -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}" ||
-    log_stdout "Stopped frida process after ${FRIDA_TIMEOUT_SECONDS} seconds."
+  log_stdout "Spawning app ${APP_PACKAGE_NAME} with Frida script $(basename "${FRIDA_SCRIPT_PATH}")."
+
+  if [ "${CI:-false}" = 'true' ]; then
+    local FRIDA_TIMEOUT_SECONDS='10'
+    log_stdout "Frida script will timeout after ${FRIDA_TIMEOUT_SECONDS} seconds."
+    timeout "${FRIDA_TIMEOUT_SECONDS}" \
+      frida -U -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}" ||
+      log_stdout "Frida timed out after ${FRIDA_TIMEOUT_SECONDS} seconds."
+  else
+    log_stdout "Frida script will run indefinitely with no timeout."
+    frida -U -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}"
+  fi
 }
 
 run_appium_server()

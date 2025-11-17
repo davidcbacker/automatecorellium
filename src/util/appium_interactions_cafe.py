@@ -23,6 +23,8 @@ DEFAULT_ADB_PORT = '5001'
 # ==== TARGET APP ====
 TARGET_APP_PACKAGE = 'com.corellium.cafe'
 TARGET_APP_ACTIVITY = '.ui.activities.MainActivity'
+TARGET_APP_BLOG_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_BLOG_SCREENSHOT_FILENAME')
+TARGET_APP_ORDER_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_ORDER_SCREENSHOT_FILENAME')
 
 # ==== APPIUM SERVER ====
 APPIUM_SERVER_IP = '127.0.0.1'
@@ -36,7 +38,6 @@ APPIUM_DRIVER_EXPLICITLY_WAIT=20 # seconds
 # =====================================
 # ===== END CONSTANTS DEFINITIONS =====
 # =====================================
-
 
 def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     '''Interact with the target app using Appium commands.'''
@@ -72,7 +73,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     # print('DEBUG CLICKING ON BLOG PAGE HEADER')
     # el8.click()
 
-    save_screenshot(driver, "corellium_cafe_blog_page.png")
+    save_screenshot(driver, TARGET_APP_BLOG_SCREENSHOT_FILENAME)
 
     el9 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
     el9.click()
@@ -116,7 +117,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el22 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
     el22.send_keys("65432")
 
-    save_screenshot(driver, "corellium_cafe_order_page.png")
+    save_screenshot(driver, TARGET_APP_ORDER_SCREENSHOT_FILENAME)
 
     el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
     el23.click()

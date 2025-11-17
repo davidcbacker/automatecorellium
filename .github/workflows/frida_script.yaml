@@ -25,7 +25,7 @@ jobs:
       pull-requests: read
     outputs:
       frida: ${{ steps.filter.outputs.frida }}
-      javascript: ${{ steps.filter.outputs.javascript }}
+      javascript-deps: ${{ steps.filter.outputs.javascript-deps }}
       shell: ${{ steps.filter.outputs.shell }}
     steps:
       - uses: actions/checkout@v5
@@ -41,7 +41,7 @@ jobs:
     if: >-
       ${{
         needs.changes.outputs.frida == 'true' ||
-        needs.changes.outputs.javascript == 'true' ||
+        needs.changes.outputs.javascript-deps == 'true' ||
         needs.changes.outputs.shell == 'true'
       }}
     runs-on: ubuntu-latest

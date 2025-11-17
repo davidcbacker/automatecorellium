@@ -65,8 +65,9 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el7 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
     el7.click()
 
-    print('Waiting 10 seconds for blog page to load')
-    time.sleep(10)
+    blog_page_sleep_time_seconds=10
+    print(f"Waiting {blog_page_sleep_time_seconds} seconds for blog page to load.")
+    time.sleep(blog_page_sleep_time_seconds)
     # instead of sleep, figure out a way to confirm that the blog page loaded with find_element or wait_until_clickable
     # el8 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"The Corellium Resource Library \")")
     # print('DEBUG CLICKING ON BLOG PAGE HEADER')
@@ -165,7 +166,7 @@ def run_app_automation(udid: str):
     options.set_capability('appium:noReset', True)
 
     try:
-        print("Starting session at:", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        print("Starting session at", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), ".")
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
         print("Successfully loaded target app.")
         driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT * 1000)
@@ -195,7 +196,7 @@ def run_app_automation(udid: str):
         sys.exit(1)
 
     finally:
-        print("Closing appium session at:", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        print("Closing appium session at", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), ".")
         driver.quit()
 
 if __name__ == "__main__":
@@ -206,9 +207,9 @@ if __name__ == "__main__":
         case 2:
             TARGET_DEVICE_SERVICES_IP = sys.argv[1]
             corellium_device_appium_udid = f'{TARGET_DEVICE_SERVICES_IP}:{DEFAULT_ADB_PORT}'
-            print(f'Running app test on device at {corellium_device_appium_udid}...')
+            print(f'Running app test on device at {corellium_device_appium_udid}.')
         case _:
-            print('ERROR: Please provide zero or pass in the Corellium device services IP.')
+            print('ERROR: Please provide zero arguments or pass in the Corellium device services IP.')
             sys.exit(1)
 
     run_app_automation(corellium_device_appium_udid)

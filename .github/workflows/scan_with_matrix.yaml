@@ -34,7 +34,7 @@ jobs:
     name: Check for file changes
     runs-on: ubuntu-latest
     outputs:
-      javascript: ${{ steps.filter.outputs.javascript }}
+      javascript-deps: ${{ steps.filter.outputs.javascript-deps }}
       matrix: ${{ steps.filter.outputs.matrix }}
       python: ${{ steps.filter.outputs.python }}
       shell: ${{ steps.filter.outputs.shell }}
@@ -50,7 +50,7 @@ jobs:
     needs: changes
     if: >-
       ${{
-        needs.changes.outputs.javascript == 'true' ||
+        needs.changes.outputs.javascript-deps == 'true' ||
         needs.changes.outputs.matrix == 'true' ||
         needs.changes.outputs.python == 'true' ||
         needs.changes.outputs.shell == 'true'

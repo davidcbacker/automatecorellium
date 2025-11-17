@@ -925,7 +925,7 @@ install_appium_server_and_dependencies()
 
 connect_to_vpn_for_instance()
 {
-  # Run this function with a timeout like 1 minute
+  # Run this function with a <= 1 minute timeout
   local INSTANCE_ID="$1"
   local OVPN_CONFIG_PATH="$2"
   local INSTANCE_SERVICES_IP
@@ -1051,8 +1051,15 @@ run_frida_script_usb()
     local FRIDA_TIMEOUT_SECONDS='10'
     log_stdout "Frida script will timeout after ${FRIDA_TIMEOUT_SECONDS} seconds."
     timeout "${FRIDA_TIMEOUT_SECONDS}" \
-      frida -U -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}" ||
-      log_stdout "Frida timed out after ${FRIDA_TIMEOUT_SECONDS} seconds."
+      frida -U -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}" || {
+      local FAILURE_EXIT_STATUS="$?"
+      if [ "${FAILURE_EXIT_STATUS}" -eq 127 ]; then
+        log_stdout "Frida successfully timed out after ${FRIDA_TIMEOUT_SECONDS} seconds."
+      else
+        log_error "Unknown exit status "${FAILURE_EXIT_STATUS}."
+        exit 1
+      fi
+    }
   else
     log_stdout "Frida script will run indefinitely with no timeout."
     frida -U -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}"

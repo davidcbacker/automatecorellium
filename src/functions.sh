@@ -162,7 +162,7 @@ start_instance()
       log_stdout "Instance ${INSTANCE_ID} is already ${INSTANCE_STATUS_ON}."
       ;;
     "${INSTANCE_STATUS_CREATING}")
-      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_CREATING}, waiting for ${INSTANCE_STATUS_ON} state."
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_CREATING}. Waiting for ${INSTANCE_STATUS_ON} state."
       wait_for_instance_status "${INSTANCE_ID}" "${INSTANCE_STATUS_ON}"
       log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
       ;;
@@ -562,7 +562,7 @@ handle_open_matrix_assessment()
     log_warn "Assessment ${OPEN_MATRIX_ASSESSMENT_ID} is currently ${OPEN_MATRIX_ASSESSMENT_STATUS}."
     case "${OPEN_MATRIX_ASSESSMENT_STATUS}" in
       'testing')
-        log_stdout "Waiting until ${OPEN_MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETE}."
+        log_stdout "Waiting until assessment ${OPEN_MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETE}."
         wait_for_assessment_status \
           "${INSTANCE_ID}" \
           "${OPEN_MATRIX_ASSESSMENT_ID}" \

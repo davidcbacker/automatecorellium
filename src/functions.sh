@@ -171,7 +171,7 @@ start_instance()
       exit 1
       ;;
     *)
-      log_stdout "Starting instance ${INSTANCE_ID}"
+      log_stdout "Starting instance ${INSTANCE_ID}."
       corellium instance start "${INSTANCE_ID}" --wait > /dev/null
       log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
       ;;
@@ -193,7 +193,7 @@ stop_instance()
       log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_CREATING}. Waiting for ${INSTANCE_STATUS_ON} state."
       wait_for_instance_status "${INSTANCE_ID}" "${INSTANCE_STATUS_ON}"
       log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
-      log_stdout "Stopping instance ${INSTANCE_ID}"
+      log_stdout "Stopping instance ${INSTANCE_ID}."
       corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
       log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_OFF}."
       ;;
@@ -318,7 +318,7 @@ wait_until_agent_ready()
         log_stdout "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
         ;;
       *)
-        log_stdout "Instance is ${INSTANCE_STATUS} not ${INSTANCE_STATUS_ON}. Exiting" >&2
+        log_stdout "Instance is ${INSTANCE_STATUS} not ${INSTANCE_STATUS_ON}." >&2
         exit 1
         ;;
     esac
@@ -363,9 +363,9 @@ install_app_from_url()
   local APP_FILENAME
   APP_FILENAME="$(basename "${APP_URL}")"
 
-  log_stdout "Downloading ${APP_FILENAME}"
+  log_stdout "Downloading ${APP_FILENAME}."
   if wget --quiet "${APP_URL}"; then
-    log_stdout "Downloaded ${APP_FILENAME}"
+    log_stdout "Downloaded ${APP_FILENAME}."
   else
     log_error "Failed to downloading app ${APP_FILENAME}."
     exit 1
@@ -586,7 +586,7 @@ run_full_matrix_assessment()
   local APP_BUNDLE_ID="$2"
   local MATRIX_WORDLIST_ID="$3"
   handle_open_matrix_assessment "${INSTANCE_ID}"
-  log_stdout "Creating MATRIX assessment"
+  log_stdout "Creating MATRIX assessment."
   local MATRIX_ASSESSMENT_ID
   MATRIX_ASSESSMENT_ID="$(create_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}")"
   if [ -z "${MATRIX_ASSESSMENT_ID}" ]; then

@@ -1042,7 +1042,9 @@ run_frida_ps_network()
 
 run_frida_ps_usb()
 {
+  log_stdout 'Listing running apps.'
   frida-ps -Ua
+  log_stdout 'Listed running apps.'
 }
 
 run_frida_script_usb()

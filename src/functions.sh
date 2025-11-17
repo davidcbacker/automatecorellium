@@ -1048,7 +1048,6 @@ run_frida_script_usb()
   log_stdout "Spawning ${APP_PACKAGE_NAME} app with Frida script $(basename "${FRIDA_SCRIPT_PATH}")."
 
   if [ "${CI:-false}" = 'true' ]; then
-  # Frida scripts run indefinitely, so set 60 second process timeout on CI
     local FRIDA_TIMEOUT_SECONDS='60'
     log_stdout "Frida script will timeout after ${FRIDA_TIMEOUT_SECONDS} seconds."
     timeout "${FRIDA_TIMEOUT_SECONDS}" \

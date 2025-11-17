@@ -509,29 +509,27 @@ get_matrix_report_id()
   corellium matrix get-assessment --instance "${INSTANCE_ID}" --assessment "${MATRIX_ASSESSMENT_ID}" | jq -r '.reportId'
 }
 
-download_matrix_report_html_to_path()
+download_matrix_report_to_local_path()
 {
   local INSTANCE_ID="$1"
   local MATRIX_ASSESSMENT_ID="$2"
-  local MATRIX_REPORT_DOWNLOAD_PATH="$3"
-  log_stdout "Downloading HTML report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  local MATRIX_REPORT_DEFAULT_FORMAT='html'
+  local MATRIX_REPORT_TARGET_FORMAT="${3:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
+  local MATRIX_REPORT_DOWNLOAD_PATH="$4"
+  case "${MATRIX_REPORT_TARGET_FORMAT}" in
+    html | json) ;;
+    *)
+      log_error "Invalid MATRIX report format ${MATRIX_REPORT_TARGET_FORMAT}."
+      exit 1
+      ;;
+  esac
+  log_stdout "Downloading ${MATRIX_REPORT_TARGET_FORMAT} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix download-report \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
+    --format "${MATRIX_REPORT_TARGET_FORMAT}" \
     > "${MATRIX_REPORT_DOWNLOAD_PATH}"
-}
-
-download_matrix_report_json_to_path()
-{
-  local INSTANCE_ID="$1"
-  local MATRIX_ASSESSMENT_ID="$2"
-  local MATRIX_REPORT_DOWNLOAD_PATH="$3"
-  log_stdout "Downloading JSON report for MATRIX assessmnet ${MATRIX_ASSESSMENT_ID}."
-  corellium matrix download-report \
-    --instance "${INSTANCE_ID}" \
-    --assessment "${MATRIX_ASSESSMENT_ID}" \
-    --format json \
-    > "${MATRIX_REPORT_DOWNLOAD_PATH}"
+  log_stdout "Downloaded ${MATRIX_REPORT_TARGET_FORMAT} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 
 delete_matrix_assessment()
@@ -600,9 +598,8 @@ run_full_matrix_assessment()
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   log_stdout "Completed MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   kill_app "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
-  download_matrix_report_html_to_path "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" "matrix_report_${MATRIX_ASSESSMENT_ID}.html"
-  download_matrix_report_json_to_path "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" "matrix_report_${MATRIX_ASSESSMENT_ID}.json"
-  log_stdout "Downloaded reports for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  download_matrix_report_to_local_path "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" 'html' "matrix_report_${MATRIX_ASSESSMENT_ID}.html"
+  download_matrix_report_to_local_path "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" 'json' "matrix_report_${MATRIX_ASSESSMENT_ID}.json"
 }
 
 delete_unauthorized_devices()
@@ -689,10 +686,10 @@ get_assessment_status()
 download_file_to_local_path()
 {
   local INSTANCE_ID="$1"
-  local DOWNLOAD_PATH="$2"
+  local FILE_DOWNLOAD_PATH="$2"
   local LOCAL_SAVE_PATH="$3"
   # replace '/' with '%2F' using parameter expansion
-  local encoded_download_path="${DOWNLOAD_PATH//\//%2F}"
+  local encoded_download_path="${FILE_DOWNLOAD_PATH//\//%2F}"
 
   curl --silent -X GET \
     "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/file/device/${encoded_download_path}" \
@@ -730,12 +727,12 @@ upload_image_from_local_path()
 save_vpn_config_to_local_path()
 {
   local INSTANCE_ID="$1"
-  local LOCAL_SAVE_PATH="$2"
+  local VPN_CONFIG_DOWNLOAD_PATH="$2"
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
-  log_stdout "Saving ovpn profile to ${LOCAL_SAVE_PATH}."
-  corellium project vpnConfig --project "${PROJECT_ID}" --path "${LOCAL_SAVE_PATH}"
-  log_stdout "Saved ovpn profile to ${LOCAL_SAVE_PATH}."
+  log_stdout "Saving ovpn profile to ${VPN_CONFIG_DOWNLOAD_PATH}."
+  corellium project vpnConfig --project "${PROJECT_ID}" --path "${VPN_CONFIG_DOWNLOAD_PATH}"
+  log_stdout "Saved ovpn profile to ${VPN_CONFIG_DOWNLOAD_PATH}."
 }
 
 wait_for_instance_status()

@@ -514,7 +514,7 @@ download_matrix_report_to_local_path()
   local INSTANCE_ID="$1"
   local MATRIX_ASSESSMENT_ID="$2"
   local MATRIX_REPORT_DEFAULT_FORMAT='html'
-  local MATRIX_REPORT_TARGET_FORMAT="${3:-$MATRIX_REPORT_DEFAULT_FORMAT}"
+  local MATRIX_REPORT_TARGET_FORMAT="${3:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
   local MATRIX_REPORT_DOWNLOAD_PATH="$4"
   case "${MATRIX_REPORT_TARGET_FORMAT}" in
     html | json) ;;

@@ -1045,12 +1045,19 @@ run_frida_script_usb()
 {
   local APP_PACKAGE_NAME="$1"
   local FRIDA_SCRIPT_PATH="$2"
-  # Frida scripts run indefinitely, so set 60 second process timeout
-  local FRIDA_TIMEOUT_SECONDS='60'
-  log_stdout "Launching frida script with ${APP_PACKAGE_NAME}."
-  timeout "${FRIDA_TIMEOUT_SECONDS}" frida -U \
-    -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}" ||
-    log_stdout "Stopped frida process after ${FRIDA_TIMEOUT_SECONDS} seconds."
+  log_stdout "Spawning ${APP_PACKAGE_NAME} app with Frida script $(basename "${FRIDA_SCRIPT_PATH}")."
+
+  if [ "${CI:-false}" = 'true' ]; then
+  # Frida scripts run indefinitely, so set 60 second process timeout on CI
+    local FRIDA_TIMEOUT_SECONDS='60'
+    log_stdout "Frida script will timeout after ${FRIDA_TIMEOUT_SECONDS} seconds."
+    timeout "${FRIDA_TIMEOUT_SECONDS}" \
+      frida -U -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}" ||
+      log_stdout "Frida timed out after ${FRIDA_TIMEOUT_SECONDS} seconds."
+  else
+    log_stdout "Frida script will run indefinitely with no timeout."
+    frida -U -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}"
+  fi
 }
 
 run_appium_server()

@@ -26,6 +26,8 @@ env:
   CORELLIUM_CAFE_SOURCE_URL: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
                             && 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
                             || 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa' }}
+  CORELLIUM_CAFE_BLOG_SCREENSHOT_FILENAME: corellium_cafe_blog_page.png
+  CORELLIUM_CAFE_ORDER_SCREENSHOT_FILENAME: corellium_cafe_order_page.png
 
 jobs:
   changes:
@@ -246,8 +248,8 @@ jobs:
         with:
           name: appium-screenshots
           path: |
-            corellium_cafe_blog_page.png
-            corellium_cafe_order_page.png
+            ${{ env.CORELLIUM_CAFE_BLOG_SCREENSHOT_FILENAME }}
+            ${{ env.CORELLIUM_CAFE_ORDER_SCREENSHOT_FILENAME }}
           compression-level: 9
           if-no-files-found: error
       - name: Ensure failed status of MATRIX storage check

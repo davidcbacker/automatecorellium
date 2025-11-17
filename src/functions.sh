@@ -135,8 +135,8 @@ EOF
     -H "Content-Type: application/json" \
     -d "${CREATE_INSTANCE_REQUEST_DATA}" |
     jq -r .id || {
-    log_error "Failed to create new instance in project ${PROJECT_ID}." >&2
-    log_error "Hardware was ${HARDWARE_FLAVOR} running ${FIRMWARE_VERSION} (${FIRMWARE_BUILD})." >&2
+    log_error "Failed to create new instance in project ${PROJECT_ID}."
+    log_error "Hardware was ${HARDWARE_FLAVOR} running ${FIRMWARE_VERSION} (${FIRMWARE_BUILD})."
     exit 1
   }
 }
@@ -145,7 +145,7 @@ delete_instance()
   local INSTANCE_ID="$1"
   log_stdout "Deleting instance ${INSTANCE_ID}."
   corellium instance delete "${INSTANCE_ID}" > /dev/null || {
-    log_error "Failed to delete instance ${INSTANCE_ID}." >&2
+    log_error "Failed to delete instance ${INSTANCE_ID}."
     exit 1
   }
   log_stdout "Deleted instance ${INSTANCE_ID}."
@@ -162,7 +162,7 @@ start_instance()
       log_stdout "Instance ${INSTANCE_ID} is already ${INSTANCE_STATUS_ON}."
       ;;
     "${INSTANCE_STATUS_CREATING}")
-      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_CREATING}, waiting for ${INSTANCE_STATUS_ON} state."
+      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_CREATING}. Waiting for ${INSTANCE_STATUS_ON} state."
       wait_for_instance_status "${INSTANCE_ID}" "${INSTANCE_STATUS_ON}"
       log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
       ;;
@@ -171,7 +171,7 @@ start_instance()
       exit 1
       ;;
     *)
-      log_stdout "Starting instance ${INSTANCE_ID}"
+      log_stdout "Starting instance ${INSTANCE_ID}."
       corellium instance start "${INSTANCE_ID}" --wait > /dev/null
       log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
       ;;
@@ -193,7 +193,7 @@ stop_instance()
       log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_CREATING}. Waiting for ${INSTANCE_STATUS_ON} state."
       wait_for_instance_status "${INSTANCE_ID}" "${INSTANCE_STATUS_ON}"
       log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
-      log_stdout "Stopping instance ${INSTANCE_ID}"
+      log_stdout "Stopping instance ${INSTANCE_ID}."
       corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
       log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_OFF}."
       ;;
@@ -202,7 +202,7 @@ stop_instance()
       exit 1
       ;;
     *)
-      log_stdout "Stopping instance ${INSTANCE_ID}"
+      log_stdout "Stopping instance ${INSTANCE_ID}."
       corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
       log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_OFF}."
       ;;
@@ -242,11 +242,11 @@ get_instance_status()
   local INSTANCE_ID="$1"
   local GET_INSTANCE_RESPONSE_JSON INSTANCE_STATE
   GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
-    log_error "Failed to get details for instance ${INSTANCE_ID}." >&2
+    log_error "Failed to get details for instance ${INSTANCE_ID}."
     return
   }
   INSTANCE_STATE="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.state')" || {
-    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}." >&2
+    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
     exit 1
   }
   echo "${INSTANCE_STATE}"
@@ -257,11 +257,11 @@ get_instance_services_ip()
   local INSTANCE_ID="$1"
   local GET_INSTANCE_RESPONSE_JSON INSTANCE_SERVICES_IP
   GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
-    log_error "Failed to get details for instance ${INSTANCE_ID}." >&2
+    log_error "Failed to get details for instance ${INSTANCE_ID}."
     exit 1
   }
   INSTANCE_SERVICES_IP="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.serviceIp')" || {
-    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}." >&2
+    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
     exit 1
   }
   echo "${INSTANCE_SERVICES_IP}"
@@ -272,11 +272,11 @@ get_instance_udid()
   local INSTANCE_ID="$1"
   local GET_INSTANCE_RESPONSE_JSON INSTANCE_UDID
   GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
-    log_error "Failed to get details for instance ${INSTANCE_ID}." >&2
+    log_error "Failed to get details for instance ${INSTANCE_ID}."
     exit 1
   }
   INSTANCE_UDID="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.bootOptions.udid')" || {
-    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}." >&2
+    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
     exit 1
   }
   echo "${INSTANCE_UDID}"
@@ -318,7 +318,7 @@ wait_until_agent_ready()
         log_stdout "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
         ;;
       *)
-        log_stdout "Instance is ${INSTANCE_STATUS} not ${INSTANCE_STATUS_ON}. Exiting" >&2
+        log_stdout "Instance is ${INSTANCE_STATUS} not ${INSTANCE_STATUS_ON}."
         exit 1
         ;;
     esac
@@ -334,12 +334,12 @@ kill_app()
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID="$2"
   if [ "$(is_app_running "${INSTANCE_ID}" "${APP_BUNDLE_ID}")" = 'true' ]; then
-    log_stdout "Killing running app ${APP_BUNDLE_ID}"
+    log_stdout "Killing running app ${APP_BUNDLE_ID}."
     if curl --silent -X POST \
       "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/app/apps/${APP_BUNDLE_ID}/kill" \
       -H "Accept: application/json" \
       -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"; then
-      log_stdout "Killed running app ${APP_BUNDLE_ID}"
+      log_stdout "Killed running app ${APP_BUNDLE_ID}."
     else
       log_error "Failed to kill app ${APP_BUNDLE_ID}."
       exit 1
@@ -363,20 +363,20 @@ install_app_from_url()
   local APP_FILENAME
   APP_FILENAME="$(basename "${APP_URL}")"
 
-  log_stdout "Downloading ${APP_FILENAME}"
+  log_stdout "Downloading ${APP_FILENAME}."
   if wget --quiet "${APP_URL}"; then
-    log_stdout "Downloaded ${APP_FILENAME}"
+    log_stdout "Downloaded ${APP_FILENAME}."
   else
     log_error "Failed to downloading app ${APP_FILENAME}."
     exit 1
   fi
 
-  log_stdout "Installing ${APP_FILENAME}"
+  log_stdout "Installing ${APP_FILENAME}."
   if corellium apps install \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \
     --app "${APP_FILENAME}" > /dev/null; then
-    log_stdout "Installed ${APP_FILENAME}"
+    log_stdout "Installed ${APP_FILENAME}."
   else
     log_error "Failed to install app ${APP_FILENAME}."
     exit 1
@@ -399,12 +399,12 @@ launch_app()
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   kill_app "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
-  log_stdout "Launching app ${APP_BUNDLE_ID}"
+  log_stdout "Launching app ${APP_BUNDLE_ID}."
   if corellium apps open \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \
     --bundle "${APP_BUNDLE_ID}" > /dev/null; then
-    log_stdout "Launched app ${APP_BUNDLE_ID}"
+    log_stdout "Launched app ${APP_BUNDLE_ID}."
   else
     log_error "Failed to launch app ${APP_BUNDLE_ID}."
     exit 1
@@ -514,8 +514,11 @@ download_matrix_report_html_to_path()
   local INSTANCE_ID="$1"
   local MATRIX_ASSESSMENT_ID="$2"
   local MATRIX_REPORT_DOWNLOAD_PATH="$3"
-  log_stdout "Downloading MATRIX assessment ${MATRIX_ASSESSMENT_ID} report as HTML"
-  corellium matrix download-report --instance "${INSTANCE_ID}" --assessment "${MATRIX_ASSESSMENT_ID}" > "${MATRIX_REPORT_DOWNLOAD_PATH}"
+  log_stdout "Downloading HTML report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  corellium matrix download-report \
+    --instance "${INSTANCE_ID}" \
+    --assessment "${MATRIX_ASSESSMENT_ID}" \
+    > "${MATRIX_REPORT_DOWNLOAD_PATH}"
 }
 
 download_matrix_report_json_to_path()
@@ -523,11 +526,12 @@ download_matrix_report_json_to_path()
   local INSTANCE_ID="$1"
   local MATRIX_ASSESSMENT_ID="$2"
   local MATRIX_REPORT_DOWNLOAD_PATH="$3"
-  log_stdout "Downloading MATRIX assessment ${MATRIX_ASSESSMENT_ID} report as JSON"
+  log_stdout "Downloading JSON report for MATRIX assessmnet ${MATRIX_ASSESSMENT_ID}."
   corellium matrix download-report \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
-    --format json > "${MATRIX_REPORT_DOWNLOAD_PATH}"
+    --format json \
+    > "${MATRIX_REPORT_DOWNLOAD_PATH}"
 }
 
 delete_matrix_assessment()
@@ -562,7 +566,7 @@ handle_open_matrix_assessment()
     log_warn "Assessment ${OPEN_MATRIX_ASSESSMENT_ID} is currently ${OPEN_MATRIX_ASSESSMENT_STATUS}."
     case "${OPEN_MATRIX_ASSESSMENT_STATUS}" in
       'testing')
-        log_stdout "Waiting until ${OPEN_MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETE}."
+        log_stdout "Waiting until assessment ${OPEN_MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETE}."
         wait_for_assessment_status \
           "${INSTANCE_ID}" \
           "${OPEN_MATRIX_ASSESSMENT_ID}" \
@@ -582,7 +586,7 @@ run_full_matrix_assessment()
   local APP_BUNDLE_ID="$2"
   local MATRIX_WORDLIST_ID="$3"
   handle_open_matrix_assessment "${INSTANCE_ID}"
-  log_stdout "Creating MATRIX assessment"
+  log_stdout "Creating MATRIX assessment."
   local MATRIX_ASSESSMENT_ID
   MATRIX_ASSESSMENT_ID="$(create_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}")"
   if [ -z "${MATRIX_ASSESSMENT_ID}" ]; then

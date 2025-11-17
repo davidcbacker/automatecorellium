@@ -20,8 +20,8 @@ DEFAULT_SERVICES_IP = '10.11.1.1'
 DEFAULT_ADB_PORT = '5001'
 
 # ==== TARGET APP ====
-TARGET_APP_PACKAGE = 'com.mypackage.name' # <----- UPDATE THIS FOR YOUR APP
-TARGET_APP_ACTIVITY = '.MainActivity'     # <----- UPDATE THIS FOR YOUR APP
+TARGET_APP_PACKAGE = 'com.mypackage.name' # <----- NOTE: Update this for your app's package name
+TARGET_APP_ACTIVITY = '.MainActivity'     # <----- NOTE: Update this for your app based on AndroidManifest.xml
 
 # ==== APPIUM SERVER ====
 APPIUM_SERVER_IP = '127.0.0.1'
@@ -69,7 +69,7 @@ def run_app_automation(udid: str):
     options.set_capability('appium:noReset', True)
 
     try:
-        print("Starting session at:", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        print("Starting session at", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), ".")
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
         print("Successfully loaded target app.")
         driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT * 1000)
@@ -100,7 +100,7 @@ def run_app_automation(udid: str):
         sys.exit(1)
 
     finally:
-        print("Closing appium session at:", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+        print("Closing appium session at", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), ".")
         driver.quit()
 
 if __name__ == "__main__":

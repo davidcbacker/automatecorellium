@@ -106,8 +106,6 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           source ./src/functions.sh && set -euo pipefail
-          echo 'DEBUG ENABLING XTRACE'
-          set -x
           log_stdout "Creating ephemeral instance."
           CREATED_CORELLIUM_INSTANCE_ID="$(create_instance \
             "${{ matrix.hardware_flavor }}" \

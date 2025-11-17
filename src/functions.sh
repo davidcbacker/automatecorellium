@@ -793,7 +793,7 @@ wait_for_assessment_status()
         exit 1
         ;;
       'monitoring')
-        log_error 'Cannot wait when status is monitoring. Exiting.'
+        log_error 'Cannot wait when status is monitoring.'
         exit 1
         ;;
       'testing')

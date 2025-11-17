@@ -509,7 +509,8 @@ get_matrix_report_id()
   corellium matrix get-assessment --instance "${INSTANCE_ID}" --assessment "${MATRIX_ASSESSMENT_ID}" | jq -r '.reportId'
 }
 
-download_matrix_report_to_local_path() {
+download_matrix_report_to_local_path()
+{
   local INSTANCE_ID="$1"
   local MATRIX_ASSESSMENT_ID="$2"
   local MATRIX_REPORT_DEFAULT_FORMAT='html'

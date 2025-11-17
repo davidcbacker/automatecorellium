@@ -1043,9 +1043,9 @@ run_frida_ps_network()
 run_frida_ps_usb()
 {
   log_stdout 'Listing running apps.'
-  frida-ps -Ua || {
+  frida-ps --usb --applications || {
     log_warning 'Failed to enumerate running apps. Retrying.'
-    frida-ps -Ua
+    frida-ps --usb --applications
   }
   log_stdout 'Listed running apps.'
 }

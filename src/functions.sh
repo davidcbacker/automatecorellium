@@ -378,7 +378,7 @@ install_app_from_url()
     --app "${APP_FILENAME}" > /dev/null; then
     log_stdout "Installed ${APP_FILENAME}"
   else
-    log_error Failed to install app ${APP_FILENAME}."
+    log_error "Failed to install app ${APP_FILENAME}."
     exit 1
   fi
 }

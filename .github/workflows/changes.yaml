@@ -40,6 +40,7 @@ jobs:
         needs.changes.outputs.shell == 'true'
       }}
     uses: ./.github/workflows/frida.yaml
+    secrets: inherit
 
   call-lint-workflow:
     name: Lint
@@ -66,3 +67,4 @@ jobs:
         needs.changes.outputs.shell == 'true'
       }}
     uses: ./.github/workflows/matrix_with_appium.yaml
+    secrets: inherit

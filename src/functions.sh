@@ -1034,7 +1034,7 @@ run_frida_ps_network()
   fi
   local INSTANCE_SERVICES_IP
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
-  frida-ps -H "${INSTANCE_SERVICES_IP}" -a
+  frida-ps --host "${INSTANCE_SERVICES_IP}" --applications
 }
 
 run_frida_ps_usb()
@@ -1052,7 +1052,7 @@ run_frida_script_usb()
     local FRIDA_TIMEOUT_SECONDS='10'
     log_stdout "Frida script will timeout after ${FRIDA_TIMEOUT_SECONDS} seconds."
     timeout "${FRIDA_TIMEOUT_SECONDS}" \
-      frida -U -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}" || {
+      frida --usb --file "${APP_PACKAGE_NAME}" --load "${FRIDA_SCRIPT_PATH}" || {
       local FAILURE_EXIT_STATUS="$?"
       if [ "${FAILURE_EXIT_STATUS}" -eq 124 ]; then
         log_stdout "Frida successfully timed out after ${FRIDA_TIMEOUT_SECONDS} seconds."
@@ -1063,7 +1063,7 @@ run_frida_script_usb()
     }
   else
     log_stdout "Frida script will run indefinitely with no timeout."
-    frida -U -f "${APP_PACKAGE_NAME}" -l "${FRIDA_SCRIPT_PATH}"
+    frida --usb --file "${APP_PACKAGE_NAME}" --load "${FRIDA_SCRIPT_PATH}"
   fi
 }
 

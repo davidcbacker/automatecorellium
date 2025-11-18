@@ -315,8 +315,7 @@ wait_until_agent_ready()
       '')
         log_warn "Failed to get instance status while waiting until agent ready."
         ;;
-      "${INSTANCE_STATUS_ON}")
-        ;;
+      "${INSTANCE_STATUS_ON}") ;;
       *)
         log_stdout "Instance is ${INSTANCE_STATUS} not ${INSTANCE_STATUS_ON}."
         exit 1

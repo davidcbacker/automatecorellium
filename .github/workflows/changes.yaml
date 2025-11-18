@@ -11,10 +11,14 @@ jobs:
     name: Check for file changes
     runs-on: ubuntu-latest
     outputs:
+      ci: ${{ steps.filter.outputs.ci }}
+      javascript: ${{ steps.filter.outputs.javascript }}
       javascript-deps: ${{ steps.filter.outputs.javascript-deps }}
+      markdown: ${{ steps.filter.outputs.markdown }}
       matrix: ${{ steps.filter.outputs.matrix }}
       python: ${{ steps.filter.outputs.python }}
       shell: ${{ steps.filter.outputs.shell }}
+      static-lint: ${{ steps.filter.outputs.static-lint }}      
     steps:
       - uses: actions/checkout@v5
       - uses: dorny/paths-filter@v3

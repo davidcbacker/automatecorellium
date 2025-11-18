@@ -31,6 +31,7 @@ jobs:
           list-files: shell
 
   call-frida-workflow:
+    name: Call the Frida workflow
     needs: changes
     if: >-
       ${{
@@ -41,6 +42,7 @@ jobs:
     uses: ./.github/workflows/frida.yaml
 
   call-lint-workflow:
+    name: Call the lint workflow
     needs: changes
     permissions:
       pull-requests: read
@@ -54,6 +56,7 @@ jobs:
     uses: ./.github/workflows/lint.yaml
 
   call-matrix-workflow:
+    name: Call the MATRIX workflow
     needs: changes
     if: >-
       ${{

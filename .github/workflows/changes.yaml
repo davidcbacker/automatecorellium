@@ -1,4 +1,4 @@
-name: MATRIX with Appium interactions
+name: Check for file changes
 
 on:
   push:

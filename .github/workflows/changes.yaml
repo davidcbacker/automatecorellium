@@ -30,6 +30,19 @@ jobs:
           filters: data/config/dorny-paths-filter.yaml
           list-files: shell
 
+  call-matrix-workflow:
+    name: MATRIX
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.javascript-deps == 'true' ||
+        needs.changes.outputs.matrix == 'true' ||
+        needs.changes.outputs.python == 'true' ||
+        needs.changes.outputs.shell == 'true'
+      }}
+    uses: ./.github/workflows/matrix_with_appium.yaml
+    secrets: inherit
+
   call-frida-workflow:
     name: Frida
     needs: changes
@@ -55,16 +68,3 @@ jobs:
         needs.changes.outputs.static-lint == 'true'
       }}
     uses: ./.github/workflows/lint.yaml
-
-  call-matrix-workflow:
-    name: MATRIX
-    needs: changes
-    if: >-
-      ${{
-        needs.changes.outputs.javascript-deps == 'true' ||
-        needs.changes.outputs.matrix == 'true' ||
-        needs.changes.outputs.python == 'true' ||
-        needs.changes.outputs.shell == 'true'
-      }}
-    uses: ./.github/workflows/matrix_with_appium.yaml
-    secrets: inherit

@@ -18,32 +18,8 @@ env:
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
 
 jobs:
-  changes:
-    name: Check for file changes
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: read
-    outputs:
-      frida: ${{ steps.filter.outputs.frida }}
-      javascript-deps: ${{ steps.filter.outputs.javascript-deps }}
-      shell: ${{ steps.filter.outputs.shell }}
-    steps:
-      - uses: actions/checkout@v5
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: data/config/dorny-paths-filter.yaml
-          list-files: 'shell'
-
   frida:
     name: Run Frida on ${{ matrix.os }}
-    needs: changes
-    if: >-
-      ${{
-        needs.changes.outputs.frida == 'true' ||
-        needs.changes.outputs.javascript-deps == 'true' ||
-        needs.changes.outputs.shell == 'true'
-      }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:

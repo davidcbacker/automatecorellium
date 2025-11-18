@@ -1,10 +1,6 @@
 name: Scan with Corellium MATRIX
 
 on:
-  push:
-    branches: master
-  pull_request:
-    branches: master
   schedule:
     - cron: "17 */6 * * *"
   workflow_call:

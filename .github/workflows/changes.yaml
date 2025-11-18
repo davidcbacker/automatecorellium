@@ -5,7 +5,6 @@ on:
     branches: master
   pull_request:
     branches: master
-  workflow_dispatch:
 
 jobs:
   changes:
@@ -25,11 +24,22 @@ jobs:
           list-files: 'shell'
 
   call-matrix-workflow:
-    if: 
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.javascript-deps == 'true' ||
+        needs.changes.outputs.matrix == 'true' ||
+        needs.changes.outputs.python == 'true' ||
+        needs.changes.outputs.shell == 'true'
+      }}
     uses: davidcbacker/automatecorellium/.github/workflows/matrix_with_appium.yaml@master
 
   call-frida-workflow:
+    if:
+    
     uses: davidcbacker/automatecorellium/.github/workflows/frida.yaml@master
 
   call-lint-workflow:
+    if:
+    
     uses: davidcbacker/automatecorellium/.github/workflows/lint.yaml@master

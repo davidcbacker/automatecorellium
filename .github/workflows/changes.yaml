@@ -44,7 +44,7 @@ jobs:
       ${{
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.javascript == 'true' ||
-        needs.changes.outputs.python == 'true ||
+        needs.changes.outputs.python == 'true' ||
         needs.changes.outputs.static-lint == 'true'
       }}
     uses: davidcbacker/automatecorellium/.github/workflows/lint.yaml@master

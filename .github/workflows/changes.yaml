@@ -44,6 +44,9 @@ jobs:
     uses: davidcbacker/automatecorellium/.github/workflows/frida.yaml@master
 
   call-lint-workflow:
-    if:
-    
+    if: >-
+      ${{
+        needs.changes.outputs.javascript == 'true' ||
+        needs.changes.outputs.static-lint == 'true'
+      }}
     uses: davidcbacker/automatecorellium/.github/workflows/lint.yaml@master

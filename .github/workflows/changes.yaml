@@ -26,18 +26,7 @@ jobs:
         id: filter
         with:
           filters: data/config/dorny-paths-filter.yaml
-          list-files: 'shell'
-
-  call-matrix-workflow:
-    needs: changes
-    if: >-
-      ${{
-        needs.changes.outputs.javascript-deps == 'true' ||
-        needs.changes.outputs.matrix == 'true' ||
-        needs.changes.outputs.python == 'true' ||
-        needs.changes.outputs.shell == 'true'
-      }}
-    uses: davidcbacker/automatecorellium/.github/workflows/matrix_with_appium.yaml@master
+          list-files: shell
 
   call-frida-workflow:
     needs: changes
@@ -59,3 +48,14 @@ jobs:
         needs.changes.outputs.static-lint == 'true'
       }}
     uses: davidcbacker/automatecorellium/.github/workflows/lint.yaml@master
+
+  call-matrix-workflow:
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.javascript-deps == 'true' ||
+        needs.changes.outputs.matrix == 'true' ||
+        needs.changes.outputs.python == 'true' ||
+        needs.changes.outputs.shell == 'true'
+      }}
+    uses: davidcbacker/automatecorellium/.github/workflows/matrix_with_appium.yaml@master

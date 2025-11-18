@@ -42,6 +42,8 @@ jobs:
 
   call-lint-workflow:
     needs: changes
+    permissions:
+      pull-requests: read
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||

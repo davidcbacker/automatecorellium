@@ -36,7 +36,7 @@ jobs:
         needs.changes.outputs.javascript-deps == 'true' ||
         needs.changes.outputs.shell == 'true'
       }}
-    uses: davidcbacker/automatecorellium/.github/workflows/frida.yaml@master
+    uses: davidcbacker/automatecorellium/.github/workflows/frida.yaml@508-check-for-changes-should-trigger-other-workflows-with-workflow_call
 
   call-lint-workflow:
     needs: changes
@@ -47,7 +47,7 @@ jobs:
         needs.changes.outputs.python == 'true' ||
         needs.changes.outputs.static-lint == 'true'
       }}
-    uses: davidcbacker/automatecorellium/.github/workflows/lint.yaml@master
+    uses: davidcbacker/automatecorellium/.github/workflows/lint.yaml@508-check-for-changes-should-trigger-other-workflows-with-workflow_call
 
   call-matrix-workflow:
     needs: changes
@@ -58,4 +58,4 @@ jobs:
         needs.changes.outputs.python == 'true' ||
         needs.changes.outputs.shell == 'true'
       }}
-    uses: davidcbacker/automatecorellium/.github/workflows/matrix_with_appium.yaml@master
+    uses: davidcbacker/automatecorellium/.github/workflows/matrix_with_appium.yaml@508-check-for-changes-should-trigger-other-workflows-with-workflow_call

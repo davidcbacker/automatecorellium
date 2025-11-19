@@ -196,9 +196,9 @@ def run_app_automation(udid: str):
         log_stdout("Successfully loaded target app.")
         driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT * 1000)
         driver_wait = WebDriverWait(driver, APPIUM_DRIVER_EXPLICITLY_WAIT, ignored_exceptions=[StaleElementReferenceException])
-        log_stdout("Starting app interactions on virtual device.")
+        log_stdout("Starting app interactions.")
         interact_with_app(driver, driver_wait)
-        log_stdout("Finished app interactions on virtual device.")
+        log_stdout("Finished app interactions.")
 
     except NoSuchElementException as e:
         print("Thrown when element could not be found.")
@@ -229,11 +229,11 @@ if __name__ == "__main__":
     match len(sys.argv):
         case 1:
             corellium_device_appium_udid = f'{DEFAULT_SERVICES_IP}:{DEFAULT_ADB_PORT}'
-            log_stdout(f'Defaulting to Corellium device at {DEFAULT_SERVICES_IP}.')
+            log_stdout(f'Defaulting to Corellium virtual device at {DEFAULT_SERVICES_IP}.')
         case 2:
             TARGET_DEVICE_SERVICES_IP = sys.argv[1]
             corellium_device_appium_udid = f'{TARGET_DEVICE_SERVICES_IP}:{DEFAULT_ADB_PORT}'
-            log_stdout(f'Using Corellium device at {corellium_device_appium_udid}.')
+            log_stdout(f'Using Corellium virtual device at {corellium_device_appium_udid}.')
         case _:
             print('ERROR: Please provide zero arguments or pass in the Corellium device services IP.')
             sys.exit(1)

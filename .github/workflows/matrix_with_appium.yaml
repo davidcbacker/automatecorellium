@@ -67,6 +67,13 @@ jobs:
           corellium login \
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
+      - name: Ensure available cores
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+            wait_for_available_cores "${{ vars.MATRIX_DEFAULT_PROJECT }}" '4'
+          else
+            wait_for_available_cores "${{ vars.MATRIX_DEFAULT_PROJECT }}" '4'
       - name: Start or create instance
         timeout-minutes: 1
         env:

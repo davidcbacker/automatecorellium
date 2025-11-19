@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: 'frida'
+  group: frida
   cancel-in-progress: false
 
 env:

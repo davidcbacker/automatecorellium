@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.event_name == 'schedule' && 'scheduled' || 'non-scheduled' }}
+  group: ${{ github.workflow }}
   cancel-in-progress: false
 
 env:

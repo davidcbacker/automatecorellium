@@ -168,8 +168,8 @@ def wait_until_clickable(by, value, wait):
 
 def log_stdout(message: str):
     '''Print message to stdout with current timestamp'''
-    current_datetime = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    print(f"[+] {current_datetime}  INFO: {message}")
+    current_datetime = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    print(f"[.] {current_datetime} INFO: {message}")
 
 def save_screenshot(driver: webdriver.Remote, filename: str):
     '''Capture a screenshot and save to working directory'''

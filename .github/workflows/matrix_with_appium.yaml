@@ -73,7 +73,8 @@ jobs:
           if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
             wait_for_available_cores "${{ vars.MATRIX_DEFAULT_PROJECT }}" '4'
           else
-            wait_for_available_cores "${{ vars.MATRIX_DEFAULT_PROJECT }}" '4'
+            wait_for_available_cores "${{ vars.MATRIX_DEFAULT_PROJECT }}" '6'
+          fi
       - name: Start or create instance
         timeout-minutes: 1
         env:

@@ -167,7 +167,7 @@ def wait_until_clickable(by, value, wait):
         sys.exit(1)
 
 def log_stdout(message: str):
-    current_datetime = datetime.now(timezone.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    current_datetime = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     print(f"[+] {current_datetime}  INFO: {message}")
 
 def save_screenshot(driver: webdriver.Remote, filename: str):

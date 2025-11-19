@@ -1041,7 +1041,7 @@ run_frida_ps_usb()
 {
   log_stdout 'Listing running apps.'
   frida-ps --usb --applications || {
-    log_warning 'Failed to enumerate running apps. Retrying.'
+    log_warn 'Failed to enumerate running apps. Retrying.'
     frida-ps --usb --applications
   }
   log_stdout 'Listed running apps.'

@@ -1,4 +1,4 @@
-name: Run Frida demo
+name: Run Frida
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: frida
+  group: ${{ github.workflow }}
   cancel-in-progress: false
 
 env:

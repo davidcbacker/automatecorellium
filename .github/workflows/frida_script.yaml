@@ -1,4 +1,4 @@
-name: Run Frida demo
+name: Run Frida
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: 'frida'
+  group: ${{ github.workflow }}
   cancel-in-progress: false
 
 env:
@@ -161,13 +161,14 @@ jobs:
           kill_app "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_app_id }}"
           install_app_from_url "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_source_url }}"
       - name: Launch Cafe and run frida-ps
-        timeout-minutes: 1
+        timeout-minutes: 2
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           launch_app "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_app_id }}"
+          sleep 5 # attempting to mitigate intermittent failure, issue 467
           run_frida_ps_usb
       - name: Run frida hook
         timeout-minutes: 2

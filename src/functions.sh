@@ -308,22 +308,20 @@ wait_until_agent_ready()
   local INSTANCE_STATUS_ON='on'
   local PROJECT_ID INSTANCE_STATUS
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
-  INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
+  log_stdout 'Waiting until virtual device agent is ready.'
   while ! is_agent_ready "${INSTANCE_ID}" "${PROJECT_ID}"; do
+    INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
     case "${INSTANCE_STATUS}" in
       '')
-        log_warn "Failed to get instance status. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
+        log_warn "Failed to get instance status while waiting until agent ready."
         ;;
-      "${INSTANCE_STATUS_ON}")
-        log_stdout "Agent is not ready yet. Checking again in ${AGENT_READY_SLEEP_TIME} seconds."
-        ;;
+      "${INSTANCE_STATUS_ON}") ;;
       *)
         log_stdout "Instance is ${INSTANCE_STATUS} not ${INSTANCE_STATUS_ON}."
         exit 1
         ;;
     esac
     sleep "${AGENT_READY_SLEEP_TIME}"
-    INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
   done
   log_stdout 'Virtual device agent is ready.'
 }

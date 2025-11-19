@@ -80,7 +80,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     save_screenshot(driver, TARGET_APP_BLOG_SCREENSHOT_FILENAME)
 
     log_stdout("Appium - Return to home page.")
-    
+
     el9 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
     el9.click()
 
@@ -167,6 +167,7 @@ def wait_until_clickable(by, value, wait):
         sys.exit(1)
 
 def log_stdout(message: str):
+    '''Print message to stdout with current timestamp'''
     current_datetime = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     print(f"[+] {current_datetime}  INFO: {message}")
 

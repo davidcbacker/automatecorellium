@@ -1,15 +1,12 @@
 name: Lint code changes
 
 on:
-  push:
-    branches: master
-  pull_request:
-    branches: master
+  workflow_call:
   workflow_dispatch:
 
 jobs:
-  changes:
-    name: Check for file changes
+  changes-lint:
+    name: Determine files to lint
     runs-on: ubuntu-latest
     permissions:
       pull-requests: read
@@ -30,11 +27,11 @@ jobs:
 
   javascript-lint:
     name: JavaScript linting
-    needs: changes
+    needs: changes-lint
     if: >-
       ${{
-        needs.changes.outputs.javascript == 'true' ||
-        needs.changes.outputs.static-lint == 'true'
+        needs.changes-lint.outputs.javascript == 'true' ||
+        needs.changes-lint.outputs.static-lint == 'true'
       }}
     runs-on: ubuntu-latest
     steps:
@@ -50,11 +47,11 @@ jobs:
 
   python-lint:
     name: Python linting
-    needs: changes
+    needs: changes-lint
     if: >-
       ${{
-        needs.changes.outputs.python == 'true' ||
-        needs.changes.outputs.static-lint == 'true'
+        needs.changes-lint.outputs.python == 'true' ||
+        needs.changes-lint.outputs.static-lint == 'true'
       }}
     runs-on: ubuntu-latest
     steps:
@@ -81,11 +78,11 @@ jobs:
 
   shell-lint:
     name: Shell linting
-    needs: changes
+    needs: changes-lint
     if: >-
       ${{
-        needs.changes.outputs.shell == 'true' ||
-        needs.changes.outputs.static-lint == 'true'
+        needs.changes-lint.outputs.shell == 'true' ||
+        needs.changes-lint.outputs.static-lint == 'true'
       }}
     runs-on: ubuntu-latest
     steps:
@@ -112,8 +109,8 @@ jobs:
 
   yaml-lint:
     name: YAML linting
-    needs: changes
-    if: ${{ needs.changes.outputs.ci == 'true' }}
+    needs: changes-lint
+    if: ${{ needs.changes-lint.outputs.ci == 'true' }}
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code

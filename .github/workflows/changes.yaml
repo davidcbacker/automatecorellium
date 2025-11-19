@@ -1,0 +1,70 @@
+name: Check changes to master
+
+on:
+  push:
+    branches: master
+  pull_request:
+    branches: master
+
+jobs:
+  changes:
+    name: Check which files changed
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    outputs:
+      ci: ${{ steps.filter.outputs.ci }}
+      frida: ${{ steps.filter.outputs.frida }}
+      javascript: ${{ steps.filter.outputs.javascript }}
+      javascript-deps: ${{ steps.filter.outputs.javascript-deps }}
+      markdown: ${{ steps.filter.outputs.markdown }}
+      matrix: ${{ steps.filter.outputs.matrix }}
+      python: ${{ steps.filter.outputs.python }}
+      shell: ${{ steps.filter.outputs.shell }}
+      static-lint: ${{ steps.filter.outputs.static-lint }}      
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: data/config/dorny-paths-filter.yaml
+          list-files: shell
+
+  call-matrix-workflow:
+    name: MATRIX
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.javascript-deps == 'true' ||
+        needs.changes.outputs.matrix == 'true' ||
+        needs.changes.outputs.python == 'true' ||
+        needs.changes.outputs.shell == 'true'
+      }}
+    uses: ./.github/workflows/matrix_with_appium.yaml
+    secrets: inherit
+
+  call-frida-workflow:
+    name: Frida
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.frida == 'true' ||
+        needs.changes.outputs.javascript-deps == 'true' ||
+        needs.changes.outputs.shell == 'true'
+      }}
+    uses: ./.github/workflows/frida.yaml
+    secrets: inherit
+
+  call-lint-workflow:
+    name: Lint
+    needs: changes
+    permissions:
+      pull-requests: read
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.javascript == 'true' ||
+        needs.changes.outputs.python == 'true' ||
+        needs.changes.outputs.static-lint == 'true'
+      }}
+    uses: ./.github/workflows/lint.yaml

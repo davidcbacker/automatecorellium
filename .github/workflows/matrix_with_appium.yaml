@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}
+  group: corellium-matrix
   cancel-in-progress: false
 
 env:

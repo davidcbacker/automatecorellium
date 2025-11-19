@@ -23,8 +23,9 @@ DEFAULT_ADB_PORT = '5001'
 # ==== TARGET APP ====
 TARGET_APP_PACKAGE = 'com.corellium.cafe'
 TARGET_APP_ACTIVITY = '.ui.activities.MainActivity'
-TARGET_APP_BLOG_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_BLOG_SCREENSHOT_FILENAME')
-TARGET_APP_ORDER_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_ORDER_SCREENSHOT_FILENAME')
+TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME')
+TARGET_APP_CUSTOMER_INFO_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_CUSTOMER_INFO_SCREENSHOT_FILENAME')
+TARGET_APP_PAYMENT_INFO_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_PAYMENT_INFO_SCREENSHOT_FILENAME')
 
 # ==== APPIUM SERVER ====
 APPIUM_SERVER_IP = '127.0.0.1'
@@ -65,15 +66,15 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el7 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
     el7.click()
 
-    blog_page_sleep_time_seconds=10
-    print(f"Waiting {blog_page_sleep_time_seconds} seconds for blog page to load.")
-    time.sleep(blog_page_sleep_time_seconds)
+    page_load_sleep_time_seconds=5
+    print(f"Waiting {page_load_sleep_time_seconds} seconds for blog page to load.")
+    time.sleep(page_load_sleep_time_seconds)
     # instead of sleep, figure out a way to confirm that the blog page loaded with find_element or wait_until_clickable
     # el8 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"The Corellium Resource Library \")")
     # print('DEBUG CLICKING ON BLOG PAGE HEADER')
     # el8.click()
 
-    save_screenshot(driver, TARGET_APP_BLOG_SCREENSHOT_FILENAME)
+    save_screenshot(driver, TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)
 
     el9 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
     el9.click()
@@ -102,6 +103,9 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el17 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText")
     el17.send_keys("3216540987")
 
+    time.sleep(page_load_sleep_time_seconds)
+    save_screenshot(driver, TARGET_APP_CUSTOMER_INFO_SCREENSHOT_FILENAME)
+
     el18 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
     el18.click()
 
@@ -117,7 +121,8 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el22 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
     el22.send_keys("65432")
 
-    save_screenshot(driver, TARGET_APP_ORDER_SCREENSHOT_FILENAME)
+    time.sleep(page_load_sleep_time_seconds)
+    save_screenshot(driver, TARGET_APP_PAYMENT_INFO_SCREENSHOT_FILENAME)
 
     el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
     el23.click()

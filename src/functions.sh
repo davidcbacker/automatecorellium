@@ -94,7 +94,7 @@ get_available_cores()
 {
   local PROJECT_ID="$1"
   local GET_PROJECTS_RESPONSE_JSON AVAILABLE_PROJECT_CORES
-  GET_PROJECTS_RESPONSE_JSON="$(corellium projects list)" || {
+  GET_PROJECTS_RESPONSE_JSON="$(corellium project list)" || {
     log_error "Failed to get projects list."
     return
   }

@@ -182,7 +182,7 @@ jobs:
           log_stdout "Closed Appium session ${OPEN_APPIUM_SESSION_ID}."
       - name: Run MATRIX assessment
         id: matrix-run-1
-        timeout-minutes: 20
+        timeout-minutes: 30
         continue-on-error: true
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
@@ -196,7 +196,7 @@ jobs:
       - name: Retry MATRIX assessment if failed
         id: matrix-run-2
         if: steps.matrix-run-1.outcome == 'failure'
-        timeout-minutes: 20
+        timeout-minutes: 30
         continue-on-error: true
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
@@ -213,7 +213,7 @@ jobs:
       - name: Retry MATRIX assessment if failed again
         id: matrix-run-3
         if: steps.matrix-run-2.outcome == 'failure'
-        timeout-minutes: 20
+        timeout-minutes: 30
         continue-on-error: false
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}

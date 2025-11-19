@@ -110,7 +110,7 @@ get_available_cores()
   echo "${AVAILABLE_PROJECT_CORES}"
 }
 
-wait_for_available_cores()
+wait_until_available_cores()
 {
   local PROJECT_ID="$1"
   local REQUIRED_CORES="$2"

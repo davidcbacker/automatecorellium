@@ -8,6 +8,7 @@ import time
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from appium.webdriver.common.appiumby import AppiumBy
+from datetime import datetime, timezone
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
 from selenium.webdriver.support.expected_conditions import element_to_be_clickable
 from selenium.webdriver.support.ui import WebDriverWait
@@ -24,7 +25,8 @@ DEFAULT_ADB_PORT = '5001'
 TARGET_APP_PACKAGE = 'com.corellium.cafe'
 TARGET_APP_ACTIVITY = '.ui.activities.MainActivity'
 TARGET_APP_BLOG_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_BLOG_SCREENSHOT_FILENAME')
-TARGET_APP_ORDER_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_ORDER_SCREENSHOT_FILENAME')
+TARGET_APP_CUSTOMER_INFO_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_CUSTOMER_INFO_SCREENSHOT_FILENAME')
+TARGET_APP_PAYMENT_INFO_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_PAYMENT_INFO_SCREENSHOT_FILENAME')
 
 # ==== APPIUM SERVER ====
 APPIUM_SERVER_IP = '127.0.0.1'
@@ -42,7 +44,7 @@ APPIUM_DRIVER_EXPLICITLY_WAIT=20 # seconds
 def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     '''Interact with the target app using Appium commands.'''
 
-    # ==== COPY-PASTE THE EXACT APPIUM INSPECTOR RECORDING SEQUENCE ====
+    log_stdout("Appium - Interact with login page.")
 
     el1 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText")
     el1.send_keys("Username123")
@@ -56,6 +58,8 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el4 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
     el4.click()
 
+    log_stdout("Appium - Open blog page.")
+
     el5 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
     el5.click()
 
@@ -66,20 +70,24 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el7.click()
 
     blog_page_sleep_time_seconds=10
-    print(f"Waiting {blog_page_sleep_time_seconds} seconds for blog page to load.")
+    log_stdout(f"Waiting {blog_page_sleep_time_seconds} seconds for blog page to load.")
     time.sleep(blog_page_sleep_time_seconds)
     # instead of sleep, figure out a way to confirm that the blog page loaded with find_element or wait_until_clickable
     # el8 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"The Corellium Resource Library \")")
-    # print('DEBUG CLICKING ON BLOG PAGE HEADER')
+    # log_stdout('DEBUG CLICKING ON BLOG PAGE HEADER')
     # el8.click()
 
     save_screenshot(driver, TARGET_APP_BLOG_SCREENSHOT_FILENAME)
 
+    log_stdout("Appium - Return to home page.")
+    
     el9 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
     el9.click()
 
     el10 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Home\")")
     el10.click()
+
+    log_stdout("Appium - Add the first coffee option to cart.")
 
     el11 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
     el11.click()
@@ -87,11 +95,15 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el12 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
     el12.click()
 
+    log_stdout("Appium - Open cart and begin checkout.")
+
     el13 = wait_until_clickable(by=AppiumBy.ACCESSIBILITY_ID, value="Cart", wait=driver_wait)
     el13.click()
 
     el14 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
     el14.click()
+
+    log_stdout("Appium - Fill in customner info.")
 
     el15 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText")
     el15.send_keys("Myfirstname")
@@ -102,8 +114,12 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el17 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText")
     el17.send_keys("3216540987")
 
+    save_screenshot(driver, TARGET_APP_CUSTOMER_INFO_SCREENSHOT_FILENAME)
+
     el18 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
     el18.click()
+
+    log_stdout("Appium - Fill in payment info.")
 
     el19 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber")
     el19.send_keys("2345678901234567")
@@ -117,10 +133,12 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el22 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
     el22.send_keys("65432")
 
-    save_screenshot(driver, TARGET_APP_ORDER_SCREENSHOT_FILENAME)
+    save_screenshot(driver, TARGET_APP_PAYMENT_INFO_SCREENSHOT_FILENAME)
 
     el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
     el23.click()
+
+    log_stdout("Appium - Enter fake promo code.")
 
     el24 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode")
     el24.send_keys("65432")
@@ -128,13 +146,13 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el25 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
     el25.click()
 
+    log_stdout("Appium - Submit order.")
+
     el26 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvSubmitOrder")
     el26.click()
 
     el27 = driver.find_element(by=AppiumBy.ID, value="android:id/button1")
     el27.click()
-
-    # ==== END OF COPY-PASTE SECTION ====
 
 def wait_until_clickable(by, value, wait):
     '''Wait for a webdriver locator to be clickable'''
@@ -148,12 +166,16 @@ def wait_until_clickable(by, value, wait):
         print(f"TimeoutException: {e}")
         sys.exit(1)
 
+def log_stdout(message: str):
+    current_datetime = datetime.now(timezone.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+    print(f"[+] {current_datetime}  INFO: {message}")
+
 def save_screenshot(driver: webdriver.Remote, filename: str):
     '''Capture a screenshot and save to working directory'''
     screenshot_path: str = os.path.join(os.getcwd(), filename)
-    print(f"Screenshot path is {screenshot_path}.")
+    log_stdout(f"Screenshot path is {screenshot_path}.")
     driver.save_screenshot(screenshot_path)
-    print("Saved screenshot.")
+    log_stdout("Saved screenshot.")
 
 def run_app_automation(udid: str):
     '''Launch the app and interact using Appium commands.'''
@@ -166,14 +188,14 @@ def run_app_automation(udid: str):
     options.set_capability('appium:noReset', True)
 
     try:
-        print("Starting session at", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), ".")
+        log_stdout("Starting session at", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), ".")
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
-        print("Successfully loaded target app.")
+        log_stdout("Successfully loaded target app.")
         driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT * 1000)
         driver_wait = WebDriverWait(driver, APPIUM_DRIVER_EXPLICITLY_WAIT, ignored_exceptions=[StaleElementReferenceException])
-        print("Starting app interaction steps.")
+        log_stdout("Starting app interaction steps.")
         interact_with_app(driver, driver_wait)
-        print("All steps executed on Corellium Android device.")
+        log_stdout("All steps executed on Corellium Android device.")
 
     except NoSuchElementException as e:
         print("Thrown when element could not be found.")
@@ -196,18 +218,18 @@ def run_app_automation(udid: str):
         sys.exit(1)
 
     finally:
-        print("Closing appium session at", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), ".")
+        log_stdout("Closing appium session at", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), ".")
         driver.quit()
 
 if __name__ == "__main__":
     match len(sys.argv):
         case 1:
             corellium_device_appium_udid = f'{DEFAULT_SERVICES_IP}:{DEFAULT_ADB_PORT}'
-            print(f'Defaulting to Corellium device at {DEFAULT_SERVICES_IP}.')
+            log_stdout(f'Defaulting to Corellium device at {DEFAULT_SERVICES_IP}.')
         case 2:
             TARGET_DEVICE_SERVICES_IP = sys.argv[1]
             corellium_device_appium_udid = f'{TARGET_DEVICE_SERVICES_IP}:{DEFAULT_ADB_PORT}'
-            print(f'Running app test on device at {corellium_device_appium_udid}.')
+            log_stdout(f'Running app test on device at {corellium_device_appium_udid}.')
         case _:
             print('ERROR: Please provide zero arguments or pass in the Corellium device services IP.')
             sys.exit(1)

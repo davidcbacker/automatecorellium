@@ -191,14 +191,14 @@ def run_app_automation(udid: str):
     options.set_capability('appium:noReset', True)
 
     try:
-        log_stdout("Starting session.")
+        log_stdout("Loading target app in Appium session.")
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
         log_stdout("Successfully loaded target app.")
         driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT * 1000)
         driver_wait = WebDriverWait(driver, APPIUM_DRIVER_EXPLICITLY_WAIT, ignored_exceptions=[StaleElementReferenceException])
-        log_stdout("Starting app interaction steps.")
+        log_stdout("Starting app interactions on virtual device.")
         interact_with_app(driver, driver_wait)
-        log_stdout("All steps executed on Corellium Android device.")
+        log_stdout("Finished app interactions on virtual device.")
 
     except NoSuchElementException as e:
         print("Thrown when element could not be found.")
@@ -233,7 +233,7 @@ if __name__ == "__main__":
         case 2:
             TARGET_DEVICE_SERVICES_IP = sys.argv[1]
             corellium_device_appium_udid = f'{TARGET_DEVICE_SERVICES_IP}:{DEFAULT_ADB_PORT}'
-            log_stdout(f'Running app test on device at {corellium_device_appium_udid}.')
+            log_stdout(f'Using Corellium device at {corellium_device_appium_udid}.')
         case _:
             print('ERROR: Please provide zero arguments or pass in the Corellium device services IP.')
             sys.exit(1)

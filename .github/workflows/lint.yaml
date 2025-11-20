@@ -45,6 +45,24 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VALIDATE_JAVASCRIPT_ES: true
 
+  markdown-lint:
+    name: Python linting
+    needs: changes-lint
+    if: >-
+      ${{
+        needs.changes-lint.outputs.markdown == 'true' ||
+        needs.changes-lint.outputs.static-lint == 'true'
+      }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+      - name: Lint markdown docs
+        uses: avto-dev/markdown-lint@v1
+        with:
+          config: 'data/config/markdownlint.yaml'
+          args: '*/*.md'
+
   python-lint:
     name: Python linting
     needs: changes-lint

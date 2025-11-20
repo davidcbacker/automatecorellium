@@ -58,10 +58,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
       - name: Lint markdown docs
-        uses: avto-dev/markdown-lint@v1
+        uses: DavidAnson/markdownlint-cli2-action@v21
         with:
-          config: 'data/config/markdownlint.yaml'
-          args: '*/*.md'
+          config: data/config/markdownlint.jsonc
+          globs: '**/*.md'
 
   python-lint:
     name: Python linting

@@ -143,7 +143,7 @@ jobs:
           kill_app "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_app_id }}"
           install_app_from_url "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_source_url }}"
       - name: Launch Cafe and run frida-ps
-        timeout-minutes: 2
+        timeout-minutes: 10
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}

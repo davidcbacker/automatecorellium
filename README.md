@@ -1,6 +1,6 @@
 # automatecorellium
 
-## CI Health Checks
+### CI Health Checks
 
 See the current CI pass/fail status of dynamic and static checks.
 

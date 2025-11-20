@@ -60,7 +60,7 @@ jobs:
       - name: Lint markdown docs
         uses: DavidAnson/markdownlint-cli2-action@v21
         with:
-          config: data/config/markdownlint.jsonc
+          config: data/config/.markdownlint-cli2.jsonc
           globs: '**/*.md'
 
   python-lint:

@@ -14,7 +14,7 @@ env:
   TERM: xterm
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
   MATRIX_RUNNER_ARTIFACTS_PATH: /home/runner/matrix_artifacts.tar.gz
-  MATRIX_INSTANCE_ID: ${{ github.event_name == 'schedule'
+  CORELLIUM_INSTANCE_ID: ${{ github.event_name == 'schedule'
                         && vars.MATRIX_AUTOMATION_INSTANCE
                         || vars.MATRIX_DEVELOPMENT_INSTANCE }}
   CORELLIUM_CAFE_PACKAGE: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
@@ -83,17 +83,17 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           source ./src/functions.sh && set -euo pipefail
-          if does_instance_exist "${MATRIX_INSTANCE_ID}"; then
-            start_instance "${MATRIX_INSTANCE_ID}"
+          if does_instance_exist "${CORELLIUM_INSTANCE_ID}"; then
+            start_instance "${CORELLIUM_INSTANCE_ID}"
           else
             log_stdout "Creating instance."
-            CREATED_MATRIX_INSTANCE_ID="$(create_instance \
+            CREATED_CORELLIUM_INSTANCE_ID="$(create_instance \
               "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" \
               "${{ vars.MATRIX_DEFAULT_FIRMWARE_VERSION }}" \
               "${{ vars.MATRIX_DEFAULT_FIRMWARE_BUILD }}" \
               "${{ vars.MATRIX_DEFAULT_PROJECT }}")"
-            log_stdout "Created instance ${CREATED_MATRIX_INSTANCE_ID}."
-            echo "MATRIX_INSTANCE_ID=${CREATED_MATRIX_INSTANCE_ID}" >> "${GITHUB_ENV}"
+            log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
+            echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
             echo 'EPHEMERAL_MATRIX_INSTANCE=true' >> "${GITHUB_ENV}"
             log_stdout 'Updated environmental variables for ephemeral instance.'
           fi
@@ -112,33 +112,33 @@ jobs:
           MATRIX_WORDLIST_PATH: './data/wordlist.txt'
         run: |
           source ./src/functions.sh && set -euo pipefail
-          CREATED_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${MATRIX_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          CREATED_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_stdout "Created new wordlist image with ID ${CREATED_MATRIX_WORDLIST_ID}."
           echo "MATRIX_WORDLIST_ID=${CREATED_MATRIX_WORDLIST_ID}" >> "${GITHUB_ENV}"
       - name: Wait for instance agent ready
         timeout-minutes: 20
         run: |
           source ./src/functions.sh && set -euo pipefail
-          start_instance "${MATRIX_INSTANCE_ID}"
-          wait_until_agent_ready "${MATRIX_INSTANCE_ID}"
-          # unlock_instance "${MATRIX_INSTANCE_ID}" # only for iOS
+          start_instance "${CORELLIUM_INSTANCE_ID}"
+          wait_until_agent_ready "${CORELLIUM_INSTANCE_ID}"
+          # unlock_instance "${CORELLIUM_INSTANCE_ID}" # only for iOS
       - name: Connect to project VPN
         timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail
           connect_to_vpn_for_instance \
-            "${MATRIX_INSTANCE_ID}" \
+            "${CORELLIUM_INSTANCE_ID}" \
             "${{ env.VPN_CONFIG_PATH }}"
       - name: Connect to device
         timeout-minutes: 1
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
-            connect_with_adb "${MATRIX_INSTANCE_ID}"
+            connect_with_adb "${CORELLIUM_INSTANCE_ID}"
           else
             run_usbfluxd_and_dependencies
-            add_instance_to_usbfluxd "${MATRIX_INSTANCE_ID}"
-            verify_usbflux_connection "${MATRIX_INSTANCE_ID}"
+            add_instance_to_usbfluxd "${CORELLIUM_INSTANCE_ID}"
+            verify_usbflux_connection "${CORELLIUM_INSTANCE_ID}"
           fi
       - name: Install Corellium Cafe from URL
         env:
@@ -146,14 +146,14 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           source ./src/functions.sh && set -euo pipefail
-          kill_app "${MATRIX_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
-          install_app_from_url "${MATRIX_INSTANCE_ID}" "${CORELLIUM_CAFE_SOURCE_URL}"
+          kill_app "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
+          install_app_from_url "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_SOURCE_URL}"
       - name: Start Appium server and run session test
         run: |
           source ./src/functions.sh && set -euo pipefail
           run_appium_server
           log_stdout 'Opening Appium session.'
-          OPEN_APPIUM_SESSION_ID="$(open_appium_session "${MATRIX_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}")"
+          OPEN_APPIUM_SESSION_ID="$(open_appium_session "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}")"
           log_stdout "Opened Appium session ${OPEN_APPIUM_SESSION_ID}."
           sleep 5
           log_stdout "Closing Appium session ${OPEN_APPIUM_SESSION_ID}."
@@ -169,7 +169,7 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           run_full_matrix_assessment\
-            "${MATRIX_INSTANCE_ID}" \
+            "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
             "${MATRIX_WORDLIST_ID}"
       - name: Retry MATRIX assessment if failed
@@ -183,10 +183,10 @@ jobs:
           MATRIX_WORDLIST_PATH: './data/wordlist.txt'
         run: |
           source ./src/functions.sh && set -euo pipefail
-          RETRY_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${MATRIX_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          RETRY_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_stdout "Created new wordlist image with ID ${RETRY_MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment\
-            "${MATRIX_INSTANCE_ID}" \
+            "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
             "${RETRY_MATRIX_WORDLIST_ID}"
       - name: Retry MATRIX assessment if failed again
@@ -200,10 +200,10 @@ jobs:
           MATRIX_WORDLIST_PATH: './data/wordlist.txt'
         run: |
           source ./src/functions.sh && set -euo pipefail
-          RETRY_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${MATRIX_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          RETRY_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_stdout "Created new wordlist image with ID ${RETRY_MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment\
-            "${MATRIX_INSTANCE_ID}" \
+            "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
             "${RETRY_MATRIX_WORDLIST_ID}"
       - name: Download MATRIX runtime artifacts from VM
@@ -218,7 +218,7 @@ jobs:
           log_stdout 'Compressed MATRIX runtime artifacts.'
           log_stdout 'Downloading MATRIX runtime artifacts from VM to CI runner.'
           download_file_to_local_path \
-            "${MATRIX_INSTANCE_ID}" \
+            "${CORELLIUM_INSTANCE_ID}" \
             "${MATRIX_INSTANCE_ARTIFACTS_PATH}" \
             "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           log_stdout 'Downloaded MATRIX runtime artifacts from VM to CI runner.'
@@ -263,14 +263,14 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           source ./src/functions.sh && set -euo pipefail
-          if [ -z "${MATRIX_INSTANCE_ID:-}" ]; then
-            log_warning 'MATRIX_INSTANCE_ID is not set.'
+          if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
+            log_warning 'CORELLIUM_INSTANCE_ID is not set.'
           elif [ "${EPHEMERAL_MATRIX_INSTANCE:-}" = 'true' ]; then
-            log_stdout "Ready to delete ephemeral instance ${MATRIX_INSTANCE_ID}."
-            stop_instance "${MATRIX_INSTANCE_ID}"
-            delete_instance "${MATRIX_INSTANCE_ID}"
+            log_stdout "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
+            stop_instance "${CORELLIUM_INSTANCE_ID}"
+            delete_instance "${CORELLIUM_INSTANCE_ID}"
           else
-            soft_stop_instance "${MATRIX_INSTANCE_ID}"
+            soft_stop_instance "${CORELLIUM_INSTANCE_ID}"
           fi
       - name: Clean up Corellium auth and processes
         if: always()

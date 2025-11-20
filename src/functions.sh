@@ -90,6 +90,38 @@ does_instance_exist()
   fi
 }
 
+get_available_cores()
+{
+  local PROJECT_ID="$1"
+  local GET_PROJECTS_RESPONSE_JSON AVAILABLE_PROJECT_CORES
+  GET_PROJECTS_RESPONSE_JSON="$(corellium project list)" || {
+    log_error "Failed to get projects list."
+    return
+  }
+
+  echo "${GET_PROJECTS_RESPONSE_JSON}" |
+    jq -e --arg id "${PROJECT_ID}" 'any(.[]; .id == $id)' > /dev/null || {
+    log_error "Project ${PROJECT_ID} does not exist."
+    exit 1
+  }
+
+  AVAILABLE_PROJECT_CORES="$(echo "${GET_PROJECTS_RESPONSE_JSON}" |
+    jq '.[] | select(.id == "e5f2bec5-516e-43d7-9919-f22501169bc5") | .quotas.cores - .quotasUsed.cores')"
+  echo "${AVAILABLE_PROJECT_CORES}"
+}
+
+wait_until_available_cores()
+{
+  local PROJECT_ID="$1"
+  local REQUIRED_CORES="$2"
+  local WAIT_CORES_SLEEP_TIME_SECONDS='15'
+
+  while [ "$(get_available_cores "${PROJECT_ID}")" -lt "${REQUIRED_CORES}" ]; do
+    log_warn "Waiting until ${REQUIRED_CORES} cores are available."
+    sleep "${WAIT_CORES_SLEEP_TIME_SECONDS}"
+  done
+}
+
 create_instance()
 {
   local HARDWARE_FLAVOR="$1"

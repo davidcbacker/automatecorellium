@@ -151,9 +151,7 @@ jobs:
       - name: Start Appium server and run session test
         run: |
           source ./src/functions.sh && set -euo pipefail
-          log_stdout 'Starting Appium session.'
           run_appium_server
-          log_stdout 'Started Appium session.'
           log_stdout 'Opening Appium session.'
           OPEN_APPIUM_SESSION_ID="$(open_appium_session "${MATRIX_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}")"
           log_stdout "Opened Appium session ${OPEN_APPIUM_SESSION_ID}."

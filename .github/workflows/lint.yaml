@@ -46,7 +46,7 @@ jobs:
           VALIDATE_JAVASCRIPT_ES: true
 
   markdown-lint:
-    name: Python linting
+    name: Markdown linting
     needs: changes-lint
     if: >-
       ${{

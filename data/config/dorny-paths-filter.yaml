@@ -3,11 +3,11 @@ ci:
   - '.github/workflows/*.yml'
   - 'data/config/**'
 frida:
-  - '.github/workflows/frida_script.yaml'  
+  - '.github/workflows/frida.yaml'  
   - 'src/util/frida_script_*.js'
   - 'src/util/frida_script_example.js'
 matrix:
-  - '.github/workflows/scan_with_matrix.yaml'
+  - '.github/workflows/matrix_with_appium.yaml'
   - 'data/wordlist.txt'
   - 'src/util/appium_interactions_cafe.py'
   - 'src/util/compress_matrix_artifacts.js'
@@ -18,7 +18,7 @@ python:
 shell:
   - 'src/*.sh'
 static-lint:
-  - '.github/workflows/commit_checks.yaml'
+  - '.github/workflows/lint.yaml'
 javascript:
   - 'package.json'
   - 'package-lock.json'

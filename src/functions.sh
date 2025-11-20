@@ -117,7 +117,7 @@ wait_until_available_cores()
   local WAIT_CORES_SLEEP_TIME_SECONDS='15'
 
   while [ "$(get_available_cores "${PROJECT_ID}")" -lt "${REQUIRED_CORES}" ]; do
-    log_warning "Waiting until ${REQUIRED_CORES} cores are available."
+    log_warn "Waiting until ${REQUIRED_CORES} cores are available."
     sleep "${WAIT_CORES_SLEEP_TIME_SECONDS}"
   done
 }

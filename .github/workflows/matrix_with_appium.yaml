@@ -267,7 +267,7 @@ jobs:
             log_warning 'MATRIX_INSTANCE_ID is not set.'
           elif [ "${EPHEMERAL_MATRIX_INSTANCE:-}" = 'true' ]; then
             log_stdout "Ready to delete ephemeral instance ${MATRIX_INSTANCE_ID}."
-            stop_instance "${MATRIX_INSTANCE_ID}" || true # delete even if stop fails
+            stop_instance "${MATRIX_INSTANCE_ID}" || true
             delete_instance "${MATRIX_INSTANCE_ID}"
           else
             soft_stop_instance "${MATRIX_INSTANCE_ID}"

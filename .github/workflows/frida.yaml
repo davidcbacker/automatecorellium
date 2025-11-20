@@ -168,7 +168,7 @@ jobs:
             log_warning 'CORELLIUM_INSTANCE_ID is not set.'
           else
             log_stdout "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
-            stop_instance "${MATRIX_INSTANCE_ID}" || true # delete even if stop fails
+            stop_instance "${MATRIX_INSTANCE_ID}" || true
             delete_instance "${CORELLIUM_INSTANCE_ID}"
           fi
       - name: Clean up Corellium auth and processes

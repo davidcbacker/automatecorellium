@@ -1,0 +1,2 @@
+default: true # includes/excludes all rules by default
+MD013: false

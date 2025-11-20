@@ -167,11 +167,9 @@ jobs:
           if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
             log_warning 'CORELLIUM_INSTANCE_ID is not set.'
           else
-            log_stdout "Stopping ephemeral instance ${CORELLIUM_INSTANCE_ID}."
-            stop_instance "${CORELLIUM_INSTANCE_ID}"
-            log_stdout "Deleting ephemeral instance ${CORELLIUM_INSTANCE_ID}."
+            log_stdout "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
+            stop_instance "${MATRIX_INSTANCE_ID}" || true # delete even if stop fails
             delete_instance "${CORELLIUM_INSTANCE_ID}"
-            log_stdout "Deleted ephemeral instance ${CORELLIUM_INSTANCE_ID}."
           fi
       - name: Clean up Corellium auth and processes
         if: always()

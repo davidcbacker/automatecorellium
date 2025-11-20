@@ -30,6 +30,20 @@ jobs:
           filters: data/config/dorny-paths-filter.yaml
           list-files: shell
 
+  call-lint-workflow:
+    name: Lint
+    needs: changes
+    permissions:
+      pull-requests: read
+    if: >-
+      ${{
+        needs.changes.outputs.ci == 'true' ||
+        needs.changes.outputs.javascript == 'true' ||
+        needs.changes.outputs.python == 'true' ||
+        needs.changes.outputs.static-lint == 'true'
+      }}
+    uses: ./.github/workflows/lint.yaml
+
   call-matrix-workflow:
     name: MATRIX
     needs: changes
@@ -54,17 +68,3 @@ jobs:
       }}
     uses: ./.github/workflows/frida.yaml
     secrets: inherit
-
-  call-lint-workflow:
-    name: Lint
-    needs: changes
-    permissions:
-      pull-requests: read
-    if: >-
-      ${{
-        needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.javascript == 'true' ||
-        needs.changes.outputs.python == 'true' ||
-        needs.changes.outputs.static-lint == 'true'
-      }}
-    uses: ./.github/workflows/lint.yaml

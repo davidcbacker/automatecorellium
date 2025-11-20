@@ -107,11 +107,6 @@ jobs:
             install_usbfluxd_and_dependencies
           fi
           install_appium_server_and_dependencies
-      - name: Start Appium server
-        timeout-minutes: 1
-        run: |
-          source ./src/functions.sh && set -euo pipefail
-          run_appium_server
       - name: Upload MATRIX wordlist
         env:
           MATRIX_WORDLIST_PATH: './data/wordlist.txt'
@@ -153,9 +148,10 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           kill_app "${MATRIX_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
           install_app_from_url "${MATRIX_INSTANCE_ID}" "${CORELLIUM_CAFE_SOURCE_URL}"
-      - name: Run Appium session test
+      - name: Start Appium server and run session test
         run: |
           source ./src/functions.sh && set -euo pipefail
+          run_appium_server
           log_stdout 'Opening Appium session.'
           OPEN_APPIUM_SESSION_ID="$(open_appium_session "${MATRIX_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}")"
           log_stdout "Opened Appium session ${OPEN_APPIUM_SESSION_ID}."

@@ -2,9 +2,9 @@ import { Corellium } from "@corellium/corellium-api";
 
 const CORELLIUM_API_ENDPOINT = process.env.CORELLIUM_API_ENDPOINT;
 const CORELLIUM_API_TOKEN = process.env.CORELLIUM_API_TOKEN;
-const MATRIX_INSTANCE_ID = process.env.MATRIX_INSTANCE_ID;
-if (!CORELLIUM_API_ENDPOINT || !CORELLIUM_API_TOKEN || !MATRIX_INSTANCE_ID) {
-    handleError('Error: Environment variables CORELLIUM_API_ENDPOINT, CORELLIUM_API_TOKEN, and MATRIX_INSTANCE_ID must be set.');
+const CORELLIUM_INSTANCE_ID = process.env.CORELLIUM_INSTANCE_ID;
+if (!CORELLIUM_API_ENDPOINT || !CORELLIUM_API_TOKEN || !CORELLIUM_INSTANCE_ID) {
+    handleError('Environment variables CORELLIUM_API_ENDPOINT, CORELLIUM_API_TOKEN, and CORELLIUM_INSTANCE_ID must be set.');
 }
 const CORELLIUM_API_ENDPOINT_ORIGIN = new URL(CORELLIUM_API_ENDPOINT).origin.toString();
 const INSTANCE_STATE_ON = 'on';
@@ -64,24 +64,24 @@ async function main() {
             handleError(loginError, 'Failed to log in to Corellium. Please check your credentials and endpoint.');
         }
 
-        const instance = await corellium.getInstance(MATRIX_INSTANCE_ID);
+        const instance = await corellium.getInstance(CORELLIUM_INSTANCE_ID);
         if (!instance) {
-            handleError(`Instance with ID ${MATRIX_INSTANCE_ID} not found.`);
+            handleError(`Instance with ID ${CORELLIUM_INSTANCE_ID} not found.`);
         } else if (instance.state !== INSTANCE_STATE_ON) {
-            handleError(`Instance with ID ${MATRIX_INSTANCE_ID} is not in the ON state.`);
+            handleError(`Instance with ID ${CORELLIUM_INSTANCE_ID} is not in the ON state.`);
         }
 
-        const tmpDirectoryPath = await isRanchu(corellium, MATRIX_INSTANCE_ID) ? '/data/local/tmp' : '/tmp';
+        const tmpDirectoryPath = await isRanchu(corellium, CORELLIUM_INSTANCE_ID) ? '/data/local/tmp' : '/tmp';
         const zipInputArtifactsDir = `${tmpDirectoryPath}/artifacts/`;
         const zipInputAssessmentsDir = `${tmpDirectoryPath}/assessment.*/`;
         const zipOutputPath = '/tmp/matrix_artifacts.tar.gz'; // outputting to /tmp simplifies our CI/CD implementation
 
         const agent = await instance.agent();
         if (!agent) {
-            handleError(`Agent for instance with ID ${MATRIX_INSTANCE_ID} not found.`);
+            handleError(`Agent for instance with ID ${CORELLIUM_INSTANCE_ID} not found.`);
         }
         await agent.ready();
-        console.log(`Agent for instance ${MATRIX_INSTANCE_ID} is ready.`);
+        console.log(`Agent for instance ${CORELLIUM_INSTANCE_ID} is ready.`);
 
         await execCommandOnInstance(agent, `tar -czvf ${zipOutputPath} ${zipInputArtifactsDir} ${zipInputAssessmentsDir}`);
         await execCommandOnInstance(agent, `ls -l ${zipOutputPath}`);

@@ -569,7 +569,8 @@ delete_matrix_assessment()
   log_stdout "Deleting MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix delete-assessment \
     --instance "${INSTANCE_ID}" \
-    --assessment "${MATRIX_ASSESSMENT_ID}"
+    --assessment "${MATRIX_ASSESSMENT_ID}" \
+    > /dev/null
   log_stdout "Deleted MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 

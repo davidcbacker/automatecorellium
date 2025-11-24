@@ -6,6 +6,9 @@ frida:
   - '.github/workflows/frida.yaml'  
   - 'src/util/frida_script_*.js'
   - 'src/util/frida_script_example.js'
+markdown:
+  - '*.md'
+  - data/config/.markdownlint-cli2.jsonc
 matrix:
   - '.github/workflows/matrix_with_appium.yaml'
   - 'data/wordlist.txt'
@@ -26,5 +29,3 @@ javascript:
 javascript-deps:
   - 'package.json'
   - 'package-lock.json'
-markdown:
-  - '*.md'

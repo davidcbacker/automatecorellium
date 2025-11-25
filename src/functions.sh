@@ -1151,6 +1151,8 @@ EOF
     log_error 'Failed to open appium session.'
     exit 1
   }
+  log_warn 'DEBUG SHOWING THE JSON RESPONSE DETAILS'
+  echo "${OPEN_APPIUM_SESSION_JSON_RESPONSE}" >&2
   OPENED_SESSION_ID="$(echo "${OPEN_APPIUM_SESSION_JSON_RESPONSE}" | jq -r '.value.sessionId')" || {
     log_error 'Failed to parse open appium session JSON response.'
     exit 1

@@ -161,16 +161,29 @@ EOF
   fi
 
   check_env_vars
-  curl --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
+  CREATE_INSATNCE_RESPONSE_JSON="$(curl --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
     -H "Accept: application/json" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
     -H "Content-Type: application/json" \
-    -d "${CREATE_INSTANCE_REQUEST_DATA}" |
-    jq -r .id || {
+    -d "${CREATE_INSTANCE_REQUEST_DATA}")" || {
     log_error "Failed to create new instance in project ${PROJECT_ID}."
-    log_error "Hardware was ${HARDWARE_FLAVOR} running ${FIRMWARE_VERSION} (${FIRMWARE_BUILD})."
+    echo "${CREATE_INSTANCE_REQUEST_DATA}" >&2
     exit 1
   }
+
+  CREATED_INSTANCE_ID="$(echo "${CREATE_INSATNCE_RESPONSE_JSON}" | jq -r .id)" || {
+    log_error 'Failed to parse create instance response JSON.'
+    echo "${CREATE_INSTANCE_RESPONSE_JSON}" >&2
+    exit 1
+  }
+
+  [ "${CREATED_INSTANCE_ID}" = 'null' ] && {
+    log_error 'Created a null instance'
+    echo "${CREATE_INSTANCE_RESPONSE_JSON}" >&2
+    exit 1
+  }
+
+  echo "${CREATED_INSTANCE_ID}"
 }
 delete_instance()
 {

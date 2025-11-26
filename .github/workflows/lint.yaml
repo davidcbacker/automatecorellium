@@ -57,11 +57,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5
-      - name: Lint markdown docs
+      - name: Lint docs
         uses: DavidAnson/markdownlint-cli2-action@v21
         with:
           config: data/config/.markdownlint-cli2.jsonc
           globs: '**/*.md'
+      - name: Spellcheck docs
+        uses: rojopolis/spellcheck-github-actions@0.54.0
+        with:
+          config_path: data/config/spellcheck.yaml
 
   lint-python:
     name: Lint Python

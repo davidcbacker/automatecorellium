@@ -62,6 +62,10 @@ jobs:
         with:
           config: data/config/.markdownlint-cli2.jsonc
           globs: '**/*.md'
+      - name: Spellcheck markdown docs
+        uses: rojopolis/spellcheck-github-actions@0.54.0
+        with:
+          config_path: data/config/spellcheck.yaml
 
   lint-python:
     name: Lint Python

@@ -8,7 +8,9 @@ frida:
   - 'src/util/frida_script_example.js'
 markdown:
   - '*.md'
-  - data/config/.markdownlint-cli2.jsonc
+  - 'data/config/.markdownlint-cli2.jsonc'
+  - 'data/config/spellcheck.yaml'
+  - 'data/config/spellcheck_whitelist.txt'
 matrix:
   - '.github/workflows/matrix_with_appium.yaml'
   - 'data/wordlist.txt'

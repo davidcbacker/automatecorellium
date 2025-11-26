@@ -161,7 +161,7 @@ EOF
   fi
 
   check_env_vars
-  CREATE_INSATNCE_RESPONSE_JSON="$(curl --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
+  CREATE_INSTANCE_RESPONSE_JSON="$(curl --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
     -H "Accept: application/json" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
     -H "Content-Type: application/json" \
@@ -171,7 +171,7 @@ EOF
     exit 1
   }
 
-  CREATED_INSTANCE_ID="$(echo "${CREATE_INSATNCE_RESPONSE_JSON}" | jq -r .id)" || {
+  CREATED_INSTANCE_ID="$(echo "${CREATE_INSTANCE_RESPONSE_JSON}" | jq -r .id)" || {
     log_error 'Failed to parse create instance response JSON.'
     echo "${CREATE_INSTANCE_RESPONSE_JSON}" >&2
     exit 1

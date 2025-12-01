@@ -95,7 +95,8 @@ jobs:
             "${{ matrix.hardware_flavor }}" \
             "${{ matrix.firmware_version }}" \
             "${{ matrix.firmware_build }}" \
-            "${CORELLIUM_DEFAULT_PROJECT}")"
+            "${CORELLIUM_DEFAULT_PROJECT}" \
+            "${CORELLIUM_INSTANCE_NAME_PREFIX}")"
           log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
           echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
           log_stdout 'Saved ephemeral instance ID as environmental variable.'

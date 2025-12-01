@@ -12,6 +12,7 @@ concurrency:
 
 env:
   TERM: xterm
+  CORELLIUM_DEFAULT_PROJECT: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
 
 jobs:
@@ -76,10 +77,10 @@ jobs:
         timeout-minutes: 30
         run: |
           source ./src/functions.sh && set -euo pipefail
-          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
-            wait_until_available_cores "${{ vars.MATRIX_DEFAULT_PROJECT }}" '4'
+          if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
+            wait_until_available_cores "${CORELLIUM_DEFAULT_PROJECT}" '4'
           else
-            wait_until_available_cores "${{ vars.MATRIX_DEFAULT_PROJECT }}" '6'
+            wait_until_available_cores "${CORELLIUM_DEFAULT_PROJECT}" '6'
           fi
       - name: Start or create instance
         timeout-minutes: 1
@@ -93,7 +94,7 @@ jobs:
             "${{ matrix.hardware_flavor }}" \
             "${{ matrix.firmware_version }}" \
             "${{ matrix.firmware_build }}" \
-            "${{ vars.MATRIX_DEFAULT_PROJECT }}")"
+            "${CORELLIUM_DEFAULT_PROJECT}")"
           log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
           echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
           log_stdout 'Saved ephemeral instance ID as environmental variable.'

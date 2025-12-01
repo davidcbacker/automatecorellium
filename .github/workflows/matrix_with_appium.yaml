@@ -14,6 +14,7 @@ env:
   TERM: xterm
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
   MATRIX_RUNNER_ARTIFACTS_PATH: /home/runner/matrix_artifacts.tar.gz
+  CORELLIUM_DEFAULT_PROJECT: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
   CORELLIUM_INSTANCE_ID: ${{ github.event_name == 'schedule'
                         && vars.MATRIX_AUTOMATION_INSTANCE
                         || vars.MATRIX_DEVELOPMENT_INSTANCE }}
@@ -72,9 +73,9 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
-            wait_until_available_cores "${{ vars.MATRIX_DEFAULT_PROJECT }}" '4'
+            wait_until_available_cores "${CORELLIUM_DEFAULT_PROJECT}" '4'
           else
-            wait_until_available_cores "${{ vars.MATRIX_DEFAULT_PROJECT }}" '6'
+            wait_until_available_cores "${CORELLIUM_DEFAULT_PROJECT}" '6'
           fi
       - name: Start or create instance
         timeout-minutes: 1
@@ -91,7 +92,7 @@ jobs:
               "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" \
               "${{ vars.MATRIX_DEFAULT_FIRMWARE_VERSION }}" \
               "${{ vars.MATRIX_DEFAULT_FIRMWARE_BUILD }}" \
-              "${{ vars.MATRIX_DEFAULT_PROJECT }}")"
+              "${CORELLIUM_DEFAULT_PROJECT}")"
             log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
             echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
             echo 'EPHEMERAL_MATRIX_INSTANCE=true' >> "${GITHUB_ENV}"

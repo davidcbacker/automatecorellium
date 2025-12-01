@@ -129,10 +129,13 @@ create_instance()
   local FIRMWARE_BUILD="$3"
   local PROJECT_ID="$4"
   check_env_vars
-  local NEW_INSTANCE_NAME
-  NEW_INSTANCE_NAME="Corellium Automation $(date '+%Y-%m-%d') ${RANDOM}"
-  # Avoid using --wait option here since it will wait for agent ready
-  # Better to create instance first then install local deps then wait
+  local NEW_INSTANCE_NAME_PREFIX NEW_INSTANCE_NAME 
+  if [ -n "$5" ]; then
+    NEW_INSTANCE_NAME_PREFIX="$5"
+  else
+    NEW_INSTANCE_NAME_PREFIX="Corellium Automation"
+  fi
+  NEW_INSTANCE_NAME="${NEW_INSTANCE_NAME_PREFIX} $(date '+%Y-%m-%d') ${RANDOM}"
 
   if [ "${HARDWARE_FLAVOR}" = 'ranchu' ]; then
     CREATE_INSTANCE_REQUEST_DATA=$(

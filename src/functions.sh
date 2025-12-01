@@ -178,7 +178,7 @@ EOF
   }
 
   [ "${CREATED_INSTANCE_ID}" = 'null' ] && {
-    log_error 'Response contain a null instance ID.'
+    log_error 'Response contains a null instance ID.'
     log_error "$(echo "${CREATE_INSTANCE_RESPONSE_JSON}" | jq -r .error)"
     exit 1
   }

@@ -128,6 +128,7 @@ create_instance()
   local FIRMWARE_VERSION="$2"
   local FIRMWARE_BUILD="$3"
   local PROJECT_ID="$4"
+  check_env_vars
   local NEW_INSTANCE_NAME
   NEW_INSTANCE_NAME="Corellium Automation $(date '+%Y-%m-%d') ${RANDOM}"
   # Avoid using --wait option here since it will wait for agent ready
@@ -160,7 +161,6 @@ EOF
     )
   fi
 
-  check_env_vars
   CREATE_INSTANCE_RESPONSE_JSON="$(curl --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
     -H "Accept: application/json" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \

@@ -172,7 +172,7 @@ EOF
   }
 
   CREATED_INSTANCE_ID="$(echo "${CREATE_INSTANCE_RESPONSE_JSON}" | jq -r .id)" || {
-    log_error 'Response does not contain a new instance ID.'
+    log_error 'Response does not contains a new instance ID.'
     log_error "$(echo "${CREATE_INSTANCE_RESPONSE_JSON}" | jq -r .error)"
     exit 1
   }

@@ -129,7 +129,7 @@ create_instance()
   local FIRMWARE_BUILD="$3"
   local PROJECT_ID="$4"
   check_env_vars
-  local NEW_INSTANCE_NAME_PREFIX NEW_INSTANCE_NAME 
+  local NEW_INSTANCE_NAME_PREFIX NEW_INSTANCE_NAME
   if [ -n "$5" ]; then
     NEW_INSTANCE_NAME_PREFIX="$5"
   else

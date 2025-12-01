@@ -13,7 +13,7 @@ concurrency:
 env:
   TERM: xterm
   CORELLIUM_DEFAULT_PROJECT: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
-  CORELLIUM_INSTANCE_NAME_PREFIX: 'Frida automation'
+  CORELLIUM_INSTANCE_NAME_PREFIX: 'Frida Automation'
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
 
 jobs:

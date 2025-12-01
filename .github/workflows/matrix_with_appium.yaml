@@ -17,6 +17,7 @@ env:
   CORELLIUM_INSTANCE_ID: ${{ github.event_name == 'schedule'
                         && vars.MATRIX_AUTOMATION_INSTANCE
                         || vars.MATRIX_DEVELOPMENT_INSTANCE }}
+  CORELLIUM_INSTANCE_NAME_PREFIX: 'MATRIX automation'
   CORELLIUM_CAFE_PACKAGE: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
                             && 'com.corellium.cafe'
                             || 'com.corellium.Cafe' }}
@@ -91,7 +92,8 @@ jobs:
               "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" \
               "${{ vars.MATRIX_DEFAULT_FIRMWARE_VERSION }}" \
               "${{ vars.MATRIX_DEFAULT_FIRMWARE_BUILD }}" \
-              "${{ vars.MATRIX_DEFAULT_PROJECT }}")"
+              "${{ vars.MATRIX_DEFAULT_PROJECT }}")" \
+              "${CORELLIUM_INSTANCE_NAME_PREFIX}"
             log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
             echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
             echo 'EPHEMERAL_MATRIX_INSTANCE=true' >> "${GITHUB_ENV}"

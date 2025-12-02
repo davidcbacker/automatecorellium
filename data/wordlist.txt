@@ -1,11 +1,10 @@
+Myemail@corellium.com
+Password123
 Myfirstname
 Mylastname
-Username123
-Password123
-2345678901234567
-64326
 3216540987
-321-654-0987
-email1234@test.com
-regex(/^[a-zA-Z0-9._+-]+@corellium\.com$/)
+2345678901234567
+24680
+65432
 CorelliumizAwesome
+regex(/^[a-zA-Z0-9._+-]+@corellium\.com$/)

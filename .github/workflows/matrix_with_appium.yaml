@@ -262,13 +262,13 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
-            log_warn 'CORELLIUM_INSTANCE_ID is not set.'
-          elif [ "${EPHEMERAL_MATRIX_INSTANCE:-}" = 'true' ]; then
+            log_info 'CORELLIUM_INSTANCE_ID is not set.'
+          elif ! does_instance_exist "${CORELLIUM_INSTANCE_ID}"; then
+            log_warn 'Instance ${CORELLIUM_INSTANCE_ID} does not exist.'
+          else
             log_stdout "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
             stop_instance "${CORELLIUM_INSTANCE_ID}" || true
             delete_instance "${CORELLIUM_INSTANCE_ID}"
-          else
-            soft_stop_instance "${CORELLIUM_INSTANCE_ID}"
           fi
       - name: Clean up Corellium auth and processes
         if: always()

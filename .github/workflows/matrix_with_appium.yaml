@@ -164,9 +164,6 @@ jobs:
           MATRIX_WORDLIST_PATH: './data/wordlist.txt'
         run: |
           source ./src/functions.sh && set -euo pipefail
-      - name: Upload MATRIX wordlist
-        run: |
-          source ./src/functions.sh && set -euo pipefail
           MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment\

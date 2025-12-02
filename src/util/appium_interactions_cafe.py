@@ -47,7 +47,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     log_stdout("Appium - Interact with login page.")
 
     el1 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText")
-    el1.send_keys("Username123")
+    el1.send_keys("Myemail@corellium.com")
 
     el2 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText")
     el2.send_keys("Password123")
@@ -132,7 +132,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el21.send_keys("135")
 
     el22 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
-    el22.send_keys("65432")
+    el22.send_keys("24680")
 
     time.sleep(page_load_sleep_time_seconds)
     save_screenshot(driver, TARGET_APP_PAYMENT_INFO_SCREENSHOT_FILENAME)

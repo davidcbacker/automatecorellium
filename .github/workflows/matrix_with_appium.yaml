@@ -110,14 +110,6 @@ jobs:
             install_usbfluxd_and_dependencies
           fi
           install_appium_server_and_dependencies
-      - name: Upload MATRIX wordlist
-        env:
-          MATRIX_WORDLIST_PATH: './data/wordlist.txt'
-        run: |
-          source ./src/functions.sh && set -euo pipefail
-          CREATED_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_stdout "Created new wordlist image with ID ${CREATED_MATRIX_WORDLIST_ID}."
-          echo "MATRIX_WORDLIST_ID=${CREATED_MATRIX_WORDLIST_ID}" >> "${GITHUB_ENV}"
       - name: Wait for instance agent ready
         timeout-minutes: 20
         run: |
@@ -169,8 +161,11 @@ jobs:
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          MATRIX_WORDLIST_PATH: './data/wordlist.txt'
         run: |
           source ./src/functions.sh && set -euo pipefail
+          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment\
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
@@ -186,12 +181,12 @@ jobs:
           MATRIX_WORDLIST_PATH: './data/wordlist.txt'
         run: |
           source ./src/functions.sh && set -euo pipefail
-          RETRY_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_stdout "Created new wordlist image with ID ${RETRY_MATRIX_WORDLIST_ID}."
+          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment\
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
-            "${RETRY_MATRIX_WORDLIST_ID}"
+            "${MATRIX_WORDLIST_ID}"
       - name: Retry MATRIX assessment if failed again
         id: matrix-run-3
         if: steps.matrix-run-2.outcome == 'failure'
@@ -203,12 +198,12 @@ jobs:
           MATRIX_WORDLIST_PATH: './data/wordlist.txt'
         run: |
           source ./src/functions.sh && set -euo pipefail
-          RETRY_MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_stdout "Created new wordlist image with ID ${RETRY_MATRIX_WORDLIST_ID}."
+          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment\
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
-            "${RETRY_MATRIX_WORDLIST_ID}"
+            "${MATRIX_WORDLIST_ID}"
       - name: Download MATRIX runtime artifacts from VM
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}

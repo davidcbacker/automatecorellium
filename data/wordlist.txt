@@ -2,9 +2,9 @@ Myemail@corellium.com
 Password123
 Myfirstname
 Mylastname
+3216540987
 2345678901234567
 24680
-3216540987
-321-654-0987
+65432
 CorelliumizAwesome
 regex(/^[a-zA-Z0-9._+-]+@corellium\.com$/)

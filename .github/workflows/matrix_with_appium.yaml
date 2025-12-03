@@ -243,15 +243,15 @@ jobs:
       - name: Analyze MATRIX report results
         run: |
           set -euo pipefail
-          log_info 'Listing failed assessment checks.'
+          log_stdout 'Listing failed assessment checks.'
           cat matrix_report_*.json | jq -r \
             '.results[] | select(.outcome == "fail") | .name' |
             sort
-          log_info 'Listed failed assessment checks.'
-          log_info 'Verifying outcome of local storage check.'
+          log_stdout 'Listed failed assessment checks.'
+          log_stdout 'Verifying outcome of local storage check.'
           cat matrix_report_*.json | jq -e \
             '.results[] | select(.id == "masvs-storage-1-android-12") | .outcome == "fail"'
-          log_info 'Verified outcome of local storage check.'
+          log_stdout 'Verified outcome of local storage check.'
       - name: Stop or delete instance
         if: always()
         timeout-minutes: 15

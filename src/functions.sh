@@ -583,9 +583,25 @@ download_matrix_report_to_local_path()
   local MATRIX_REPORT_DEFAULT_FORMAT='html'
   local MATRIX_REPORT_TARGET_FORMAT="${4:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
   log_stdout "Downloading ${MATRIX_REPORT_TARGET_FORMAT} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
-  get_raw_matrix_report "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" "${MATRIX_REPORT_TARGET_FORMAT}" \
+  get_raw_matrix_report \
+    "${INSTANCE_ID}" \
+    "${MATRIX_ASSESSMENT_ID}" \
+    "${MATRIX_REPORT_TARGET_FORMAT}" \
     > "${MATRIX_REPORT_DOWNLOAD_PATH}"
   log_stdout "Downloaded ${MATRIX_REPORT_TARGET_FORMAT} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+}
+
+print_failed_matrix_checks()
+{
+  local INSTANCE_ID="$1"
+  local MATRIX_ASSESSMENT_ID="$2"
+  local MATRIX_REPORT_FORMAT='json'
+  get_raw_matrix_report \
+    "${INSTANCE_ID}" \
+    "${MATRIX_ASSESSMENT_ID}" \
+    "${MATRIX_REPORT_TARGET_FORMAT}" |
+    jq -r '.results[] | select(.outcome == "fail") | .name' |
+    sort
 }
 
 delete_matrix_assessment()

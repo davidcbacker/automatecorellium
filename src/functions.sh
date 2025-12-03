@@ -599,7 +599,7 @@ print_failed_matrix_checks()
   get_raw_matrix_report \
     "${INSTANCE_ID}" \
     "${MATRIX_ASSESSMENT_ID}" \
-    "${MATRIX_REPORT_TARGET_FORMAT}" |
+    "${MATRIX_REPORT_FORMAT}" |
     jq -r '.results[] | select(.outcome == "fail") | .name' |
     sort
 }

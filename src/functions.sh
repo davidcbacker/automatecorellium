@@ -569,13 +569,13 @@ download_matrix_report_to_local_path()
       exit 1
       ;;
   esac
-  log_stdout "Downloading ${MATRIX_REPORT_TARGET_FORMAT} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_stdout "Downloading ${MATRIX_REPORT_TARGET_FORMAT^^} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix download-report \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
     --format "${MATRIX_REPORT_TARGET_FORMAT}" \
     > "${MATRIX_REPORT_DOWNLOAD_PATH}"
-  log_stdout "Downloaded ${MATRIX_REPORT_TARGET_FORMAT} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_stdout "Downloaded ${MATRIX_REPORT_TARGET_FORMAT^^} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 
 delete_matrix_assessment()

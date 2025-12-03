@@ -579,21 +579,11 @@ download_matrix_report_to_local_path()
 {
   local INSTANCE_ID="$1"
   local MATRIX_ASSESSMENT_ID="$2"
+  local MATRIX_REPORT_DOWNLOAD_PATH="$3"
   local MATRIX_REPORT_DEFAULT_FORMAT='html'
-  local MATRIX_REPORT_TARGET_FORMAT="${3:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
-  local MATRIX_REPORT_DOWNLOAD_PATH="$4"
-  case "${MATRIX_REPORT_TARGET_FORMAT}" in
-    html | json) ;;
-    *)
-      log_error "Invalid MATRIX report format ${MATRIX_REPORT_TARGET_FORMAT}."
-      exit 1
-      ;;
-  esac
+  local MATRIX_REPORT_TARGET_FORMAT="${4:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
   log_stdout "Downloading ${MATRIX_REPORT_TARGET_FORMAT} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
-  corellium matrix download-report \
-    --instance "${INSTANCE_ID}" \
-    --assessment "${MATRIX_ASSESSMENT_ID}" \
-    --format "${MATRIX_REPORT_TARGET_FORMAT}" \
+  get_raw_matrix_report "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" "${MATRIX_REPORT_TARGET_FORMAT}" \
     > "${MATRIX_REPORT_DOWNLOAD_PATH}"
   log_stdout "Downloaded ${MATRIX_REPORT_TARGET_FORMAT} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }

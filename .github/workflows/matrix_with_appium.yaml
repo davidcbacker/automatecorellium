@@ -15,9 +15,6 @@ env:
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
   MATRIX_RUNNER_ARTIFACTS_PATH: /home/runner/matrix_artifacts.tar.gz
   CORELLIUM_DEFAULT_PROJECT: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
-  CORELLIUM_INSTANCE_ID: ${{ github.event_name == 'schedule'
-                        && vars.MATRIX_AUTOMATION_INSTANCE
-                        || vars.MATRIX_DEVELOPMENT_INSTANCE }}
   CORELLIUM_INSTANCE_NAME_PREFIX: 'MATRIX Automation'
   CORELLIUM_CAFE_PACKAGE: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
                             && 'com.corellium.cafe'
@@ -78,28 +75,23 @@ jobs:
           else
             wait_until_available_cores "${CORELLIUM_DEFAULT_PROJECT}" '6'
           fi
-      - name: Start or create instance
+      - name: Create instance
         timeout-minutes: 1
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           source ./src/functions.sh && set -euo pipefail
-          if does_instance_exist "${CORELLIUM_INSTANCE_ID}"; then
-            start_instance "${CORELLIUM_INSTANCE_ID}"
-          else
-            log_stdout "Creating instance."
-            CREATED_CORELLIUM_INSTANCE_ID="$(create_instance \
-              "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" \
-              "${{ vars.MATRIX_DEFAULT_FIRMWARE_VERSION }}" \
-              "${{ vars.MATRIX_DEFAULT_FIRMWARE_BUILD }}" \
-              "${CORELLIUM_DEFAULT_PROJECT}" \
-              "${CORELLIUM_INSTANCE_NAME_PREFIX}")"
-            log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
-            echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
-            echo 'EPHEMERAL_MATRIX_INSTANCE=true' >> "${GITHUB_ENV}"
-            log_stdout 'Updated environmental variables for ephemeral instance.'
-          fi
+          log_stdout "Creating instance."
+          CREATED_CORELLIUM_INSTANCE_ID="$(create_instance \
+            "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" \
+            "${{ vars.MATRIX_DEFAULT_FIRMWARE_VERSION }}" \
+            "${{ vars.MATRIX_DEFAULT_FIRMWARE_BUILD }}" \
+            "${CORELLIUM_DEFAULT_PROJECT}" \
+            "${CORELLIUM_INSTANCE_NAME_PREFIX}")"
+          log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
+          echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
+          log_stdout 'Updated environmental variables for ephemeral instance.'
       - name: Install additional runner dependencies
         run: |
           source ./src/functions.sh && set -euo pipefail
@@ -125,7 +117,7 @@ jobs:
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ env.VPN_CONFIG_PATH }}"
       - name: Connect to device
-        timeout-minutes: 1
+        timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
@@ -263,9 +255,8 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
             log_info 'CORELLIUM_INSTANCE_ID is not set.'
-          elif ! does_instance_exist "${CORELLIUM_INSTANCE_ID}"; then
-            :
-          else
+            log_warn 'CORELLIUM_INSTANCE_ID is not set.'
+          elif does_instance_exist "${CORELLIUM_INSTANCE_ID}"; then
             log_stdout "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
             stop_instance "${CORELLIUM_INSTANCE_ID}" || true
             delete_instance "${CORELLIUM_INSTANCE_ID}"

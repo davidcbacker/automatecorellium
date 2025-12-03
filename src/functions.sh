@@ -555,6 +555,26 @@ get_matrix_report_id()
   corellium matrix get-assessment --instance "${INSTANCE_ID}" --assessment "${MATRIX_ASSESSMENT_ID}" | jq -r '.reportId'
 }
 
+get_raw_matrix_report()
+{
+  local INSTANCE_ID="$1"
+  local MATRIX_ASSESSMENT_ID="$2"
+  local MATRIX_REPORT_DEFAULT_FORMAT='html'
+  local MATRIX_REPORT_TARGET_FORMAT="${3:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
+  case "${MATRIX_REPORT_TARGET_FORMAT}" in
+    html | json) ;;
+    *)
+      log_error "Invalid MATRIX report format ${MATRIX_REPORT_TARGET_FORMAT}."
+      exit 1
+      ;;
+  esac
+
+  corellium matrix download-report \
+    --instance "${INSTANCE_ID}" \
+    --assessment "${MATRIX_ASSESSMENT_ID}" \
+    --format "${MATRIX_REPORT_TARGET_FORMAT}"
+}
+
 download_matrix_report_to_local_path()
 {
   local INSTANCE_ID="$1"

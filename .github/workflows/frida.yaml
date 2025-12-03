@@ -83,7 +83,7 @@ jobs:
           else
             wait_until_available_cores "${CORELLIUM_DEFAULT_PROJECT}" '6'
           fi
-      - name: Start or create instance
+      - name: Create instance
         timeout-minutes: 1
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}

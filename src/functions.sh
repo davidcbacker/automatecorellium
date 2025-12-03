@@ -671,8 +671,16 @@ run_full_matrix_assessment()
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   log_stdout "Completed MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   kill_app "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
-  download_matrix_report_to_local_path "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" 'html' "matrix_report_${MATRIX_ASSESSMENT_ID}.html"
-  download_matrix_report_to_local_path "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" 'json' "matrix_report_${MATRIX_ASSESSMENT_ID}.json"
+  download_matrix_report_to_local_path \
+    "${INSTANCE_ID}" \
+    "${MATRIX_ASSESSMENT_ID}" \
+    "matrix_report_${MATRIX_ASSESSMENT_ID}.html" \
+    'html'
+  download_matrix_report_to_local_path \
+    "${INSTANCE_ID}" \
+    "${MATRIX_ASSESSMENT_ID}" \
+    "matrix_report_${MATRIX_ASSESSMENT_ID}.json" \
+    'json'
 }
 
 delete_unauthorized_devices()

@@ -250,7 +250,7 @@ jobs:
           if-no-files-found: error
       - name: Analyze MATRIX report results
         run: |
-          source ./src/functions.sh && set -euo pipefail
+          set -euo pipefail
           cat matrix_report_*.json | jq -r \
             '.results[] | select(.outcome == "fail") | .name' |
             sort

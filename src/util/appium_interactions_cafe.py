@@ -140,7 +140,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
     el23.click()
 
-    log_stdout("Appium - Enter fake promo code.")
+    log_stdout("Appium - Enter invalid promo code.")
 
     el24 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode")
     el24.send_keys("65432")

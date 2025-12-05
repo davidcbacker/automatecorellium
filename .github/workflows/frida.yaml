@@ -126,7 +126,7 @@ jobs:
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ env.VPN_CONFIG_PATH }}"
       - name: Connect to device
-        timeout-minutes: 1
+        timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then

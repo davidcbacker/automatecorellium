@@ -241,13 +241,20 @@ jobs:
           compression-level: 9
           if-no-files-found: error
       - name: Analyze MATRIX report results
+        env:
+          MATRIX_CHECK_TO_ANALYZE: masvs-storage-1-android-12
+          MATRIX_CHECK_EXPECTED_OUTCOME: fail
         run: |
           source ./src/functions.sh && set -euo pipefail
           for report in matrix_report_*.json; do
             log_stdout "Listing failed assessment checks for ${report}."
             print_failed_matrix_checks_from_local_json_path "${report}"
+            log_stdout "Listed failed assessment checks for ${report}."
             log_stdout 'Verifying outcome of local storage check.'
-            ensure_matrix_check_outcome 'masvs-storage-1-android-12' 'fail'
+            ensure_matrix_check_outcomes_from_local_json_path \
+              "${report}" \
+              "${MATRIX_CHECK_TO_ANALYZE}" \
+              "${MATRIX_CHECK_EXPECTED_OUTCOME}
             log_stdout 'Verified outcome of local storage check.'
           done
           cat matrix_report_*.json | jq -e \

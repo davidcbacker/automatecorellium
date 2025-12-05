@@ -254,7 +254,7 @@ jobs:
             ensure_matrix_check_outcomes_from_local_json_path \
               "${report}" \
               "${MATRIX_CHECK_TO_ANALYZE}" \
-              "${MATRIX_CHECK_EXPECTED_OUTCOME}
+              "${MATRIX_CHECK_EXPECTED_OUTCOME}"
             log_stdout 'Verified outcome of local storage check.'
           done
       - name: Stop or delete instance

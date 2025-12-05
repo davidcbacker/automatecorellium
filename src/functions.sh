@@ -1274,3 +1274,17 @@ ensure_matrix_check_outcomes_from_local_json_path()
     exit 1
   }
 }
+
+analyze_corellium_cafe_matrix_report_from_local_path()
+{
+  local MATRIX_JSON_REPORT_PATH="$1"
+  local MATRIX_CHECK_TO_ANALYZE='storage-12'
+  local MATRIX_CHECK_EXPECTED_OUTCOME='fail'
+  log_stdout 'asdf'
+  print_matrix_failures_from_local_json_path \
+    "${MATRIX_JSON_REPORT_PATH}"
+  ensure_matrix_check_outcomes_from_local_json_path \
+    "${MATRIX_JSON_REPORT_PATH}" \
+    "${MATRIX_CHECK_TO_ANALYZE}" \
+    "${MATRIX_CHECK_EXPECTED_OUTCOME}"
+}

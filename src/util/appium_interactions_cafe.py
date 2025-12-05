@@ -140,7 +140,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
     el23.click()
 
-    log_stdout("Appium - Enter fake promo code.")
+    log_stdout("Appium - Enter invalid promo code.")
 
     el24 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode")
     el24.send_keys("65432")
@@ -176,7 +176,7 @@ def log_stdout(message: str):
 def save_screenshot(driver: webdriver.Remote, filename: str):
     '''Capture a screenshot and save to working directory'''
     screenshot_path: str = os.path.join(os.getcwd(), filename)
-    log_stdout(f"Appium - Screenshot path is {screenshot_path}.")
+    log_stdout(f"Appium - Saving screenshot as {filename}.")
     driver.save_screenshot(screenshot_path)
     log_stdout("Appium - Saved screenshot.")
 

@@ -242,7 +242,7 @@ jobs:
           if-no-files-found: error
       - name: Analyze MATRIX report results
         run: |
-          set -euo pipefail
+          source ./src/functions.sh && set -euo pipefail
           log_stdout 'Listing failed assessment checks.'
           cat matrix_report_*.json | jq -r \
             '.results[] | select(.outcome == "fail") | .name' |

@@ -1250,3 +1250,11 @@ run_appium_interactions_template()
   python3 src/util/appium_interactions_template.py "${INSTANCE_SERVICES_IP}"
   log_stdout 'Finished automated Appium interactions.'
 }
+
+print_matrix_failures_from_local_json_path()
+{
+  local MATRIX_JSON_REPORT_PATH="$1"
+  cat "{MATRIX_JSON_REPORT_PATH}" |
+    jq -r '.results[] | select(.outcome == "fail") | .name' |
+    sort
+}

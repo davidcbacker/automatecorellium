@@ -1254,8 +1254,9 @@ run_appium_interactions_template()
 print_matrix_failures_from_local_json_path()
 {
   local MATRIX_JSON_REPORT_PATH="$1"
-  cat "${MATRIX_JSON_REPORT_PATH}" |
-    jq -r '.results[] | select(.outcome == "fail") | .name' |
+  jq -r \
+    '.results[] | select(.outcome == "fail") | .name' \
+    "${MATRIX_JSON_REPORT_PATH}" |
     sort
 }
 
@@ -1264,10 +1265,11 @@ ensure_matrix_check_outcomes_from_local_json_path()
   local MATRIX_JSON_REPORT_PATH="$1"
   local MATRIX_CHECK_TO_ANALYZE="$2"
   local MATRIX_CHECK_EXPECTED_OUTCOME="$3"
-  cat "${MATRIX_JSON_REPORT_PATH}" | jq -e \
+  jq -e \
     -arg id "${MATRIX_CHECK_TO_ANALYZE}" \
     -arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
     '.results[] | select(.id == $id) | .outcome == $expected_outcome' \
+    "${MATRIX_JSON_REPORT_PATH}"
     > /dev/null || {
     log_error "MATRIX check ${MATRIX_CHECK_TO_ANALYZE} is not ${MATRIX_CHECK_EXPECTED_OUTCOME}."
     exit 1

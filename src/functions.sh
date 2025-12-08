@@ -1291,8 +1291,8 @@ ensure_matrix_check_outcomes_from_local_json_path()
   local MATRIX_CHECK_TO_ANALYZE="$2"
   local MATRIX_CHECK_EXPECTED_OUTCOME="$3"
   jq -e \
-    -arg id "${MATRIX_CHECK_TO_ANALYZE}" \
-    -arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
+    --arg id "${MATRIX_CHECK_TO_ANALYZE}" \
+    --arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
     '.results[] | select(.id == $id) | .outcome == $expected_outcome' \
     "${MATRIX_JSON_REPORT_PATH}" \
     > /dev/null || {

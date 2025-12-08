@@ -1260,7 +1260,7 @@ analyze_corellium_cafe_matrix_report_from_local_path()
     log_error "${MATRIX_JSON_REPORT_PATH} is not a file."
     exit 1
   }
-  jq empty "${MATRIX_JSON_REPORT_PATH} >/dev/null 2>&1 || {
+  jq empty "${MATRIX_JSON_REPORT_PATH}" >/dev/null 2>&1 || {
     log_error "Failed to parse ${MATRIX_JSON_REPORT_PATH}."
     exit 1
   }

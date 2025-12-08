@@ -1254,6 +1254,7 @@ run_appium_interactions_template()
 print_matrix_failures_from_local_json_path()
 {
   local MATRIX_JSON_REPORT_PATH="$1"
+  echo "DEBUG MATRIX_JSON_REPORT_PATH=${MATRIX_JSON_REPORT_PATH}"
   jq -r \
     '.results[] | select(.outcome == "fail") | .name' \
     "${MATRIX_JSON_REPORT_PATH}" |

@@ -568,7 +568,6 @@ get_raw_matrix_report()
       exit 1
       ;;
   esac
-  log_stdout "Downloading ${MATRIX_REPORT_TARGET_FORMAT^^} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix download-report \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
@@ -582,7 +581,7 @@ download_matrix_report_to_local_path()
   local MATRIX_REPORT_DOWNLOAD_PATH="$3"
   local MATRIX_REPORT_DEFAULT_FORMAT='html'
   local MATRIX_REPORT_TARGET_FORMAT="${4:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
-  log_stdout "Downloading ${MATRIX_REPORT_TARGET_FORMAT} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_stdout "Downloading ${MATRIX_REPORT_TARGET_FORMAT^^} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   get_raw_matrix_report \
     "${INSTANCE_ID}" \
     "${MATRIX_ASSESSMENT_ID}" \

@@ -1275,11 +1275,14 @@ analyze_corellium_cafe_matrix_report_from_local_path()
   log_stdout 'Verified outcome of local storage check.'
 }
 
-print_matrix_failures_from_local_json_path()
+print_matching_matrix_check_outcomes_from_local_json_path()
 {
   local MATRIX_JSON_REPORT_PATH="$1"
+  local MATRIX_CHECK_DEFAULT_EXPECTED_OUTCOME='fail'
+  local MATRIX_CHECK_EXPECTED_OUTCOME="${2:-${MATRIX_CHECK_DEFAULT_EXPECTED_OUTCOME}}"
   jq -r \
-    '.results[] | select(.outcome == "fail") | .name' \
+      --arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
+    '.results[] | select(.outcome == $expected_outcome) | .name' \
     "${MATRIX_JSON_REPORT_PATH}" |
     sort
 }

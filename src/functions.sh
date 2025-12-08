@@ -1264,8 +1264,9 @@ analyze_corellium_cafe_matrix_report_from_local_path()
     exit 1
   }
   log_stdout "Listing failed assessment checks for ${report}."
-  print_matrix_failures_from_local_json_path \
-    "${MATRIX_JSON_REPORT_PATH}"
+  print_matching_matrix_check_outcomes_from_local_json_path \
+    "${MATRIX_JSON_REPORT_PATH}" \
+    "${MATRIX_CHECK_EXPECTED_OUTCOME}"
   log_stdout 'Listed failed assessment checks.'
   log_stdout "Verifying outcome of local storage check for ${report}."
   ensure_matrix_check_outcomes_from_local_json_path \

@@ -1251,6 +1251,31 @@ run_appium_interactions_template()
   log_stdout 'Finished automated Appium interactions.'
 }
 
+analyze_corellium_cafe_matrix_report_from_local_path()
+{
+  local MATRIX_JSON_REPORT_PATH="$1"
+  local MATRIX_CHECK_TO_ANALYZE='masvs-storage-1-android-12'
+  local MATRIX_CHECK_EXPECTED_OUTCOME='fail'
+  [ -f "${MATRIX_JSON_REPORT_PATH}" ] || {
+    log_error "${MATRIX_JSON_REPORT_PATH} is not a file."
+    exit 1
+  }
+  jq empty "${MATRIX_JSON_REPORT_PATH} >/dev/null 2>&1 || {
+    log_error "Failed to parse ${MATRIX_JSON_REPORT_PATH}."
+    exit 1
+  }
+  log_stdout "Listing failed assessment checks for ${report}."
+  print_matrix_failures_from_local_json_path \
+    "${MATRIX_JSON_REPORT_PATH}"
+  log_stdout 'Listed failed assessment checks.'
+  log_stdout "Verifying outcome of local storage check for ${report}."
+  ensure_matrix_check_outcomes_from_local_json_path \
+    "${MATRIX_JSON_REPORT_PATH}" \
+    "${MATRIX_CHECK_TO_ANALYZE}" \
+    "${MATRIX_CHECK_EXPECTED_OUTCOME}"
+  log_stdout 'Verified outcome of local storage check.'
+}
+
 print_matrix_failures_from_local_json_path()
 {
   local MATRIX_JSON_REPORT_PATH="$1"
@@ -1275,21 +1300,4 @@ ensure_matrix_check_outcomes_from_local_json_path()
     log_error "MATRIX check ${MATRIX_CHECK_TO_ANALYZE} is not ${MATRIX_CHECK_EXPECTED_OUTCOME}."
     exit 1
   }
-}
-
-analyze_corellium_cafe_matrix_report_from_local_path()
-{
-  local MATRIX_JSON_REPORT_PATH="$1"
-  local MATRIX_CHECK_TO_ANALYZE='masvs-storage-1-android-12'
-  local MATRIX_CHECK_EXPECTED_OUTCOME='fail'
-  log_stdout "Listing failed assessment checks for ${report}."
-  print_matrix_failures_from_local_json_path \
-    "${MATRIX_JSON_REPORT_PATH}"
-  log_stdout 'Listed failed assessment checks.'
-  log_stdout "Verifying outcome of local storage check for ${report}."
-  ensure_matrix_check_outcomes_from_local_json_path \
-    "${MATRIX_JSON_REPORT_PATH}" \
-    "${MATRIX_CHECK_TO_ANALYZE}" \
-    "${MATRIX_CHECK_EXPECTED_OUTCOME}"
-  log_stdout 'Verified outcome of local storage check.'
 }

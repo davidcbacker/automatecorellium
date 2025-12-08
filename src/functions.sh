@@ -352,7 +352,7 @@ is_agent_ready()
 wait_until_agent_ready()
 {
   local INSTANCE_ID="$1"
-  local AGENT_READY_SLEEP_TIME='15'
+  local AGENT_READY_SLEEP_TIME='5'
   local INSTANCE_STATUS_ON='on'
   local PROJECT_ID INSTANCE_STATUS
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"

@@ -107,7 +107,7 @@ get_available_cores()
 
   AVAILABLE_PROJECT_CORES="$(echo "${GET_PROJECTS_RESPONSE_JSON}" |
     jq --arg project_id "${PROJECT_ID}" \
-    '.[] | select(.id == $project_id) | .quotas.cores - .quotasUsed.cores')"
+      '.[] | select(.id == $project_id) | .quotas.cores - .quotasUsed.cores')"
   echo "${AVAILABLE_PROJECT_CORES}"
 }
 

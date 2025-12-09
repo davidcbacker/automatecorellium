@@ -504,7 +504,7 @@ start_matrix_monitoring()
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
     > /dev/null
-  wait_for_assessment_status \
+  wait_for_matrix_assessment_status \
     "${INSTANCE_ID}" \
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_MONITORING}" ||
@@ -522,7 +522,7 @@ stop_matrix_monitoring()
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
     > /dev/null
-  wait_for_assessment_status \
+  wait_for_matrix_assessment_status \
     "${INSTANCE_ID}" \
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_READY_FOR_TESTING}" ||
@@ -540,7 +540,7 @@ test_matrix_evidence()
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
     > /dev/null
-  wait_for_assessment_status \
+  wait_for_matrix_assessment_status \
     "${INSTANCE_ID}" \
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_COMPLETE}" ||
@@ -612,7 +612,7 @@ handle_open_matrix_assessment()
     case "${OPEN_MATRIX_ASSESSMENT_STATUS}" in
       'testing')
         log_stdout "Waiting until assessment ${OPEN_MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETE}."
-        wait_for_assessment_status \
+        wait_for_matrix_assessment_status \
           "${INSTANCE_ID}" \
           "${OPEN_MATRIX_ASSESSMENT_ID}" \
           "${MATRIX_STATUS_COMPLETE}" ||
@@ -723,7 +723,7 @@ stop_demo_instances()
   done
 }
 
-get_assessment_status()
+get_matrix_assessment_status()
 {
   local instance_id="$1"
   local assessment_id="$2"
@@ -811,7 +811,7 @@ wait_for_instance_status()
   done
 }
 
-wait_for_assessment_status()
+wait_for_matrix_assessment_status()
 {
   local INSTANCE_ID="$1"
   local ASSESSMENT_ID="$2"
@@ -829,7 +829,7 @@ wait_for_assessment_status()
 
   local CURRENT_ASSESSMENT_STATUS LAST_ASSESSMENT_STATUS ASSESSMENT_STATUS_SLEEP_TIME
   LAST_ASSESSMENT_STATUS='UNDEFINED'
-  CURRENT_ASSESSMENT_STATUS="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
+  CURRENT_ASSESSMENT_STATUS="$(get_matrix_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
   while [ "${CURRENT_ASSESSMENT_STATUS}" != "${TARGET_ASSESSMENT_STATUS}" ]; do
     case "${CURRENT_ASSESSMENT_STATUS}" in
       '')
@@ -853,7 +853,7 @@ wait_for_assessment_status()
     esac
     sleep "${ASSESSMENT_STATUS_SLEEP_TIME}"
     LAST_ASSESSMENT_STATUS="${CURRENT_ASSESSMENT_STATUS}"
-    CURRENT_ASSESSMENT_STATUS="$(get_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
+    CURRENT_ASSESSMENT_STATUS="$(get_matrix_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
   done
 }
 

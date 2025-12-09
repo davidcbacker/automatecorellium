@@ -120,8 +120,9 @@ wait_until_available_cores()
     log_error 'Project ID must be set.'
     exit 1
   }
-  local AVAILABLE_CORES="$(get_available_cores "${PROJECT_ID}")"
   log_stdout "Waiting until ${REQUIRED_CORES} CPU cores are available."
+  local AVAILABLE_CORES
+  AVAILABLE_CORES="$(get_available_cores "${PROJECT_ID}")"
   while [ "${AVAILABLE_CORES:-0}" -lt "${REQUIRED_CORES}" ]; do
     log_warn "Only ${AVAILABLE_CORES} CPU cores are available."
     sleep "${WAIT_CORES_SLEEP_TIME_SECONDS}"

@@ -106,7 +106,8 @@ get_available_cores()
   }
 
   AVAILABLE_PROJECT_CORES="$(echo "${GET_PROJECTS_RESPONSE_JSON}" |
-    jq '.[] | select(.id == "e5f2bec5-516e-43d7-9919-f22501169bc5") | .quotas.cores - .quotasUsed.cores')"
+    jq --arg project_id "${PROJECT_ID}" \
+      '.[] | select(.id == $project_id) | .quotas.cores - .quotasUsed.cores')"
   echo "${AVAILABLE_PROJECT_CORES}"
 }
 

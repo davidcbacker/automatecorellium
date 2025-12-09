@@ -352,7 +352,7 @@ is_agent_ready()
 wait_until_agent_ready()
 {
   local INSTANCE_ID="$1"
-  local AGENT_READY_SLEEP_TIME='15'
+  local AGENT_READY_SLEEP_TIME='5'
   local INSTANCE_STATUS_ON='on'
   local PROJECT_ID INSTANCE_STATUS
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
@@ -816,8 +816,8 @@ wait_for_assessment_status()
   local INSTANCE_ID="$1"
   local ASSESSMENT_ID="$2"
   local TARGET_ASSESSMENT_STATUS="$3"
-  local SLEEP_TIME_DEFAULT='5'
-  local SLEEP_TIME_FOR_TESTING='20'
+  local SLEEP_TIME_DEFAULT='2'
+  local SLEEP_TIME_FOR_TESTING='5'
 
   case "${TARGET_ASSESSMENT_STATUS}" in
     'complete' | 'failed' | 'monitoring' | 'readyForTesting' | 'startMonitoring' | 'stopMonitoring' | 'testing') ;;

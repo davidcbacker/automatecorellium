@@ -565,13 +565,12 @@ get_matrix_report_id()
   corellium matrix get-assessment --instance "${INSTANCE_ID}" --assessment "${MATRIX_ASSESSMENT_ID}" | jq -r '.reportId'
 }
 
-download_matrix_report_to_local_path()
+get_raw_matrix_report()
 {
   local INSTANCE_ID="$1"
   local MATRIX_ASSESSMENT_ID="$2"
   local MATRIX_REPORT_DEFAULT_FORMAT='html'
   local MATRIX_REPORT_TARGET_FORMAT="${3:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
-  local MATRIX_REPORT_DOWNLOAD_PATH="$4"
   case "${MATRIX_REPORT_TARGET_FORMAT}" in
     html | json) ;;
     *)
@@ -579,13 +578,39 @@ download_matrix_report_to_local_path()
       exit 1
       ;;
   esac
-  log_stdout "Downloading ${MATRIX_REPORT_TARGET_FORMAT^^} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix download-report \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
-    --format "${MATRIX_REPORT_TARGET_FORMAT}" \
+    --format "${MATRIX_REPORT_TARGET_FORMAT}"
+}
+
+download_matrix_report_to_local_path()
+{
+  local INSTANCE_ID="$1"
+  local MATRIX_ASSESSMENT_ID="$2"
+  local MATRIX_REPORT_DOWNLOAD_PATH="$3"
+  local MATRIX_REPORT_DEFAULT_FORMAT='html'
+  local MATRIX_REPORT_TARGET_FORMAT="${4:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
+  log_stdout "Downloading ${MATRIX_REPORT_TARGET_FORMAT^^} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  get_raw_matrix_report \
+    "${INSTANCE_ID}" \
+    "${MATRIX_ASSESSMENT_ID}" \
+    "${MATRIX_REPORT_TARGET_FORMAT}" \
     > "${MATRIX_REPORT_DOWNLOAD_PATH}"
   log_stdout "Downloaded ${MATRIX_REPORT_TARGET_FORMAT^^} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+}
+
+print_failed_matrix_checks()
+{
+  local INSTANCE_ID="$1"
+  local MATRIX_ASSESSMENT_ID="$2"
+  local MATRIX_REPORT_FORMAT='json'
+  get_raw_matrix_report \
+    "${INSTANCE_ID}" \
+    "${MATRIX_ASSESSMENT_ID}" \
+    "${MATRIX_REPORT_FORMAT}" |
+    jq -r '.results[] | select(.outcome == "fail") | .name' |
+    sort
 }
 
 delete_matrix_assessment()
@@ -655,8 +680,16 @@ run_full_matrix_assessment()
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   log_stdout "Completed MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   kill_app "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
-  download_matrix_report_to_local_path "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" 'html' "matrix_report_${MATRIX_ASSESSMENT_ID}.html"
-  download_matrix_report_to_local_path "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}" 'json' "matrix_report_${MATRIX_ASSESSMENT_ID}.json"
+  download_matrix_report_to_local_path \
+    "${INSTANCE_ID}" \
+    "${MATRIX_ASSESSMENT_ID}" \
+    "matrix_report_${MATRIX_ASSESSMENT_ID}.html" \
+    'html'
+  download_matrix_report_to_local_path \
+    "${INSTANCE_ID}" \
+    "${MATRIX_ASSESSMENT_ID}" \
+    "matrix_report_${MATRIX_ASSESSMENT_ID}.json" \
+    'json'
 }
 
 delete_unauthorized_devices()
@@ -1225,4 +1258,57 @@ run_appium_interactions_template()
   log_stdout 'Starting automated Appium interactions.'
   python3 src/util/appium_interactions_template.py "${INSTANCE_SERVICES_IP}"
   log_stdout 'Finished automated Appium interactions.'
+}
+
+analyze_corellium_cafe_matrix_report_from_local_path()
+{
+  local MATRIX_JSON_REPORT_PATH="$1"
+  local MATRIX_CHECK_TO_ANALYZE='masvs-storage-1-android-12'
+  local MATRIX_CHECK_EXPECTED_OUTCOME='fail'
+  [ -f "${MATRIX_JSON_REPORT_PATH}" ] || {
+    log_error "${MATRIX_JSON_REPORT_PATH} is not a file."
+    exit 1
+  }
+  jq '.' "${MATRIX_JSON_REPORT_PATH}" > /dev/null 2>&1 || {
+    log_error "Failed to parse ${MATRIX_JSON_REPORT_PATH}."
+    exit 1
+  }
+  log_stdout "Listing failed assessment checks for ${report}."
+  print_matching_matrix_check_outcomes_from_local_json_path \
+    "${MATRIX_JSON_REPORT_PATH}" \
+    "${MATRIX_CHECK_EXPECTED_OUTCOME}"
+  log_stdout 'Listed failed assessment checks.'
+  log_stdout "Verifying outcome of local storage check for ${report}."
+  ensure_matrix_check_outcomes_from_local_json_path \
+    "${MATRIX_JSON_REPORT_PATH}" \
+    "${MATRIX_CHECK_TO_ANALYZE}" \
+    "${MATRIX_CHECK_EXPECTED_OUTCOME}"
+  log_stdout 'Verified outcome of local storage check.'
+}
+
+print_matching_matrix_check_outcomes_from_local_json_path()
+{
+  local MATRIX_JSON_REPORT_PATH="$1"
+  local MATRIX_CHECK_DEFAULT_EXPECTED_OUTCOME='fail'
+  local MATRIX_CHECK_EXPECTED_OUTCOME="${2:-${MATRIX_CHECK_DEFAULT_EXPECTED_OUTCOME}}"
+  jq -r \
+    --arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
+    '.results[] | select(.outcome == $expected_outcome) | "\(.name) [\(.id)]"' \
+    "${MATRIX_JSON_REPORT_PATH}" |
+    sort
+}
+
+ensure_matrix_check_outcomes_from_local_json_path()
+{
+  local MATRIX_JSON_REPORT_PATH="$1"
+  local MATRIX_CHECK_TO_ANALYZE="$2"
+  local MATRIX_CHECK_EXPECTED_OUTCOME="$3"
+  jq -e \
+    --arg id "${MATRIX_CHECK_TO_ANALYZE}" \
+    --arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
+    '.results[] | select(.id == $id) | .outcome == $expected_outcome' \
+    "${MATRIX_JSON_REPORT_PATH}" || {
+    log_error "MATRIX check ${MATRIX_CHECK_TO_ANALYZE} is not ${MATRIX_CHECK_EXPECTED_OUTCOME}."
+    exit 1
+  }
 }

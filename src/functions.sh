@@ -114,13 +114,21 @@ get_available_cores()
 wait_until_available_cores()
 {
   local PROJECT_ID="$1"
-  local REQUIRED_CORES="$2"
+  local REQUIRED_CORES="${2:-6}"
   local WAIT_CORES_SLEEP_TIME_SECONDS='15'
-
-  while [ "$(get_available_cores "${PROJECT_ID}")" -lt "${REQUIRED_CORES}" ]; do
-    log_warn "Waiting until ${REQUIRED_CORES} cores are available."
+  [ -z "${PROJECT_ID}" ] && {
+    log_error 'Project ID must be set.'
+    exit 1
+  }
+  log_stdout "Waiting until ${REQUIRED_CORES} CPU cores are available."
+  local AVAILABLE_CORES
+  AVAILABLE_CORES="$(get_available_cores "${PROJECT_ID}")"
+  while [ "${AVAILABLE_CORES:-0}" -lt "${REQUIRED_CORES}" ]; do
+    log_warn "Only ${AVAILABLE_CORES} CPU cores are available."
     sleep "${WAIT_CORES_SLEEP_TIME_SECONDS}"
+    AVAILABLE_CORES="$(get_available_cores "${PROJECT_ID}")"
   done
+  log_stdout "${AVAILABLE_CORES} CPU cores are available."
 }
 
 create_instance()
@@ -189,6 +197,7 @@ EOF
 
   echo "${CREATED_INSTANCE_ID}"
 }
+
 delete_instance()
 {
   local INSTANCE_ID="$1"

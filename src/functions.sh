@@ -155,7 +155,7 @@ create_instance()
   "flavor": "${HARDWARE_FLAVOR}",
   "os": "${FIRMWARE_VERSION}",
   "osbuild": "${FIRMWARE_BUILD}",
-  "bootOptions": {"cores": 4,"ram": 4096}
+  "bootOptions": {"cores": 6,"ram": 6144}
 }
 EOF
     )

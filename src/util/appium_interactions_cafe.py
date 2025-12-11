@@ -43,9 +43,9 @@ APPIUM_DRIVER_EXPLICITLY_WAIT=20 # seconds
 
 def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     '''Interact with the target app using Appium commands.'''
-    
+
     page_load_sleep_time_seconds=5
-    
+
     log_stdout("Appium - Interact with login page.")
     el1 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText")
     el1.send_keys("Myemail@corellium.com")

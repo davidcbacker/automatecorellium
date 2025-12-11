@@ -64,7 +64,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el7 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
     el7.click()
 
-    log_stdout('Waiting for blog page to load.')
+    log_stdout('Appium - Wait for blog page to load.')
     el8 = wait_until_clickable(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", wait=driver_wait)
     el8.click()
     save_screenshot(driver, TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)

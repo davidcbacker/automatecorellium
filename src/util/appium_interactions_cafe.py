@@ -44,112 +44,84 @@ APPIUM_DRIVER_EXPLICITLY_WAIT=20 # seconds
 def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     '''Interact with the target app using Appium commands.'''
 
-    log_stdout("Appium - Interact with login page.")
+    page_load_sleep_time_seconds=5
 
+    log_stdout("Appium - Interact with login page.")
     el1 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText")
     el1.send_keys("Myemail@corellium.com")
-
     el2 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText")
     el2.send_keys("Password123")
-
     el3 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
     el3.click()
-
     el4 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
     el4.click()
 
     log_stdout("Appium - Open blog page.")
-
     el5 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
     el5.click()
-
     el6 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Blog\")")
     el6.click()
-
     el7 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
     el7.click()
 
-    page_load_sleep_time_seconds=5
     log_stdout('Waiting for blog page to load.')
     el8 = wait_until_clickable(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", wait=driver_wait)
     el8.click()
-
     save_screenshot(driver, TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)
 
     log_stdout("Appium - Return to home page.")
-
     el9 = driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
     el9.click()
-
     el10 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Home\")")
     el10.click()
 
     log_stdout("Appium - Add the first coffee option to cart.")
-
     el11 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
     el11.click()
-
     el12 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
     el12.click()
 
     log_stdout("Appium - Open cart and begin checkout.")
-
     el13 = wait_until_clickable(by=AppiumBy.ACCESSIBILITY_ID, value="Cart", wait=driver_wait)
     el13.click()
-
     el14 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
     el14.click()
 
     log_stdout("Appium - Fill in customner info.")
-
     el15 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText")
     el15.send_keys("Myfirstname")
-
     el16 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText")
     el16.send_keys("Mylastname")
-
     el17 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText")
     el17.send_keys("3216540987")
-
     time.sleep(page_load_sleep_time_seconds)
     save_screenshot(driver, TARGET_APP_CUSTOMER_INFO_SCREENSHOT_FILENAME)
-
     el18 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
     el18.click()
 
     log_stdout("Appium - Fill in payment info.")
-
     el19 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber")
     el19.send_keys("2345678901234567")
-
     el20 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration")
     el20.send_keys("1234")
-
     el21 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV")
     el21.send_keys("135")
-
     el22 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
     el22.send_keys("24680")
-
     time.sleep(page_load_sleep_time_seconds)
     save_screenshot(driver, TARGET_APP_PAYMENT_INFO_SCREENSHOT_FILENAME)
-
     el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
     el23.click()
 
     log_stdout("Appium - Enter invalid promo code.")
-
     el24 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode")
     el24.send_keys("65432")
-
     el25 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
     el25.click()
 
     log_stdout("Appium - Submit order.")
-
     el26 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvSubmitOrder")
     el26.click()
-
     el27 = driver.find_element(by=AppiumBy.ID, value="android:id/button1")
     el27.click()
 

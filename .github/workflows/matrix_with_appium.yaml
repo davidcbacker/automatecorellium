@@ -59,7 +59,7 @@ jobs:
           python-version: 3.14
       - name: Install API dependencies
         run: |
-          npm ci
+          npm ci --no-audit --no-fund
           echo "$(pwd)/node_modules/.bin" >> "${GITHUB_PATH}"
       - name: Log in to Corellium
         run: |

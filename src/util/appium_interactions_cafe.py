@@ -70,10 +70,8 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el7.click()
 
     page_load_sleep_time_seconds=5
-    log_stdout('DEBUG WAITING FOR BLOG PAGE ELEMENT')
-    # el8 = driver.find_element(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"The Corellium Resource Library \")")
+    log_stdout('Waiting for blog page to load.')
     el8 = wait_until_clickable(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", wait=driver_wait)
-    log_stdout('DEBUG CLICKING ON BLOG PAGE ELEMENT')
     el8.click()
 
     save_screenshot(driver, TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)

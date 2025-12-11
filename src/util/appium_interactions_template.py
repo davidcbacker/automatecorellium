@@ -113,7 +113,7 @@ if __name__ == "__main__":
             corellium_device_appium_udid = f'{TARGET_DEVICE_SERVICES_IP}:{DEFAULT_ADB_PORT}'
             print(f'Running app test on device at {corellium_device_appium_udid}...')
         case _:
-            print('ERROR: Please provide zero or pass in the Corellium device services IP.')
+            print('ERROR: Please provide zero args or pass in the Corellium device services IP.')
             sys.exit(1)
 
     run_app_automation(corellium_device_appium_udid)

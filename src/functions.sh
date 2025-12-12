@@ -1331,8 +1331,8 @@ is_app_running_on_instance()
 
   APP_RUNNING_STATUS="$(echo "${APP_STATUS_JSON_RESPONSE}" |
     jq -r \
-    --args app_package_name "${APP_PACKAGE_NAME}" \
-    '.[] | select(.bundleID == $app_package_name) | .running')" || {
+      --args app_package_name "${APP_PACKAGE_NAME}" \
+      '.[] | select(.bundleID == $app_package_name) | .running')" || {
     log_error 'Failed to parse app status JSON response.'
     exit 1
   }
@@ -1348,7 +1348,7 @@ ensure_app_is_running_on_instance()
 {
   local INSTANCE_ID="$1"
   local APP_PACKAGE_NAME="$2"
-  is_app_running_on_instance "${INSTANCE_ID}"  "${APP_PACKAGE_NAME}" || {
+  is_app_running_on_instance "${INSTANCE_ID}" "${APP_PACKAGE_NAME}" || {
     log_error "${APP_PACKAGE_NAME} is not running on instance ${INSTANCE_ID}."
     exit 1
   }

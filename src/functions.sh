@@ -676,10 +676,14 @@ run_full_matrix_assessment()
   fi
   log_stdout "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
-  [ -n "${APPIUM_INTERACTIONS_PATH}" &&
+  wait_until_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
+  if [ -n "${APPIUM_INTERACTIONS_PATH}"; then
     run_appium_interactions \
       "${INSTANCE_ID}" \
       "${APPIUM_INTERACTIONS_PATH}"
+    sleep 5
+    ensure_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
+  fi
   stop_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   log_stdout "Completed MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
@@ -1314,6 +1318,54 @@ ensure_matrix_check_outcomes_from_local_json_path()
     '.results[] | select(.id == $id) | .outcome == $expected_outcome' \
     "${MATRIX_JSON_REPORT_PATH}" || {
     log_error "MATRIX check ${MATRIX_CHECK_TO_ANALYZE} is not ${MATRIX_CHECK_EXPECTED_OUTCOME}."
+    exit 1
+  }
+}
+
+is_app_running_on_instance()
+{
+  local INSTANCE_ID="$1"
+  local APP_PACKAGE_NAME="$2"
+  local PROJECT_ID APP_STATUS_JSON_RESPONSE APP_RUNNING_STATUS
+  PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
+
+  APP_STATUS_JSON_RESPONSE="$(corellium instance apps \
+    --instance "${INSTANCE_ID}" \
+    --project "${PROJECT_ID}")" || {
+    log_error 'Failed to check app status.'
+    exit 1
+  }
+
+  APP_RUNNING_STATUS="$(echo "${APP_STATUS_JSON_RESPONSE}" |
+    jq -r \
+      --arg app_package_name "${APP_PACKAGE_NAME}" \
+      '.[] | select(.bundleID == $app_package_name) | .running')" || {
+    log_error 'Failed to parse app status JSON response.'
+    exit 1
+  }
+
+  if [ "${APP_RUNNING_STATUS}" = 'true' ]; then
+    return 0
+  else
+    return 1
+  fi
+}
+
+wait_until_app_is_running_on_instance()
+{
+  local INSTANCE_ID="$1"
+  local APP_PACKAGE_NAME="$2"
+  until is_app_running_on_instance "${INSTANCE_ID}" "${APP_PACKAGE_NAME}"; do
+    sleep 1
+  done
+}
+
+ensure_app_is_running_on_instance()
+{
+  local INSTANCE_ID="$1"
+  local APP_PACKAGE_NAME="$2"
+  is_app_running_on_instance "${INSTANCE_ID}" "${APP_PACKAGE_NAME}" || {
+    log_error "${APP_PACKAGE_NAME} is not running on instance ${INSTANCE_ID}."
     exit 1
   }
 }

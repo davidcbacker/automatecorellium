@@ -665,6 +665,7 @@ run_full_matrix_assessment()
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID="$2"
   local MATRIX_WORDLIST_ID="$3"
+  local APPIUM_INTERACTIONS_PATH="${4:-}"
   handle_open_matrix_assessment "${INSTANCE_ID}"
   log_stdout "Creating MATRIX assessment."
   local MATRIX_ASSESSMENT_ID
@@ -675,7 +676,10 @@ run_full_matrix_assessment()
   fi
   log_stdout "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
-  run_appium_interactions_cafe "${INSTANCE_ID}"
+  [ -n "${APPIUM_INTERACTIONS_PATH}" &&
+    run_appium_interactions \
+      "${INSTANCE_ID}" \
+      "${APPIUM_INTERACTIONS_PATH}"
   stop_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   log_stdout "Completed MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
@@ -1243,10 +1247,11 @@ close_appium_session()
 run_appium_interactions_cafe()
 {
   local INSTANCE_ID="$1"
+  local APPIUM_INTERACTIONS_PATH="$2"
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   log_stdout 'Starting automated Appium interactions.'
-  PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe.py "${INSTANCE_SERVICES_IP}"
+  PYTHONUNBUFFERED=1 python3 "${APPIUM_INTERACTIONS_PATH}" "${INSTANCE_SERVICES_IP}"
   log_stdout 'Finished automated Appium interactions.'
 }
 

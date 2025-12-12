@@ -675,7 +675,9 @@ run_full_matrix_assessment()
   fi
   log_stdout "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
+  ensure_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   run_appium_interactions_cafe "${INSTANCE_ID}"
+  ensure_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   stop_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   log_stdout "Completed MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
@@ -1340,4 +1342,16 @@ is_app_running_on_instance()
   else
     return 1
   fi
+}
+
+ensure_app_is_running_on_instance()
+{
+  local INSTANCE_ID="$1"
+  local APP_PACKAGE_NAME="$2"
+  is_app_running_on_instance \
+    "${INSTANCE_ID}" \
+    "${APP_PACKAGE_NAME}" || {
+    log_error "${APP_PACKAGE_NAME} is not running on instance ${INSTANCE_ID}."
+    exit 1
+  }
 }

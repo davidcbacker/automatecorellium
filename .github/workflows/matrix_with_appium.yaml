@@ -43,12 +43,14 @@ jobs:
             firmware_build: 'r2 userdebug'
             corellium_cafe_app_id: com.corellium.cafe
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
+            corellium_cafe_interactions_script: 'src/util/appium_interactions_cafe_android.py'
           - os: iOS
             hardware_flavor: iphone17pm
             firmware_version: 26.0.1
             firmware_build: 23A355
             corellium_cafe_app_id: com.corellium.Cafe
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
+            corellium_cafe_interactions_script: 'src/util/appium_interactions_cafe_ios.py'
     steps:
       - name: Pull the latest code
         uses: actions/checkout@v5
@@ -192,6 +194,7 @@ jobs:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
           MATRIX_WORDLIST_PATH: './data/wordlist.txt'
+          APPIUM_INTERACTIONS_PATH: ${{ matrix.corellium_cafe_interactions_script }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
@@ -199,7 +202,8 @@ jobs:
           run_full_matrix_assessment\
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_app_id }}" \
-            "${MATRIX_WORDLIST_ID}"
+            "${MATRIX_WORDLIST_ID}" \
+            "${APPIUM_INTERACTIONS_PATH}"
       - name: Retry MATRIX assessment if failed again
         id: matrix-run-3
         if: steps.matrix-run-2.outcome == 'failure'

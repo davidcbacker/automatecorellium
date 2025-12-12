@@ -1312,3 +1312,32 @@ ensure_matrix_check_outcomes_from_local_json_path()
     exit 1
   }
 }
+
+is_app_running_on_instance()
+{
+  local INSTANCE_ID="$1"
+  local APP_PACKAGE_NAME="$2"
+  local PROJECT_ID APP_STATUS_JSON_RESPONSE APP_RUNNING_STATUS
+  PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
+
+  APP_STATUS_JSON_RESPONSE="$(corellium instance apps \
+    --instance "${INSTANCE_ID}" \
+    --project "${PROJECT_ID}")" || {
+    log_error 'Failed to check app status.'
+    exit 1
+  }
+
+  APP_RUNNING_STATUS="$(echo "${APP_STATUS_JSON_RESPONSE}" |
+    jq -r \
+    --args app_package_name "${APP_PACKAGE_NAME}" \
+    '.[] | select(.bundleID == $app_package_name) | .running') || {
+    log_error 'Failed to parse app status JSON response.'
+    exit 1
+  }
+
+  if [ "${APP_RUNNING_STATUS}" = 'true' ]; then
+    return 0
+  else
+    return 1
+  fi
+}

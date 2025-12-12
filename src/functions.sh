@@ -677,7 +677,7 @@ run_full_matrix_assessment()
   log_stdout "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   wait_until_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
-  if [ -n "${APPIUM_INTERACTIONS_PATH}"; then
+  if [ -n "${APPIUM_INTERACTIONS_PATH}" ]; then
     run_appium_interactions \
       "${INSTANCE_ID}" \
       "${APPIUM_INTERACTIONS_PATH}"

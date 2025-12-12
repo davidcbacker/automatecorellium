@@ -66,7 +66,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
 
     log_stdout('Appium - Wait for blog page to load.')
     el8 = wait_until_clickable(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", wait=driver_wait)
-    el8.click()
+    el8.send_keys("Testing")
     save_screenshot(driver, TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)
 
     log_stdout("Appium - Return to home page.")

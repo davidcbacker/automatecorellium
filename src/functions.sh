@@ -1205,7 +1205,7 @@ open_appium_session()
     local INSTANCE_SERVICES_IP
     INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
     APPIUM_SESSION_JSON_PAYLOAD=$(
-    cat << EOF
+      cat << EOF
 {
   "capabilities": {
     "alwaysMatch": {
@@ -1222,11 +1222,11 @@ open_appium_session()
   }
 }
 EOF
-)
+    )
   else
     APPIUM_UDID="$(get_instance_udid "${INSTANCE_ID}")"
     APPIUM_SESSION_JSON_PAYLOAD=$(
-    cat << EOF
+      cat << EOF
 {
   "capabilities": {
     "alwaysMatch": {
@@ -1241,7 +1241,7 @@ EOF
   }
 }
 EOF
-)
+    )
   fi
 
   OPEN_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent --retry 5 \

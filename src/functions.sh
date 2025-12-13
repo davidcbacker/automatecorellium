@@ -678,9 +678,7 @@ run_full_matrix_assessment()
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   wait_until_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   if [ -n "${APPIUM_INTERACTIONS_PATH}" ]; then
-    run_appium_interactions \
-      "${INSTANCE_ID}" \
-      "${APPIUM_INTERACTIONS_PATH}"
+    run_appium_interactions_cafe "${INSTANCE_ID}"
     sleep 5
     ensure_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   fi
@@ -1251,18 +1249,23 @@ close_appium_session()
 run_appium_interactions_cafe()
 {
   local INSTANCE_ID="$1"
-  local APPIUM_INTERACTIONS_PATH="$2"
-  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
-  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   log_stdout 'Starting automated Appium interactions.'
-  PYTHONUNBUFFERED=1 python3 "${APPIUM_INTERACTIONS_PATH}" "${INSTANCE_SERVICES_IP}"
+  if [ "$(get_instance_flavor "${INSTANCE_ID}")" = 'ranchu' ]; then
+    local INSTANCE_SERVICES_IP
+    INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+    PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_android.py "${INSTANCE_SERVICES_IP}"
+  else
+    local INSTANCE_UDID
+    INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
+    PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_ios.py "${INSTANCE_UDID}"
+  fi
   log_stdout 'Finished automated Appium interactions.'
 }
 
 run_appium_interactions_template()
 {
   local INSTANCE_ID="$1"
-  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
+  local INSTANCE_SERVICES_IP
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   log_stdout 'Starting automated Appium interactions.'
   python3 src/util/appium_interactions_template.py "${INSTANCE_SERVICES_IP}"

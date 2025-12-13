@@ -665,7 +665,6 @@ run_full_matrix_assessment()
   local INSTANCE_ID="$1"
   local APP_BUNDLE_ID="$2"
   local MATRIX_WORDLIST_ID="$3"
-  local APPIUM_INTERACTIONS_PATH="${4:-}"
   handle_open_matrix_assessment "${INSTANCE_ID}"
   log_stdout "Creating MATRIX assessment."
   local MATRIX_ASSESSMENT_ID
@@ -677,11 +676,9 @@ run_full_matrix_assessment()
   log_stdout "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   wait_until_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
-  if [ -n "${APPIUM_INTERACTIONS_PATH}" ]; then
-    run_appium_interactions_cafe "${INSTANCE_ID}"
-    sleep 5
-    ensure_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
-  fi
+  run_appium_interactions_cafe "${INSTANCE_ID}"
+  sleep 5
+  ensure_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   stop_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   log_stdout "Completed MATRIX assessment ${MATRIX_ASSESSMENT_ID}."

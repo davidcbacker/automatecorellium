@@ -28,9 +28,27 @@ env:
 
 jobs:
   corellium-matrixscan:
-    name: Scan with MATRIX
+    name: Scan with MATRIX on ${{ matrix.os }}
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        os: [Android, iOS]
+        include:
+          - os: Android
+            hardware_flavor: ranchu
+            firmware_version: 16.0.0
+            firmware_build: 'r2 userdebug'
+            corellium_cafe_app_id: com.corellium.cafe
+            corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
+          - os: iOS
+            hardware_flavor: iphone17pm
+            firmware_version: 26.0.1
+            firmware_build: 23A355
+            corellium_cafe_app_id: com.corellium.Cafe
+            corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
     steps:
       - name: Pull the latest code
         uses: actions/checkout@v5
@@ -70,7 +88,7 @@ jobs:
         timeout-minutes: 30
         run: |
           source ./src/functions.sh && set -euo pipefail
-          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+          if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
             wait_until_available_cores "${CORELLIUM_DEFAULT_PROJECT}" '6'
           else
             wait_until_available_cores "${CORELLIUM_DEFAULT_PROJECT}" '6'
@@ -82,33 +100,34 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           source ./src/functions.sh && set -euo pipefail
-          log_stdout "Creating instance."
+          log_stdout "Creating ephemeral instance."
           CREATED_CORELLIUM_INSTANCE_ID="$(create_instance \
-            "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" \
-            "${{ vars.MATRIX_DEFAULT_FIRMWARE_VERSION }}" \
-            "${{ vars.MATRIX_DEFAULT_FIRMWARE_BUILD }}" \
+            "${{ matrix.hardware_flavor }}" \
+            "${{ matrix.firmware_version }}" \
+            "${{ matrix.firmware_build }}" \
             "${CORELLIUM_DEFAULT_PROJECT}" \
             "${CORELLIUM_INSTANCE_NAME_PREFIX}")"
           log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
           echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
-          log_stdout 'Updated environmental variables for ephemeral instance.'
+          log_stdout 'Saved ephemeral instance ID as environmental variable.'
       - name: Install additional runner dependencies
         run: |
           source ./src/functions.sh && set -euo pipefail
           install_openvpn_dependencies
-          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+          install_appium_server_and_dependencies
+          if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
             install_adb_dependency
           else
             install_usbfluxd_and_dependencies
           fi
-          install_appium_server_and_dependencies
       - name: Wait for instance agent ready
         timeout-minutes: 20
         run: |
           source ./src/functions.sh && set -euo pipefail
           start_instance "${CORELLIUM_INSTANCE_ID}"
           wait_until_agent_ready "${CORELLIUM_INSTANCE_ID}"
-          # unlock_instance "${CORELLIUM_INSTANCE_ID}" # only for iOS
+          [ "${{ matrix.hardware_flavor }}" == 'ranchu' ] ||
+            unlock_instance "${CORELLIUM_INSTANCE_ID}"
       - name: Connect to project VPN
         timeout-minutes: 2
         run: |
@@ -120,7 +139,7 @@ jobs:
         timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail
-          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+          if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
             connect_with_adb "${CORELLIUM_INSTANCE_ID}"
           else
             run_usbfluxd_and_dependencies
@@ -128,20 +147,21 @@ jobs:
             verify_usbflux_connection "${CORELLIUM_INSTANCE_ID}"
           fi
       - name: Install Corellium Cafe from URL
+        timeout-minutes: 2
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           source ./src/functions.sh && set -euo pipefail
-          kill_app "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
-          install_app_from_url "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_SOURCE_URL}"
+          kill_app "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_app_id }}"
+          install_app_from_url "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_source_url }}"
       - name: Start Appium server and run session test
         timeout-minutes: 15
         run: |
           source ./src/functions.sh && set -euo pipefail
           run_appium_server
           log_stdout 'Opening Appium session.'
-          OPEN_APPIUM_SESSION_ID="$(open_appium_session "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}")"
+          OPEN_APPIUM_SESSION_ID="$(open_appium_session "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_app_id }}")"
           log_stdout "Opened Appium session ${OPEN_APPIUM_SESSION_ID}."
           sleep 5
           log_stdout "Closing Appium session ${OPEN_APPIUM_SESSION_ID}."
@@ -161,7 +181,7 @@ jobs:
           log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment\
             "${CORELLIUM_INSTANCE_ID}" \
-            "${CORELLIUM_CAFE_PACKAGE}" \
+            "${{ matrix.corellium_cafe_app_id }}" \
             "${MATRIX_WORDLIST_ID}"
       - name: Retry MATRIX assessment if failed
         id: matrix-run-2
@@ -178,7 +198,7 @@ jobs:
           log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment\
             "${CORELLIUM_INSTANCE_ID}" \
-            "${CORELLIUM_CAFE_PACKAGE}" \
+            "${{ matrix.corellium_cafe_app_id }}" \
             "${MATRIX_WORDLIST_ID}"
       - name: Retry MATRIX assessment if failed again
         id: matrix-run-3
@@ -195,7 +215,7 @@ jobs:
           log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment\
             "${CORELLIUM_INSTANCE_ID}" \
-            "${CORELLIUM_CAFE_PACKAGE}" \
+            "${{ matrix.corellium_cafe_app_id }}" \
             "${MATRIX_WORDLIST_ID}"
       - name: Download MATRIX runtime artifacts from VM
         env:

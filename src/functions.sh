@@ -1222,6 +1222,7 @@ open_appium_session()
   }
 }
 EOF
+)
   else
     APPIUM_UDID="$(get_instance_udid "${INSTANCE_ID}")"
     APPIUM_SESSION_JSON_PAYLOAD=$(
@@ -1240,6 +1241,7 @@ EOF
   }
 }
 EOF
+)
   fi
 
   OPEN_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent --retry 5 \

@@ -215,6 +215,21 @@ jobs:
           log_stdout 'Downloaded MATRIX runtime artifacts from VM to CI runner.'
           ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
+      - name: Delete instance
+        if: always()
+        timeout-minutes: 15
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
+            log_stdout 'CORELLIUM_INSTANCE_ID is not set.'
+          elif does_instance_exist "${CORELLIUM_INSTANCE_ID}"; then
+            log_stdout "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
+            stop_instance "${CORELLIUM_INSTANCE_ID}" || true
+            delete_instance "${CORELLIUM_INSTANCE_ID}"
+          fi
       - name: Upload artifact 'MATRIX runtime artifacts'
         uses: actions/upload-artifact@v5
         with:
@@ -247,21 +262,6 @@ jobs:
           for report in matrix_report_*.json; do
             analyze_corellium_cafe_matrix_report_from_local_path "${report}"
           done
-      - name: Stop or delete instance
-        if: always()
-        timeout-minutes: 15
-        env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
-        run: |
-          source ./src/functions.sh && set -euo pipefail
-          if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
-            log_stdout 'CORELLIUM_INSTANCE_ID is not set.'
-          elif does_instance_exist "${CORELLIUM_INSTANCE_ID}"; then
-            log_stdout "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
-            stop_instance "${CORELLIUM_INSTANCE_ID}" || true
-            delete_instance "${CORELLIUM_INSTANCE_ID}"
-          fi
       - name: Clean up Corellium auth and processes
         if: always()
         timeout-minutes: 1

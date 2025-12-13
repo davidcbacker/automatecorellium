@@ -1213,7 +1213,7 @@ open_appium_session()
     APPIUM_AUTOMATION_NAME="XCUITest"
     APPIUM_UDID="$(get_instance_udid "${INSTANCE_ID}")"
   fi
-    
+
   APPIUM_SESSION_JSON_PAYLOAD=$(
     cat << EOF
 {

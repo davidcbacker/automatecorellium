@@ -17,15 +17,9 @@ from selenium.webdriver.support.ui import WebDriverWait
 # ==== BEGIN CONSTANTS DEFINITIONS ====
 # =====================================
 
-# ==== CORELLIUM DEVICE ====
-DEFAULT_SERVICES_IP = '10.11.1.1'
-DEFAULT_ADB_PORT = '5001'
-
 # ==== TARGET APP ====
-TARGET_APP_PACKAGE = 'com.corellium.cafe'
-TARGET_APP_ACTIVITY = '.ui.activities.MainActivity'
+TARGET_APP_PACKAGE = 'com.corellium.Cafe'
 TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME')
-TARGET_APP_CUSTOMER_INFO_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_CUSTOMER_INFO_SCREENSHOT_FILENAME')
 TARGET_APP_PAYMENT_INFO_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_PAYMENT_INFO_SCREENSHOT_FILENAME')
 
 # ==== APPIUM SERVER ====
@@ -65,10 +59,6 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
 
     log_stdout("Appium - Fill in order info.")
     time.sleep(page_load_sleep_time_seconds)
-    save_screenshot(driver, TARGET_APP_CUSTOMER_INFO_SCREENSHOT_FILENAME)
-
-    log_stdout("Appium - Fill in payment info.")
-    time.sleep(page_load_sleep_time_seconds)
     save_screenshot(driver, TARGET_APP_PAYMENT_INFO_SCREENSHOT_FILENAME)
 
     log_stdout("Appium - Submit order.")
@@ -101,10 +91,9 @@ def run_app_automation(udid: str):
     '''Launch the app and interact using Appium commands.'''
     options = UiAutomator2Options()
     options.set_capability('platformName', 'Android')
-    options.set_capability('appium:automationName', 'UiAutomator2')
+    options.set_capability('appium:automationName', 'XCUITest')
     options.set_capability('appium:udid', udid)
     options.set_capability('appium:appPackage', TARGET_APP_PACKAGE)
-    options.set_capability('appium:appActivity', TARGET_APP_ACTIVITY)
     options.set_capability('appium:noReset', True)
     options.set_capability('appium:adbExecTimeout', 60000)
 
@@ -145,15 +134,10 @@ def run_app_automation(udid: str):
 
 if __name__ == "__main__":
     match len(sys.argv):
-        case 1:
-            corellium_device_appium_udid = f'{DEFAULT_SERVICES_IP}:{DEFAULT_ADB_PORT}'
-            log_stdout(f'Defaulting to Corellium virtual device at {DEFAULT_SERVICES_IP}.')
         case 2:
-            TARGET_DEVICE_SERVICES_IP = sys.argv[1]
-            corellium_device_appium_udid = f'{TARGET_DEVICE_SERVICES_IP}:{DEFAULT_ADB_PORT}'
-            log_stdout(f'Using Corellium virtual device at {corellium_device_appium_udid}.')
+            corellium_device_appium_udid = sys.argv[1]
         case _:
-            print('ERROR: Please provide zero arguments or pass in the Corellium device services IP.')
+            print('ERROR: Please pass in the Corellium iOS or iPadOS device UDID.')
             sys.exit(1)
 
     run_app_automation(corellium_device_appium_udid)

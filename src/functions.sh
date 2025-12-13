@@ -1012,8 +1012,11 @@ install_appium_server_and_dependencies()
   log_stdout 'Installed appium dependencies.'
   log_stdout 'Installing appium and device driver.'
   npm install --location=global appium
-  appium driver install uiautomator2
-  #appium driver install xcuitest # for ios devices
+  if [ "$(get_instance_flavor "${INSTANCE_ID}")" = 'ranchu' ]; then
+    appium driver install uiautomator2
+  else
+    appium driver install xcuitest
+  fi
   log_stdout 'Installed appium and device driver.'
 }
 

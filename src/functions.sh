@@ -1202,26 +1202,16 @@ open_appium_session()
   local APPIUM_PLATFORM_NAME APPIUM_AUTOMATION_NAME APPIUM_UDID \
     APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
   if [ "$(get_instance_flavor "${INSTANCE_ID}")" = 'ranchu' ]; then
-    APPIUM_PLATFORM_NAME='Android'
-    APPIUM_AUTOMATION_NAME='UiAutomator2'
     local INSTANCE_SERVICES_IP
     INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
-    local DEFAULT_ADB_PORT='5001'
-    APPIUM_UDID="${INSTANCE_SERVICES_IP}:${DEFAULT_ADB_PORT}"
-  else
-    APPIUM_PLATFORM_NAME='iOS'
-    APPIUM_AUTOMATION_NAME="XCUITest"
-    APPIUM_UDID="$(get_instance_udid "${INSTANCE_ID}")"
-  fi
-
-  APPIUM_SESSION_JSON_PAYLOAD=$(
+    APPIUM_SESSION_JSON_PAYLOAD=$(
     cat << EOF
 {
   "capabilities": {
     "alwaysMatch": {
-      "platformName": "${APPIUM_PLATFORM_NAME}",
-      "appium:automationName": "${APPIUM_AUTOMATION_NAME}",
-      "appium:udid": "${APPIUM_UDID}",
+      "platformName": "Android",
+      "appium:automationName": "UiAutomator2",
+      "appium:udid": "${INSTANCE_SERVICES_IP}:5001",
       "appium:deviceName": "Corellium",
       "appium:appPackage": "${APP_PACKAGE_NAME}",
       "appium:appActivity": ".ui.activities.MainActivity",
@@ -1232,7 +1222,25 @@ open_appium_session()
   }
 }
 EOF
-  )
+  else
+    APPIUM_UDID="$(get_instance_udid "${INSTANCE_ID}")"
+    APPIUM_SESSION_JSON_PAYLOAD=$(
+    cat << EOF
+{
+  "capabilities": {
+    "alwaysMatch": {
+      "platformName": "iOS",
+      "appium:automationName": "XCUITest",
+      "appium:udid": "${APPIUM_UDID}",
+      "appium:deviceName": "Corellium",
+      "appium:bundleId": "${APP_PACKAGE_NAME}",
+      "appium:noReset": false
+    },
+    "firstMatch": [{}]
+  }
+}
+EOF
+  fi
 
   OPEN_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent --retry 5 \
     -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \

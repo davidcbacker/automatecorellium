@@ -1199,8 +1199,7 @@ open_appium_session()
   local INSTANCE_ID="$1"
   local APP_PACKAGE_NAME="$2"
   local DEFAULT_APPIUM_PORT='4723'
-  local APPIUM_PLATFORM_NAME APPIUM_AUTOMATION_NAME APPIUM_UDID \
-    APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
+  local APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
   if [ "$(get_instance_flavor "${INSTANCE_ID}")" = 'ranchu' ]; then
     local INSTANCE_SERVICES_IP
     INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
@@ -1224,6 +1223,7 @@ open_appium_session()
 EOF
     )
   else
+    local APPIUM_UDID
     APPIUM_UDID="$(get_instance_udid "${INSTANCE_ID}")"
     APPIUM_SESSION_JSON_PAYLOAD=$(
       cat << EOF

@@ -1232,7 +1232,7 @@ EOF
     "alwaysMatch": {
       "platformName": "iOS",
       "appium:automationName": "XCUITest",
-      "appium:udid": "${APPIUM_UDID}",
+      "appium:udid": "${APPIUM_UDID//-/}",
       "appium:deviceName": "Corellium",
       "appium:bundleId": "${APP_PACKAGE_NAME}",
       "appium:noReset": false

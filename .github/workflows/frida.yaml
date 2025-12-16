@@ -41,7 +41,7 @@ jobs:
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
     steps:
       - name: Pull the latest code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Install Node
         uses: actions/setup-node@v6
         with:

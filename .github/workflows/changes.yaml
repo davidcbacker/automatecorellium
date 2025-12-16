@@ -23,7 +23,7 @@ jobs:
       shell: ${{ steps.filter.outputs.shell }}
       static-lint: ${{ steps.filter.outputs.static-lint }}      
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v3
         id: filter
         with:

@@ -66,7 +66,7 @@ def run_app_automation(udid: str):
     options.set_capability('appium:udid', udid)
     options.set_capability('appium:appPackage', TARGET_APP_PACKAGE)
     options.set_capability('appium:appActivity', TARGET_APP_ACTIVITY)
-    options.set_capability('appium:noReset', True)
+    options.set_capability('appium:noReset', False) # <----- NOTE: Set this to True for MATRIX assessments
 
     try:
         print("Starting session at", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), ".")

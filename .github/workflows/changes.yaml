@@ -53,7 +53,6 @@ jobs:
       ${{
         needs.changes.outputs.javascript-deps == 'true' ||
         needs.changes.outputs.matrix == 'true' ||
-        needs.changes.outputs.python == 'true' ||
         needs.changes.outputs.shell == 'true'
       }}
     uses: ./.github/workflows/matrix_with_appium.yaml

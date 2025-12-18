@@ -58,6 +58,18 @@ def wait_until_clickable(by, value, wait):
         print(f"TimeoutException: {e}")
         sys.exit(1)
 
+def log_stdout(message: str):
+    '''Print message to stdout with current timestamp'''
+    current_datetime = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
+    print(f"[-] {current_datetime} INFO: {message}")
+
+def save_screenshot(driver: webdriver.Remote, filename: str):
+    '''Capture a screenshot and save to working directory'''
+    screenshot_path: str = os.path.join(os.getcwd(), filename)
+    log_stdout(f"Appium - Saving screenshot as {filename}.")
+    driver.save_screenshot(screenshot_path)
+    log_stdout("Appium - Saved screenshot.")
+
 def run_app_automation(udid: str):
     '''Launch the app and interact using Appium commands.'''
     options = UiAutomator2Options()

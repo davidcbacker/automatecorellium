@@ -37,14 +37,15 @@ APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
 APPIUM_DRIVER_IMPLICITLY_WAIT=5 # seconds
 APPIUM_DRIVER_EXPLICITLY_WAIT=20 # seconds
 
+# ==== SLEEP TIME ====
+PAGE_LOAD_SLEEP_TIME_SECONDS=5
+
 # =====================================
 # ===== END CONSTANTS DEFINITIONS =====
 # =====================================
 
 def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     '''Interact with the target app using Appium commands.'''
-
-    page_load_sleep_time_seconds=5
 
     log_stdout("Appium - Interact with login page.")
     el1 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText")
@@ -94,7 +95,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el16.send_keys("Mylastname")
     el17 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText")
     el17.send_keys("3216540987")
-    time.sleep(page_load_sleep_time_seconds)
+    time.sleep(PAGE_LOAD_SLEEP_TIME_SECONDS)
     save_screenshot(driver, TARGET_APP_CUSTOMER_INFO_SCREENSHOT_FILENAME)
     el18 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
     el18.click()
@@ -108,7 +109,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el21.send_keys("135")
     el22 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
     el22.send_keys("24680")
-    time.sleep(page_load_sleep_time_seconds)
+    time.sleep(PAGE_LOAD_SLEEP_TIME_SECONDS)
     save_screenshot(driver, TARGET_APP_PAYMENT_INFO_SCREENSHOT_FILENAME)
     el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
     el23.click()

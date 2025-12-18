@@ -295,6 +295,22 @@ soft_stop_instance()
   esac
 }
 
+get_instance_flavor()
+{
+  local INSTANCE_ID="$1"
+  local GET_INSTANCE_RESPONSE_JSON INSTANCE_STATE
+  GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
+    log_error "Failed to get details for instance ${INSTANCE_ID}."
+    return
+  }
+  INSTANCE_FLAVOR="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.flavor')" || {
+    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
+    echo "${GET_INSTANCE_RESPONSE_JSON}"
+    exit 1
+  }
+  echo "${INSTANCE_FLAVOR}"
+}
+
 get_instance_status()
 {
   local INSTANCE_ID="$1"
@@ -305,6 +321,7 @@ get_instance_status()
   }
   INSTANCE_STATE="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.state')" || {
     log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
+    echo "${GET_INSTANCE_RESPONSE_JSON}"
     exit 1
   }
   echo "${INSTANCE_STATE}"
@@ -677,6 +694,7 @@ run_full_matrix_assessment()
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   wait_until_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   run_appium_interactions_cafe "${INSTANCE_ID}"
+  sleep 5
   ensure_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   stop_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
@@ -1012,7 +1030,7 @@ install_appium_server_and_dependencies()
   log_stdout 'Installing appium and device driver.'
   npm install --location=global appium
   appium driver install uiautomator2
-  #appium driver install xcuitest # for ios devices
+  appium driver install xcuitest
   log_stdout 'Installed appium and device driver.'
 }
 
@@ -1181,18 +1199,18 @@ open_appium_session()
   local INSTANCE_ID="$1"
   local APP_PACKAGE_NAME="$2"
   local DEFAULT_APPIUM_PORT='4723'
-  local DEFAULT_ADB_PORT='5001'
-  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
-  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
-
-  APPIUM_SESSION_JSON_PAYLOAD=$(
-    cat << EOF
+  local APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
+  if [ "$(get_instance_flavor "${INSTANCE_ID}")" = 'ranchu' ]; then
+    local INSTANCE_SERVICES_IP
+    INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+    APPIUM_SESSION_JSON_PAYLOAD=$(
+      cat << EOF
 {
   "capabilities": {
     "alwaysMatch": {
       "platformName": "Android",
       "appium:automationName": "UiAutomator2",
-      "appium:udid": "${INSTANCE_SERVICES_IP}:${DEFAULT_ADB_PORT}",
+      "appium:udid": "${INSTANCE_SERVICES_IP}:5001",
       "appium:deviceName": "Corellium",
       "appium:appPackage": "${APP_PACKAGE_NAME}",
       "appium:appActivity": ".ui.activities.MainActivity",
@@ -1203,7 +1221,28 @@ open_appium_session()
   }
 }
 EOF
-  )
+    )
+  else
+    local APPIUM_UDID
+    APPIUM_UDID="$(get_instance_udid "${INSTANCE_ID}")"
+    APPIUM_SESSION_JSON_PAYLOAD=$(
+      cat << EOF
+{
+  "capabilities": {
+    "alwaysMatch": {
+      "platformName": "iOS",
+      "appium:automationName": "XCUITest",
+      "appium:udid": "${APPIUM_UDID//-/}",
+      "appium:deviceName": "Corellium",
+      "appium:bundleId": "${APP_PACKAGE_NAME}",
+      "appium:noReset": false
+    },
+    "firstMatch": [{}]
+  }
+}
+EOF
+    )
+  fi
 
   OPEN_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent --retry 5 \
     -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
@@ -1245,17 +1284,23 @@ close_appium_session()
 run_appium_interactions_cafe()
 {
   local INSTANCE_ID="$1"
-  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
-  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   log_stdout 'Starting automated Appium interactions.'
-  PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe.py "${INSTANCE_SERVICES_IP}"
+  if [ "$(get_instance_flavor "${INSTANCE_ID}")" = 'ranchu' ]; then
+    local INSTANCE_SERVICES_IP
+    INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+    PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_android.py "${INSTANCE_SERVICES_IP}"
+  else
+    local INSTANCE_UDID
+    INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
+    PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_ios.py "${INSTANCE_UDID}"
+  fi
   log_stdout 'Finished automated Appium interactions.'
 }
 
 run_appium_interactions_template()
 {
   local INSTANCE_ID="$1"
-  local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
+  local INSTANCE_SERVICES_IP
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   log_stdout 'Starting automated Appium interactions.'
   python3 src/util/appium_interactions_template.py "${INSTANCE_SERVICES_IP}"

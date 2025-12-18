@@ -1167,6 +1167,10 @@ run_frida_script_usb()
 run_appium_server()
 {
   log_stdout 'Starting appium.'
+  command -v appium > /dev/null || {
+    log_error 'Cannot find appium in PATH.'
+    exit 1
+  }
   appium \
     --port 4723 \
     --log-level info \

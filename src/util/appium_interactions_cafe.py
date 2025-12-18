@@ -82,7 +82,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el12.click()
 
     log_stdout("Appium - Open cart and begin checkout.")
-    el13 = wait_until_clickable(by=AppiumBy.ACCESSIBILITY_ID, value="Cart", wait=driver_wait)
+    el13 = wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/abmCart", wait=driver_wait)
     el13.click()
     el14 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
     el14.click()

@@ -14,6 +14,52 @@ create_matrix_assessment()
     jq -r '.id'
 }
 
+wait_for_matrix_assessment_status()
+{
+  local INSTANCE_ID="$1"
+  local ASSESSMENT_ID="$2"
+  local TARGET_ASSESSMENT_STATUS="$3"
+  local SLEEP_TIME_DEFAULT='2'
+  local SLEEP_TIME_FOR_TESTING='5'
+
+  case "${TARGET_ASSESSMENT_STATUS}" in
+    'complete' | 'failed' | 'monitoring' | 'readyForTesting' | 'startMonitoring' | 'stopMonitoring' | 'testing') ;;
+    *)
+      log_error "Unsupported target assessment status '${TARGET_ASSESSMENT_STATUS}'."
+      exit 1
+      ;;
+  esac
+
+  local CURRENT_ASSESSMENT_STATUS LAST_ASSESSMENT_STATUS ASSESSMENT_STATUS_SLEEP_TIME
+  LAST_ASSESSMENT_STATUS='UNDEFINED'
+  CURRENT_ASSESSMENT_STATUS="$(get_matrix_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
+  while [ "${CURRENT_ASSESSMENT_STATUS}" != "${TARGET_ASSESSMENT_STATUS}" ]; do
+    case "${CURRENT_ASSESSMENT_STATUS}" in
+      '')
+        log_warn "Failed to get instance status. Checking again in ${SLEEP_TIME_DEFAULT} seconds."
+        ASSESSMENT_STATUS_SLEEP_TIME="${SLEEP_TIME_DEFAULT}"
+        ;;
+      'failed')
+        log_error "Detected a failed run. Last state was '${LAST_ASSESSMENT_STATUS}'."
+        exit 1
+        ;;
+      'monitoring')
+        log_error 'Cannot wait when status is monitoring.'
+        exit 1
+        ;;
+      'testing')
+        ASSESSMENT_STATUS_SLEEP_TIME="${SLEEP_TIME_FOR_TESTING}"
+        ;;
+      *)
+        ASSESSMENT_STATUS_SLEEP_TIME="${SLEEP_TIME_DEFAULT}"
+        ;;
+    esac
+    sleep "${ASSESSMENT_STATUS_SLEEP_TIME}"
+    LAST_ASSESSMENT_STATUS="${CURRENT_ASSESSMENT_STATUS}"
+    CURRENT_ASSESSMENT_STATUS="$(get_matrix_assessment_status "${INSTANCE_ID}" "${ASSESSMENT_ID}")"
+  done
+}
+
 start_matrix_monitoring()
 {
   local INSTANCE_ID="$1"

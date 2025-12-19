@@ -77,6 +77,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     log_stdout('Appium - Wait for blog page to load.')
     el8 = wait_until_clickable(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", wait=driver_wait)
     el8.send_keys("Testing")
+    wait_until_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", expected_value="3216540987", wait=driver_wait)
     save_screenshot(driver, TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)
 
     log_stdout("Appium - Return to home page.")
@@ -104,7 +105,8 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el16.send_keys("Mylastname")
     el17 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText")
     el17.send_keys("3216540987")
-    time.sleep(PAGE_LOAD_SLEEP_TIME_SECONDS)
+    wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText", expected_value="3216540987", wait=driver_wait)
+    #time.sleep(PAGE_LOAD_SLEEP_TIME_SECONDS)
     save_screenshot(driver, TARGET_APP_CUSTOMER_INFO_SCREENSHOT_FILENAME)
     log_stdout("Appium - Submit customner info.")
     el18 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
@@ -119,7 +121,8 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el21.send_keys("135")
     el22 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
     el22.send_keys("24680")
-    time.sleep(PAGE_LOAD_SLEEP_TIME_SECONDS)
+    wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode", expected_value="24680", wait=driver_wait)
+    #time.sleep(PAGE_LOAD_SLEEP_TIME_SECONDS)
     save_screenshot(driver, TARGET_APP_PAYMENT_INFO_SCREENSHOT_FILENAME)
     log_stdout("Appium - Submit payment info.")
     el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
@@ -150,6 +153,18 @@ def wait_until_clickable(by, value, wait):
         print(f"TimeoutException: {e}")
         sys.exit(1)
 
+
+def wait_until_element_value(by, value, expected_value, wait):
+    '''Wait for a webdriver locator to have a specific value'''
+    try:
+        element_locator = (by, value)
+        element = wait.until(text_to_be_present_in_element_value(element_locator, expected_value))
+        return element
+    except TimeoutException as e:
+        print("Thrown when a command does not complete in enough time.")
+        print(f"Element not found with value '{expected_value}' after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
+        print(f"TimeoutException: {e}")
+        sys.exit(1)
 
 def wait_until_element_value(by, value, expected_value, wait):
     '''Wait for a webdriver locator to have a specific value'''

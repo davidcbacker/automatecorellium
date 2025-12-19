@@ -128,6 +128,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el27 = driver.find_element(by=AppiumBy.ID, value="android:id/button1")
     el27.click()
 
+
 def wait_until_clickable(by, value, wait):
     '''Wait for a webdriver locator to be clickable'''
     try:
@@ -140,10 +141,25 @@ def wait_until_clickable(by, value, wait):
         print(f"TimeoutException: {e}")
         sys.exit(1)
 
+
+def wait_until_element_value(by, value, expected_value, wait):
+    '''Wait for a webdriver locator to have a specific value'''
+    try:
+        element_locator = (by, value)
+        element = wait.until(text_to_be_present_in_element_value(element_locator, expected_value))
+        return element
+    except TimeoutException as e:
+        print("Thrown when a command does not complete in enough time.")
+        print(f"Element not found with value '{expected_value}' after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
+        print(f"TimeoutException: {e}")
+        sys.exit(1)
+
+
 def log_stdout(message: str):
     '''Print message to stdout with current timestamp'''
     current_datetime = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
     print(f"[-] {current_datetime} INFO: {message}")
+
 
 def save_screenshot(driver: webdriver.Remote, filename: str):
     '''Capture a screenshot and save to working directory'''
@@ -151,6 +167,7 @@ def save_screenshot(driver: webdriver.Remote, filename: str):
     log_stdout(f"Appium - Saving screenshot as {filename}.")
     driver.save_screenshot(screenshot_path)
     log_stdout("Appium - Saved screenshot.")
+
 
 def run_app_automation(udid: str):
     '''Launch the app and interact using Appium commands.'''
@@ -197,6 +214,7 @@ def run_app_automation(udid: str):
         log_stdout("Closing appium session.")
         driver.quit()
         log_stdout("Closed appium session.")
+
 
 if __name__ == "__main__":
     match len(sys.argv):

@@ -2,6 +2,30 @@
 #
 # Define reusable functions for Corellium MATRIX
 
+install_appium_server_and_dependencies()
+{
+  log_stdout 'Installing appium dependencies.'
+  sudo apt-get -qq update
+  sudo apt-get -qq install --assume-yes --no-install-recommends libusb-dev
+  #python3 -m pip install -U pymobiledevice3 # for ios devices
+  python3 -m pip install -U Appium-Python-Client
+  log_stdout 'Installed appium dependencies.'
+  log_stdout 'Installing appium and device driver.'
+  npm install --location=global appium
+  appium driver install uiautomator2
+  #appium driver install xcuitest # for ios devices
+  log_stdout 'Installed appium and device driver.'
+}
+
+install_appium_runner_ios()
+{
+  local INSTANCE_ID="$1"
+  local APPIUM_RUNNER_IOS_URL="https://www.corellium.com/hubfs/Blog%20Attachments/WebDriverAgentRunner-Runner.ipa"
+  local APPIUM_RUNNER_IOS_BUNDLE_ID='org.appium.WebDriverAgentRunner.xctrunner'
+  kill_app "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_BUNDLE_ID}"
+  install_app_from_url "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_URL}"
+}
+
 create_matrix_assessment()
 {
   local INSTANCE_ID="$1"

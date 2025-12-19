@@ -15,7 +15,11 @@ from selenium.common.exceptions import (
     TimeoutException,
     WebDriverException,
 )
-from selenium.webdriver.support.expected_conditions import element_to_be_clickable
+from selenium.webdriver.support.expected_conditions import (
+    element_to_be_clickable,
+    text_to_be_present_in_element_value,
+    visibility_of_element_located,
+)
 from selenium.webdriver.support.ui import WebDriverWait
 
 # =====================================
@@ -71,7 +75,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el7.click()
 
     log_stdout('Appium - Wait for blog page to load.')
-    el8 = wait_until_clickable(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", wait=driver_wait)
+    el8 = wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", wait=driver_wait)
     el8.send_keys("Testing")
     save_screenshot(driver, TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)
 
@@ -142,6 +146,18 @@ def wait_until_clickable(by, value, wait):
     except TimeoutException as e:
         print("Thrown when a command does not complete in enough time.")
         print(f"Element not clickable after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
+        print(f"TimeoutException: {e}")
+        sys.exit(1)
+
+def wait_until_visible(by, value, wait):
+    '''Wait for a webdriver locator to be visible'''
+    try:
+        element_locator = (by, value)
+        visible_element = wait.until(visibility_of_element_located(element_locator))
+        return visible_element
+    except TimeoutException as e:
+        print("Thrown when a command does not complete in enough time.")
+        print(f"Element not visible after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
         print(f"TimeoutException: {e}")
         sys.exit(1)
 

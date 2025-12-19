@@ -10,7 +10,11 @@ from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from appium.webdriver.common.appiumby import AppiumBy
 from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
-from selenium.webdriver.support.expected_conditions import element_to_be_clickable
+from selenium.webdriver.support.expected_conditions import (
+    element_to_be_clickable,
+    text_to_be_present_in_element_value,
+    visibility_of_element_located,
+)
 from selenium.webdriver.support.ui import WebDriverWait
 
 # =====================================

@@ -1171,10 +1171,7 @@ run_appium_server()
     log_error 'Cannot find appium in PATH.'
     exit 1
   }
-  appium \
-    --port 4723 \
-    --log-level info \
-    --allow-insecure=uiautomator2:chromedriver_autodownload &
+  appium &
   until curl --silent http://127.0.0.1:4723/status |
     jq -e '.value.ready == true' > /dev/null; do sleep 0.1; done
   log_stdout 'Started appium server.'

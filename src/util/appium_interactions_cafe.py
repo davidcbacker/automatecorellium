@@ -9,7 +9,12 @@ from datetime import datetime, timezone
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
 from appium.webdriver.common.appiumby import AppiumBy
-from selenium.common.exceptions import NoSuchElementException, StaleElementReferenceException, TimeoutException
+from selenium.common.exceptions import (
+    NoSuchElementException,
+    StaleElementReferenceException,
+    TimeoutException,
+    WebDriverException,
+)
 from selenium.webdriver.support.expected_conditions import (
     element_to_be_clickable,
     text_to_be_present_in_element_value,
@@ -212,6 +217,11 @@ def run_app_automation(udid: str):
         print("    Such as an element being relocated.")
         print("  * Element may have been inside an iframe or another context which was refreshed.")
         print(f"StaleElementReferenceException: {e}")
+        sys.exit(1)
+
+    except WebDriverException as e:
+        print('Base webdriver exception.')
+        print(f"WebDriverException: {e}")
         sys.exit(1)
 
     finally:

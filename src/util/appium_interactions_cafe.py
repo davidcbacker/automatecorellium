@@ -97,6 +97,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el17.send_keys("3216540987")
     time.sleep(PAGE_LOAD_SLEEP_TIME_SECONDS)
     save_screenshot(driver, TARGET_APP_CUSTOMER_INFO_SCREENSHOT_FILENAME)
+    log_stdout("Appium - Submit customner info.")
     el18 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
     el18.click()
 
@@ -111,6 +112,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el22.send_keys("24680")
     time.sleep(PAGE_LOAD_SLEEP_TIME_SECONDS)
     save_screenshot(driver, TARGET_APP_PAYMENT_INFO_SCREENSHOT_FILENAME)
+    log_stdout("Appium - Submit payment info.")
     el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
     el23.click()
 

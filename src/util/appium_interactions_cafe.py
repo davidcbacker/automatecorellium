@@ -17,7 +17,7 @@ from selenium.common.exceptions import (
 )
 from selenium.webdriver.support.expected_conditions import (
     element_to_be_clickable,
-    text_to_be_present_in_element_value,
+    text_to_be_present_in_element,
     visibility_of_element_located,
 )
 from selenium.webdriver.support.ui import WebDriverWait

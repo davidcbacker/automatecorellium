@@ -75,7 +75,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el7.click()
 
     log_stdout('Appium - Wait for blog page to load.')
-    el8 = wait_until_clickable(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", wait=driver_wait)
+    el8 = wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", wait=driver_wait)
     el8.send_keys("Testing")
     wait_until_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", expected_value="3216540987", wait=driver_wait)
     save_screenshot(driver, TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)
@@ -166,6 +166,18 @@ def wait_until_element_value(by, value, expected_value, wait):
         print(f"TimeoutException: {e}")
         sys.exit(1)
 
+
+def wait_until_visible(by, value, wait):
+    '''Wait for a webdriver locator to be visible'''
+    try:
+        element_locator = (by, value)
+        visible_element = wait.until(visibility_of_element_located(element_locator))
+        return visible_element
+    except TimeoutException as e:
+        print("Thrown when a command does not complete in enough time.")
+        print(f"Element not visible after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
+        print(f"TimeoutException: {e}")
+        sys.exit(1)
 
 def log_stdout(message: str):
     '''Print message to stdout with current timestamp'''

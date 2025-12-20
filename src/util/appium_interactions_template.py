@@ -28,7 +28,6 @@ DEFAULT_ADB_PORT = '5001'
 
 # ==== TARGET APP ====
 TARGET_APP_PACKAGE = 'com.mypackage.name' # <----- NOTE: Update this for your app's package name
-TARGET_APP_ACTIVITY = '.MainActivity'     # <----- NOTE: Update this for your app based on AndroidManifest.xml
 
 # ==== APPIUM SERVER ====
 APPIUM_SERVER_IP = '127.0.0.1'
@@ -84,7 +83,6 @@ def run_app_automation(udid: str):
     options.set_capability('appium:automationName', 'UiAutomator2')
     options.set_capability('appium:udid', udid)
     options.set_capability('appium:appPackage', TARGET_APP_PACKAGE)
-    options.set_capability('appium:appActivity', TARGET_APP_ACTIVITY)
     options.set_capability('appium:noReset', False) # <----- NOTE: Set this to True for MATRIX assessments
 
     try:

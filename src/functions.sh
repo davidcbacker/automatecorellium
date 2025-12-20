@@ -1166,11 +1166,15 @@ run_frida_script_usb()
 
 run_appium_server()
 {
-  log_stdout 'Starting appium.'
+  log_stdout 'Starting appium server.'
+  command -v appium > /dev/null || {
+    log_error 'Cannot find appium in PATH.'
+    exit 1
+  }
   appium &
   until curl --silent http://127.0.0.1:4723/status |
     jq -e '.value.ready == true' > /dev/null; do sleep 0.1; done
-  log_stdout 'Started appium.'
+  log_stdout 'Started appium server.'
 }
 
 open_appium_session()

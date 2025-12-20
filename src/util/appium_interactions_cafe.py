@@ -158,7 +158,7 @@ def wait_until_element_value(by, value, expected_value, wait):
     '''Wait for a webdriver locator to have a specific value'''
     try:
         element_locator = (by, value)
-        element = wait.until(text_to_be_present_in_element_value(element_locator, expected_value))
+        element = wait.until(text_to_be_present_in_element(element_locator, expected_value))
         return element
     except TimeoutException as e:
         print("Thrown when a command does not complete in enough time.")

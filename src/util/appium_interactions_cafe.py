@@ -77,7 +77,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     log_stdout('Appium - Wait for blog page to load.')
     el8 = wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", wait=driver_wait)
     el8.send_keys("Testing")
-    wait_until_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", expected_value="3216540987", wait=driver_wait)
+    wait_until_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", expected_value="Testing", wait=driver_wait)
     save_screenshot(driver, TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)
 
     log_stdout("Appium - Return to home page.")

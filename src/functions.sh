@@ -423,7 +423,7 @@ install_app_from_url()
   if wget --quiet "${APP_URL}"; then
     log_stdout "Downloaded ${APP_FILENAME}."
   else
-    log_error "Failed to downloading app ${APP_FILENAME}."
+    log_error "Failed to download app ${APP_FILENAME}."
     exit 1
   fi
 

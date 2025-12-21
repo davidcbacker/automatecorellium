@@ -4,6 +4,7 @@ ci:
   - 'data/config/**'
 frida:
   - '.github/workflows/frida.yaml'
+  - 'src/functions.sh'
   - 'src/functions_frida.sh'
   - 'src/util/frida_script_*.js'
   - 'src/util/frida_script_example.js'
@@ -15,6 +16,7 @@ markdown:
 matrix:
   - '.github/workflows/matrix_with_appium.yaml'
   - 'data/wordlist.txt'
+  - 'src/functions.sh'
   - 'src/functions_matrix.sh'
   - 'src/util/appium_interactions_cafe.py'
   - 'src/util/compress_matrix_artifacts.js'

@@ -311,11 +311,7 @@ open_appium_session()
       "platformName": "Android",
       "appium:automationName": "UiAutomator2",
       "appium:udid": "${INSTANCE_SERVICES_IP}:${DEFAULT_ADB_PORT}",
-      "appium:deviceName": "Corellium",
-      "appium:appPackage": "${APP_PACKAGE_NAME}",
-      "appium:appActivity": ".ui.activities.MainActivity",
-      "appium:noReset": false,
-      "appium:systemPort": 8200
+      "appium:appPackage": "${APP_PACKAGE_NAME}"
     },
     "firstMatch": [{}]
   }

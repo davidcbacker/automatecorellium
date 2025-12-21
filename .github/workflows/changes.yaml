@@ -52,8 +52,7 @@ jobs:
     if: >-
       ${{
         needs.changes.outputs.javascript-deps == 'true' ||
-        needs.changes.outputs.matrix == 'true' ||
-        needs.changes.outputs.shell == 'true'
+        needs.changes.outputs.matrix == 'true'
       }}
     uses: ./.github/workflows/matrix_with_appium.yaml
     secrets: inherit
@@ -64,8 +63,7 @@ jobs:
     if: >-
       ${{
         needs.changes.outputs.frida == 'true' ||
-        needs.changes.outputs.javascript-deps == 'true' ||
-        needs.changes.outputs.shell == 'true'
+        needs.changes.outputs.javascript-deps == 'true'
       }}
     uses: ./.github/workflows/frida.yaml
     secrets: inherit

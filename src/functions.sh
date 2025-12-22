@@ -306,7 +306,7 @@ get_instance_json()
       exit 1
     }
   }
-  echo "${GET_INSTANCE_RESPONSE_JSON}" | jq '.' >/dev/null 2>&1 || {
+  echo "${GET_INSTANCE_RESPONSE_JSON}" | jq '.' > /dev/null 2>&1 || {
     echo "${GET_INSTANCE_RESPONSE_JSON}"
     log_error 'Failed to parse JSON response.'
     exit 1

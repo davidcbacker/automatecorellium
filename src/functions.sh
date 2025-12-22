@@ -911,7 +911,7 @@ remote_code_execution_with_adb()
     exit 1
   }
   adb shell "${COMMAND_TO_EXECUTE}" || {
-    log_error 'Failed to execute SSH command.'
+    log_error 'Failed to execute remote command with ADB.'
     exit 1
   }
 }
@@ -924,7 +924,7 @@ remote_code_execution_with_ssh()
   log_stdout "Executing ${COMMAND_TO_EXECUTE} on device at ${TARGET_SERVICES_IP}."
   # TODO need to handle authentication with either password or project SSH key
   ssh "root@${TARGET_SERVICES_IP}" "${COMMAND_TO_EXECUTE}" || {
-    log_error 'Failed to execute SSH command.'
+    log_error 'Failed to execute remote command with SSH.
     exit 1
   }
 }

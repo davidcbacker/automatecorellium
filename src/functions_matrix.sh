@@ -428,3 +428,10 @@ ensure_matrix_check_outcomes_from_local_json_path()
     exit 1
   }
 }
+
+compress_matrix_runtime_artifacts()
+{
+  local INSTANCE_ID="$1"
+  local INSTANCE_SERVICES_IP
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+}

@@ -455,5 +455,6 @@ compress_matrix_runtime_artifacts()
     else
       remote_code_execution_with_ssh "${INSTANCE_SERVICES_IP}" "${target_command}"
     fi
-  done  
+  done
 }
+

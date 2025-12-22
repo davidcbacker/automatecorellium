@@ -451,7 +451,7 @@ compress_matrix_runtime_artifacts()
   )
   for target_command in "${TARGET_COMMANDS[@]}"; do
     if [ "${INSTANCE_FLAVOR}" = 'ranchu' ]; then
-      remote_code_execution_with_ssh "${INSTANCE_SERVICES_IP}" "${target_command}"
+      remote_code_execution_with_adb "${INSTANCE_SERVICES_IP}" "${target_command}"
     else
       remote_code_execution_with_ssh "${INSTANCE_SERVICES_IP}" "${target_command}"
     fi

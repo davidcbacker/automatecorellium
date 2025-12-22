@@ -340,6 +340,21 @@ get_instance_udid()
   echo "${INSTANCE_UDID}"
 }
 
+get_instance_flavor()
+{
+  local INSTANCE_ID="$1"
+  local GET_INSTANCE_RESPONSE_JSON INSTANCE_FLAVOR
+  GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
+    log_error "Failed to get details for instance ${INSTANCE_ID}."
+    exit 1
+  }
+  INSTANCE_FLAVOR="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.flavor')" || {
+    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
+    exit 1
+  }
+  echo "${INSTANCE_FLAVOR}"
+}
+
 is_agent_ready()
 {
   local INSTANCE_ID="$1"

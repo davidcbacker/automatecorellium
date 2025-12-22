@@ -799,15 +799,13 @@ is_instance_conneted_with_adb()
   command -v adb > /dev/null || {
     log_warn 'Attempting to install adb dependency.'
     install_adb_dependency
+  }
 
   if adb devices -l | grep -q "${ADB_CONNECT_SOCKET}"; then
     return 0
   else
     return 1
   fi
-  }
-
-  
 }
 
 run_usbfluxd_and_dependencies()

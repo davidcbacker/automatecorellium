@@ -103,6 +103,7 @@ jobs:
       - name: Install additional runner dependencies
         run: |
           source ./src/functions.sh && set -euo pipefail
+          source ./src/functions_frida.sh
           install_openvpn_dependencies
           if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
             install_adb_dependency
@@ -152,6 +153,7 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
         run: |
           source ./src/functions.sh && set -euo pipefail
+          source ./src/functions_frida.sh
           launch_app "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_app_id }}"
           sleep 5 # attempting to mitigate intermittent failure, issue 467
           run_frida_ps_usb
@@ -161,6 +163,7 @@ jobs:
           FRIDA_SCRIPT_PATH: src/util/frida_script_example.js
         run: |
           source ./src/functions.sh && set -euo pipefail
+          source ./src/functions_frida.sh
           run_frida_script_usb "${{ matrix.corellium_cafe_app_id }}" "${FRIDA_SCRIPT_PATH}"
       - name: Delete instance
         if: always()

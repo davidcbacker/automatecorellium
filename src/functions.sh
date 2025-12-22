@@ -426,8 +426,8 @@ install_app_from_url()
     exit 1
   fi
 
-  log_stdout "Listing file size of ${APP_FILENAME}"
-  du "${APP_FILENAME}"
+  log_stdout "Showing file size of ${APP_FILENAME} in KiB."
+  du -k "${APP_FILENAME}"
 
   log_stdout "Installing ${APP_FILENAME}."
   if corellium apps install \

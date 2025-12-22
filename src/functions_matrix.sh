@@ -457,4 +457,3 @@ compress_matrix_runtime_artifacts()
     fi
   done
 }
-

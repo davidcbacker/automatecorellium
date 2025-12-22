@@ -317,9 +317,9 @@ get_instance_json()
 get_instance_status()
 {
   local INSTANCE_ID="$1"
-  local GET_INSTANCE_RESPONSE_JSON INSTANCE_STATE
-  GET_INSTANCE_RESPONSE_JSON="$(get_instance_json "${INSTANCE_ID}")"
-  INSTANCE_STATE="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.state')" || {
+  local GET_INSTANCE_JSON INSTANCE_STATE
+  GET_INSTANCE_JSON="$(get_instance_json "${INSTANCE_ID}")"
+  INSTANCE_STATE="$(echo "${GET_INSTANCE_JSON}" | jq -r '.state')" || {
     log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
     exit 1
   }
@@ -329,9 +329,9 @@ get_instance_status()
 get_instance_services_ip()
 {
   local INSTANCE_ID="$1"
-  local GET_INSTANCE_RESPONSE_JSON INSTANCE_SERVICES_IP
-  GET_INSTANCE_RESPONSE_JSON="$(get_instance_json "${INSTANCE_ID}")"
-  INSTANCE_SERVICES_IP="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.serviceIp')" || {
+  local GET_INSTANCE_JSON INSTANCE_SERVICES_IP
+  GET_INSTANCE_JSON="$(get_instance_json "${INSTANCE_ID}")"
+  INSTANCE_SERVICES_IP="$(echo "${GET_INSTANCE_JSON}" | jq -r '.serviceIp')" || {
     log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
     exit 1
   }
@@ -341,9 +341,9 @@ get_instance_services_ip()
 get_instance_udid()
 {
   local INSTANCE_ID="$1"
-  local GET_INSTANCE_RESPONSE_JSON INSTANCE_UDID
-  GET_INSTANCE_RESPONSE_JSON="$(get_instance_json "${INSTANCE_ID}")"
-  INSTANCE_UDID="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.bootOptions.udid')" || {
+  local GET_INSTANCE_JSON INSTANCE_UDID
+  GET_INSTANCE_JSON="$(get_instance_json "${INSTANCE_ID}")"
+  INSTANCE_UDID="$(echo "${GET_INSTANCE_JSON}" | jq -r '.bootOptions.udid')" || {
     log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
     exit 1
   }

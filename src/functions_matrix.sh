@@ -435,7 +435,7 @@ compress_matrix_runtime_artifacts()
   local INSTANCE_SERVICES_IP
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   local ARCHIVE_INPUT_ARTIFACTS_PATH ARCHIVE_INPUT_ASSESSMENTS_PATH
-  if [ "$(get_instance_flavor)" = 'ranchu' ]; then
+  if [ "$(get_instance_flavor "${INSTANCE_ID}")" = 'ranchu' ]; then
     ARCHIVE_INPUT_ARTIFACTS_PATH='/data/local/tmp/artifacts/'
     ARCHIVE_INPUT_ASSESSMENTS_PATH='/data/local/tmp/assessment.*/'
   else

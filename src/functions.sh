@@ -773,20 +773,41 @@ connect_with_adb()
   local ADB_CONNECT_PORT='5001'
   local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
 
-  if ! command -v adb > /dev/null; then
+  command -v adb > /dev/null || {
     log_warn 'Attempting to install adb dependency.'
     install_adb_dependency
-  fi
+  }
 
   log_stdout "Connecting over adb to ${ADB_CONNECT_SOCKET}."
   adb connect "${ADB_CONNECT_SOCKET}"
   log_stdout "Connected over adb to ${ADB_CONNECT_SOCKET}."
-  adb devices -l | grep -q "${ADB_CONNECT_SOCKET}" || {
+  log_stdout 'Finding connected adb device'
+  is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" || {
     log_error "Unable to connect to ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
     adb devices -l
     exit 1
   }
   log_stdout 'Found connected adb device.'
+}
+
+is_instance_conneted_with_adb()
+{
+  local INSTANCE_SERVICES_IP="$1"
+  local ADB_CONNECT_PORT='5001'
+  local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
+
+  command -v adb > /dev/null || {
+    log_warn 'Attempting to install adb dependency.'
+    install_adb_dependency
+
+  if adb devices -l | grep -q "${ADB_CONNECT_SOCKET}"; then
+    return 0
+  else
+    return 1
+  fi
+  }
+
+  
 }
 
 run_usbfluxd_and_dependencies()
@@ -882,12 +903,28 @@ ensure_app_is_running_on_instance()
   }
 }
 
-# shellcheck disable=SC2029
-remote_code_execution_via_ssh()
+remote_code_execution_with_adb()
 {
   local TARGET_SERVICES_IP="$1"
   local COMMAND_TO_EXECUTE="$2"
   log_stdout "Executing ${COMMAND_TO_EXECUTE} on device at ${TARGET_SERVICES_IP}."
+  is_instance_services_ip_connected_with_adb "${TARGET_SERVICES_IP}" || {
+    log_error "Cannot find adb connection to ${TARGET_SERVICES_IP}."
+    exit 1
+  }
+  adb shell "${COMMAND_TO_EXECUTE}" || {
+    log_error 'Failed to execute SSH command.'
+    exit 1
+  }
+}
+
+# shellcheck disable=SC2029
+remote_code_execution_with_ssh()
+{
+  local TARGET_SERVICES_IP="$1"
+  local COMMAND_TO_EXECUTE="$2"
+  log_stdout "Executing ${COMMAND_TO_EXECUTE} on device at ${TARGET_SERVICES_IP}."
+  # TODO need to handle authentication with either password or project SSH key
   ssh "root@${TARGET_SERVICES_IP}" "${COMMAND_TO_EXECUTE}" || {
     log_error 'Failed to execute SSH command.'
     exit 1

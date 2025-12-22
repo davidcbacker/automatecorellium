@@ -887,7 +887,7 @@ remote_code_execution_via_ssh()
   local TARGET_SERVICES_IP="$1"
   local COMMAND_TO_EXECUTE="$2"
   log_stdout "Executing ${COMMAND_TO_EXECUTE} on device at ${TARGET_SERVICES_IP}."
-  ssh root@${TARGET_SERVICES_IP}" "${COMMAND_TO_EXECUTE}" || {
+  ssh "root@${TARGET_SERVICES_IP}" "${COMMAND_TO_EXECUTE}" || {
     log_error 'Failed to execute SSH command.'
     exit 1
   }

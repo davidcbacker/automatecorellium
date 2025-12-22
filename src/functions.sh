@@ -413,7 +413,6 @@ install_app_from_url()
 {
   local INSTANCE_ID="$1"
   local APP_URL="$2"
-
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   local APP_FILENAME
@@ -426,6 +425,9 @@ install_app_from_url()
     log_error "Failed to download app ${APP_FILENAME}."
     exit 1
   fi
+
+  log_stdout "Checking file size of ${APP_FILENAME}"
+  ls -l "${APP_FILENAME}"
 
   log_stdout "Installing ${APP_FILENAME}."
   if corellium apps install \

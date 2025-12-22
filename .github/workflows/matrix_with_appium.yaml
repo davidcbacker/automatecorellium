@@ -209,6 +209,7 @@ jobs:
           MATRIX_INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.tar.gz
         run: |
           source ./src/functions.sh && set -euo pipefail
+          source ./src/functions_matrix.sh
           log_stdout 'Compressing MATRIX runtime artifacts.'
           compress_matrix_runtime_artifacts "${CORELLIUM_INSTANCE_ID}"
           log_stdout 'Compressed MATRIX runtime artifacts.'

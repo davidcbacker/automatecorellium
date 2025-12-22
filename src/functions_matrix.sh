@@ -434,8 +434,9 @@ compress_matrix_runtime_artifacts()
   local INSTANCE_ID="$1"
   local INSTANCE_SERVICES_IP
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
-  local ARCHIVE_INPUT_ARTIFACTS_PATH ARCHIVE_INPUT_ASSESSMENTS_PATH
-  if [ "$(get_instance_flavor "${INSTANCE_ID}")" = 'ranchu' ]; then
+  local INSTANCE_FLAVOR ARCHIVE_INPUT_ARTIFACTS_PATH ARCHIVE_INPUT_ASSESSMENTS_PATH
+  INSTANCE_FLAVOR="$(get_instance_flavor "${INSTANCE_ID}")"
+  if [ "${INSTANCE_FLAVOR}" = 'ranchu' ]; then
     ARCHIVE_INPUT_ARTIFACTS_PATH='/data/local/tmp/artifacts/'
     ARCHIVE_INPUT_ASSESSMENTS_PATH='/data/local/tmp/assessment.*/'
   else
@@ -449,6 +450,10 @@ compress_matrix_runtime_artifacts()
     "sha256sum ${ARCHIVE_OUTPUT_PATH}"
   )
   for target_command in "${TARGET_COMMANDS[@]}"; do
-    remote_code_execution_via_ssh "${INSTANCE_SERVICES_IP}" "${target_command}"
+    if [ "${INSTANCE_FLAVOR}" = 'ranchu' ]; then
+      remote_code_execution_with_ssh "${INSTANCE_SERVICES_IP}" "${target_command}"
+    else
+      remote_code_execution_with_ssh "${INSTANCE_SERVICES_IP}" "${target_command}"
+    fi
   done  
 }

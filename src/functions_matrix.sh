@@ -445,7 +445,7 @@ compress_matrix_runtime_artifacts()
   fi
   local ARCHIVE_OUTPUT_PATH='/tmp/matrix_artifacts.tar.gz'
   local TARGET_COMMANDS=(
-    "tar -czvf ${ARCHIVE_OUTPUT_PATH} '${ARCHIVE_INPUT_ARTIFACTS_PATH}' '${ARCHIVE_INPUT_ASSESSMENTS_PATH}'"
+    "tar -czvf ${ARCHIVE_OUTPUT_PATH} ${ARCHIVE_INPUT_ARTIFACTS_PATH} ${ARCHIVE_INPUT_ASSESSMENTS_PATH}"
     "ls -l ${ARCHIVE_OUTPUT_PATH}"
     "sha256sum ${ARCHIVE_OUTPUT_PATH}"
   )

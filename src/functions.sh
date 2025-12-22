@@ -790,7 +790,7 @@ connect_with_adb()
   log_stdout 'Found connected adb device.'
 }
 
-is_instance_conneted_with_adb()
+is_services_ip_conneted_with_adb()
 {
   local INSTANCE_SERVICES_IP="$1"
   local ADB_CONNECT_PORT='5001'

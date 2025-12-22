@@ -882,6 +882,7 @@ ensure_app_is_running_on_instance()
   }
 }
 
+# shellcheck disable=SC2029
 remote_code_execution_via_ssh()
 {
   local TARGET_SERVICES_IP="$1"

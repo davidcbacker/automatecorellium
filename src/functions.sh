@@ -829,8 +829,13 @@ is_app_running_on_instance()
   APP_STATUS_JSON_RESPONSE="$(corellium instance apps \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}")" || {
-    log_error 'Failed to check app status.'
-    exit 1
+    log_warn 'Failed to check app status. Retrying.'
+    APP_STATUS_JSON_RESPONSE="$(corellium instance apps \
+      --instance "${INSTANCE_ID}" \
+      --project "${PROJECT_ID}")" || {
+      log_error 'Failed again to check app status.'
+      exit 1
+    }
   }
 
   APP_RUNNING_STATUS="$(echo "${APP_STATUS_JSON_RESPONSE}" |

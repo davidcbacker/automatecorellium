@@ -426,7 +426,7 @@ install_app_from_url()
     exit 1
   fi
 
-  log_stdout "Showing file size of ${APP_FILENAME} in KiB."
+  log_stdout 'Showing file size in KiB.'
   du -k "${APP_FILENAME}"
 
   log_stdout "Installing ${APP_FILENAME}."

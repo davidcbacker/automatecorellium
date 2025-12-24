@@ -427,15 +427,14 @@ install_app_from_url()
   log_stdout "Size on disk is $(du -k "${APP_FILENAME}" | cut -f1) KiB."
   
   log_stdout "Installing ${APP_FILENAME}."
-  if corellium apps install \
+  corellium apps install \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \
-    --app "${APP_FILENAME}" > /dev/null; then
-    log_stdout "Installed ${APP_FILENAME}."
-  else
+    --app "${APP_FILENAME}" > /dev/null || {
     log_error "Failed to install app ${APP_FILENAME}."
     exit 1
-  fi
+  }
+  log_stdout "Installed ${APP_FILENAME}."
 }
 
 launch_app()

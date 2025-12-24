@@ -58,7 +58,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Lint markdown docs
-        uses: DavidAnson/markdownlint-cli2-action@v21
+        uses: DavidAnson/markdownlint-cli2-action@v22
         with:
           config: data/config/.markdownlint-cli2.jsonc
           globs: '**/*.md'

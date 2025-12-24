@@ -419,13 +419,12 @@ install_app_from_url()
   APP_FILENAME="$(basename "${APP_URL}")"
 
   log_stdout "Downloading ${APP_FILENAME}."
-  if wget --quiet "${APP_URL}"; then
-    log_stdout "Downloaded ${APP_FILENAME}."
-    log_stdout "Size on disk is $(du -k "${APP_FILENAME}" | cut -f1) KiB."
-  else
+  wget --quiet "${APP_URL}" || {
     log_error "Failed to download app ${APP_FILENAME}."
     exit 1
-  fi
+  }
+  log_stdout "Downloaded ${APP_FILENAME}."
+  log_stdout "Size on disk is $(du -k "${APP_FILENAME}" | cut -f1) KiB."
   
   log_stdout "Installing ${APP_FILENAME}."
   if corellium apps install \

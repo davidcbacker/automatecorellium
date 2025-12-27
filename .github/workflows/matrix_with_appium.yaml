@@ -236,14 +236,14 @@ jobs:
             delete_instance "${CORELLIUM_INSTANCE_ID}"
           fi
       - name: Upload artifact 'MATRIX runtime artifacts'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: matrix-runtime-artifacts
           path: ${{ env.MATRIX_RUNNER_ARTIFACTS_PATH }}
           compression-level: 9
           if-no-files-found: error
       - name: Upload artifact 'MATRIX reports'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: matrix-reports
           path: |
@@ -252,7 +252,7 @@ jobs:
           compression-level: 9
           if-no-files-found: error
       - name: Upload artifact 'Appium screenshots'
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: appium-screenshots
           path: |

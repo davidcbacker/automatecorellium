@@ -423,30 +423,28 @@ install_app_from_url()
 {
   local INSTANCE_ID="$1"
   local APP_URL="$2"
-
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   local APP_FILENAME
   APP_FILENAME="$(basename "${APP_URL}")"
 
   log_stdout "Downloading ${APP_FILENAME}."
-  if wget --quiet "${APP_URL}"; then
-    log_stdout "Downloaded ${APP_FILENAME}."
-  else
+  wget --quiet "${APP_URL}" || {
     log_error "Failed to download app ${APP_FILENAME}."
     exit 1
-  fi
+  }
+  log_stdout "Downloaded ${APP_FILENAME}."
+  log_stdout "Size on disk is $(du -k "${APP_FILENAME}" | cut -f1) KiB."
 
   log_stdout "Installing ${APP_FILENAME}."
-  if corellium apps install \
+  corellium apps install \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \
-    --app "${APP_FILENAME}" > /dev/null; then
-    log_stdout "Installed ${APP_FILENAME}."
-  else
+    --app "${APP_FILENAME}" > /dev/null || {
     log_error "Failed to install app ${APP_FILENAME}."
     exit 1
-  fi
+  }
+  log_stdout "Installed ${APP_FILENAME}."
 }
 
 launch_app()

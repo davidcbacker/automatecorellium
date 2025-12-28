@@ -28,10 +28,6 @@ shell:
   - 'src/*.sh'
 static-lint:
   - '.github/workflows/lint.yaml'
-javascript:
-  - 'package.json'
-  - 'package-lock.json'
-  - 'src/util/*.js'
 javascript-deps:
   - 'package.json'
   - 'package-lock.json'

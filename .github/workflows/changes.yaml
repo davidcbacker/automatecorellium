@@ -15,7 +15,6 @@ jobs:
     outputs:
       ci: ${{ steps.filter.outputs.ci }}
       frida: ${{ steps.filter.outputs.frida }}
-      javascript: ${{ steps.filter.outputs.javascript }}
       javascript-deps: ${{ steps.filter.outputs.javascript-deps }}
       markdown: ${{ steps.filter.outputs.markdown }}
       matrix: ${{ steps.filter.outputs.matrix }}

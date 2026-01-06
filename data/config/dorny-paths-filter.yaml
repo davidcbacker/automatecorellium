@@ -8,6 +8,9 @@ frida:
   - 'src/functions_frida.sh'
   - 'src/util/frida_script_*.js'
   - 'src/util/frida_script_example.js'
+javascript:
+  - 'package.json'
+  - 'package-lock.json'
 markdown:
   - '*.md'
   - 'data/config/.markdownlint-cli2.jsonc'
@@ -28,6 +31,3 @@ shell:
   - 'src/*.sh'
 static-lint:
   - '.github/workflows/lint.yaml'
-javascript-deps:
-  - 'package.json'
-  - 'package-lock.json'

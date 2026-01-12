@@ -63,7 +63,7 @@ jobs:
           config: data/config/.markdownlint-cli2.jsonc
           globs: '**/*.md'
       - name: Spellcheck markdown docs
-        uses: rojopolis/spellcheck-github-actions@0.55.0
+        uses: rojopolis/spellcheck-github-actions@0.56.0
         with:
           config_path: data/config/spellcheck.yaml
 

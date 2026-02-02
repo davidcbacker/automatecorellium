@@ -15,6 +15,7 @@ env:
   CORELLIUM_DEFAULT_PROJECT: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
   CORELLIUM_INSTANCE_NAME_PREFIX: 'Frida Automation'
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
+  NODE_TLS_REJECT_UNAUTHORIZED: 0
 
 jobs:
   frida:
@@ -72,7 +73,7 @@ jobs:
           echo "$(pwd)/node_modules/.bin" >> "${GITHUB_PATH}"
       - name: Log in to Corellium
         run: |
-          NODE_TLS_REJECT_UNAUTHORIZED=0 corellium login \
+          corellium login \
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Wait until available cores

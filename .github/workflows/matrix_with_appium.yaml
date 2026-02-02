@@ -30,8 +30,11 @@ env:
 jobs:
   corellium-matrixscan:
     name: Scan with MATRIX
-    runs-on: self-hosted
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 60
+    strategy:
+      matrix:
+        os: [ubuntu-latest, self-hosted]
     steps:
       - name: Pull the latest code
         uses: actions/checkout@v6
@@ -53,7 +56,7 @@ jobs:
             exit 1
           fi
       - name: Install Python
-        if: runner.os == 'Linux'
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: actions/setup-python@v6
         with:
           cache: pip

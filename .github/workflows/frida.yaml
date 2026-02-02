@@ -106,7 +106,7 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_frida.sh
-          install_openvpn_dependencies
+          #install_openvpn_dependencies
           if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
             install_adb_dependency
           else

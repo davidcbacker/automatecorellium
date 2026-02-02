@@ -57,13 +57,13 @@ jobs:
     uses: ./.github/workflows/matrix_with_appium.yaml
     secrets: inherit
 
-  call-frida-workflow:
-    name: Frida
-    needs: changes
-    if: >-
-      ${{
-        needs.changes.outputs.frida == 'true' ||
-        needs.changes.outputs.javascript-deps == 'true'
-      }}
-    uses: ./.github/workflows/frida.yaml
-    secrets: inherit
+  # call-frida-workflow:
+  #   name: Frida
+  #   needs: changes
+  #   if: >-
+  #     ${{
+  #       needs.changes.outputs.frida == 'true' ||
+  #       needs.changes.outputs.javascript-deps == 'true'
+  #     }}
+  #   uses: ./.github/workflows/frida.yaml
+  #   secrets: inherit

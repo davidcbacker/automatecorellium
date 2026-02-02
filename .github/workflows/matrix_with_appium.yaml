@@ -51,12 +51,12 @@ jobs:
             } >&2
             exit 1
           fi
-      - name: Install Python
-        uses: actions/setup-python@v6
-        with:
-          cache: pip
-          cache-dependency-path: requirements-pip-appium.txt
-          python-version: 3.14
+      # - name: Install Python
+      #   uses: actions/setup-python@v6
+      #   with:
+      #     cache: pip
+      #     cache-dependency-path: requirements-pip-appium.txt
+      #     python-version: 3.14
       - name: Install API dependencies
         run: |
           npm ci --no-audit --no-fund

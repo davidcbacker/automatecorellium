@@ -173,19 +173,14 @@ EOF
     )
   fi
 
-  CREATE_INSTANCE_RESPONSE_JSON="$(curl --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
+  CREATE_INSTANCE_RESPONSE_JSON="$(curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
     -H "Accept: application/json" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
     -H "Content-Type: application/json" \
     -d "${CREATE_INSTANCE_REQUEST_DATA}")" || {
     log_error "Failed to create new instance in project ${PROJECT_ID}."
     echo "${CREATE_INSTANCE_REQUEST_DATA}" >&2
-    curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
-      -H "Accept: application/json" \
-      -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
-      -H "Content-Type: application/json" \
-      -d "${CREATE_INSTANCE_REQUEST_DATA}" ||
-      exit 1
+    exit 1
   }
 
   CREATED_INSTANCE_ID="$(echo "${CREATE_INSTANCE_RESPONSE_JSON}" | jq -r .id)" || {
@@ -288,7 +283,7 @@ soft_stop_instance()
     *)
       log_stdout "Stopping instance ${INSTANCE_ID}."
       check_env_vars
-      curl --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/stop" \
+      curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/stop" \
         -H "Accept: application/json" \
         -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
         -H "Content-Type: application/json" \
@@ -406,7 +401,7 @@ kill_app()
   local APP_BUNDLE_ID="$2"
   if [ "$(is_app_running "${INSTANCE_ID}" "${APP_BUNDLE_ID}")" = 'true' ]; then
     log_stdout "Killing running app ${APP_BUNDLE_ID}."
-    if curl --silent -X POST \
+    if curl --insecure --silent -X POST \
       "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/app/apps/${APP_BUNDLE_ID}/kill" \
       -H "Accept: application/json" \
       -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"; then
@@ -571,7 +566,7 @@ download_file_to_local_path()
   # replace '/' with '%2F' using parameter expansion
   local encoded_download_path="${FILE_DOWNLOAD_PATH//\//%2F}"
 
-  curl --silent -X GET \
+  curl --insecure --silent -X GET \
     "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/file/device/${encoded_download_path}" \
     -H "Accept: application/octet-stream" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \

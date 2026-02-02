@@ -106,12 +106,12 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_frida.sh
-          #install_openvpn_dependencies
-          if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
-            install_adb_dependency
-          else
-            install_usbfluxd_and_dependencies
-          fi
+          # install_openvpn_dependencies
+          # if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
+          #   install_adb_dependency
+          # else
+          #   install_usbfluxd_and_dependencies
+          # fi
           install_frida_dependencies
       - name: Wait for instance agent ready
         timeout-minutes: 20

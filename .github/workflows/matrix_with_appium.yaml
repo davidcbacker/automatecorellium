@@ -281,7 +281,6 @@ jobs:
           )
           readonly PROCS_TO_KILL=(
             MainThread
-            adb
             appium
             avahi-daemon
             openvpn

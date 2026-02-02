@@ -60,6 +60,7 @@ jobs:
             exit 1
           fi
       - name: Install Python
+        if: runner.os == 'Linux'
         uses: actions/setup-python@v6
         with:
           cache: pip

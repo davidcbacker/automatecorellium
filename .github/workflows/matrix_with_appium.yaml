@@ -98,7 +98,7 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
-          install_openvpn_dependencies
+          # install_openvpn_dependencies
           if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
             install_adb_dependency
           else

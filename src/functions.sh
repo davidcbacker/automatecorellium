@@ -180,7 +180,12 @@ EOF
     -d "${CREATE_INSTANCE_REQUEST_DATA}")" || {
     log_error "Failed to create new instance in project ${PROJECT_ID}."
     echo "${CREATE_INSTANCE_REQUEST_DATA}" >&2
-    exit 1
+    curl -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
+      -H "Accept: application/json" \
+      -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
+      -H "Content-Type: application/json" \
+      -d "${CREATE_INSTANCE_REQUEST_DATA}" ||
+      exit 1
   }
 
   CREATED_INSTANCE_ID="$(echo "${CREATE_INSTANCE_RESPONSE_JSON}" | jq -r .id)" || {

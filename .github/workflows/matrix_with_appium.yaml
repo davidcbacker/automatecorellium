@@ -29,7 +29,7 @@ env:
 jobs:
   corellium-matrixscan:
     name: Scan with MATRIX
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     timeout-minutes: 60
     steps:
       - name: Pull the latest code

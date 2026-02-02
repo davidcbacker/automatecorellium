@@ -64,7 +64,7 @@ jobs:
           echo "$(pwd)/node_modules/.bin" >> "${GITHUB_PATH}"
       - name: Log in to Corellium
         run: |
-          corellium login \
+          NODE_TLS_REJECT_UNAUTHORIZED=0 corellium login \
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Wait until available cores

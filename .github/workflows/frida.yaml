@@ -189,7 +189,6 @@ jobs:
             "${VPN_CONFIG_PATH}"
           )
           readonly PROCS_TO_KILL=(
-            adb
             avahi-daemon
             openvpn
             usbfluxd

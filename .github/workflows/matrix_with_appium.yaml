@@ -33,8 +33,10 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, self-hosted]
+      max-parallel: 2
     steps:
       - name: Pull the latest code
         uses: actions/checkout@v6

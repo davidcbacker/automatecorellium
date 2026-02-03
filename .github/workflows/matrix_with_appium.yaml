@@ -79,6 +79,7 @@ jobs:
           echo "$(pwd)/node_modules/.bin" >> "${GITHUB_PATH}"
       - name: Log in to Corellium
         run: |
+          echo "Logging in with secret keys ${{ matrix.api_endpoint_secret_key }} and ${{ matrix.api_token_secret_key }}"
           corellium login \
             --apitoken ${{ secrets[matrix.api_token_secret_key] }} \
             --endpoint ${{ secrets[matrix.api_endpoint_secret_key] }}

@@ -424,7 +424,7 @@ get_project_from_instance_id()
 
 get_projects_list()
 {
-  corellium projects list | jq -r '.[].id'
+  corellium project list | jq -r '.[].id'
 }
 
 install_app_from_url()

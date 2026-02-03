@@ -183,6 +183,10 @@ EOF
     exit 1
   }
 
+  echo "DEBUG PRINTING CREATE INSTANCE RESPONSE JSON"
+  echo "${CREATE_INSTANCE_RESPONSE_JSON}"
+  echo "DEBUG PRINTED CREATE INSTANCE RESPONSE JSON"
+
   CREATED_INSTANCE_ID="$(echo "${CREATE_INSTANCE_RESPONSE_JSON}" | jq -r .id)" || {
     log_error 'Response does not contain a new instance ID.'
     log_error "$(echo "${CREATE_INSTANCE_RESPONSE_JSON}" | jq -r .error)"

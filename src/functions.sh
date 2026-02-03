@@ -739,7 +739,7 @@ connect_to_vpn_for_instance()
 
   if ! command -v openvpn > /dev/null; then
     log_warn 'Attempting to install openvpn dependency.'
-    install_openvpn_dependency
+    install_openvpn_dependencies
   fi
 
   save_vpn_config_to_local_path "${INSTANCE_ID}" "${OVPN_CONFIG_PATH}"

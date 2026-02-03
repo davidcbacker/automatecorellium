@@ -35,7 +35,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, self-hosted]
+        # os: [ubuntu-latest, self-hosted]
+        os: [self-hosted]
         include:
           - os: ubuntu-latest
             api_endpoint_secret_key: CORELLIUM_API_ENDPOINT

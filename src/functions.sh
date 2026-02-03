@@ -133,6 +133,7 @@ wait_until_available_cores()
 
 create_instance()
 {
+  ECHO "DEBUG STARTING CREATE INSTANCE FUNCTION"
   local HARDWARE_FLAVOR="$1"
   local FIRMWARE_VERSION="$2"
   local FIRMWARE_BUILD="$3"
@@ -172,6 +173,10 @@ EOF
 EOF
     )
   fi
+
+  echo "DEBUG PRINTING CREATE INSTANCE REQUEST JSON"
+  echo "${CREATE_INSTANCE_REQUEST_DATA}"
+  echo "DEBUG PRINTED CREATE INSTANCE REQUEST JSON"
 
   CREATE_INSTANCE_RESPONSE_JSON="$(curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
     -H "Accept: application/json" \

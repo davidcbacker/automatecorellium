@@ -192,6 +192,9 @@ EOF
   [ "${CREATED_INSTANCE_ID}" = 'null' ] && {
     log_error 'Response contains a null instance ID.'
     log_error "$(echo "${CREATE_INSTANCE_RESPONSE_JSON}" | jq -r .error)"
+    echo "DEBUG LISTING ALL PROJECTS"
+    get_projects_list
+    echo "DEBUG EXITING"
     exit 1
   }
 

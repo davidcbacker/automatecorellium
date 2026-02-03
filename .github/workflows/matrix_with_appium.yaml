@@ -36,6 +36,12 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, self-hosted]
+        include:
+          - os: self-hosted
+            api-endpoint: ${{ secrets.CORELLIUM_API_TOKEN }}
+          - os: ubuntu-latest
+            api-endpoint: ${{ secrets.CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN }}
+        
       max-parallel: 2
     steps:
       - name: Pull the latest code
@@ -70,6 +76,20 @@ jobs:
           echo "$(pwd)/node_modules/.bin" >> "${GITHUB_PATH}"
       - name: Log in to Corellium
         run: |
+          case ${{ matrix.os }} in
+            ubuntu-latest)
+              api_endpoint="${{ secrets.CORELLIUM_API_ENDPOINT }}"
+              api_token="${{ secrets.CORELLIUM_API_TOKEN }}"
+              ;;
+            self-hosted)
+              api_endpoint="${{ secrets.CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT }}"
+              api_token="${{ secrets.CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN }}"
+              ;;
+            *)
+              echo "ERROR: unknown OS"
+              exit 1
+              ;;
+          esac
           corellium login \
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
             --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}

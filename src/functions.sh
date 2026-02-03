@@ -133,6 +133,11 @@ wait_until_available_cores()
 
 create_instance()
 {
+  echo "CALLED THE CREATE_INSTANCE FUNCTION"
+}
+
+old_debug_create_instance()
+{
   ECHO "DEBUG STARTING CREATE INSTANCE FUNCTION"
   local HARDWARE_FLAVOR="$1"
   local FIRMWARE_VERSION="$2"

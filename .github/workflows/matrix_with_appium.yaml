@@ -35,13 +35,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, self-hosted]
-        include:
-          - os: self-hosted
-            api-endpoint: ${{ secrets.CORELLIUM_API_TOKEN }}
-          - os: ubuntu-latest
-            api-endpoint: ${{ secrets.CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN }}
-        
+        os: [ubuntu-latest, self-hosted]        
       max-parallel: 2
     steps:
       - name: Pull the latest code
@@ -91,8 +85,8 @@ jobs:
               ;;
           esac
           corellium login \
-            --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
-            --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
+            --apitoken "${api_token}"
+            --endpoint "${api_endpoint}"
       - name: Wait until available cores
         timeout-minutes: 30
         run: |

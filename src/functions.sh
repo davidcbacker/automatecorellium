@@ -419,6 +419,11 @@ get_project_from_instance_id()
   corellium instance get --instance "${INSTANCE_ID}" | jq -r '.project'
 }
 
+get_projects_list()
+{
+  corellium projects list | jq -r '.[].id'
+}
+
 install_app_from_url()
 {
   local INSTANCE_ID="$1"

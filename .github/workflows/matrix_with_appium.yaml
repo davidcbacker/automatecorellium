@@ -89,7 +89,7 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
-            wait_until_available_cores "${{ matrix.default_corellium_project }}" '6'
+            wait_until_available_cores "${{ matrix.default_corellium_project }}" '4'
           else
             wait_until_available_cores "${{ matrix.default_corellium_project }}" '6'
           fi

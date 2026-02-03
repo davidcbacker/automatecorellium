@@ -42,7 +42,7 @@ jobs:
           config: data/config/.markdownlint-cli2.jsonc
           globs: '**/*.md'
       - name: Spellcheck markdown docs
-        uses: rojopolis/spellcheck-github-actions@0.55.0
+        uses: rojopolis/spellcheck-github-actions@0.57.0
         with:
           config_path: data/config/spellcheck.yaml
 
@@ -90,7 +90,7 @@ jobs:
       - name: Pull the latest code
         uses: actions/checkout@v6
       - name: Lint
-        uses: luizm/action-sh-checker@v0.9.0
+        uses: luizm/action-sh-checker@v0.10.0
         env:
           SHELLCHECK_OPTS: >-
             --exclude SC2153,SC2154

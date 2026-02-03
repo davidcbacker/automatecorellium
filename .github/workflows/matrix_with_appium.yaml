@@ -85,7 +85,7 @@ jobs:
               ;;
           esac
           corellium login \
-            --apitoken "${api_token}"
+            --apitoken "${api_token}" \
             --endpoint "${api_endpoint}"
       - name: Wait until available cores
         timeout-minutes: 30

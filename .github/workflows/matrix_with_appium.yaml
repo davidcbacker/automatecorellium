@@ -73,6 +73,11 @@ jobs:
           cache: pip
           cache-dependency-path: requirements-pip-appium.txt
           python-version: 3.14
+      - name: Check Python version
+        run: |
+          command -v python3 || true
+          ls -la /opt/homebrew/bin/python3 || true
+          echo $PATH
       - name: Install API dependencies
         run: |
           npm ci --no-audit --no-fund

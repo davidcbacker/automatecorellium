@@ -157,6 +157,8 @@ jobs:
           install_app_from_url "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_SOURCE_URL}"
       - name: Start Appium server and run session test
         timeout-minutes: 15
+        env:
+          ANDROID_HOME: ${{ secrets.SELF_HOSTED_RUNNER_ANDROID_HOME_PATH }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
@@ -173,6 +175,7 @@ jobs:
         timeout-minutes: 30
         continue-on-error: true
         env:
+          ANDROID_HOME: ${{ secrets.SELF_HOSTED_RUNNER_ANDROID_HOME_PATH }}
           CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
           MATRIX_WORDLIST_PATH: './data/wordlist.txt'

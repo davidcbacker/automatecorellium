@@ -662,7 +662,7 @@ install_openvpn_dependencies()
 
 install_adb_dependency()
 {
-  [ "$(uname -s)" ] = 'Darwin' ] && return
+  [ "$(uname -s)" = 'Darwin' ] && return
   log_stdout 'Installing adb.'
   sudo apt-get -qq update
   sudo apt-get -qq install adb

@@ -18,23 +18,23 @@ env:
 
 jobs:
   frida:
-    name: Run Frida on ${{ matrix.corellium-os }} VM (${{ matrix.runner-os }} runner)
-    runs-on: ${{ matrix.runner-os }}
+    name: Run Frida on ${{ matrix.corellium-os }} VM (${{ matrix.os }} runner)
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
       fail-fast: false
       max-parallel: 1
       matrix:
-        # runner-os: [self-hosted, ubuntu-latest]
-        runner-os: [self-hosted]
+        # os: [self-hosted, ubuntu-latest]
+        os: [self-hosted]
         corellium-os: [Android, iOS]
         include:
-          # - runner-os: ubuntu-latest
+          # - os: ubuntu-latest
           #   api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
           #   api_token_secret_key: CORELLIUM_API_TOKEN
           #   default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
           #   matrix_runner_artifacts_path: /home/runner/matrix_artifacts.tar.gz
-          - runner-os: self-hosted
+          - os: self-hosted
             api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
             api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
             default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}
@@ -50,9 +50,9 @@ jobs:
             firmware_build: 23B85
             corellium_cafe_app_id: com.corellium.Cafe
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
-        exclude:
-          - runner-os: self-hosted
-            corellium-os: iOS
+        # exclude:
+        #   - os: self-hosted
+        #     corellium-os: iOS
 
     steps:
       - name: Pull the latest code
@@ -75,7 +75,7 @@ jobs:
             exit 1
           fi
       - name: Install Python
-        if: matrix.runner-os == 'ubuntu-latest'
+        if: matrix.os == 'ubuntu-latest'
         uses: actions/setup-python@v6
         with:
           cache: pip
@@ -120,7 +120,7 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_frida.sh
-          if [ ${{ matrix.runner-os }} = 'ubuntu-latest' ]; then
+          if [ ${{ matrix.os }} = 'ubuntu-latest' ]; then
             install_openvpn_dependencies
           fi
           if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
@@ -138,7 +138,7 @@ jobs:
           [ "${{ matrix.hardware_flavor }}" == 'ranchu' ] ||
             unlock_instance "${CORELLIUM_INSTANCE_ID}"
       - name: Connect to project VPN
-        if: ${{ matrix.runner-os == 'ubuntu-latest' }}
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail

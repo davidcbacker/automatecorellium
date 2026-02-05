@@ -676,6 +676,11 @@ install_adb_dependency()
 
 install_usbfluxd_and_dependencies()
 {
+  if [ "$(uname -s)" = 'Darwin' ]; then
+    export PATH="/Applications/USBFlux.app/Contents/Resources:$PATH"
+    return
+  fi
+
   local USBFLUXD_APT_DEPS=(
     avahi-daemon
     build-essential

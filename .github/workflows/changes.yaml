@@ -46,16 +46,16 @@ jobs:
       }}
     uses: ./.github/workflows/lint.yaml
 
-  # call-matrix-workflow:
-  #   name: MATRIX
-  #   needs: changes
-  #   if: >-
-  #     ${{
-  #       needs.changes.outputs.javascript-deps == 'true' ||
-  #       needs.changes.outputs.matrix == 'true'
-  #     }}
-  #   uses: ./.github/workflows/matrix_with_appium.yaml
-  #   secrets: inherit
+  call-matrix-workflow:
+    name: MATRIX
+    needs: changes
+    if: >-
+      ${{
+        needs.changes.outputs.javascript-deps == 'true' ||
+        needs.changes.outputs.matrix == 'true'
+      }}
+    uses: ./.github/workflows/matrix_with_appium.yaml
+    secrets: inherit
 
   call-frida-workflow:
     name: Frida

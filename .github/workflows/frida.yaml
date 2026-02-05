@@ -85,8 +85,8 @@ jobs:
       - name: Log in to Corellium
         run: |
           corellium login \
-            --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
-            --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
+            --apitoken ${{ secrets[matrix.api_token_secret_key] }} \
+            --endpoint ${{ secrets[matrix.api_endpoint_secret_key] }}
       - name: Wait until available cores
         timeout-minutes: 30
         run: |

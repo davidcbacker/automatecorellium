@@ -441,7 +441,7 @@ install_app_from_url()
   APP_FILENAME="$(basename "${APP_URL}")"
 
   log_stdout "Downloading ${APP_FILENAME}."
-  wget --quiet "${APP_URL}" || {
+  curl --silent --output "${APP_FILENAME}" "${APP_URL}" || {
     log_error "Failed to download app ${APP_FILENAME}."
     exit 1
   }

@@ -125,13 +125,15 @@ download_matrix_report_to_local_path()
   local MATRIX_REPORT_DOWNLOAD_PATH="$3"
   local MATRIX_REPORT_DEFAULT_FORMAT='html'
   local MATRIX_REPORT_TARGET_FORMAT="${4:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
-  log_stdout "Downloading ${MATRIX_REPORT_TARGET_FORMAT^^} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  local MATRIX_REPORT_TARGET_FORMAT_UPPER
+  MATRIX_REPORT_TARGET_FORMAT_UPPER="$(echo "${MATRIX_REPORT_TARGET_FORMAT}" | tr '[:lower:]' '[:upper:]')"
+  log_stdout "Downloading ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   get_raw_matrix_report \
     "${INSTANCE_ID}" \
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_REPORT_TARGET_FORMAT}" \
     > "${MATRIX_REPORT_DOWNLOAD_PATH}"
-  log_stdout "Downloaded ${MATRIX_REPORT_TARGET_FORMAT^^} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_stdout "Downloaded ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 
 print_failed_matrix_checks()

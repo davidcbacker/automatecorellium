@@ -12,7 +12,6 @@ concurrency:
 
 env:
   TERM: xterm
-  CORELLIUM_DEFAULT_PROJECT: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
   CORELLIUM_INSTANCE_NAME_PREFIX: 'Frida Automation'
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
   NODE_TLS_REJECT_UNAUTHORIZED: 0
@@ -108,7 +107,7 @@ jobs:
             "${{ matrix.hardware_flavor }}" \
             "${{ matrix.firmware_version }}" \
             "${{ matrix.firmware_build }}" \
-            "${CORELLIUM_DEFAULT_PROJECT}" \
+            "${{ matrix.default_corellium_project }}" \
             "${CORELLIUM_INSTANCE_NAME_PREFIX}")"
           log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
           echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"

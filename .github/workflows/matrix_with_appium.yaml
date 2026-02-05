@@ -40,12 +40,10 @@ jobs:
           #   api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
           #   api_token_secret_key: CORELLIUM_API_TOKEN
           #   default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
-          #   matrix_runner_artifacts_path: /home/runner/matrix_artifacts.tar.gz
           - os: self-hosted
             api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
             api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
             default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}
-            matrix_runner_artifacts_path: /tmp/matrix_artifacts.tar.gz
       max-parallel: 2
     steps:
       - name: Pull the latest code
@@ -230,6 +228,7 @@ jobs:
           CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
           MATRIX_INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.tar.gz
+          MATRIX_RUNNER_ARTIFACTS_PATH: ${{ runner.temp }}/matrix_artifacts.tar.gz
         run: |
           source ./src/functions.sh && set -euo pipefail
           log_stdout 'Compressing MATRIX runtime artifacts.'
@@ -239,10 +238,10 @@ jobs:
           download_file_to_local_path \
             "${CORELLIUM_INSTANCE_ID}" \
             "${MATRIX_INSTANCE_ARTIFACTS_PATH}" \
-            "${{ matrix.matrix_runner_artifacts_path }}"
+            "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           log_stdout 'Downloaded MATRIX runtime artifacts from VM to CI runner.'
-          ls -la "${{ matrix.matrix_runner_artifacts_path }}"
-          sha256sum "${{ matrix.matrix_runner_artifacts_path }}"
+          ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
+          sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
       - name: Delete instance
         if: always()
         timeout-minutes: 15
@@ -262,7 +261,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: matrix-runtime-artifacts
-          path: ${{ matrix.matrix_runner_artifacts_path }}
+          path: ${{ runner.temp }}/matrix_artifacts.tar.gz
           compression-level: 9
           if-no-files-found: error
       - name: Upload artifact 'MATRIX reports'

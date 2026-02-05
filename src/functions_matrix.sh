@@ -125,8 +125,8 @@ download_matrix_report_to_local_path()
   local MATRIX_REPORT_DOWNLOAD_PATH="$3"
   local MATRIX_REPORT_DEFAULT_FORMAT='html'
   local MATRIX_REPORT_TARGET_FORMAT="${4:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
-  local MATRIX_REPORT_TARGET_FORMAT_UPPERCASE
-  MATRIX_REPORT_TARGET_FORMAT_UPPER="$(echo "$MATRIX_REPORT_TARGET_FORMAT" | tr '[:lower:]' '[:upper:]')"
+  local MATRIX_REPORT_TARGET_FORMAT_UPPER
+  MATRIX_REPORT_TARGET_FORMAT_UPPER="$(echo "${MATRIX_REPORT_TARGET_FORMAT}" | tr '[:lower:]' '[:upper:]')"
   log_stdout "Downloading ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   get_raw_matrix_report \
     "${INSTANCE_ID}" \

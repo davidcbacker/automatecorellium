@@ -677,7 +677,7 @@ install_adb_dependency()
 install_usbfluxd_and_dependencies()
 {
   if [ "$(uname -s)" = 'Darwin' ]; then
-    export PATH="/Applications/USBFlux.app/Contents/Resources:$PATH"
+    export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
     return
   fi
 
@@ -806,7 +806,7 @@ run_usbfluxd_and_dependencies()
     sudo avahi-daemon &
     log_stdout 'Starting avahi-daemon.'
   fi
-  command -v usbfluxd >/dev/null || {
+  command -v usbfluxd > /dev/null || {
     log_error 'Cannot find usbfluxd in local environment PATH.'
     exit 1
   }
@@ -822,7 +822,7 @@ add_instance_to_usbfluxd()
   local INSTANCE_SERVICES_IP INSTANCE_USBFLUXD_SOCKET
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
-  command -v usbfluxctl >/dev/null || {
+  command -v usbfluxctl > /dev/null || {
     log_error 'Cannot find usbfluxctl in local environment PATH.'
     exit 1
   }

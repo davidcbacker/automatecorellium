@@ -678,7 +678,7 @@ install_adb_dependency()
 install_usbfluxd_and_dependencies()
 {
   if [ "$(uname -s)" = 'Darwin' ]; then
-    [ -d /Applications/USBFlux.app/Contents/Resources' ] || {
+    [ -d '/Applications/USBFlux.app/Contents/Resources' ] || {
       log_error 'Please install USBFlux for maCOS from the Corellium device Connect tab.'
       exit 1
     }

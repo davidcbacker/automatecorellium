@@ -28,19 +28,19 @@ env:
 jobs:
   corellium-matrixscan:
     name: Scan with MATRIX
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.runner-os }}
     timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
-        # os: [ubuntu-latest, self-hosted]
-        os: [self-hosted]
+        # runner-os: [ubuntu-latest, self-hosted]
+        runner-os: [self-hosted]
         include:
           # - os: ubuntu-latest
           #   api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
           #   api_token_secret_key: CORELLIUM_API_TOKEN
           #   default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
-          - os: self-hosted
+          - runner-os: self-hosted
             api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
             api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
             default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}
@@ -66,7 +66,7 @@ jobs:
             exit 1
           fi
       - name: Install Python
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.runner-os == 'ubuntu-latest' }}
         uses: actions/setup-python@v6
         with:
           cache: pip
@@ -109,12 +109,13 @@ jobs:
           echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
           log_stdout 'Updated environmental variables for ephemeral instance.'
       - name: Install additional runner dependencies
-        if: ${{ matrix.os == 'ubuntu-latest' }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
-          install_appium_server_and_dependencies
-          install_openvpn_dependencies
+          if [ ${{ matrix.runner-os }} = 'ubuntu-latest' ]; then
+            install_appium_server_and_dependencies
+            install_openvpn_dependencies
+          fi
           if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
             install_adb_dependency
           else
@@ -128,7 +129,7 @@ jobs:
           wait_until_agent_ready "${CORELLIUM_INSTANCE_ID}"
           # unlock_instance "${CORELLIUM_INSTANCE_ID}" # only for iOS
       - name: Connect to project VPN
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.runner-os == 'ubuntu-latest' }}
         timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail

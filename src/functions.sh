@@ -144,7 +144,7 @@ create_instance()
   else
     NEW_INSTANCE_NAME_PREFIX="Corellium Automation"
   fi
-  NEW_INSTANCE_NAME="${NEW_INSTANCE_NAME_PREFIX} $(date '+%Y-%m-%d_%H-%M-%S')"
+  NEW_INSTANCE_NAME="${NEW_INSTANCE_NAME_PREFIX} $(date '+%Y%m%d-%H%M%S')"
 
   if [ "${HARDWARE_FLAVOR}" = 'ranchu' ]; then
     CREATE_INSTANCE_REQUEST_DATA=$(

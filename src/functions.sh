@@ -679,7 +679,7 @@ install_usbfluxd_and_dependencies()
 {
   if [ "$(uname -s)" = 'Darwin' ]; then
     [ -d '/Applications/USBFlux.app/Contents/Resources' ] || {
-      log_error 'Please install USBFlux for maCOS from the Corellium device Connect tab.'
+      log_error "Please install the USBFlux application from the Corellium virtual device's Connect tab."
       exit 1
     }
     export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"

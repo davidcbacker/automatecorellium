@@ -19,22 +19,33 @@ env:
 
 jobs:
   frida:
-    name: Run Frida on ${{ matrix.os }}
-    runs-on: self-hosted
+    name: Run Frida on ${{ matrix.corellium-os }} VM (${{ matrix.runner-os }} runner)
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
       fail-fast: false
-      max-parallel: 1
+      max-parallel: 2
       matrix:
-        os: [Android, iOS]
+        # runner-os: [self-hosted, ubuntu-latest]
+        runner-os: [self-hosted]
+        corellium-os: [Android, iOS]
         include:
-          - os: Android
+          # - os: ubuntu-latest
+          #   api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
+          #   api_token_secret_key: CORELLIUM_API_TOKEN
+          #   default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
+          #   matrix_runner_artifacts_path: /home/runner/matrix_artifacts.tar.gz
+          - os: self-hosted
+            api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
+            api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
+            default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}
+          - corellium-os: Android
             hardware_flavor: ranchu
             firmware_version: 16.0.0
             firmware_build: 'r2 userdebug'
             corellium_cafe_app_id: com.corellium.cafe
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
-          - os: iOS
+          - corellium-os: iOS
             hardware_flavor: iphone17pm
             firmware_version: 26.0.1
             firmware_build: 23A355
@@ -61,7 +72,7 @@ jobs:
             exit 1
           fi
       - name: Install Python
-        if: runner.os == 'Linux'
+        if: matrix.runner-os == 'ubuntu-latest'
         uses: actions/setup-python@v6
         with:
           cache: pip

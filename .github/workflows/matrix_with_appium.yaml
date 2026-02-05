@@ -13,7 +13,6 @@ concurrency:
 env:
   TERM: xterm
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
-  MATRIX_RUNNER_ARTIFACTS_PATH: /home/runner/matrix_artifacts.tar.gz
   CORELLIUM_INSTANCE_NAME_PREFIX: 'MATRIX Automation'
   CORELLIUM_CAFE_PACKAGE: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
                             && 'com.corellium.cafe'
@@ -41,10 +40,12 @@ jobs:
           #   api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
           #   api_token_secret_key: CORELLIUM_API_TOKEN
           #   default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
+          #   matrix_runner_artifacts_path: /home/runner/matrix_artifacts.tar.gz
           - os: self-hosted
             api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
             api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
             default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}
+            matrix_runner_artifacts_path: /tmp/matrix_artifacts.tar.gz
       max-parallel: 2
     steps:
       - name: Pull the latest code
@@ -238,10 +239,10 @@ jobs:
           download_file_to_local_path \
             "${CORELLIUM_INSTANCE_ID}" \
             "${MATRIX_INSTANCE_ARTIFACTS_PATH}" \
-            "${MATRIX_RUNNER_ARTIFACTS_PATH}"
+            "${{ matrix.matrix_runner_artifacts_path }}"
           log_stdout 'Downloaded MATRIX runtime artifacts from VM to CI runner.'
-          ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
-          sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
+          ls -la "${{ matrix.matrix_runner_artifacts_path }}"
+          sha256sum "${{ matrix.matrix_runner_artifacts_path }}"
       - name: Delete instance
         if: always()
         timeout-minutes: 15
@@ -261,7 +262,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           name: matrix-runtime-artifacts
-          path: ${{ env.MATRIX_RUNNER_ARTIFACTS_PATH }}
+          path: ${{ matrix.matrix_runner_artifacts_path }}
           compression-level: 9
           if-no-files-found: error
       - name: Upload artifact 'MATRIX reports'

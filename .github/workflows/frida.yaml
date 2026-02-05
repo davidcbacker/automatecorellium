@@ -92,9 +92,9 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
-            wait_until_available_cores "${CORELLIUM_DEFAULT_PROJECT}" '4'
+            wait_until_available_cores "${{ matrix.default_corellium_project }}" '4'
           else
-            wait_until_available_cores "${CORELLIUM_DEFAULT_PROJECT}" '6'
+            wait_until_available_cores "${{ matrix.default_corellium_project }}" '6'
           fi
       - name: Create instance
         timeout-minutes: 1

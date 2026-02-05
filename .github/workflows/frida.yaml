@@ -29,11 +29,11 @@ jobs:
         runner-os: [self-hosted]
         corellium-os: [Android, iOS]
         include:
-          - runner-os: ubuntu-latest
-            api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
-            api_token_secret_key: CORELLIUM_API_TOKEN
-            default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
-            matrix_runner_artifacts_path: /home/runner/matrix_artifacts.tar.gz
+          # - runner-os: ubuntu-latest
+          #   api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
+          #   api_token_secret_key: CORELLIUM_API_TOKEN
+          #   default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
+          #   matrix_runner_artifacts_path: /home/runner/matrix_artifacts.tar.gz
           - runner-os: self-hosted
             api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
             api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN

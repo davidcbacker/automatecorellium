@@ -24,7 +24,7 @@ jobs:
     timeout-minutes: 60
     strategy:
       fail-fast: false
-      max-parallel: 2
+      max-parallel: 1
       matrix:
         # runner-os: [self-hosted, ubuntu-latest]
         runner-os: [self-hosted]

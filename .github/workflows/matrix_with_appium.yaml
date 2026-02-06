@@ -33,13 +33,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # runner-os: [ubuntu-latest, self-hosted]
-        runner-os: [self-hosted]
+        runner-os: [ubuntu-latest, self-hosted]
         include:
-          # - os: ubuntu-latest
-          #   api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
-          #   api_token_secret_key: CORELLIUM_API_TOKEN
-          #   default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
+          - runner-os: ubuntu-latest
+            api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
+            api_token_secret_key: CORELLIUM_API_TOKEN
+            default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
           - runner-os: self-hosted
             api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
             api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN

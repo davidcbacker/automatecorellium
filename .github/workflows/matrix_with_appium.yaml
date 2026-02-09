@@ -262,14 +262,14 @@ jobs:
       - name: Upload artifact 'MATRIX runtime artifacts'
         uses: actions/upload-artifact@v6
         with:
-          name: matrix-runtime-artifacts
+          name: matrix-runtime-artifacts-${{ runner.os }}
           path: ${{ runner.temp }}/matrix_artifacts.tar.gz
           compression-level: 9
           if-no-files-found: error
       - name: Upload artifact 'MATRIX reports'
         uses: actions/upload-artifact@v6
         with:
-          name: matrix-reports
+          name: matrix-reports-${{ runner.os }}
           path: |
             matrix_report_*.html
             matrix_report_*.json
@@ -278,7 +278,7 @@ jobs:
       - name: Upload artifact 'Appium screenshots'
         uses: actions/upload-artifact@v6
         with:
-          name: appium-screenshots
+          name: appium-screenshots-${{ runner.os }}
           path: |
             ${{ env.CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME }}
             ${{ env.CORELLIUM_CAFE_CUSTOMER_INFO_SCREENSHOT_FILENAME }}

@@ -809,7 +809,7 @@ run_usbfluxd_and_dependencies()
   case "$(uname -s)" in
     Darwin)
       log_stdout 'Starting usbfluxd.'
-      sudo usbfluxd -f &
+      /Applications/USBFlux.app/Contents/Resources/usbfluxd -f &
       log_stdout 'Started usbfluxd.'
       ;;
     Linux)

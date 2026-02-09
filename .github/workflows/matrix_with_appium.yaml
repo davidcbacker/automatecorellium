@@ -39,10 +39,12 @@ jobs:
             api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
             api_token_secret_key: CORELLIUM_API_TOKEN
             default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
+            android_home_path: ${{ vars.GITHUB_UBUNTU_RUNNER_ANDROID_HOME_PATH }}
           - runner-os: self-hosted
             api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
             api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
             default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}
+            android_home_path: ${{ secrets.SELF_HOSTED_RUNNER_ANDROID_HOME_PATH }}
       max-parallel: 2
     steps:
       - name: Pull the latest code
@@ -157,7 +159,7 @@ jobs:
       - name: Start Appium server and run session test
         timeout-minutes: 15
         env:
-          ANDROID_HOME: ${{ secrets.SELF_HOSTED_RUNNER_ANDROID_HOME_PATH }}
+          ANDROID_HOME: ${{ matrix.android_home_path }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh

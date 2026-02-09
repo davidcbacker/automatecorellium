@@ -39,7 +39,7 @@ jobs:
             api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
             api_token_secret_key: CORELLIUM_API_TOKEN
             default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
-            android_home_path: ${{ vars.GITHUB_UBUNTU_RUNNER_ANDROID_HOME_PATH }}
+            android_home_path: ${{ vars.ACTIONS_UBUNTU_RUNNER_ANDROID_HOME_PATH }}
           - runner-os: self-hosted
             api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
             api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN

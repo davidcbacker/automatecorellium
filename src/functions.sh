@@ -802,22 +802,32 @@ connect_with_adb()
 
 run_usbfluxd_and_dependencies()
 {
-  if [ "$(uname -s)" = 'Linux' ]; then
-    log_stdout 'Starting usbmuxd service.'
-    sudo systemctl start usbmuxd
-    sudo systemctl status usbmuxd
-    log_stdout 'Started usbmuxd service.'
-    log_stdout 'Started avahi-daemon.'
-    sudo avahi-daemon &
-    log_stdout 'Starting avahi-daemon.'
-  fi
-  command -v usbfluxd > /dev/null || {
+  if ! command -v usbfluxd > /dev/null; then
     log_error 'Cannot find usbfluxd in local environment PATH.'
     exit 1
-  }
-  log_stdout 'Starting usbfluxd.'
-  sudo usbfluxd -f -n &
-  log_stdout 'Started usbfluxd.'
+  fi
+  case "$(uname -s)" in
+    Darwin)
+      log_stdout 'Starting usbfluxd.'
+      sudo usbfluxd -f &
+      log_stdout 'Started usbfluxd.'
+      ;;
+    Linux)
+      log_stdout 'Starting usbmuxd service.'
+      sudo systemctl start usbmuxd
+      sudo systemctl status usbmuxd
+      log_stdout 'Started usbmuxd service.'
+      log_stdout 'Started avahi-daemon.'
+      sudo avahi-daemon &
+      log_stdout 'Starting avahi-daemon.'
+      log_stdout 'Starting usbfluxd.'
+      sudo usbfluxd -f -n &
+      log_stdout 'Started usbfluxd.'
+      ;;
+    *)
+      log_error "Cannot run usbmuxd. Unknown kernel type."
+      ;;
+  esac
 }
 
 add_instance_to_usbfluxd()

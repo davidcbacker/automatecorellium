@@ -677,14 +677,14 @@ install_adb_dependency()
 
 install_usbfluxd_and_dependencies()
 {
-  if [ "$(uname -s)" = 'Darwin' ]; then
-    [ -d '/Applications/USBFlux.app/Contents/Resources' ] || {
+  [ "$(uname -s)" = 'Darwin' ] && {
+    if [ -d '/Applications/USBFlux.app/Contents/Resources' ]; then
+      return
+    else
       log_error "Please install the USBFlux application from the Corellium virtual device's Connect tab."
       exit 1
-    }
-    export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
-    return
-  fi
+    fi
+  }
 
   local USBFLUXD_APT_DEPS=(
     avahi-daemon

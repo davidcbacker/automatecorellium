@@ -27,7 +27,7 @@ env:
 
 jobs:
   corellium-matrixscan:
-    name: Scan with MATRIX
+    name: Scan with MATRIX [${{ matrix.runner-os }}]
     runs-on: ${{ matrix.runner-os }}
     timeout-minutes: 60
     strategy:

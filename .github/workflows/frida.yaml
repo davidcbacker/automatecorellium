@@ -18,7 +18,7 @@ env:
 
 jobs:
   frida:
-    name: Run Frida on [${{ matrix.corellium-os }}, ${{ matrix.os-friendly-name }}]
+    name: Run Frida [${{ matrix.corellium-os }}, ${{ matrix.os-friendly-name }}]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:

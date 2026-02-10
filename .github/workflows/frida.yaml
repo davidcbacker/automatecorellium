@@ -18,7 +18,7 @@ env:
 
 jobs:
   frida:
-    name: Run Frida on ${{ matrix.corellium-os }} VM [${{ matrix.os }}]
+    name: Run Frida on ${{ matrix.corellium-os }} VM [${{ matrix.os-friendly-name }}]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 60
     strategy:
@@ -41,10 +41,12 @@ jobs:
             corellium_cafe_app_id: com.corellium.Cafe
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
           - os: ubuntu-latest
+            os-friendly-name: Ubuntu
             api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
             api_token_secret_key: CORELLIUM_API_TOKEN
             default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
           - os: self-hosted
+            os-friendly-name: macOS
             api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
             api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
             default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}

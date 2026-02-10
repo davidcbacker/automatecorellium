@@ -812,7 +812,7 @@ verify_usbflux_connection()
 {
   local INSTANCE_ID="$1"
   local INSTANCE_UDID
-  for binary_name in (idevice_id idevicepair); do
+  for binary_name in idevice_id idevicepair; do
     command -v "${binary_name}" > /dev/null || {
       log_error "Cannot find the '${binary_name}' binary. Please install using apt (Ubuntu) or brew (macOS)."
       exit 1

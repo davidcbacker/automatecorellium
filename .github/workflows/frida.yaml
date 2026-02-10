@@ -25,15 +25,13 @@ jobs:
       fail-fast: false
       max-parallel: 1
       matrix:
-        # os: [self-hosted, ubuntu-latest]
-        os: [self-hosted]
+        os: [self-hosted, ubuntu-latest]
         corellium-os: [Android, iOS]
         include:
-          # - os: ubuntu-latest
-          #   api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
-          #   api_token_secret_key: CORELLIUM_API_TOKEN
-          #   default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
-          #   matrix_runner_artifacts_path: /home/runner/matrix_artifacts.tar.gz
+          - os: ubuntu-latest
+            api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
+            api_token_secret_key: CORELLIUM_API_TOKEN
+            default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
           - os: self-hosted
             api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
             api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
@@ -50,10 +48,6 @@ jobs:
             firmware_build: 23B85
             corellium_cafe_app_id: com.corellium.Cafe
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
-        # exclude:
-        #   - os: self-hosted
-        #     corellium-os: iOS
-
     steps:
       - name: Pull the latest code
         uses: actions/checkout@v6

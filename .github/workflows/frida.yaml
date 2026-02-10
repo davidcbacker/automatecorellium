@@ -220,7 +220,7 @@ jobs:
           for PROCESS in "${PROCS_TO_KILL[@]}"; do
             if pgrep "${PROCESS}" > /dev/null 2>&1; then
               echo "[+] Killing ${PROCESS}"
-              if [ "${{ runner.os }}" = 'self-hosted' ]; then
+              if [ "${{ matrix.os }}" = 'self-hosted' ]; then
                 killall "${PROCESS}"
               else
                 sudo killall "${PROCESS}"

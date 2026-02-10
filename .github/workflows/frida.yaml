@@ -208,7 +208,7 @@ jobs:
             avahi-daemon
             openvpn
           )
-          [ ${{ matrix.corellium-os }} = 'iOS' ] &&
+          [ "${{ matrix.corellium-os }}" = 'iOS' ] &&
             PROCS_TO_KILL+=('usbfluxd')
           for FILE_PATH in "${FILES_TO_DELETE[@]}"; do
             if [ -f "${FILE_PATH}" ]; then
@@ -220,7 +220,7 @@ jobs:
           for PROCESS in "${PROCS_TO_KILL[@]}"; do
             if pgrep "${PROCESS}" > /dev/null 2>&1; then
               echo "[+] Killing ${PROCESS}"
-              if [ ${{ runner.os }} ] = 'self-hosted' ]; then
+              if [ "${{ runner.os }}" = 'self-hosted' ]; then
                 killall "${PROCESS}"
               else
                 sudo killall "${PROCESS}"

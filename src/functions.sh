@@ -813,9 +813,15 @@ verify_usbflux_connection()
   local INSTANCE_ID="$1"
   local INSTANCE_UDID
   INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
+  command -v idevice_id > /dev/null || {
+    log_error 'Cannot find the idevice_id binary. Please install using apt (Ubuntu) or brew (macOS).'
+  }
   log_stdout 'Checking for usb connection with idevice_id.'
   until idevice_id "${INSTANCE_UDID}"; do sleep 0.1; done
   log_stdout 'Found usb connection with idevice_id.'
+  command -v idevicepair > /dev/null || {
+    log_error 'Cannot find the idevicepair binary. Please install using apt (Ubuntu) or brew (macOS).'
+  }
   log_stdout 'Pairing to Corellium device with idevicepair.'
   until idevicepair --udid "${INSTANCE_UDID}" pair; do sleep 1; done
   log_stdout 'Paired to Corellium device with idevicepair.'

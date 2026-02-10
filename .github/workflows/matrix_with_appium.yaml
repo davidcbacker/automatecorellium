@@ -27,7 +27,7 @@ env:
 
 jobs:
   corellium-matrixscan:
-    name: Scan with MATRIX [${{ matrix.runner-os }}]
+    name: Scan with MATRIX [${{ matrix.runner-os-friendly-name }}]
     runs-on: ${{ matrix.runner-os }}
     timeout-minutes: 60
     strategy:
@@ -36,11 +36,13 @@ jobs:
         runner-os: [ubuntu-latest, self-hosted]
         include:
           - runner-os: ubuntu-latest
+            runner-os-friendly-name: Ubuntu
             api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
             api_token_secret_key: CORELLIUM_API_TOKEN
             default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
             android_home_path: ${{ vars.ACTIONS_UBUNTU_RUNNER_ANDROID_HOME_PATH }}
           - runner-os: self-hosted
+            runner-os-friendly-name: macOS
             api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
             api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
             default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}

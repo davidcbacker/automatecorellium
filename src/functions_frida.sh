@@ -11,6 +11,13 @@ install_frida_dependencies()
   # python3 -m pip install -U objection # Objection does not support Frida 17 yet
 }
 
+run_frida_list_devices()
+{
+  log_stdout 'Listing devices.'
+  frida-ls-devices
+  log_stdout 'Listed devices.'
+}
+
 run_frida_ps_network()
 {
   local INSTANCE_ID="$1"
@@ -28,6 +35,8 @@ run_frida_ps_network()
 
 run_frida_ps_usb()
 {
+  log_stdout 'Listing devices.'
+  frida-ls-devices
   log_stdout 'Listing running apps.'
   frida-ps --usb --applications || {
     log_warn 'Failed to enumerate running apps. Retrying.'

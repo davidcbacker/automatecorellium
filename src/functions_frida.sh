@@ -14,7 +14,7 @@ install_frida_dependencies()
 run_frida_list_devices()
 {
   log_stdout 'Listing devices.'
-  frida-ls-devices < /dev/null || true
+  frida-ls-devices || true
   log_stdout 'Listed devices.'
 }
 

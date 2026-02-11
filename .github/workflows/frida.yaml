@@ -221,7 +221,9 @@ jobs:
               rm -f "${FILE_PATH}"
             fi
           done
-          command -v adb > /dev/null && adb disconnect
+          [ "${{ matrix.os }}" = 'ubuntu-latest' ] &&
+            command -v adb > /dev/null &&
+            adb disconnect
           for PROCESS in "${PROCS_TO_KILL[@]}"; do
             if pgrep "${PROCESS}" > /dev/null 2>&1; then
               echo "[+] Killing ${PROCESS}"

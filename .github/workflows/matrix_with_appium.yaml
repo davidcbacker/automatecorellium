@@ -23,7 +23,6 @@ env:
   CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME: corellium_cafe_blog_page.png
   CORELLIUM_CAFE_CUSTOMER_INFO_SCREENSHOT_FILENAME: corellium_cafe_customer_info.png
   CORELLIUM_CAFE_PAYMENT_INFO_SCREENSHOT_FILENAME: corellium_cafe_payment_info.png
-  NODE_TLS_REJECT_UNAUTHORIZED: 0
 
 jobs:
   corellium-matrixscan:

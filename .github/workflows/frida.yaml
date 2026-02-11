@@ -174,7 +174,7 @@ jobs:
           launch_app "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_app_id }}"
           sleep 5 # attempting to mitigate intermittent failure, issue 467
           run_frida_list_devices
-          run_frida_ps_usb
+          run_frida_ps_device "${CORELLIUM_INSTANCE_ID}"
       - name: Run frida hook
         timeout-minutes: 2
         env:

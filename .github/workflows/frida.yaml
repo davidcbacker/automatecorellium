@@ -212,8 +212,8 @@ jobs:
             avahi-daemon
             openvpn
           )
-          [ "${{ matrix.corellium-os }}" = 'iOS' ] &&
-            [ "${{ matrix.os }}" = 'ubuntu-latest' ] &&
+          [ "${{ matrix.os }}" = 'ubuntu-latest' ] &&
+            [ "${{ matrix.corellium-os }}" = 'iOS' ] &&
             PROCS_TO_KILL+=('usbfluxd')
           for FILE_PATH in "${FILES_TO_DELETE[@]}"; do
             if [ -f "${FILE_PATH}" ]; then

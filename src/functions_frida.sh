@@ -21,7 +21,7 @@ run_frida_list_devices()
 run_frida_ps_device()
 {
   local INSTANCE_ID="$1"
-  local GET_INSTANCE_JSON_RESPONSE INSTANCE_SERVICES_IP FRIDA_DEVICE_ID 
+  local GET_INSTANCE_JSON_RESPONSE INSTANCE_SERVICES_IP FRIDA_DEVICE_ID
   GET_INSTANCE_JSON_RESPONSE="$(corellium instance get --instance "${INSTANCE_ID}")"
   INSTANCE_FLAVOR="$(echo "${GET_INSTANCE_JSON_RESPONSE}" | jq -r '.flavor')"
   if [ "${INSTANCE_FLAVOR}" = 'ranchu' ]; then

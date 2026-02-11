@@ -326,7 +326,11 @@ jobs:
           for PROCESS in "${PROCS_TO_KILL[@]}"; do
             if pgrep "${PROCESS}" > /dev/null 2>&1; then
               echo "[+] Killing ${PROCESS}"
-              sudo killall "${PROCESS}"
+              if [ "${{ matrix.runner-os }}" = 'self-hosted' ]; then
+                killall "${PROCESS}"
+              else
+                sudo killall "${PROCESS}"
+              fi
               echo "[+] Killed ${PROCESS}"
             fi
           done

@@ -28,7 +28,7 @@ run_frida_ps_device()
     INSTANCE_SERVICES_IP="$(echo "${GET_INSTANCE_JSON_RESPONSE}" | jq -r '.serviceIp')"
     FRIDA_DEVICE_ID="${INSTANCE_SERVICES_IP}:5001"
   else
-    INSTANCE_UDID="$(echo "${GET_INSTANCE_JSON_RESPONSE}" | jq -r '.udid')"
+    INSTANCE_UDID="$(echo "${GET_INSTANCE_JSON_RESPONSE}" | jq -r '.bootOptions.udid')"
     FRIDA_DEVICE_ID="${INSTANCE_UDID}"
   fi
   log_stdout 'Listing running apps.'

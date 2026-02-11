@@ -309,13 +309,14 @@ jobs:
             "${CORELLIUM_CLI_PROFILE}"
             "${VPN_CONFIG_PATH}"
           )
-          readonly PROCS_TO_KILL=(
+          PROCS_TO_KILL=(
             MainThread
             appium
             avahi-daemon
             openvpn
-            usbfluxd
           )
+          [ "${{ matrix.runner-os }}" = 'ubuntu-latest' ] &&
+            PROCS_TO_KILL+=('usbfluxd')
           for FILE_PATH in "${FILES_TO_DELETE[@]}"; do
             if [ -f "${FILE_PATH}" ]; then
               echo "[+] Deleting ${FILE_PATH}"

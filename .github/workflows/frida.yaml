@@ -213,6 +213,7 @@ jobs:
             openvpn
           )
           [ "${{ matrix.corellium-os }}" = 'iOS' ] &&
+            [ "${{ matrix.os }}" = 'ubuntu-latest' ] &&
             PROCS_TO_KILL+=('usbfluxd')
           for FILE_PATH in "${FILES_TO_DELETE[@]}"; do
             if [ -f "${FILE_PATH}" ]; then

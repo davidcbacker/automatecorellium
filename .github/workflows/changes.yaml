@@ -16,7 +16,6 @@ jobs:
       ci: ${{ steps.filter.outputs.ci }}
       frida: ${{ steps.filter.outputs.frida }}
       javascript: ${{ steps.filter.outputs.javascript }}
-      javascript-deps: ${{ steps.filter.outputs.javascript-deps }}
       markdown: ${{ steps.filter.outputs.markdown }}
       matrix: ${{ steps.filter.outputs.matrix }}
       python: ${{ steps.filter.outputs.python }}
@@ -38,7 +37,6 @@ jobs:
     if: >-
       ${{
         needs.changes.outputs.ci == 'true' ||
-        needs.changes.outputs.javascript == 'true' ||
         needs.changes.outputs.markdown == 'true' ||
         needs.changes.outputs.python == 'true' ||
         needs.changes.outputs.static-lint == 'true' ||
@@ -51,7 +49,7 @@ jobs:
     needs: changes
     if: >-
       ${{
-        needs.changes.outputs.javascript-deps == 'true' ||
+        needs.changes.outputs.javascript == 'true' ||
         needs.changes.outputs.matrix == 'true'
       }}
     uses: ./.github/workflows/matrix_with_appium.yaml
@@ -63,7 +61,7 @@ jobs:
     if: >-
       ${{
         needs.changes.outputs.frida == 'true' ||
-        needs.changes.outputs.javascript-deps == 'true'
+        needs.changes.outputs.javascript == 'true'
       }}
     uses: ./.github/workflows/frida.yaml
     secrets: inherit

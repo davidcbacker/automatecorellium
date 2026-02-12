@@ -11,17 +11,10 @@ install_frida_dependencies()
   # python3 -m pip install -U objection # Objection does not support Frida 17 yet
 }
 
-run_frida_list_devices()
-{
-  log_stdout 'Listing devices.'
-  frida-ls-devices || true
-  log_stdout 'Listed devices.'
-}
-
-run_frida_ps_device()
+get_frida_device_id()
 {
   local INSTANCE_ID="$1"
-  local GET_INSTANCE_JSON_RESPONSE INSTANCE_SERVICES_IP FRIDA_DEVICE_ID
+  local GET_INSTANCE_JSON_RESPONSE INSTANCE_SERVICES_IP INSTANCE_UDID FRIDA_DEVICE_ID
   GET_INSTANCE_JSON_RESPONSE="$(corellium instance get --instance "${INSTANCE_ID}")"
   INSTANCE_FLAVOR="$(echo "${GET_INSTANCE_JSON_RESPONSE}" | jq -r '.flavor')"
   if [ "${INSTANCE_FLAVOR}" = 'ranchu' ]; then
@@ -31,6 +24,14 @@ run_frida_ps_device()
     INSTANCE_UDID="$(echo "${GET_INSTANCE_JSON_RESPONSE}" | jq -r '.bootOptions.udid')"
     FRIDA_DEVICE_ID="${INSTANCE_UDID}"
   fi
+  echo "${FRIDA_DEVICE_ID}"
+}
+
+run_frida_ps_device()
+{
+  local INSTANCE_ID="$1"
+  local FRIDA_DEVICE_ID
+  FRIDA_DEVICE_ID="$(get_frida_device_id "${INSTANCE_ID}")"
   log_stdout 'Listing running apps.'
   frida-ps --device "${FRIDA_DEVICE_ID}" --applications || {
     log_warn 'Failed to enumerate running apps. Retrying.'

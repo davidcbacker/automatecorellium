@@ -173,7 +173,7 @@ EOF
     )
   fi
 
-  CREATE_INSTANCE_RESPONSE_JSON="$(curl --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
+  CREATE_INSTANCE_RESPONSE_JSON="$(curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
     -H "Accept: application/json" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
     -H "Content-Type: application/json" \
@@ -192,6 +192,9 @@ EOF
   [ "${CREATED_INSTANCE_ID}" = 'null' ] && {
     log_error 'Response contains a null instance ID.'
     log_error "$(echo "${CREATE_INSTANCE_RESPONSE_JSON}" | jq -r .error)"
+    echo "DEBUG LISTING ALL PROJECTS"
+    get_projects_list
+    echo "DEBUG EXITING"
     exit 1
   }
 
@@ -283,7 +286,7 @@ soft_stop_instance()
     *)
       log_stdout "Stopping instance ${INSTANCE_ID}."
       check_env_vars
-      curl --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/stop" \
+      curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/stop" \
         -H "Accept: application/json" \
         -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
         -H "Content-Type: application/json" \
@@ -401,7 +404,7 @@ kill_app()
   local APP_BUNDLE_ID="$2"
   if [ "$(is_app_running "${INSTANCE_ID}" "${APP_BUNDLE_ID}")" = 'true' ]; then
     log_stdout "Killing running app ${APP_BUNDLE_ID}."
-    if curl --silent -X POST \
+    if curl --insecure --silent -X POST \
       "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/app/apps/${APP_BUNDLE_ID}/kill" \
       -H "Accept: application/json" \
       -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"; then
@@ -417,6 +420,11 @@ get_project_from_instance_id()
 {
   local INSTANCE_ID="$1"
   corellium instance get --instance "${INSTANCE_ID}" | jq -r '.project'
+}
+
+get_projects_list()
+{
+  corellium project list | jq -r '.[].id'
 }
 
 install_app_from_url()
@@ -566,7 +574,7 @@ download_file_to_local_path()
   # replace '/' with '%2F' using parameter expansion
   local encoded_download_path="${FILE_DOWNLOAD_PATH//\//%2F}"
 
-  curl --silent -X GET \
+  curl --insecure --silent -X GET \
     "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/file/device/${encoded_download_path}" \
     -H "Accept: application/octet-stream" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
@@ -654,6 +662,7 @@ install_openvpn_dependencies()
 
 install_adb_dependency()
 {
+  [ "$(uname -s)" = 'Darwin' ] && return
   log_stdout 'Installing adb.'
   sudo apt-get -qq update
   sudo apt-get -qq install adb
@@ -668,6 +677,15 @@ install_adb_dependency()
 
 install_usbfluxd_and_dependencies()
 {
+  [ "$(uname -s)" = 'Darwin' ] && {
+    if [ -d '/Applications/USBFlux.app/Contents/Resources' ]; then
+      return
+    else
+      log_error "Please install the USBFlux application from the Corellium virtual device's Connect tab."
+      exit 1
+    fi
+  }
+
   local USBFLUXD_APT_DEPS=(
     avahi-daemon
     build-essential
@@ -739,7 +757,7 @@ connect_to_vpn_for_instance()
 
   if ! command -v openvpn > /dev/null; then
     log_warn 'Attempting to install openvpn dependency.'
-    install_openvpn_dependency
+    install_openvpn_dependencies
   fi
 
   save_vpn_config_to_local_path "${INSTANCE_ID}" "${OVPN_CONFIG_PATH}"
@@ -784,16 +802,32 @@ connect_with_adb()
 
 run_usbfluxd_and_dependencies()
 {
-  log_stdout 'Starting usbmuxd service.'
-  sudo systemctl start usbmuxd
-  sudo systemctl status usbmuxd
-  log_stdout 'Started usbmuxd service.'
-  log_stdout 'Started avahi-daemon.'
-  sudo avahi-daemon &
-  log_stdout 'Starting avahi-daemon.'
-  log_stdout 'Starting usbfluxd.'
-  sudo usbfluxd -f -n &
-  log_stdout 'Started usbfluxd.'
+  if ! command -v usbfluxd > /dev/null; then
+    log_error 'Cannot find usbfluxd in local environment PATH.'
+    exit 1
+  fi
+  case "$(uname -s)" in
+    Darwin)
+      log_stdout 'Starting usbfluxd.'
+      /Applications/USBFlux.app/Contents/Resources/usbfluxd -f &
+      log_stdout 'Started usbfluxd.'
+      ;;
+    Linux)
+      log_stdout 'Starting usbmuxd service.'
+      sudo systemctl start usbmuxd
+      sudo systemctl status usbmuxd
+      log_stdout 'Started usbmuxd service.'
+      log_stdout 'Started avahi-daemon.'
+      sudo avahi-daemon &
+      log_stdout 'Starting avahi-daemon.'
+      log_stdout 'Starting usbfluxd.'
+      sudo usbfluxd -f -n &
+      log_stdout 'Started usbfluxd.'
+      ;;
+    *)
+      log_error "Cannot run usbmuxd. Unknown kernel type."
+      ;;
+  esac
 }
 
 add_instance_to_usbfluxd()
@@ -803,6 +837,10 @@ add_instance_to_usbfluxd()
   local INSTANCE_SERVICES_IP INSTANCE_USBFLUXD_SOCKET
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
+  command -v usbfluxctl > /dev/null || {
+    log_error 'Cannot find usbfluxctl in local environment PATH.'
+    exit 1
+  }
   log_stdout "Adding device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
   usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"
   log_stdout "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."

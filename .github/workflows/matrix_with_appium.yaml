@@ -13,8 +13,6 @@ concurrency:
 env:
   TERM: xterm
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
-  MATRIX_RUNNER_ARTIFACTS_PATH: /home/runner/matrix_artifacts.tar.gz
-  CORELLIUM_DEFAULT_PROJECT: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
   CORELLIUM_INSTANCE_NAME_PREFIX: 'MATRIX Automation'
   CORELLIUM_CAFE_PACKAGE: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
                             && 'com.corellium.cafe'
@@ -28,9 +26,31 @@ env:
 
 jobs:
   corellium-matrixscan:
-    name: Scan with MATRIX
-    runs-on: ubuntu-latest
+    name: Scan with MATRIX [Android, ${{ matrix.runner-os-friendly-name }}]
+    runs-on: ${{ matrix.runner-os }}
     timeout-minutes: 60
+    env:
+      NODE_TLS_REJECT_UNAUTHORIZED: ${{ matrix.node_tls_reject_unauthorized }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner-os: [ubuntu-latest, self-hosted]
+        include:
+          - runner-os: ubuntu-latest
+            runner-os-friendly-name: Ubuntu
+            api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
+            api_token_secret_key: CORELLIUM_API_TOKEN
+            default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
+            android_home_path: ${{ vars.ACTIONS_UBUNTU_RUNNER_ANDROID_HOME_PATH }}
+            node_tls_reject_unauthorized: 1
+          - runner-os: self-hosted
+            runner-os-friendly-name: macOS
+            api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
+            api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
+            default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}
+            android_home_path: ${{ vars.SELF_HOSTED_RUNNER_ANDROID_HOME_PATH }}
+            node_tls_reject_unauthorized: 0
+      max-parallel: 2
     steps:
       - name: Pull the latest code
         uses: actions/checkout@v6
@@ -52,6 +72,7 @@ jobs:
             exit 1
           fi
       - name: Install Python
+        if: ${{ matrix.runner-os == 'ubuntu-latest' }}
         uses: actions/setup-python@v6
         with:
           cache: pip
@@ -63,23 +84,24 @@ jobs:
           echo "$(pwd)/node_modules/.bin" >> "${GITHUB_PATH}"
       - name: Log in to Corellium
         run: |
+          echo "Logging in with secret keys ${{ matrix.api_endpoint_secret_key }} and ${{ matrix.api_token_secret_key }}"
           corellium login \
-            --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
-            --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
+            --apitoken ${{ secrets[matrix.api_token_secret_key] }} \
+            --endpoint ${{ secrets[matrix.api_endpoint_secret_key] }}
       - name: Wait until available cores
         timeout-minutes: 30
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
-            wait_until_available_cores "${CORELLIUM_DEFAULT_PROJECT}" '6'
+            wait_until_available_cores "${{ matrix.default_corellium_project }}" '4'
           else
-            wait_until_available_cores "${CORELLIUM_DEFAULT_PROJECT}" '6'
+            wait_until_available_cores "${{ matrix.default_corellium_project }}" '6'
           fi
       - name: Create instance
         timeout-minutes: 1
         env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
+          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           log_stdout "Creating instance."
@@ -87,7 +109,7 @@ jobs:
             "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" \
             "${{ vars.MATRIX_DEFAULT_FIRMWARE_VERSION }}" \
             "${{ vars.MATRIX_DEFAULT_FIRMWARE_BUILD }}" \
-            "${CORELLIUM_DEFAULT_PROJECT}" \
+            "${{ matrix.default_corellium_project }}" \
             "${CORELLIUM_INSTANCE_NAME_PREFIX}")"
           log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
           echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
@@ -96,13 +118,15 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
-          install_openvpn_dependencies
+          if [ ${{ matrix.runner-os }} = 'ubuntu-latest' ]; then
+            install_appium_server_and_dependencies
+            install_openvpn_dependencies
+          fi
           if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
             install_adb_dependency
           else
             install_usbfluxd_and_dependencies
           fi
-          install_appium_server_and_dependencies
       - name: Wait for instance agent ready
         timeout-minutes: 20
         run: |
@@ -111,6 +135,7 @@ jobs:
           wait_until_agent_ready "${CORELLIUM_INSTANCE_ID}"
           # unlock_instance "${CORELLIUM_INSTANCE_ID}" # only for iOS
       - name: Connect to project VPN
+        if: ${{ matrix.runner-os == 'ubuntu-latest' }}
         timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail
@@ -124,20 +149,24 @@ jobs:
           if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
             connect_with_adb "${CORELLIUM_INSTANCE_ID}"
           else
+            [ "$(uname -s)" = 'Darwin' ] &&
+              export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
             run_usbfluxd_and_dependencies
             add_instance_to_usbfluxd "${CORELLIUM_INSTANCE_ID}"
             verify_usbflux_connection "${CORELLIUM_INSTANCE_ID}"
           fi
       - name: Install Corellium Cafe from URL
         env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
+          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           kill_app "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
           install_app_from_url "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_SOURCE_URL}"
       - name: Start Appium server and run session test
         timeout-minutes: 15
+        env:
+          ANDROID_HOME: ${{ matrix.android_home_path }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
@@ -154,8 +183,9 @@ jobs:
         timeout-minutes: 30
         continue-on-error: true
         env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          ANDROID_HOME: ${{ secrets.SELF_HOSTED_RUNNER_ANDROID_HOME_PATH }}
+          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
+          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
           MATRIX_WORDLIST_PATH: './data/wordlist.txt'
         run: |
           source ./src/functions.sh && set -euo pipefail
@@ -172,8 +202,8 @@ jobs:
         timeout-minutes: 30
         continue-on-error: true
         env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
+          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
           MATRIX_WORDLIST_PATH: './data/wordlist.txt'
         run: |
           source ./src/functions.sh && set -euo pipefail
@@ -190,8 +220,8 @@ jobs:
         timeout-minutes: 30
         continue-on-error: false
         env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
+          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
           MATRIX_WORDLIST_PATH: './data/wordlist.txt'
         run: |
           source ./src/functions.sh && set -euo pipefail
@@ -204,9 +234,10 @@ jobs:
             "${MATRIX_WORDLIST_ID}"
       - name: Download MATRIX runtime artifacts from VM
         env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
+          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
           MATRIX_INSTANCE_ARTIFACTS_PATH: /tmp/matrix_artifacts.tar.gz
+          MATRIX_RUNNER_ARTIFACTS_PATH: ${{ runner.temp }}/matrix_artifacts.tar.gz
         run: |
           source ./src/functions.sh && set -euo pipefail
           log_stdout 'Compressing MATRIX runtime artifacts.'
@@ -224,8 +255,8 @@ jobs:
         if: always()
         timeout-minutes: 15
         env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
+          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
@@ -238,14 +269,14 @@ jobs:
       - name: Upload artifact 'MATRIX runtime artifacts'
         uses: actions/upload-artifact@v6
         with:
-          name: matrix-runtime-artifacts
-          path: ${{ env.MATRIX_RUNNER_ARTIFACTS_PATH }}
+          name: matrix-runtime-artifacts-${{ runner.os }}
+          path: ${{ runner.temp }}/matrix_artifacts.tar.gz
           compression-level: 9
           if-no-files-found: error
       - name: Upload artifact 'MATRIX reports'
         uses: actions/upload-artifact@v6
         with:
-          name: matrix-reports
+          name: matrix-reports-${{ runner.os }}
           path: |
             matrix_report_*.html
             matrix_report_*.json
@@ -254,7 +285,7 @@ jobs:
       - name: Upload artifact 'Appium screenshots'
         uses: actions/upload-artifact@v6
         with:
-          name: appium-screenshots
+          name: appium-screenshots-${{ runner.os }}
           path: |
             ${{ env.CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME }}
             ${{ env.CORELLIUM_CAFE_CUSTOMER_INFO_SCREENSHOT_FILENAME }}
@@ -278,25 +309,31 @@ jobs:
             "${CORELLIUM_CLI_PROFILE}"
             "${VPN_CONFIG_PATH}"
           )
-          readonly PROCS_TO_KILL=(
+          PROCS_TO_KILL=(
             MainThread
-            adb
             appium
             avahi-daemon
             openvpn
-            usbfluxd
           )
+          [ "${{ matrix.runner-os }}" = 'ubuntu-latest' ] &&
+            PROCS_TO_KILL+=('usbfluxd')
           for FILE_PATH in "${FILES_TO_DELETE[@]}"; do
             if [ -f "${FILE_PATH}" ]; then
               echo "[+] Deleting ${FILE_PATH}"
               rm -f "${FILE_PATH}"
             fi
           done
-          command -v adb > /dev/null && adb disconnect
+          [ "${{ matrix.runner-os }}" = 'ubuntu-latest' ] &&
+            command -v adb > /dev/null &&
+            adb disconnect
           for PROCESS in "${PROCS_TO_KILL[@]}"; do
             if pgrep "${PROCESS}" > /dev/null 2>&1; then
               echo "[+] Killing ${PROCESS}"
-              sudo killall "${PROCESS}"
+              if [ "${{ matrix.runner-os }}" = 'self-hosted' ]; then
+                killall "${PROCESS}"
+              else
+                sudo killall "${PROCESS}"
+              fi
               echo "[+] Killed ${PROCESS}"
             fi
           done

@@ -12,33 +12,47 @@ concurrency:
 
 env:
   TERM: xterm
-  CORELLIUM_DEFAULT_PROJECT: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
   CORELLIUM_INSTANCE_NAME_PREFIX: 'Frida Automation'
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
 
 jobs:
   frida:
-    name: Run Frida on ${{ matrix.os }}
-    runs-on: ubuntu-latest
+    name: Run Frida [${{ matrix.corellium-os }}, ${{ matrix.os-friendly-name }}]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 60
+    env:
+      NODE_TLS_REJECT_UNAUTHORIZED: ${{ matrix.node_tls_reject_unauthorized }}
     strategy:
       fail-fast: false
-      max-parallel: 1
+      max-parallel: 2
       matrix:
-        os: [Android, iOS]
+        corellium-os: [Android, iOS]
+        os: [ubuntu-latest, self-hosted]
         include:
-          - os: Android
+          - corellium-os: Android
             hardware_flavor: ranchu
             firmware_version: 16.0.0
             firmware_build: 'r2 userdebug'
             corellium_cafe_app_id: com.corellium.cafe
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
-          - os: iOS
+          - corellium-os: iOS
             hardware_flavor: iphone17pm
-            firmware_version: 26.0.1
-            firmware_build: 23A355
+            firmware_version: 26.1
+            firmware_build: 23B85
             corellium_cafe_app_id: com.corellium.Cafe
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
+          - os: ubuntu-latest
+            os-friendly-name: Ubuntu
+            api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
+            api_token_secret_key: CORELLIUM_API_TOKEN
+            default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
+            node_tls_reject_unauthorized: 1
+          - os: self-hosted
+            os-friendly-name: macOS
+            api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
+            api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
+            default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}
+            node_tls_reject_unauthorized: 0
     steps:
       - name: Pull the latest code
         uses: actions/checkout@v6
@@ -60,6 +74,7 @@ jobs:
             exit 1
           fi
       - name: Install Python
+        if: matrix.os == 'ubuntu-latest'
         uses: actions/setup-python@v6
         with:
           cache: pip
@@ -72,22 +87,22 @@ jobs:
       - name: Log in to Corellium
         run: |
           corellium login \
-            --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
-            --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
+            --apitoken ${{ secrets[matrix.api_token_secret_key] }} \
+            --endpoint ${{ secrets[matrix.api_endpoint_secret_key] }}
       - name: Wait until available cores
         timeout-minutes: 30
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
-            wait_until_available_cores "${CORELLIUM_DEFAULT_PROJECT}" '4'
+            wait_until_available_cores "${{ matrix.default_corellium_project }}" '4'
           else
-            wait_until_available_cores "${CORELLIUM_DEFAULT_PROJECT}" '6'
+            wait_until_available_cores "${{ matrix.default_corellium_project }}" '6'
           fi
       - name: Create instance
         timeout-minutes: 1
         env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
+          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           log_stdout "Creating ephemeral instance."
@@ -95,7 +110,7 @@ jobs:
             "${{ matrix.hardware_flavor }}" \
             "${{ matrix.firmware_version }}" \
             "${{ matrix.firmware_build }}" \
-            "${CORELLIUM_DEFAULT_PROJECT}" \
+            "${{ matrix.default_corellium_project }}" \
             "${CORELLIUM_INSTANCE_NAME_PREFIX}")"
           log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
           echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
@@ -104,7 +119,9 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_frida.sh
-          install_openvpn_dependencies
+          if [ ${{ matrix.os }} = 'ubuntu-latest' ]; then
+            install_openvpn_dependencies
+          fi
           if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
             install_adb_dependency
           else
@@ -112,7 +129,7 @@ jobs:
           fi
           install_frida_dependencies
       - name: Wait for instance agent ready
-        timeout-minutes: 20
+        timeout-minutes: 30
         run: |
           source ./src/functions.sh && set -euo pipefail
           start_instance "${CORELLIUM_INSTANCE_ID}"
@@ -120,6 +137,7 @@ jobs:
           [ "${{ matrix.hardware_flavor }}" == 'ranchu' ] ||
             unlock_instance "${CORELLIUM_INSTANCE_ID}"
       - name: Connect to project VPN
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail
@@ -133,6 +151,8 @@ jobs:
           if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
             connect_with_adb "${CORELLIUM_INSTANCE_ID}"
           else
+            [ "$(uname -s)" = 'Darwin' ] &&
+              export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
             run_usbfluxd_and_dependencies
             add_instance_to_usbfluxd "${CORELLIUM_INSTANCE_ID}"
             verify_usbflux_connection "${CORELLIUM_INSTANCE_ID}"
@@ -140,8 +160,8 @@ jobs:
       - name: Install Corellium Cafe from URL
         timeout-minutes: 2
         env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
+          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           kill_app "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_app_id }}"
@@ -149,14 +169,14 @@ jobs:
       - name: Launch Cafe and run frida-ps
         timeout-minutes: 10
         env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
-          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
+          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_frida.sh
           launch_app "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_app_id }}"
           sleep 5 # attempting to mitigate intermittent failure, issue 467
-          run_frida_ps_usb
+          run_frida_ps_device "${CORELLIUM_INSTANCE_ID}"
       - name: Run frida hook
         timeout-minutes: 2
         env:
@@ -187,23 +207,30 @@ jobs:
             "${CORELLIUM_CLI_PROFILE}"
             "${VPN_CONFIG_PATH}"
           )
-          readonly PROCS_TO_KILL=(
-            adb
+          PROCS_TO_KILL=(
             avahi-daemon
             openvpn
-            usbfluxd
           )
+          [ "${{ matrix.os }}" = 'ubuntu-latest' ] &&
+            [ "${{ matrix.corellium-os }}" = 'iOS' ] &&
+            PROCS_TO_KILL+=('usbfluxd')
           for FILE_PATH in "${FILES_TO_DELETE[@]}"; do
             if [ -f "${FILE_PATH}" ]; then
               echo "[+] Deleting ${FILE_PATH}"
               rm -f "${FILE_PATH}"
             fi
           done
-          command -v adb > /dev/null && adb disconnect
+          [ "${{ matrix.os }}" = 'ubuntu-latest' ] &&
+            command -v adb > /dev/null &&
+            adb disconnect
           for PROCESS in "${PROCS_TO_KILL[@]}"; do
             if pgrep "${PROCESS}" > /dev/null 2>&1; then
               echo "[+] Killing ${PROCESS}"
-              sudo killall "${PROCESS}"
+              if [ "${{ matrix.os }}" = 'self-hosted' ]; then
+                killall "${PROCESS}"
+              else
+                sudo killall "${PROCESS}"
+              fi
               echo "[+] Killed ${PROCESS}"
             fi
           done

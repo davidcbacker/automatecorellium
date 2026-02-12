@@ -24,7 +24,7 @@ jobs:
       NODE_TLS_REJECT_UNAUTHORIZED: ${{ matrix.node_tls_reject_unauthorized }}
     strategy:
       fail-fast: false
-      max-parallel: 1
+      max-parallel: 2
       matrix:
         corellium-os: [Android, iOS]
         os: [ubuntu-latest, self-hosted]

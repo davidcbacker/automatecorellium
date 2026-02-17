@@ -70,6 +70,33 @@ run_frida_ps_usb()
   log_stdout 'Listed running apps.'
 }
 
+run_frida_script_device()
+{
+  local INSTANCE_ID="${1:?}"
+  local APP_PACKAGE_NAME="${2:?}"
+  local FRIDA_SCRIPT_PATH="${3:?}"
+  local FRIDA_DEVICE_ID
+  FRIDA_DEVICE_ID="$(get_frida_device_id "${INSTANCE_ID}")"
+  log_stdout "Spawning app ${APP_PACKAGE_NAME} with Frida script $(basename "${FRIDA_SCRIPT_PATH}")."
+  if [ "${CI:-false}" = 'true' ]; then
+    local FRIDA_TIMEOUT_SECONDS='10'
+    log_stdout "Frida script will timeout after ${FRIDA_TIMEOUT_SECONDS} seconds."
+    timeout "${FRIDA_TIMEOUT_SECONDS}" \
+      frida --device "${FRIDA_DEVICE_ID}" --file "${APP_PACKAGE_NAME}" --load "${FRIDA_SCRIPT_PATH}" || {
+      local FAILURE_EXIT_STATUS="$?"
+      if [ "${FAILURE_EXIT_STATUS}" -eq 124 ]; then
+        log_stdout "Frida successfully timed out after ${FRIDA_TIMEOUT_SECONDS} seconds."
+      else
+        log_error "Unknown exit status ${FAILURE_EXIT_STATUS}."
+        exit 1
+      fi
+    }
+  else
+    log_stdout "Frida script will run indefinitely with no timeout."
+    frida --device "${FRIDA_DEVICE_ID}" --file "${APP_PACKAGE_NAME}" --load "${FRIDA_SCRIPT_PATH}"
+  fi
+}
+
 run_frida_script_usb()
 {
   local APP_PACKAGE_NAME="$1"

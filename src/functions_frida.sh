@@ -72,7 +72,9 @@ run_frida_ps_usb()
 
 run_frida_script_device()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
+  local APP_PACKAGE_NAME="${2:?}"
+  local FRIDA_SCRIPT_PATH="${3:?}"
   local FRIDA_DEVICE_ID
   FRIDA_DEVICE_ID="$(get_frida_device_id "${INSTANCE_ID}")"
   log_stdout "Spawning app ${APP_PACKAGE_NAME} with Frida script $(basename "${FRIDA_SCRIPT_PATH}")."

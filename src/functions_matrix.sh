@@ -433,7 +433,7 @@ ensure_matrix_check_outcomes_from_local_json_path()
 
 compress_matrix_runtime_artifacts()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   local ARCHIVE_OUTPUT_PATH='/tmp/matrix_artifacts.tar.gz'
   local INSTANCE_SERVICES_IP INSTANCE_FLAVOR ARCHIVE_INPUT_ARTIFACTS_PATH ARCHIVE_INPUT_ASSESSMENTS_PATH
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"

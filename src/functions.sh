@@ -779,8 +779,8 @@ connect_with_adb()
   local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
 
   command -v adb > /dev/null || {
-    log_warn 'Attempting to install adb dependency.'
-    install_adb_dependency
+    log_error 'Cannot find adb dependency in PATH.'
+    exit 1
   }
 
   log_stdout "Connecting over adb to ${ADB_CONNECT_SOCKET}."

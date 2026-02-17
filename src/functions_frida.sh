@@ -13,7 +13,7 @@ install_frida_dependencies()
 
 get_frida_device_id()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   local GET_INSTANCE_JSON_RESPONSE INSTANCE_SERVICES_IP INSTANCE_UDID FRIDA_DEVICE_ID
   GET_INSTANCE_JSON_RESPONSE="$(corellium instance get --instance "${INSTANCE_ID}")"
   INSTANCE_FLAVOR="$(echo "${GET_INSTANCE_JSON_RESPONSE}" | jq -r '.flavor')"
@@ -29,7 +29,7 @@ get_frida_device_id()
 
 run_frida_ps_device()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   local FRIDA_DEVICE_ID
   FRIDA_DEVICE_ID="$(get_frida_device_id "${INSTANCE_ID}")"
   log_stdout 'Listing running apps.'
@@ -42,7 +42,7 @@ run_frida_ps_device()
 
 run_frida_ps_network()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   local GET_INSTANCE_JSON_RESPONSE
   GET_INSTANCE_JSON_RESPONSE="$(corellium instance get --instance "${INSTANCE_ID}")"
   if echo "${GET_INSTANCE_JSON_RESPONSE}" | jq -e '.flavor != ranchu' > /dev/null &&
@@ -72,8 +72,8 @@ run_frida_ps_usb()
 
 run_frida_script_usb()
 {
-  local APP_PACKAGE_NAME="$1"
-  local FRIDA_SCRIPT_PATH="$2"
+  local APP_PACKAGE_NAME="${1:?}"
+  local FRIDA_SCRIPT_PATH="${2:?}"
   log_stdout "Spawning app ${APP_PACKAGE_NAME} with Frida script $(basename "${FRIDA_SCRIPT_PATH}")."
 
   if [ "${CI:-false}" = 'true' ]; then

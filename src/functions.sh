@@ -352,7 +352,7 @@ get_instance_udid()
 
 get_instance_flavor()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   local GET_INSTANCE_RESPONSE_JSON INSTANCE_FLAVOR
   GET_INSTANCE_JSON="$(get_instance_json "${INSTANCE_ID}")"
   INSTANCE_FLAVOR="$(echo "${GET_INSTANCE_JSON}" | jq -r '.flavor')" || {
@@ -913,8 +913,8 @@ ensure_app_is_running_on_instance()
 
 remote_code_execution_with_adb()
 {
-  local TARGET_SERVICES_IP="$1"
-  local COMMAND_TO_EXECUTE="$2"
+  local TARGET_SERVICES_IP="${1:?}"
+  local COMMAND_TO_EXECUTE="${2:?}"
   log_stdout "Executing ${COMMAND_TO_EXECUTE} on device at ${TARGET_SERVICES_IP}."
   is_services_ip_conneted_with_adb "${TARGET_SERVICES_IP}" || {
     log_error "Cannot find adb connection to ${TARGET_SERVICES_IP}."
@@ -929,8 +929,8 @@ remote_code_execution_with_adb()
 # shellcheck disable=SC2029
 remote_code_execution_with_ssh()
 {
-  local TARGET_SERVICES_IP="$1"
-  local COMMAND_TO_EXECUTE="$2"
+  local TARGET_SERVICES_IP="${1:?}"
+  local COMMAND_TO_EXECUTE="${2:?}"
   log_stdout "Executing ${COMMAND_TO_EXECUTE} on device at ${TARGET_SERVICES_IP}."
   # TODO need to handle authentication with either password or project SSH key
   ssh "root@${TARGET_SERVICES_IP}" "${COMMAND_TO_EXECUTE}" || {

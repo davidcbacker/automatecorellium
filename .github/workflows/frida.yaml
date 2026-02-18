@@ -209,7 +209,7 @@ jobs:
           elif ! does_instance_exist "${CORELLIUM_INSTANCE_ID}"; then
             log_stdout "Instance ${CORELLIUM_INSTANCE_ID} does not exist."
           elif [ "${{ matrix.os }}" = 'self-hosted' ] &&
-            [  "${{ matrix.corellium-os }}" = 'iOS' ]; then
+            [ "${{ matrix.corellium-os }}" = 'iOS' ]; then
             log_stdout "Ready to stop existing instance ${CORELLIUM_INSTANCE_ID}."
             stop_instance "${CORELLIUM_INSTANCE_ID}"
           else

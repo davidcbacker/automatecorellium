@@ -204,6 +204,10 @@ EOF
 delete_instance()
 {
   local INSTANCE_ID="$1"
+  does_instance_exist "${INSTANCE_ID}" || {
+    log_info 'Nothing to delete because instance does not exist.'
+    return
+  }
   log_stdout "Deleting instance ${INSTANCE_ID}."
   corellium instance delete "${INSTANCE_ID}" > /dev/null || {
     log_error "Failed to delete instance ${INSTANCE_ID}."

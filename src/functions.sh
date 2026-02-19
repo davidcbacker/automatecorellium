@@ -535,11 +535,11 @@ delete_unauthorized_devices()
     fi
   done
 
+  log_stdout "Deleting unauthorized devices."
   for DEVICE_TO_DELETE in "${UNAUTHORIZED_DEVICES[@]}"; do
-    log_stdout "Deleting unauthorized device ${DEVICE_TO_DELETE}."
-    corellium instance delete "${DEVICE_TO_DELETE}" --wait
-    log_stdout "Deleted unauthorized device ${DEVICE_TO_DELETE}."
+    delete_instance "${DEVICE_TO_DELETE}"
   done
+  log_stdout "Deleted unauthorized devices."
 }
 
 start_demo_instances()

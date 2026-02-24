@@ -204,6 +204,10 @@ EOF
 delete_instance()
 {
   local INSTANCE_ID="$1"
+  does_instance_exist "${INSTANCE_ID}" || {
+    log_info 'Nothing to delete because instance does not exist.'
+    return
+  }
   log_stdout "Deleting instance ${INSTANCE_ID}."
   corellium instance delete "${INSTANCE_ID}" > /dev/null || {
     log_error "Failed to delete instance ${INSTANCE_ID}."
@@ -535,11 +539,11 @@ delete_unauthorized_devices()
     fi
   done
 
+  log_stdout "Deleting unauthorized devices."
   for DEVICE_TO_DELETE in "${UNAUTHORIZED_DEVICES[@]}"; do
-    log_stdout "Deleting unauthorized device ${DEVICE_TO_DELETE}."
-    corellium instance delete "${DEVICE_TO_DELETE}" --wait
-    log_stdout "Deleted unauthorized device ${DEVICE_TO_DELETE}."
+    delete_instance "${DEVICE_TO_DELETE}"
   done
+  log_stdout "Deleted unauthorized devices."
 }
 
 start_demo_instances()

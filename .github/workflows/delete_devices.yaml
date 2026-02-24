@@ -18,6 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        runner-os: [ubuntu-latest, self-hosted]
         include:
           - runner-os: ubuntu-latest
             runner-os-friendly-name: Ubuntu

@@ -5,6 +5,7 @@ on:
 
 env:
   TERM: xterm
+  NODE_TLS_REJECT_UNAUTHORIZED: 1
 
 jobs:
   corellium-delete:

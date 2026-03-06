@@ -1,0 +1,13 @@
+name: Bump NPM dependencies
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bump-deps:
+    name: Run npm install
+    runs-on: self-hosted
+    steps:
+      - name: Run npm install
+        run: |
+          npm install

@@ -549,8 +549,9 @@ start_demo_instances()
   local INSTANCES_TO_START=()
   while IFS= read -r line; do
     INSTANCE_TO_START="$(echo "${line}" | tr -d '\r\n')"
-    [ -z "${INSTANCE_TO_START}" ] && continue
-    INSTANCES_TO_START+=("${INSTANCE_TO_START}")
+    if [ -n "${INSTANCE_TO_START}" ]; then
+      INSTANCES_TO_START+=("${INSTANCE_TO_START}")
+    fi
   done <<< "${START_INSTANCES}"
   for INSTANCE_ID in "${INSTANCES_TO_START[@]}"; do
     start_instance "${INSTANCE_ID}"
@@ -564,8 +565,9 @@ stop_demo_instances()
   local INSTANCES_TO_STOP=()
   while IFS= read -r line; do
     INSTANCE_TO_STOP="$(echo "${line}" | tr -d '\r\n')"
-    [ -z "${INSTANCE_TO_STOP}" ] && continue
-    INSTANCES_TO_STOP+=("${INSTANCE_TO_STOP}")
+    if [ -n "${INSTANCE_TO_STOP}" ]; then
+      INSTANCES_TO_STOP+=("${INSTANCE_TO_STOP}")
+    fi
   done <<< "${STOP_INSTANCES}"
   for INSTANCE_ID in "${INSTANCES_TO_STOP[@]}"; do
     stop_instance "${INSTANCE_ID}"

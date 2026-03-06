@@ -10,4 +10,6 @@ jobs:
     steps:
       - name: Run npm install
         run: |
+          echo '[+] Updating npm dependencies.'
           npm install
+          echo '[+] Updated npm dependencies.'

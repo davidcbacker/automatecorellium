@@ -545,12 +545,12 @@ delete_unauthorized_devices()
 start_demo_instances()
 {
   local INSTANCE_START_SLEEP_TIME='30'
-  local INSTANCE_TO_START
+  local THIS_INSTANCE_TO_START
   local INSTANCES_TO_START=()
   while IFS= read -r line; do
-    INSTANCE_TO_START="$(echo "${line}" | tr -d '\r\n')"
-    if [ -n "${INSTANCE_TO_START}" ]; then
-      INSTANCES_TO_START+=("${INSTANCE_TO_START}")
+    THIS_INSTANCE_TO_START="$(echo "${line}" | tr -d '\r\n')"
+    if [ -n "${THIS_INSTANCE_TO_START}" ]; then
+      INSTANCES_TO_START+=("${THIS_INSTANCE_TO_START}")
     fi
   done <<< "${START_INSTANCES}"
   for INSTANCE_ID in "${INSTANCES_TO_START[@]}"; do
@@ -561,12 +561,12 @@ start_demo_instances()
 
 stop_demo_instances()
 {
-  local INSTANCE_TO_STOP
+  local THIS_INSTANCE_TO_STOP
   local INSTANCES_TO_STOP=()
   while IFS= read -r line; do
-    INSTANCE_TO_STOP="$(echo "${line}" | tr -d '\r\n')"
-    if [ -n "${INSTANCE_TO_STOP}" ]; then
-      INSTANCES_TO_STOP+=("${INSTANCE_TO_STOP}")
+    THIS_INSTANCE_TO_STOP="$(echo "${line}" | tr -d '\r\n')"
+    if [ -n "${THIS_INSTANCE_TO_STOP}" ]; then
+      INSTANCES_TO_STOP+=("${THIS_INSTANCE_TO_STOP}")
     fi
   done <<< "${STOP_INSTANCES}"
   for INSTANCE_ID in "${INSTANCES_TO_STOP[@]}"; do

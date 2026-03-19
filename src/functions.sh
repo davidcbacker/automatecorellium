@@ -516,6 +516,11 @@ delete_unauthorized_devices()
     exit 1
   }
 
+  [[ ${#ALL_EXISTING_DEVICES[@]} -eq 0 ]] && {
+    log_stdout "No devices exist, so nothing to delete."
+    return
+  }
+
   local UNAUTHORIZED_DEVICES=()
   local IS_DEVICE_AUTHORIZED
   for EXISTING_DEVICE in "${ALL_EXISTING_DEVICES[@]}"; do
@@ -534,6 +539,11 @@ delete_unauthorized_devices()
       UNAUTHORIZED_DEVICES+=("${EXISTING_DEVICE}")
     fi
   done
+
+  [[ ${#UNAUTHORIZED_DEVICES[@]} -eq 0 ]] && {
+    log_stdout "All devices are authorized, so nothing to delete."
+    return
+  }
 
   for DEVICE_TO_DELETE in "${UNAUTHORIZED_DEVICES[@]}"; do
     log_stdout "Deleting unauthorized device ${DEVICE_TO_DELETE}."

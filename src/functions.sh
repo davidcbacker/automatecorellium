@@ -205,7 +205,7 @@ delete_instance()
 {
   local INSTANCE_ID="$1"
   does_instance_exist "${INSTANCE_ID}" || {
-    log_info 'Nothing to delete because instance does not exist.'
+    log_info "Nothing to delete because instance ${INSTANCE_ID} does not exist."
     return
   }
   log_stdout "Deleting instance ${INSTANCE_ID}."

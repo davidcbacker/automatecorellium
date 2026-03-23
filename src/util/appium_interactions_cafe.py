@@ -59,7 +59,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
 
     log_stdout("Appium - Interact with login page.")
     el1 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText")
-    el1.send_keys("Myemail@corellium.com")
+    el1.send_keys("Hello@corellium.com")
     #wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText", expected_value="Myemail@corellium.com", wait=driver_wait)
     el2 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText")
     el2.send_keys("Password123")

@@ -20,9 +20,10 @@ env:
   CORELLIUM_CAFE_SOURCE_URL: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
                             && 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
                             || 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa' }}
+  CORELLIUM_CAFE_LOGIN_PAGE_SCREENSHOT_FILENAME: corellium_cafe_login_page.png
   CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME: corellium_cafe_blog_page.png
-  CORELLIUM_CAFE_CUSTOMER_INFO_SCREENSHOT_FILENAME: corellium_cafe_customer_info.png
-  CORELLIUM_CAFE_PAYMENT_INFO_SCREENSHOT_FILENAME: corellium_cafe_payment_info.png
+  CORELLIUM_CAFE_CUSTOMER_PAGE_SCREENSHOT_FILENAME: corellium_cafe_customer_info.png
+  CORELLIUM_CAFE_PAYMENT_PAGE_SCREENSHOT_FILENAME: corellium_cafe_payment_info.png
 
 jobs:
   corellium-matrixscan:
@@ -287,9 +288,10 @@ jobs:
         with:
           name: appium-screenshots-${{ runner.os }}
           path: |
+            ${{ env.CORELLIUM_CAFE_LOGIN_PAGE_SCREENSHOT_FILENAME }}
             ${{ env.CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME }}
-            ${{ env.CORELLIUM_CAFE_CUSTOMER_INFO_SCREENSHOT_FILENAME }}
-            ${{ env.CORELLIUM_CAFE_PAYMENT_INFO_SCREENSHOT_FILENAME }}
+            ${{ env.CORELLIUM_CAFE_CUSTOMER_PAGE_SCREENSHOT_FILENAME }}
+            ${{ env.CORELLIUM_CAFE_PAYMENT_PAGE_SCREENSHOT_FILENAME }}
           compression-level: 9
           if-no-files-found: error
       - name: Analyze MATRIX report results

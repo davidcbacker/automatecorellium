@@ -1,10 +1,10 @@
-Myemail@corellium.com
+Hello@corellium.com
 Password123
-Myfirstname
-Mylastname
+Firstname
+Lastname
 3216540987
 2345678901234567
 24680
 65432
 CorelliumizAwesome
-regex(/^[a-zA-Z0-9._+-]+@corellium\.com$/)
+regex(/^[a-zA-Z0-9._+\-]+@exampledomain\.com$/)

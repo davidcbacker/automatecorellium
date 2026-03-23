@@ -7,4 +7,4 @@ Lastname
 24680
 65432
 CorelliumizAwesome
-regex(/^[a-zA-Z0-9._+\-]+@exampledomain\.com$/)
+regex(/^[a-zA-Z0-9._+-]+@exampledomain\.com$/)

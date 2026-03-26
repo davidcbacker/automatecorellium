@@ -123,7 +123,7 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el23.click()
 
     log_stdout("Appium - Enter invalid promo code.")
-    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText", expected_value="65432", driver=driver, wait=driver_wait)
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode", expected_value="65432", driver=driver, wait=driver_wait)
     el25 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
     el25.click()
 

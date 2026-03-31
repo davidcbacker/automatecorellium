@@ -204,6 +204,10 @@ EOF
 delete_instance()
 {
   local INSTANCE_ID="${1:?}"
+  does_instance_exist "${INSTANCE_ID}" || {
+    log_stdout "Instance ${INSTANCE_ID} does not exist, so nothing to delete."
+    return
+  }
   log_stdout "Deleting instance ${INSTANCE_ID}."
   corellium instance delete "${INSTANCE_ID}" > /dev/null || {
     log_error "Failed to delete instance ${INSTANCE_ID}."
@@ -547,19 +551,23 @@ delete_unauthorized_devices()
     return
   }
 
+  log_stdout "Deleting unauthorized devices."
   for DEVICE_TO_DELETE in "${UNAUTHORIZED_DEVICES[@]}"; do
-    log_stdout "Deleting unauthorized device ${DEVICE_TO_DELETE}."
-    corellium instance delete "${DEVICE_TO_DELETE}" --wait
-    log_stdout "Deleted unauthorized device ${DEVICE_TO_DELETE}."
+    delete_instance "${DEVICE_TO_DELETE}"
   done
+  log_stdout "Deleted unauthorized devices."
 }
 
 start_demo_instances()
 {
   local INSTANCE_START_SLEEP_TIME='30'
+  local THIS_INSTANCE_TO_START
   local INSTANCES_TO_START=()
   while IFS= read -r line; do
-    INSTANCES_TO_START+=("$(echo "${line}" | tr -d '\r\n')")
+    THIS_INSTANCE_TO_START="$(echo "${line}" | tr -d '\r\n')"
+    if [ -n "${THIS_INSTANCE_TO_START}" ]; then
+      INSTANCES_TO_START+=("${THIS_INSTANCE_TO_START}")
+    fi
   done <<< "${START_INSTANCES}"
   for INSTANCE_ID in "${INSTANCES_TO_START[@]}"; do
     start_instance "${INSTANCE_ID}"
@@ -569,9 +577,13 @@ start_demo_instances()
 
 stop_demo_instances()
 {
+  local THIS_INSTANCE_TO_STOP
   local INSTANCES_TO_STOP=()
   while IFS= read -r line; do
-    INSTANCES_TO_STOP+=("$(echo "${line}" | tr -d '\r\n')")
+    THIS_INSTANCE_TO_STOP="$(echo "${line}" | tr -d '\r\n')"
+    if [ -n "${THIS_INSTANCE_TO_STOP}" ]; then
+      INSTANCES_TO_STOP+=("${THIS_INSTANCE_TO_STOP}")
+    fi
   done <<< "${STOP_INSTANCES}"
   for INSTANCE_ID in "${INSTANCES_TO_STOP[@]}"; do
     stop_instance "${INSTANCE_ID}"

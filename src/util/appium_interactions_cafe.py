@@ -180,10 +180,8 @@ def log_stdout(message: str):
     print(f"[-] {current_datetime} INFO: {message}")
 
 
-def save_screenshot(driver: webdriver.Remote, filename: str):
+def save_screenshot(driver: webdriver.Remote, filename: str = "screenshot.png"):
     '''Capture a screenshot and save to working directory'''
-    if not filename:
-        filename = "screenshot.png"  # or raise a clear error
     cwd = os.getcwd()
     if cwd is None:
         cwd = os.path.dirname(os.path.abspath(__file__)) # fallback to script location

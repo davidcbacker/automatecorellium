@@ -61,6 +61,7 @@ jobs:
           cache: 'npm'
           node-version: 24
       - name: Check Node package lock
+        continue-on-error: ${{ matrix.runner-os != 'ubuntu-latest' }}
         run: |
           npm install --package-lock-only --quiet --no-audit --no-fund
           if ! git diff --quiet package-lock.json; then

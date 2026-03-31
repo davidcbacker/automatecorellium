@@ -180,7 +180,7 @@ def log_stdout(message: str):
     print(f"[-] {current_datetime} INFO: {message}")
 
 
-def save_screenshot(driver: webdriver.Remote, filename: str = "screenshot.png"):
+def save_screenshot(driver: webdriver.Remote, filename: str):
     '''Capture a screenshot and save to working directory'''
     cwd = os.getcwd()
     if cwd is None:

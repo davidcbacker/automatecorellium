@@ -91,7 +91,7 @@ jobs:
             --apitoken ${{ secrets[matrix.api_token_secret_key] }} \
             --endpoint ${{ secrets[matrix.api_endpoint_secret_key] }}
       - name: Wait until available cores
-        if: ${{ matrix.os == 'ubuntu-latest' || matrix.corellium-os == 'iOS' }}
+        if: ${{ matrix.os == 'ubuntu-latest' || matrix.corellium-os == 'Android' }}
         timeout-minutes: 30
         run: |
           source ./src/functions.sh && set -euo pipefail

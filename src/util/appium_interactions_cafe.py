@@ -58,12 +58,8 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     '''Interact with the target app using Appium commands.'''
 
     log_stdout("Appium - Interact with login page.")
-    el1 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText")
-    el1.send_keys("Myemail@corellium.com")
-    #wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText", expected_value="Myemail@corellium.com", wait=driver_wait)
-    el2 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText")
-    el2.send_keys("Password123")
-    #wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText", expected_value="Password123", wait=driver_wait)
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText", expected_value="Hello@corellium.com", wait=driver_wait)
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText", expected_value="Password123", wait=driver_wait)
     el3 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
     el3.click()
     save_screenshot(driver, TARGET_APP_LOGIN_PAGE_SCREENSHOT_FILENAME)
@@ -102,10 +98,8 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el14.click()
 
     log_stdout("Appium - Fill in customner info.")
-    el15 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText")
-    el15.send_keys("Myfirstname")
-    el16 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText")
-    el16.send_keys("Mylastname")
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText", expected_value="Firstname", driver=driver, wait=driver_wait)
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText", expected_value="Lastname", driver=driver, wait=driver_wait)
     set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText", expected_value="3216540987", driver=driver, wait=driver_wait)
     save_screenshot(driver, TARGET_APP_CUSTOMER_PAGE_SCREENSHOT_FILENAME)
     log_stdout("Appium - Submit customner info.")

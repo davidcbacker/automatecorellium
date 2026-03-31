@@ -75,7 +75,7 @@ jobs:
             exit 1
           fi
       - name: Install Python
-        if: matrix.os == 'ubuntu-latest'
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: actions/setup-python@v6
         with:
           cache: pip
@@ -91,6 +91,7 @@ jobs:
             --apitoken ${{ secrets[matrix.api_token_secret_key] }} \
             --endpoint ${{ secrets[matrix.api_endpoint_secret_key] }}
       - name: Wait until available cores
+        if: ${{ matrix.os == 'ubuntu-latest' || matrix.corellium-os == 'iOS' }}
         timeout-minutes: 30
         run: |
           source ./src/functions.sh && set -euo pipefail

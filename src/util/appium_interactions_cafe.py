@@ -58,8 +58,8 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     '''Interact with the target app using Appium commands.'''
 
     log_stdout("Appium - Interact with login page.")
-    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText", expected_value="Hello@corellium.com", wait=driver_wait)
-    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText", expected_value="Password123", wait=driver_wait)
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText", expected_value="Hello@corellium.com", driver=driver, wait=driver_wait)
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText", expected_value="Password123", driver=driver, wait=driver_wait)
     el3 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
     el3.click()
     save_screenshot(driver, TARGET_APP_LOGIN_PAGE_SCREENSHOT_FILENAME)

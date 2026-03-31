@@ -20,9 +20,10 @@ env:
   CORELLIUM_CAFE_SOURCE_URL: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
                             && 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
                             || 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa' }}
+  CORELLIUM_CAFE_LOGIN_PAGE_SCREENSHOT_FILENAME: corellium_cafe_login_page.png
   CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME: corellium_cafe_blog_page.png
-  CORELLIUM_CAFE_CUSTOMER_INFO_SCREENSHOT_FILENAME: corellium_cafe_customer_info.png
-  CORELLIUM_CAFE_PAYMENT_INFO_SCREENSHOT_FILENAME: corellium_cafe_payment_info.png
+  CORELLIUM_CAFE_CUSTOMER_PAGE_SCREENSHOT_FILENAME: corellium_cafe_customer_info.png
+  CORELLIUM_CAFE_PAYMENT_PAGE_SCREENSHOT_FILENAME: corellium_cafe_payment_info.png
 
 jobs:
   corellium-matrixscan:
@@ -60,6 +61,7 @@ jobs:
           cache: 'npm'
           node-version: 24
       - name: Check Node package lock
+        continue-on-error: ${{ matrix.runner-os != 'ubuntu-latest' }}
         run: |
           npm install --package-lock-only --quiet --no-audit --no-fund
           if ! git diff --quiet package-lock.json; then
@@ -192,7 +194,7 @@ jobs:
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
-          run_full_matrix_assessment\
+          run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
             "${MATRIX_WORDLIST_ID}"
@@ -210,7 +212,7 @@ jobs:
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
-          run_full_matrix_assessment\
+          run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
             "${MATRIX_WORDLIST_ID}"
@@ -228,7 +230,7 @@ jobs:
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
-          run_full_matrix_assessment\
+          run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
             "${MATRIX_WORDLIST_ID}"
@@ -267,14 +269,14 @@ jobs:
             delete_instance "${CORELLIUM_INSTANCE_ID}"
           fi
       - name: Upload artifact 'MATRIX runtime artifacts'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: matrix-runtime-artifacts-${{ runner.os }}
           path: ${{ runner.temp }}/matrix_artifacts.tar.gz
           compression-level: 9
           if-no-files-found: error
       - name: Upload artifact 'MATRIX reports'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: matrix-reports-${{ runner.os }}
           path: |
@@ -283,13 +285,14 @@ jobs:
           compression-level: 9
           if-no-files-found: error
       - name: Upload artifact 'Appium screenshots'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: appium-screenshots-${{ runner.os }}
           path: |
+            ${{ env.CORELLIUM_CAFE_LOGIN_PAGE_SCREENSHOT_FILENAME }}
             ${{ env.CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME }}
-            ${{ env.CORELLIUM_CAFE_CUSTOMER_INFO_SCREENSHOT_FILENAME }}
-            ${{ env.CORELLIUM_CAFE_PAYMENT_INFO_SCREENSHOT_FILENAME }}
+            ${{ env.CORELLIUM_CAFE_CUSTOMER_PAGE_SCREENSHOT_FILENAME }}
+            ${{ env.CORELLIUM_CAFE_PAYMENT_PAGE_SCREENSHOT_FILENAME }}
           compression-level: 9
           if-no-files-found: error
       - name: Analyze MATRIX report results

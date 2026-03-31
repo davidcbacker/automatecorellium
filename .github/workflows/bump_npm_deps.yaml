@@ -1,0 +1,15 @@
+name: Bump NPM dependencies
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bump-deps:
+    name: Run npm install
+    runs-on: self-hosted
+    steps:
+      - name: Run npm install
+        run: |
+          echo '[+] Updating npm dependencies.'
+          npm install
+          echo '[+] Updated npm dependencies.'

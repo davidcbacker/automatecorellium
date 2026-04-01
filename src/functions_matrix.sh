@@ -30,7 +30,7 @@ create_matrix_assessment()
 {
   local INSTANCE_ID="${1:?}"
   local APP_BUNDLE_ID="${2:?}"
-  local MATRIX_WORDLIST_ID="$3"
+  local MATRIX_WORDLIST_ID="${3:?}"
   corellium matrix create-assessment \
     --instance "${INSTANCE_ID}" \
     --bundle "${APP_BUNDLE_ID}" \
@@ -122,7 +122,7 @@ download_matrix_report_to_local_path()
 {
   local INSTANCE_ID="${1:?}"
   local MATRIX_ASSESSMENT_ID="${2:?}"
-  local MATRIX_REPORT_DOWNLOAD_PATH="$3"
+  local MATRIX_REPORT_DOWNLOAD_PATH="${3:?}"
   local MATRIX_REPORT_DEFAULT_FORMAT='html'
   local MATRIX_REPORT_TARGET_FORMAT="${4:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
   local MATRIX_REPORT_TARGET_FORMAT_UPPER
@@ -200,7 +200,7 @@ run_full_matrix_assessment()
 {
   local INSTANCE_ID="${1:?}"
   local APP_BUNDLE_ID="${2:?}"
-  local MATRIX_WORDLIST_ID="$3"
+  local MATRIX_WORDLIST_ID="${3:?}"
   handle_open_matrix_assessment "${INSTANCE_ID}"
   log_stdout "Creating MATRIX assessment."
   local MATRIX_ASSESSMENT_ID
@@ -241,7 +241,7 @@ wait_for_matrix_assessment_status()
 {
   local INSTANCE_ID="${1:?}"
   local ASSESSMENT_ID="${2:?}"
-  local TARGET_ASSESSMENT_STATUS="$3"
+  local TARGET_ASSESSMENT_STATUS="${3:?}"
   local SLEEP_TIME_DEFAULT='2'
   local SLEEP_TIME_FOR_TESTING='5'
 
@@ -394,11 +394,15 @@ analyze_corellium_cafe_matrix_report_from_local_path()
     "${MATRIX_JSON_REPORT_PATH}" \
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
   log_stdout 'Listed failed assessment checks.'
+  log_stdout "Verifying no MATRIX checks resulted in error ${report}."
+  ensure_no_errors_in_matrix_checks "${MATRIX_JSON_REPORT_PATH}"
+  log_stdout "Verified no MATRIX checks resulted in error ${report}."
   log_stdout "Verifying outcome of local storage check for ${report}."
   ensure_matrix_check_outcomes_from_local_json_path \
     "${MATRIX_JSON_REPORT_PATH}" \
     "${MATRIX_CHECK_TO_ANALYZE}" \
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
+  
   log_stdout 'Verified outcome of local storage check.'
 }
 
@@ -414,11 +418,24 @@ print_matching_matrix_check_outcomes_from_local_json_path()
     sort
 }
 
+ensure_no_errors_in_matrix_checks()
+{
+ local MATRIX_JSON_REPORT_PATH="${1:?}"
+ local MATRIX_CHECK_EXPECTED_OUTCOME='error'
+ jq -e \
+   --arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
+  '.results[] | select(.outcome == $expected_outcome)' \
+  "${MATRIX_JSON_REPORT_PATH}" && {
+    log_error 'Errors were found in MATRIX results.'
+    exit 1
+  }
+}
+
 ensure_matrix_check_outcomes_from_local_json_path()
 {
   local MATRIX_JSON_REPORT_PATH="${1:?}"
   local MATRIX_CHECK_TO_ANALYZE="${2:?}"
-  local MATRIX_CHECK_EXPECTED_OUTCOME="$3"
+  local MATRIX_CHECK_EXPECTED_OUTCOME="${3:?}"
   jq -e \
     --arg id "${MATRIX_CHECK_TO_ANALYZE}" \
     --arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \

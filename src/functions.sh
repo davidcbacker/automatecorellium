@@ -900,9 +900,38 @@ add_instance_to_usbfluxd()
     log_error 'Cannot find usbfluxctl in local environment PATH.'
     exit 1
   }
-  log_stdout "Adding device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
-  usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"
-  log_stdout "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
+  if is_services_ip_listed_on_usbfluxctl "${INSTANCE_SERVICES_IP}"; then
+    log_stdout "Socket ${INSTANCE_USBFLUXD_SOCKET} is already listed on usbfluxctl."
+    usbfluxctl list
+  else
+    log_stdout "Adding socket ${INSTANCE_USBFLUXD_SOCKET}  to usbfluxd via usbfluxctl."
+    usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"
+    log_stdout "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd via usbfluxctl."
+    log_stdout "Verifying device at ${INSTANCE_USBFLUXD_SOCKET} via usbfluxctl."
+    is_services_ip_listed_on_usbfluxctl || {
+      log_error "Failed to add ${INSTANCE_USBFLUXD_SOCKET} via usbfluxctl."
+      log_warn 'Running usbfluxctl list.'
+      usbfluxctl list
+      exit 1
+    }
+    log_stdout "Verified device at ${INSTANCE_USBFLUXD_SOCKET} via usbfluxctl."
+  fi
+}
+
+is_services_ip_listed_on_usbfluxctl()
+{
+  local INSTANCE_SERVICES_IP="${1:?}"
+  local USBFLUXD_PORT='5000'
+  local INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
+  command -v usbfluxctl > /dev/null || {
+    log_error 'Cannot find usbfluxctl in local environment PATH.'
+    exit 1
+  }
+  if usbfluxctl list | grep "${INSTANCE_USBFLUXD_SOCKET}"; then
+    return 0
+  else
+    return 1
+  fi
 }
 
 verify_usbflux_connection()

@@ -394,16 +394,15 @@ analyze_corellium_cafe_matrix_report_from_local_path()
     "${MATRIX_JSON_REPORT_PATH}" \
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
   log_stdout 'Listed failed assessment checks.'
-  log_stdout "Verifying no MATRIX checks resulted in error ${report}."
+  log_stdout "Verifying MATRIX report ${report} is free of errors."
   ensure_no_errors_in_matrix_checks "${MATRIX_JSON_REPORT_PATH}"
-  log_stdout "Verified no MATRIX checks resulted in error ${report}."
-  log_stdout "Verifying outcome of local storage check for ${report}."
+  log_stdout "Verified MATRIX report ${report} is free of errors."
+  log_stdout "Verifying outcome of local storage check for report ${report}."
   ensure_matrix_check_outcomes_from_local_json_path \
     "${MATRIX_JSON_REPORT_PATH}" \
     "${MATRIX_CHECK_TO_ANALYZE}" \
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
-  
-  log_stdout 'Verified outcome of local storage check.'
+  log_stdout "Verified outcome of local storage check for report ${report}."
 }
 
 print_matching_matrix_check_outcomes_from_local_json_path()

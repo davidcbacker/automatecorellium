@@ -828,7 +828,7 @@ connect_with_adb()
   log_stdout "Connecting over adb to ${ADB_CONNECT_SOCKET}."
   adb connect "${ADB_CONNECT_SOCKET}"
   log_stdout "Connected over adb to ${ADB_CONNECT_SOCKET}."
-  adb devices -l | grep -q "${ADB_CONNECT_SOCKET}" || {
+  is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" || {
     log_error "Unable to connect to ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
     adb devices -l
     exit 1

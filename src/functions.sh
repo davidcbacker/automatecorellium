@@ -822,7 +822,12 @@ connect_with_adb()
 
   command -v adb > /dev/null || {
     log_error 'Cannot find adb dependency in PATH.'
-    exit 1
+    log_warn 'Attempting to install adb dependency.'
+    install_adb_dependency
+    command -v adb > /dev/null || {
+      log_error 'Failed attempt to install adb dependency.'
+      exit 1
+    }
   }
 
   log_stdout "Connecting over adb to ${ADB_CONNECT_SOCKET}."

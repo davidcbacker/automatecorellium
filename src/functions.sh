@@ -908,7 +908,7 @@ add_instance_to_usbfluxd()
     usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"
     log_stdout "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd via usbfluxctl."
     log_stdout "Verifying device at ${INSTANCE_USBFLUXD_SOCKET} via usbfluxctl."
-    is_services_ip_listed_on_usbfluxctl || {
+    is_services_ip_listed_on_usbfluxctl "{INSTANCE_SERVICES_IP}" || {
       log_error "Failed to add ${INSTANCE_USBFLUXD_SOCKET} via usbfluxctl."
       log_warn 'Running usbfluxctl list.'
       usbfluxctl list

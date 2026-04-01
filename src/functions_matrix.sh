@@ -420,12 +420,12 @@ print_matching_matrix_check_outcomes_from_local_json_path()
 
 ensure_no_errors_in_matrix_checks()
 {
- local MATRIX_JSON_REPORT_PATH="${1:?}"
- local MATRIX_CHECK_EXPECTED_OUTCOME='error'
- if jq -e \
-   --arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
-  '.results[] | select(.outcome == $expected_outcome)' \
-  "${MATRIX_JSON_REPORT_PATH}"; then
+  local MATRIX_JSON_REPORT_PATH="${1:?}"
+  local MATRIX_CHECK_EXPECTED_OUTCOME='error'
+  if jq -e \
+    --arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
+    '.results[] | select(.outcome == $expected_outcome)' \
+    "${MATRIX_JSON_REPORT_PATH}"; then
     log_error 'The MATRIX report contains errors.'
     exit 1
   else

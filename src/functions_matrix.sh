@@ -422,13 +422,15 @@ ensure_no_errors_in_matrix_checks()
 {
  local MATRIX_JSON_REPORT_PATH="${1:?}"
  local MATRIX_CHECK_EXPECTED_OUTCOME='error'
- jq -e \
+ if jq -e \
    --arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
   '.results[] | select(.outcome == $expected_outcome)' \
-  "${MATRIX_JSON_REPORT_PATH}" && {
-    log_error 'Errors were found in MATRIX results.'
+  "${MATRIX_JSON_REPORT_PATH}"; then
+    log_error 'The MATRIX report contains errors.'
     exit 1
-  }
+  else
+    log_stdout 'The MATRIX report is free of errors.'
+  fi
 }
 
 ensure_matrix_check_outcomes_from_local_json_path()

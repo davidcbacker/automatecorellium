@@ -86,15 +86,14 @@ def run_app_automation(udid: str):
     options.set_capability('appium:noReset', False) # <----- NOTE: Set this to True for MATRIX assessments
 
     try:
-        print("Starting session at", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), ".")
+        log_stdout(f"Loading target app {TARGET_APP_PACKAGE} in Appium session.")
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
-        print("Successfully loaded target app.")
+        log_stdout("Successfully loaded target app.")
         driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT * 1000)
-        # To wait for an element, pass in driver_wait as the `wait` parameter for wait_until_clickable()
         driver_wait = WebDriverWait(driver, APPIUM_DRIVER_EXPLICITLY_WAIT, ignored_exceptions=[StaleElementReferenceException])
-        print("Starting app interaction steps.")
+        log_stdout("Starting app interaction steps.")
         interact_with_app(driver, driver_wait)
-        print("All steps executed on Corellium Android device.")
+        log_stdout("Finished app interactions.")
 
     except NoSuchElementException as e:
         print("Thrown when element could not be found.")
@@ -122,18 +121,19 @@ def run_app_automation(udid: str):
         sys.exit(1)
 
     finally:
-        print("Closing appium session at", time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), ".")
+        log_stdout("Closing appium session.")
         driver.quit()
+        log_stdout("Closed appium session.")
 
 if __name__ == "__main__":
     match len(sys.argv):
         case 1:
             corellium_device_appium_udid = f'{DEFAULT_SERVICES_IP}:{DEFAULT_ADB_PORT}'
-            print(f'Defaulting to Corellium device at {DEFAULT_SERVICES_IP}.')
+            log_stdout(f'Defaulting to Corellium device at {DEFAULT_SERVICES_IP}.')
         case 2:
             TARGET_DEVICE_SERVICES_IP = sys.argv[1]
             corellium_device_appium_udid = f'{TARGET_DEVICE_SERVICES_IP}:{DEFAULT_ADB_PORT}'
-            print(f'Running app test on device at {corellium_device_appium_udid}...')
+            log_stdout(f'Running app test on device at {corellium_device_appium_udid}...')
         case _:
             print('ERROR: Please provide zero args or pass in the Corellium device services IP.')
             sys.exit(1)

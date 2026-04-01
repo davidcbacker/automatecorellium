@@ -47,9 +47,6 @@ APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
 APPIUM_DRIVER_IMPLICITLY_WAIT=5 # seconds
 APPIUM_DRIVER_EXPLICITLY_WAIT=20 # seconds
 
-# ==== SLEEP TIME ====
-PAGE_LOAD_SLEEP_TIME_SECONDS=5
-
 # =====================================
 # ===== END CONSTANTS DEFINITIONS =====
 # =====================================

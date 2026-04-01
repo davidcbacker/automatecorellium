@@ -197,7 +197,7 @@ def run_app_automation(udid: str):
     options.set_capability('appium:appPackage', TARGET_APP_PACKAGE)
     options.set_capability('appium:appActivity', TARGET_APP_ACTIVITY)
     options.set_capability('appium:noReset', True)
-    options.adb_exec_timeout = 30000
+    options.adb_exec_timeout = 40000
 
     try:
         log_stdout("Loading target app in Appium session.")

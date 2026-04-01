@@ -836,6 +836,24 @@ connect_with_adb()
   log_stdout 'Found connected adb device.'
 }
 
+is_services_ip_conneted_with_adb()
+{
+  local INSTANCE_SERVICES_IP="$1"
+  local ADB_CONNECT_PORT='5001'
+  local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
+
+  command -v adb > /dev/null || {
+    log_warn 'Attempting to install adb dependency.'
+    install_adb_dependency
+  }
+
+  if adb devices -l | grep -q "${ADB_CONNECT_SOCKET}"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 run_usbfluxd_and_dependencies()
 {
   if ! command -v usbfluxd > /dev/null; then
@@ -956,6 +974,34 @@ ensure_app_is_running_on_instance()
   local APP_PACKAGE_NAME="${2:?}"
   is_app_running_on_instance "${INSTANCE_ID}" "${APP_PACKAGE_NAME}" || {
     log_error "${APP_PACKAGE_NAME} is not running on instance ${INSTANCE_ID}."
+    exit 1
+  }
+}
+
+remote_code_execution_with_adb()
+{
+  local TARGET_SERVICES_IP="${1:?}"
+  local COMMAND_TO_EXECUTE="${2:?}"
+  log_stdout "Executing ${COMMAND_TO_EXECUTE} on device at ${TARGET_SERVICES_IP}."
+  is_services_ip_conneted_with_adb "${TARGET_SERVICES_IP}" || {
+    log_error "Cannot find adb connection to ${TARGET_SERVICES_IP}."
+    exit 1
+  }
+  adb shell su root "${COMMAND_TO_EXECUTE}" || {
+    log_error 'Failed to execute remote command with ADB.'
+    exit 1
+  }
+}
+
+# shellcheck disable=SC2029
+remote_code_execution_with_ssh()
+{
+  local TARGET_SERVICES_IP="${1:?}"
+  local COMMAND_TO_EXECUTE="${2:?}"
+  log_stdout "Executing ${COMMAND_TO_EXECUTE} on device at ${TARGET_SERVICES_IP}."
+  # TODO need to handle authentication with either password or project SSH key
+  ssh "root@${TARGET_SERVICES_IP}" "${COMMAND_TO_EXECUTE}" || {
+    log_error 'Failed to execute remote command with SSH.'
     exit 1
   }
 }

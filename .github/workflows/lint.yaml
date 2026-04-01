@@ -19,7 +19,7 @@ jobs:
       static-lint: ${{ steps.filter.outputs.static-lint }}
     steps:
       - uses: actions/checkout@v6
-      - uses: dorny/paths-filter@v3
+      - uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: data/config/dorny-paths-filter.yaml
@@ -58,12 +58,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Lint markdown docs
-        uses: DavidAnson/markdownlint-cli2-action@v21
+        uses: DavidAnson/markdownlint-cli2-action@v22
         with:
           config: data/config/.markdownlint-cli2.jsonc
           globs: '**/*.md'
       - name: Spellcheck markdown docs
-        uses: rojopolis/spellcheck-github-actions@0.55.0
+        uses: rojopolis/spellcheck-github-actions@0.60.0
         with:
           config_path: data/config/spellcheck.yaml
 
@@ -111,7 +111,7 @@ jobs:
       - name: Pull the latest code
         uses: actions/checkout@v6
       - name: Lint
-        uses: luizm/action-sh-checker@v0.9.0
+        uses: luizm/action-sh-checker@v0.10.0
         env:
           SHELLCHECK_OPTS: >-
             --exclude SC2153,SC2154

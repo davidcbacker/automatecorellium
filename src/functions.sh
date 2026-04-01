@@ -80,7 +80,7 @@ log_warn()
 
 does_instance_exist()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   if corellium instance get --instance "${INSTANCE_ID}" 2> /dev/null |
     jq -e --arg id "${INSTANCE_ID}" 'select(.id == $id)' > /dev/null; then
     return 0
@@ -92,7 +92,7 @@ does_instance_exist()
 
 get_available_cores()
 {
-  local PROJECT_ID="$1"
+  local PROJECT_ID="${1:?}"
   local GET_PROJECTS_RESPONSE_JSON AVAILABLE_PROJECT_CORES
   GET_PROJECTS_RESPONSE_JSON="$(corellium project list)" || {
     log_error "Failed to get projects list."
@@ -113,7 +113,7 @@ get_available_cores()
 
 wait_until_available_cores()
 {
-  local PROJECT_ID="$1"
+  local PROJECT_ID="${1:?}"
   local REQUIRED_CORES="${2:-6}"
   local WAIT_CORES_SLEEP_TIME_SECONDS='15'
   [ -z "${PROJECT_ID}" ] && {
@@ -133,10 +133,10 @@ wait_until_available_cores()
 
 create_instance()
 {
-  local HARDWARE_FLAVOR="$1"
-  local FIRMWARE_VERSION="$2"
-  local FIRMWARE_BUILD="$3"
-  local PROJECT_ID="$4"
+  local HARDWARE_FLAVOR="${1:?}"
+  local FIRMWARE_VERSION="${2:?}"
+  local FIRMWARE_BUILD="${3:?}"
+  local PROJECT_ID="${4:?}"
   check_env_vars
   local NEW_INSTANCE_NAME NEW_INSTANCE_NAME_PREFIX
   if [ -n "${5:-}" ]; then
@@ -144,7 +144,7 @@ create_instance()
   else
     NEW_INSTANCE_NAME_PREFIX="Corellium Automation"
   fi
-  NEW_INSTANCE_NAME="${NEW_INSTANCE_NAME_PREFIX} $(date '+%Y-%m-%d_%H-%M-%S')"
+  NEW_INSTANCE_NAME="${NEW_INSTANCE_NAME_PREFIX} $(date '+%Y%m%d-%H%M%S')"
 
   if [ "${HARDWARE_FLAVOR}" = 'ranchu' ]; then
     CREATE_INSTANCE_REQUEST_DATA=$(
@@ -155,7 +155,7 @@ create_instance()
   "flavor": "${HARDWARE_FLAVOR}",
   "os": "${FIRMWARE_VERSION}",
   "osbuild": "${FIRMWARE_BUILD}",
-  "bootOptions": {"cores": 6,"ram": 6144}
+  "bootOptions": {"cores": 4,"ram": 4096}
 }
 EOF
     )
@@ -173,7 +173,7 @@ EOF
     )
   fi
 
-  CREATE_INSTANCE_RESPONSE_JSON="$(curl --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
+  CREATE_INSTANCE_RESPONSE_JSON="$(curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
     -H "Accept: application/json" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
     -H "Content-Type: application/json" \
@@ -192,6 +192,9 @@ EOF
   [ "${CREATED_INSTANCE_ID}" = 'null' ] && {
     log_error 'Response contains a null instance ID.'
     log_error "$(echo "${CREATE_INSTANCE_RESPONSE_JSON}" | jq -r .error)"
+    echo "DEBUG LISTING ALL PROJECTS"
+    get_projects_list
+    echo "DEBUG EXITING"
     exit 1
   }
 
@@ -200,7 +203,11 @@ EOF
 
 delete_instance()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
+  does_instance_exist "${INSTANCE_ID}" || {
+    log_stdout "Instance ${INSTANCE_ID} does not exist, so nothing to delete."
+    return
+  }
   log_stdout "Deleting instance ${INSTANCE_ID}."
   corellium instance delete "${INSTANCE_ID}" > /dev/null || {
     log_error "Failed to delete instance ${INSTANCE_ID}."
@@ -211,7 +218,7 @@ delete_instance()
 
 start_instance()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   local INSTANCE_STATUS_ON='on'
   local INSTANCE_STATUS_CREATING='creating'
   does_instance_exist "${INSTANCE_ID}" || exit 1
@@ -238,7 +245,7 @@ start_instance()
 
 stop_instance()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   local INSTANCE_STATUS_OFF='off'
   local INSTANCE_STATUS_ON='on'
   local INSTANCE_STATUS_CREATING='creating'
@@ -269,7 +276,7 @@ stop_instance()
 
 soft_stop_instance()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   local INSTANCE_STATUS_OFF='off'
   does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in
@@ -283,7 +290,7 @@ soft_stop_instance()
     *)
       log_stdout "Stopping instance ${INSTANCE_ID}."
       check_env_vars
-      curl --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/stop" \
+      curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/stop" \
         -H "Accept: application/json" \
         -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
         -H "Content-Type: application/json" \
@@ -295,15 +302,31 @@ soft_stop_instance()
   esac
 }
 
+get_instance_json()
+{
+  local INSTANCE_ID="${1:?}"
+  local GET_INSTANCE_RESPONSE_JSON
+  GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
+    log_error "Failed to get details for instance ${INSTANCE_ID}. Retrying."
+    GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
+      log_error "Failed again to get details for instance ${INSTANCE_ID}."
+      exit 1
+    }
+  }
+  echo "${GET_INSTANCE_RESPONSE_JSON}" | jq '.' > /dev/null 2>&1 || {
+    echo "${GET_INSTANCE_RESPONSE_JSON}"
+    log_error 'Failed to parse JSON response.'
+    exit 1
+  }
+  echo "${GET_INSTANCE_RESPONSE_JSON}"
+}
+
 get_instance_status()
 {
-  local INSTANCE_ID="$1"
-  local GET_INSTANCE_RESPONSE_JSON INSTANCE_STATE
-  GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
-    log_error "Failed to get details for instance ${INSTANCE_ID}."
-    return
-  }
-  INSTANCE_STATE="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.state')" || {
+  local INSTANCE_ID="${1:?}"
+  local GET_INSTANCE_JSON INSTANCE_STATE
+  GET_INSTANCE_JSON="$(get_instance_json "${INSTANCE_ID}")"
+  INSTANCE_STATE="$(echo "${GET_INSTANCE_JSON}" | jq -r '.state')" || {
     log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
     exit 1
   }
@@ -312,13 +335,10 @@ get_instance_status()
 
 get_instance_services_ip()
 {
-  local INSTANCE_ID="$1"
-  local GET_INSTANCE_RESPONSE_JSON INSTANCE_SERVICES_IP
-  GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
-    log_error "Failed to get details for instance ${INSTANCE_ID}."
-    exit 1
-  }
-  INSTANCE_SERVICES_IP="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.serviceIp')" || {
+  local INSTANCE_ID="${1:?}"
+  local GET_INSTANCE_JSON INSTANCE_SERVICES_IP
+  GET_INSTANCE_JSON="$(get_instance_json "${INSTANCE_ID}")"
+  INSTANCE_SERVICES_IP="$(echo "${GET_INSTANCE_JSON}" | jq -r '.serviceIp')" || {
     log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
     exit 1
   }
@@ -327,23 +347,33 @@ get_instance_services_ip()
 
 get_instance_udid()
 {
-  local INSTANCE_ID="$1"
-  local GET_INSTANCE_RESPONSE_JSON INSTANCE_UDID
-  GET_INSTANCE_RESPONSE_JSON="$(corellium instance get --instance "${INSTANCE_ID}")" || {
-    log_error "Failed to get details for instance ${INSTANCE_ID}."
-    exit 1
-  }
-  INSTANCE_UDID="$(echo "${GET_INSTANCE_RESPONSE_JSON}" | jq -r '.bootOptions.udid')" || {
+  local INSTANCE_ID="${1:?}"
+  local GET_INSTANCE_JSON INSTANCE_UDID
+  GET_INSTANCE_JSON="$(get_instance_json "${INSTANCE_ID}")"
+  INSTANCE_UDID="$(echo "${GET_INSTANCE_JSON}" | jq -r '.bootOptions.udid')" || {
     log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
     exit 1
   }
   echo "${INSTANCE_UDID}"
 }
 
+get_instance_flavor()
+{
+  local INSTANCE_ID="${1:?}"
+  local GET_INSTANCE_RESPONSE_JSON INSTANCE_FLAVOR
+  GET_INSTANCE_JSON="$(get_instance_json "${INSTANCE_ID}")"
+  INSTANCE_FLAVOR="$(echo "${GET_INSTANCE_JSON}" | jq -r '.flavor')" || {
+    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
+    exit 1
+  }
+  echo "${INSTANCE_FLAVOR}"
+}
+
 is_agent_ready()
 {
-  local INSTANCE_ID="$1"
-  local PROJECT_ID="$2"
+  local INSTANCE_ID="${1:?}"
+  # pass in project ID to reduce the number of API calls
+  local PROJECT_ID="${2:?}"
   local AGENT_READY_JSON_RESPONSE AGENT_READY_STATUS
   AGENT_READY_JSON_RESPONSE="$(corellium ready --instance "${INSTANCE_ID}" --project "${PROJECT_ID}" 2> /dev/null)" || {
     return 1 # corellium ready exits with nonzero status if agent isn't ready
@@ -361,12 +391,13 @@ is_agent_ready()
 
 wait_until_agent_ready()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   local AGENT_READY_SLEEP_TIME='5'
   local INSTANCE_STATUS_ON='on'
   local PROJECT_ID INSTANCE_STATUS
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   log_stdout 'Waiting until virtual device agent is ready.'
+  # pass project ID into is_agent_ready() to reduce the number of API calls
   while ! is_agent_ready "${INSTANCE_ID}" "${PROJECT_ID}"; do
     INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
     case "${INSTANCE_STATUS}" in
@@ -387,11 +418,11 @@ wait_until_agent_ready()
 kill_app()
 {
   check_env_vars
-  local INSTANCE_ID="$1"
-  local APP_BUNDLE_ID="$2"
+  local INSTANCE_ID="${1:?}"
+  local APP_BUNDLE_ID="${2:?}"
   if [ "$(is_app_running "${INSTANCE_ID}" "${APP_BUNDLE_ID}")" = 'true' ]; then
     log_stdout "Killing running app ${APP_BUNDLE_ID}."
-    if curl --silent -X POST \
+    if curl --insecure --silent -X POST \
       "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/app/apps/${APP_BUNDLE_ID}/kill" \
       -H "Accept: application/json" \
       -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"; then
@@ -405,44 +436,47 @@ kill_app()
 
 get_project_from_instance_id()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   corellium instance get --instance "${INSTANCE_ID}" | jq -r '.project'
+}
+
+get_projects_list()
+{
+  corellium project list | jq -r '.[].id'
 }
 
 install_app_from_url()
 {
-  local INSTANCE_ID="$1"
-  local APP_URL="$2"
-
+  local INSTANCE_ID="${1:?}"
+  local APP_URL="${2:?}"
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   local APP_FILENAME
   APP_FILENAME="$(basename "${APP_URL}")"
 
   log_stdout "Downloading ${APP_FILENAME}."
-  if wget --quiet "${APP_URL}"; then
-    log_stdout "Downloaded ${APP_FILENAME}."
-  else
+  curl --silent --output "${APP_FILENAME}" "${APP_URL}" || {
     log_error "Failed to download app ${APP_FILENAME}."
     exit 1
-  fi
+  }
+  log_stdout "Downloaded ${APP_FILENAME}."
+  log_stdout "Size on disk is $(du -k "${APP_FILENAME}" | cut -f1) KiB."
 
   log_stdout "Installing ${APP_FILENAME}."
-  if corellium apps install \
+  corellium apps install \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \
-    --app "${APP_FILENAME}" > /dev/null; then
-    log_stdout "Installed ${APP_FILENAME}."
-  else
+    --app "${APP_FILENAME}" > /dev/null || {
     log_error "Failed to install app ${APP_FILENAME}."
     exit 1
-  fi
+  }
+  log_stdout "Installed ${APP_FILENAME}."
 }
 
 launch_app()
 {
-  local INSTANCE_ID="$1"
-  local APP_BUNDLE_ID="$2"
+  local INSTANCE_ID="${1:?}"
+  local APP_BUNDLE_ID="${2:?}"
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   kill_app "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
@@ -460,7 +494,7 @@ launch_app()
 
 unlock_instance()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   log_stdout "Unlocking instance ${INSTANCE_ID}."
   corellium instance unlock --instance "${INSTANCE_ID}" > /dev/null
   log_stdout "Unlocked instance ${INSTANCE_ID}."
@@ -468,8 +502,8 @@ unlock_instance()
 
 is_app_running()
 {
-  local INSTANCE_ID="$1"
-  local APP_BUNDLE_ID="$2"
+  local INSTANCE_ID="${1:?}"
+  local APP_BUNDLE_ID="${2:?}"
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   corellium apps --project "${PROJECT_ID}" --instance "${INSTANCE_ID}" |
@@ -500,6 +534,11 @@ delete_unauthorized_devices()
     exit 1
   }
 
+  [[ ${#ALL_EXISTING_DEVICES[@]} -eq 0 ]] && {
+    log_stdout "No devices exist, so nothing to delete."
+    return
+  }
+
   local UNAUTHORIZED_DEVICES=()
   local IS_DEVICE_AUTHORIZED
   for EXISTING_DEVICE in "${ALL_EXISTING_DEVICES[@]}"; do
@@ -519,19 +558,28 @@ delete_unauthorized_devices()
     fi
   done
 
+  [[ ${#UNAUTHORIZED_DEVICES[@]} -eq 0 ]] && {
+    log_stdout "All devices are authorized, so nothing to delete."
+    return
+  }
+
+  log_stdout "Deleting unauthorized devices."
   for DEVICE_TO_DELETE in "${UNAUTHORIZED_DEVICES[@]}"; do
-    log_stdout "Deleting unauthorized device ${DEVICE_TO_DELETE}."
-    corellium instance delete "${DEVICE_TO_DELETE}" --wait
-    log_stdout "Deleted unauthorized device ${DEVICE_TO_DELETE}."
+    delete_instance "${DEVICE_TO_DELETE}"
   done
+  log_stdout "Deleted unauthorized devices."
 }
 
 start_demo_instances()
 {
   local INSTANCE_START_SLEEP_TIME='30'
+  local THIS_INSTANCE_TO_START
   local INSTANCES_TO_START=()
   while IFS= read -r line; do
-    INSTANCES_TO_START+=("$(echo "${line}" | tr -d '\r\n')")
+    THIS_INSTANCE_TO_START="$(echo "${line}" | tr -d '\r\n')"
+    if [ -n "${THIS_INSTANCE_TO_START}" ]; then
+      INSTANCES_TO_START+=("${THIS_INSTANCE_TO_START}")
+    fi
   done <<< "${START_INSTANCES}"
   for INSTANCE_ID in "${INSTANCES_TO_START[@]}"; do
     start_instance "${INSTANCE_ID}"
@@ -541,9 +589,13 @@ start_demo_instances()
 
 stop_demo_instances()
 {
+  local THIS_INSTANCE_TO_STOP
   local INSTANCES_TO_STOP=()
   while IFS= read -r line; do
-    INSTANCES_TO_STOP+=("$(echo "${line}" | tr -d '\r\n')")
+    THIS_INSTANCE_TO_STOP="$(echo "${line}" | tr -d '\r\n')"
+    if [ -n "${THIS_INSTANCE_TO_STOP}" ]; then
+      INSTANCES_TO_STOP+=("${THIS_INSTANCE_TO_STOP}")
+    fi
   done <<< "${STOP_INSTANCES}"
   for INSTANCE_ID in "${INSTANCES_TO_STOP[@]}"; do
     stop_instance "${INSTANCE_ID}"
@@ -552,13 +604,13 @@ stop_demo_instances()
 
 download_file_to_local_path()
 {
-  local INSTANCE_ID="$1"
-  local FILE_DOWNLOAD_PATH="$2"
-  local LOCAL_SAVE_PATH="$3"
+  local INSTANCE_ID="${1:?}"
+  local FILE_DOWNLOAD_PATH="${2:?}"
+  local LOCAL_SAVE_PATH="${3:?}"
   # replace '/' with '%2F' using parameter expansion
   local encoded_download_path="${FILE_DOWNLOAD_PATH//\//%2F}"
 
-  curl --silent -X GET \
+  curl --insecure --silent -X GET \
     "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/file/device/${encoded_download_path}" \
     -H "Accept: application/octet-stream" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
@@ -568,8 +620,8 @@ download_file_to_local_path()
 # Upload a file to the Corellium server and print the image ID to stdout
 upload_image_from_local_path()
 {
-  local INSTANCE_ID="$1"
-  local LOCAL_FILE_PATH="$2"
+  local INSTANCE_ID="${1:?}"
+  local LOCAL_FILE_PATH="${2:?}"
   local PROJECT_ID IMAGE_NAME
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   IMAGE_NAME="$(basename "${LOCAL_FILE_PATH}")"
@@ -593,8 +645,8 @@ upload_image_from_local_path()
 
 save_vpn_config_to_local_path()
 {
-  local INSTANCE_ID="$1"
-  local VPN_CONFIG_DOWNLOAD_PATH="$2"
+  local INSTANCE_ID="${1:?}"
+  local VPN_CONFIG_DOWNLOAD_PATH="${2:?}"
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   log_stdout "Saving ovpn profile to ${VPN_CONFIG_DOWNLOAD_PATH}."
@@ -604,8 +656,8 @@ save_vpn_config_to_local_path()
 
 wait_for_instance_status()
 {
-  local INSTANCE_ID="$1"
-  local TARGET_INSTANCE_STATUS="$2"
+  local INSTANCE_ID="${1:?}"
+  local TARGET_INSTANCE_STATUS="${2:?}"
   local SLEEP_TIME_DEFAULT='2'
 
   case "${TARGET_INSTANCE_STATUS}" in
@@ -646,6 +698,7 @@ install_openvpn_dependencies()
 
 install_adb_dependency()
 {
+  [ "$(uname -s)" = 'Darwin' ] && return
   log_stdout 'Installing adb.'
   sudo apt-get -qq update
   sudo apt-get -qq install adb
@@ -660,6 +713,15 @@ install_adb_dependency()
 
 install_usbfluxd_and_dependencies()
 {
+  [ "$(uname -s)" = 'Darwin' ] && {
+    if [ -d '/Applications/USBFlux.app/Contents/Resources' ]; then
+      return
+    else
+      log_error "Please install the USBFlux application from the Corellium virtual device's Connect tab."
+      exit 1
+    fi
+  }
+
   local USBFLUXD_APT_DEPS=(
     avahi-daemon
     build-essential
@@ -723,15 +785,15 @@ install_usbfluxd_and_dependencies()
 
 connect_to_vpn_for_instance()
 {
-  # Run this function with a <= 1 minute timeout
-  local INSTANCE_ID="$1"
-  local OVPN_CONFIG_PATH="$2"
+  # recommend to run this function with a <= 1 minute timeout
+  local INSTANCE_ID="${1:?}"
+  local OVPN_CONFIG_PATH="${2:?}"
   local INSTANCE_SERVICES_IP
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
 
   if ! command -v openvpn > /dev/null; then
     log_warn 'Attempting to install openvpn dependency.'
-    install_openvpn_dependency
+    install_openvpn_dependencies
   fi
 
   save_vpn_config_to_local_path "${INSTANCE_ID}" "${OVPN_CONFIG_PATH}"
@@ -752,7 +814,7 @@ connect_to_vpn_for_instance()
 
 connect_with_adb()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   local INSTANCE_SERVICES_IP
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   local ADB_CONNECT_PORT='5001'
@@ -766,7 +828,8 @@ connect_with_adb()
   log_stdout "Connecting over adb to ${ADB_CONNECT_SOCKET}."
   adb connect "${ADB_CONNECT_SOCKET}"
   log_stdout "Connected over adb to ${ADB_CONNECT_SOCKET}."
-  adb devices -l | grep -q "${ADB_CONNECT_SOCKET}" || {
+  log_stdout 'Finding connected adb device.'
+  is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" || {
     log_error "Unable to connect to ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
     adb devices -l
     exit 1
@@ -774,27 +837,65 @@ connect_with_adb()
   log_stdout 'Found connected adb device.'
 }
 
+is_services_ip_conneted_with_adb()
+{
+  local INSTANCE_SERVICES_IP="$1"
+  local ADB_CONNECT_PORT='5001'
+  local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
+
+  command -v adb > /dev/null || {
+    log_warn 'Attempting to install adb dependency.'
+    install_adb_dependency
+  }
+
+  if adb devices -l | grep -q "${ADB_CONNECT_SOCKET}"; then
+    return 0
+  else
+    return 1
+  fi
+}
+
 run_usbfluxd_and_dependencies()
 {
-  log_stdout 'Starting usbmuxd service.'
-  sudo systemctl start usbmuxd
-  sudo systemctl status usbmuxd
-  log_stdout 'Started usbmuxd service.'
-  log_stdout 'Started avahi-daemon.'
-  sudo avahi-daemon &
-  log_stdout 'Starting avahi-daemon.'
-  log_stdout 'Starting usbfluxd.'
-  sudo usbfluxd -f -n &
-  log_stdout 'Started usbfluxd.'
+  if ! command -v usbfluxd > /dev/null; then
+    log_error 'Cannot find usbfluxd in local environment PATH.'
+    exit 1
+  fi
+  case "$(uname -s)" in
+    Darwin)
+      log_stdout 'Starting usbfluxd.'
+      /Applications/USBFlux.app/Contents/Resources/usbfluxd -f &
+      log_stdout 'Started usbfluxd.'
+      ;;
+    Linux)
+      log_stdout 'Starting usbmuxd service.'
+      sudo systemctl start usbmuxd
+      sudo systemctl status usbmuxd
+      log_stdout 'Started usbmuxd service.'
+      log_stdout 'Started avahi-daemon.'
+      sudo avahi-daemon &
+      log_stdout 'Starting avahi-daemon.'
+      log_stdout 'Starting usbfluxd.'
+      sudo usbfluxd -f -n &
+      log_stdout 'Started usbfluxd.'
+      ;;
+    *)
+      log_error "Cannot run usbmuxd. Unknown kernel type."
+      ;;
+  esac
 }
 
 add_instance_to_usbfluxd()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   local USBFLUXD_PORT='5000'
   local INSTANCE_SERVICES_IP INSTANCE_USBFLUXD_SOCKET
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
+  command -v usbfluxctl > /dev/null || {
+    log_error 'Cannot find usbfluxctl in local environment PATH.'
+    exit 1
+  }
   log_stdout "Adding device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
   usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"
   log_stdout "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
@@ -802,8 +903,14 @@ add_instance_to_usbfluxd()
 
 verify_usbflux_connection()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   local INSTANCE_UDID
+  for binary_name in idevice_id idevicepair; do
+    command -v "${binary_name}" > /dev/null || {
+      log_error "Cannot find the '${binary_name}' binary. Please install using apt (Ubuntu) or brew (macOS)."
+      exit 1
+    }
+  done
   INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
   log_stdout 'Checking for usb connection with idevice_id.'
   until idevice_id "${INSTANCE_UDID}"; do sleep 0.1; done
@@ -821,16 +928,21 @@ verify_usbflux_connection()
 
 is_app_running_on_instance()
 {
-  local INSTANCE_ID="$1"
-  local APP_PACKAGE_NAME="$2"
+  local INSTANCE_ID="${1:?}"
+  local APP_PACKAGE_NAME="${2:?}"
   local PROJECT_ID APP_STATUS_JSON_RESPONSE APP_RUNNING_STATUS
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
 
   APP_STATUS_JSON_RESPONSE="$(corellium instance apps \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}")" || {
-    log_error 'Failed to check app status.'
-    exit 1
+    log_warn 'Failed to check app status. Retrying.'
+    APP_STATUS_JSON_RESPONSE="$(corellium instance apps \
+      --instance "${INSTANCE_ID}" \
+      --project "${PROJECT_ID}")" || {
+      log_error 'Failed again to check app status.'
+      exit 1
+    }
   }
 
   APP_RUNNING_STATUS="$(echo "${APP_STATUS_JSON_RESPONSE}" |
@@ -850,8 +962,8 @@ is_app_running_on_instance()
 
 wait_until_app_is_running_on_instance()
 {
-  local INSTANCE_ID="$1"
-  local APP_PACKAGE_NAME="$2"
+  local INSTANCE_ID="${1:?}"
+  local APP_PACKAGE_NAME="${2:?}"
   until is_app_running_on_instance "${INSTANCE_ID}" "${APP_PACKAGE_NAME}"; do
     sleep 1
   done
@@ -859,10 +971,38 @@ wait_until_app_is_running_on_instance()
 
 ensure_app_is_running_on_instance()
 {
-  local INSTANCE_ID="$1"
-  local APP_PACKAGE_NAME="$2"
+  local INSTANCE_ID="${1:?}"
+  local APP_PACKAGE_NAME="${2:?}"
   is_app_running_on_instance "${INSTANCE_ID}" "${APP_PACKAGE_NAME}" || {
     log_error "${APP_PACKAGE_NAME} is not running on instance ${INSTANCE_ID}."
+    exit 1
+  }
+}
+
+remote_code_execution_with_adb()
+{
+  local TARGET_SERVICES_IP="${1:?}"
+  local COMMAND_TO_EXECUTE="${2:?}"
+  log_stdout "Executing ${COMMAND_TO_EXECUTE} on device at ${TARGET_SERVICES_IP}."
+  is_services_ip_conneted_with_adb "${TARGET_SERVICES_IP}" || {
+    log_error "Cannot find adb connection to ${TARGET_SERVICES_IP}."
+    exit 1
+  }
+  adb shell su root "${COMMAND_TO_EXECUTE}" || {
+    log_error 'Failed to execute remote command with ADB.'
+    exit 1
+  }
+}
+
+# shellcheck disable=SC2029
+remote_code_execution_with_ssh()
+{
+  local TARGET_SERVICES_IP="${1:?}"
+  local COMMAND_TO_EXECUTE="${2:?}"
+  log_stdout "Executing ${COMMAND_TO_EXECUTE} on device at ${TARGET_SERVICES_IP}."
+  # TODO need to handle authentication with either password or project SSH key
+  ssh "root@${TARGET_SERVICES_IP}" "${COMMAND_TO_EXECUTE}" || {
+    log_error 'Failed to execute remote command with SSH.'
     exit 1
   }
 }

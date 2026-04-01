@@ -10,7 +10,7 @@ env:
 
 jobs:
   corellium-stop:
-    name: Start devices
+    name: Stop devices
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code

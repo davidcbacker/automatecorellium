@@ -19,7 +19,7 @@ install_appium_server_and_dependencies()
 
 install_appium_runner_ios()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   local APPIUM_RUNNER_IOS_URL="https://www.corellium.com/hubfs/Blog%20Attachments/WebDriverAgentRunner-Runner.ipa"
   local APPIUM_RUNNER_IOS_BUNDLE_ID='org.appium.WebDriverAgentRunner.xctrunner'
   kill_app "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_BUNDLE_ID}"
@@ -28,8 +28,8 @@ install_appium_runner_ios()
 
 create_matrix_assessment()
 {
-  local INSTANCE_ID="$1"
-  local APP_BUNDLE_ID="$2"
+  local INSTANCE_ID="${1:?}"
+  local APP_BUNDLE_ID="${2:?}"
   local MATRIX_WORDLIST_ID="$3"
   corellium matrix create-assessment \
     --instance "${INSTANCE_ID}" \
@@ -40,8 +40,8 @@ create_matrix_assessment()
 
 start_matrix_monitoring()
 {
-  local INSTANCE_ID="$1"
-  local MATRIX_ASSESSMENT_ID="$2"
+  local INSTANCE_ID="${1:?}"
+  local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_STATUS_MONITORING='monitoring'
   log_stdout "Starting monitoring for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix start-monitor \
@@ -58,8 +58,8 @@ start_matrix_monitoring()
 
 stop_matrix_monitoring()
 {
-  local INSTANCE_ID="$1"
-  local MATRIX_ASSESSMENT_ID="$2"
+  local INSTANCE_ID="${1:?}"
+  local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_STATUS_READY_FOR_TESTING='readyForTesting'
   log_stdout "Stopping monitoring for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix stop-monitor \
@@ -76,8 +76,8 @@ stop_matrix_monitoring()
 
 test_matrix_evidence()
 {
-  local INSTANCE_ID="$1"
-  local MATRIX_ASSESSMENT_ID="$2"
+  local INSTANCE_ID="${1:?}"
+  local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_STATUS_COMPLETE='complete'
   log_stdout "Running test for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix test \
@@ -94,15 +94,15 @@ test_matrix_evidence()
 
 get_matrix_report_id()
 {
-  local INSTANCE_ID="$1"
-  local MATRIX_ASSESSMENT_ID="$2"
+  local INSTANCE_ID="${1:?}"
+  local MATRIX_ASSESSMENT_ID="${2:?}"
   corellium matrix get-assessment --instance "${INSTANCE_ID}" --assessment "${MATRIX_ASSESSMENT_ID}" | jq -r '.reportId'
 }
 
 get_raw_matrix_report()
 {
-  local INSTANCE_ID="$1"
-  local MATRIX_ASSESSMENT_ID="$2"
+  local INSTANCE_ID="${1:?}"
+  local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_REPORT_DEFAULT_FORMAT='html'
   local MATRIX_REPORT_TARGET_FORMAT="${3:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
   case "${MATRIX_REPORT_TARGET_FORMAT}" in
@@ -120,24 +120,26 @@ get_raw_matrix_report()
 
 download_matrix_report_to_local_path()
 {
-  local INSTANCE_ID="$1"
-  local MATRIX_ASSESSMENT_ID="$2"
+  local INSTANCE_ID="${1:?}"
+  local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_REPORT_DOWNLOAD_PATH="$3"
   local MATRIX_REPORT_DEFAULT_FORMAT='html'
   local MATRIX_REPORT_TARGET_FORMAT="${4:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
-  log_stdout "Downloading ${MATRIX_REPORT_TARGET_FORMAT^^} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  local MATRIX_REPORT_TARGET_FORMAT_UPPER
+  MATRIX_REPORT_TARGET_FORMAT_UPPER="$(echo "${MATRIX_REPORT_TARGET_FORMAT}" | tr '[:lower:]' '[:upper:]')"
+  log_stdout "Downloading ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   get_raw_matrix_report \
     "${INSTANCE_ID}" \
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_REPORT_TARGET_FORMAT}" \
     > "${MATRIX_REPORT_DOWNLOAD_PATH}"
-  log_stdout "Downloaded ${MATRIX_REPORT_TARGET_FORMAT^^} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_stdout "Downloaded ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 
 print_failed_matrix_checks()
 {
-  local INSTANCE_ID="$1"
-  local MATRIX_ASSESSMENT_ID="$2"
+  local INSTANCE_ID="${1:?}"
+  local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_REPORT_FORMAT='json'
   get_raw_matrix_report \
     "${INSTANCE_ID}" \
@@ -149,8 +151,8 @@ print_failed_matrix_checks()
 
 delete_matrix_assessment()
 {
-  local INSTANCE_ID="$1"
-  local MATRIX_ASSESSMENT_ID="$2"
+  local INSTANCE_ID="${1:?}"
+  local MATRIX_ASSESSMENT_ID="${2:?}"
   log_stdout "Deleting MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix delete-assessment \
     --instance "${INSTANCE_ID}" \
@@ -161,14 +163,14 @@ delete_matrix_assessment()
 
 get_open_matrix_assessment_json()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   corellium matrix get-assessments --instance "${INSTANCE_ID}" |
     jq -r '.[] | select(.status != "complete" and .status != "failed")'
 }
 
 handle_open_matrix_assessment()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   local OPEN_MATRIX_ASSESSMENT_JSON
   OPEN_MATRIX_ASSESSMENT_JSON="$(get_open_matrix_assessment_json "${INSTANCE_ID}")"
   local MATRIX_STATUS_COMPLETE='complete'
@@ -196,8 +198,8 @@ handle_open_matrix_assessment()
 
 run_full_matrix_assessment()
 {
-  local INSTANCE_ID="$1"
-  local APP_BUNDLE_ID="$2"
+  local INSTANCE_ID="${1:?}"
+  local APP_BUNDLE_ID="${2:?}"
   local MATRIX_WORDLIST_ID="$3"
   handle_open_matrix_assessment "${INSTANCE_ID}"
   log_stdout "Creating MATRIX assessment."
@@ -230,15 +232,15 @@ run_full_matrix_assessment()
 
 get_matrix_assessment_status()
 {
-  local instance_id="$1"
-  local assessment_id="$2"
-  corellium matrix get-assessment --instance "${instance_id}" --assessment "${assessment_id}" | jq -r '.status'
+  local INSTANCE_ID="${1:?}"
+  local ASSESSMENT_ID="${2:?}"
+  corellium matrix get-assessment --instance "${INSTANCE_ID}" --assessment "${ASSESSMENT_ID}" | jq -r '.status'
 }
 
 wait_for_matrix_assessment_status()
 {
-  local INSTANCE_ID="$1"
-  local ASSESSMENT_ID="$2"
+  local INSTANCE_ID="${1:?}"
+  local ASSESSMENT_ID="${2:?}"
   local TARGET_ASSESSMENT_STATUS="$3"
   local SLEEP_TIME_DEFAULT='2'
   local SLEEP_TIME_FOR_TESTING='5'
@@ -296,8 +298,8 @@ run_appium_server()
 
 open_appium_session()
 {
-  local INSTANCE_ID="$1"
-  local APP_PACKAGE_NAME="$2"
+  local INSTANCE_ID="${1:?}"
+  local APP_PACKAGE_NAME="${2:?}"
   local DEFAULT_APPIUM_PORT='4723'
   local DEFAULT_ADB_PORT='5001'
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
@@ -326,8 +328,6 @@ EOF
     log_error 'Failed to open appium session.'
     exit 1
   }
-  log_warn 'DEBUG SHOWING THE JSON RESPONSE DETAILS'
-  echo "${OPEN_APPIUM_SESSION_JSON_RESPONSE}" >&2
   OPENED_SESSION_ID="$(echo "${OPEN_APPIUM_SESSION_JSON_RESPONSE}" | jq -r '.value.sessionId')" || {
     log_error 'Failed to parse open appium session JSON response.'
     exit 1
@@ -337,7 +337,7 @@ EOF
 
 close_appium_session()
 {
-  local SESSION_ID="$1"
+  local SESSION_ID="${1:?}"
   local DEFAULT_APPIUM_PORT='4723'
   local APPIUM_API_SESSION_URL="http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session/${SESSION_ID}"
   curl --silent -X DELETE "${APPIUM_API_SESSION_URL}" \
@@ -358,7 +358,7 @@ close_appium_session()
 
 run_appium_interactions_cafe()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   log_stdout 'Starting automated Appium interactions.'
@@ -368,7 +368,7 @@ run_appium_interactions_cafe()
 
 run_appium_interactions_template()
 {
-  local INSTANCE_ID="$1"
+  local INSTANCE_ID="${1:?}"
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   log_stdout 'Starting automated Appium interactions.'
@@ -378,7 +378,7 @@ run_appium_interactions_template()
 
 analyze_corellium_cafe_matrix_report_from_local_path()
 {
-  local MATRIX_JSON_REPORT_PATH="$1"
+  local MATRIX_JSON_REPORT_PATH="${1:?}"
   local MATRIX_CHECK_TO_ANALYZE='masvs-storage-1-android-12'
   local MATRIX_CHECK_EXPECTED_OUTCOME='fail'
   [ -f "${MATRIX_JSON_REPORT_PATH}" ] || {
@@ -404,7 +404,7 @@ analyze_corellium_cafe_matrix_report_from_local_path()
 
 print_matching_matrix_check_outcomes_from_local_json_path()
 {
-  local MATRIX_JSON_REPORT_PATH="$1"
+  local MATRIX_JSON_REPORT_PATH="${1:?}"
   local MATRIX_CHECK_DEFAULT_EXPECTED_OUTCOME='fail'
   local MATRIX_CHECK_EXPECTED_OUTCOME="${2:-${MATRIX_CHECK_DEFAULT_EXPECTED_OUTCOME}}"
   jq -r \
@@ -416,8 +416,8 @@ print_matching_matrix_check_outcomes_from_local_json_path()
 
 ensure_matrix_check_outcomes_from_local_json_path()
 {
-  local MATRIX_JSON_REPORT_PATH="$1"
-  local MATRIX_CHECK_TO_ANALYZE="$2"
+  local MATRIX_JSON_REPORT_PATH="${1:?}"
+  local MATRIX_CHECK_TO_ANALYZE="${2:?}"
   local MATRIX_CHECK_EXPECTED_OUTCOME="$3"
   jq -e \
     --arg id "${MATRIX_CHECK_TO_ANALYZE}" \

@@ -33,9 +33,10 @@ DEFAULT_ADB_PORT = '5001'
 # ==== TARGET APP ====
 TARGET_APP_PACKAGE = 'com.corellium.cafe'
 TARGET_APP_ACTIVITY = '.ui.activities.MainActivity'
+TARGET_APP_LOGIN_PAGE_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_LOGIN_PAGE_SCREENSHOT_FILENAME')
 TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME')
-TARGET_APP_CUSTOMER_INFO_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_CUSTOMER_INFO_SCREENSHOT_FILENAME')
-TARGET_APP_PAYMENT_INFO_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_PAYMENT_INFO_SCREENSHOT_FILENAME')
+TARGET_APP_CUSTOMER_PAGE_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_CUSTOMER_PAGE_SCREENSHOT_FILENAME')
+TARGET_APP_PAYMENT_PAGE_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_PAYMENT_PAGE_SCREENSHOT_FILENAME')
 
 # ==== APPIUM SERVER ====
 APPIUM_SERVER_IP = '127.0.0.1'
@@ -57,12 +58,11 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     '''Interact with the target app using Appium commands.'''
 
     log_stdout("Appium - Interact with login page.")
-    el1 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText")
-    el1.send_keys("Myemail@corellium.com")
-    el2 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText")
-    el2.send_keys("Password123")
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText", expected_value="Hello@corellium.com", driver=driver, wait=driver_wait)
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText", expected_value="Password123", driver=driver, wait=driver_wait)
     el3 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
     el3.click()
+    save_screenshot(driver, TARGET_APP_LOGIN_PAGE_SCREENSHOT_FILENAME)
     el4 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
     el4.click()
 
@@ -75,9 +75,8 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el7.click()
 
     log_stdout('Appium - Wait for blog page to load.')
-    el8 = wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", wait=driver_wait)
-    el8.send_keys("Testing")
-    wait_until_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", expected_value="Testing", wait=driver_wait)
+    wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", wait=driver_wait)
+    set_then_wait_until_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", expected_value="Testing", driver=driver, wait=driver_wait)
     save_screenshot(driver, TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)
 
     log_stdout("Appium - Return to home page.")
@@ -99,38 +98,26 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el14.click()
 
     log_stdout("Appium - Fill in customner info.")
-    el15 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText")
-    el15.send_keys("Myfirstname")
-    el16 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText")
-    el16.send_keys("Mylastname")
-    el17 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText")
-    el17.send_keys("3216540987")
-    wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText", expected_value="3216540987", wait=driver_wait)
-    #time.sleep(PAGE_LOAD_SLEEP_TIME_SECONDS)
-    save_screenshot(driver, TARGET_APP_CUSTOMER_INFO_SCREENSHOT_FILENAME)
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText", expected_value="Firstname", driver=driver, wait=driver_wait)
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText", expected_value="Lastname", driver=driver, wait=driver_wait)
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText", expected_value="3216540987", driver=driver, wait=driver_wait)
+    save_screenshot(driver, TARGET_APP_CUSTOMER_PAGE_SCREENSHOT_FILENAME)
     log_stdout("Appium - Submit customner info.")
     el18 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
     el18.click()
 
     log_stdout("Appium - Fill in payment info.")
-    el19 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber")
-    el19.send_keys("2345678901234567")
-    el20 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration")
-    el20.send_keys("1234")
-    el21 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV")
-    el21.send_keys("135")
-    el22 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode")
-    el22.send_keys("24680")
-    wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode", expected_value="24680", wait=driver_wait)
-    #time.sleep(PAGE_LOAD_SLEEP_TIME_SECONDS)
-    save_screenshot(driver, TARGET_APP_PAYMENT_INFO_SCREENSHOT_FILENAME)
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber", expected_value="2345678901234567", driver=driver, wait=driver_wait)
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration", expected_value="1234", driver=driver, wait=driver_wait)
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV", expected_value="135", driver=driver, wait=driver_wait)
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode", expected_value="24680", driver=driver, wait=driver_wait)
+    save_screenshot(driver, TARGET_APP_PAYMENT_PAGE_SCREENSHOT_FILENAME)
     log_stdout("Appium - Submit payment info.")
     el23 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
     el23.click()
 
     log_stdout("Appium - Enter invalid promo code.")
-    el24 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode")
-    el24.send_keys("65432")
+    set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode", expected_value="65432", driver=driver, wait=driver_wait)
     el25 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
     el25.click()
 
@@ -152,6 +139,14 @@ def wait_until_clickable(by, value, wait):
         print(f"Element not clickable after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
         print(f"TimeoutException: {e}")
         sys.exit(1)
+
+
+def set_then_wait_until_element_value(by, value, expected_value, driver, wait):
+    '''Find an element, send keys, then wait until element value'''
+    found_element = driver.find_element(by=by, value=value)
+    found_element.send_keys(expected_value)
+    wait_until_element_value(by=by, value=value, expected_value=expected_value, wait=wait)
+
 
 
 def wait_until_element_value(by, value, expected_value, wait):

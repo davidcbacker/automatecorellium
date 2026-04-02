@@ -132,9 +132,9 @@ def wait_until_clickable(by, value, wait):
         clickable_element = wait.until(element_to_be_clickable(element_locator))
         return clickable_element
     except TimeoutException as e:
-        print("Thrown when a command does not complete in enough time.")
-        print(f"Element not clickable after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
-        print(f"TimeoutException: {e}")
+        print("Thrown when a command does not complete in enough time.", file=sys.stderr)
+        print(f"Element not clickable after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.", file=sys.stderr)
+        print(f"TimeoutException: {e}", file=sys.stderr)
         sys.exit(1)
 
 
@@ -153,9 +153,9 @@ def wait_until_element_value(by, value, expected_value, wait):
         element = wait.until(text_to_be_present_in_element(element_locator, expected_value))
         return element
     except TimeoutException as e:
-        print("Thrown when a command does not complete in enough time.")
-        print(f"Element not found with value '{expected_value}' after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
-        print(f"TimeoutException: {e}")
+        print("Thrown when a command does not complete in enough time.", file=sys.stderr)
+        print(f"Element not found with value '{expected_value}' after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.", file=sys.stderr)
+        print(f"TimeoutException: {e}", file=sys.stderr)
         sys.exit(1)
 
 
@@ -166,9 +166,9 @@ def wait_until_visible(by, value, wait):
         visible_element = wait.until(visibility_of_element_located(element_locator))
         return visible_element
     except TimeoutException as e:
-        print("Thrown when a command does not complete in enough time.")
-        print(f"Element not visible after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
-        print(f"TimeoutException: {e}")
+        print("Thrown when a command does not complete in enough time.", file=sys.stderr)
+        print(f"Element not visible after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.", file=sys.stderr)
+        print(f"TimeoutException: {e}", file=sys.stderr)
         sys.exit(1)
 
 def log_stdout(message: str):
@@ -207,28 +207,28 @@ def run_app_automation(udid: str):
         log_stdout("Finished app interactions.")
 
     except NoSuchElementException as e:
-        print("Thrown when element could not be found.")
-        print("If you encounter this exception, you may want to check the following:")
-        print("  * Check your selector used in your find_by...")
-        print("  * Element may not yet be on the screen at the time of the find operation,")
-        print("    write a wait wrapper to wait for an element to appear.")
-        print(f"NoSuchElementException: {e}")
+        print("Thrown when element could not be found.", file=sys.stderr)
+        print("If you encounter this exception, you may want to check the following:", file=sys.stderr)
+        print("  * Check your selector used in your find_by...", file=sys.stderr)
+        print("  * Element may not yet be on the screen at the time of the find operation,", file=sys.stderr)
+        print("    write a wait wrapper to wait for an element to appear.", file=sys.stderr)
+        print(f"NoSuchElementException: {e}", file=sys.stderr)
         sys.exit(1)
 
     except StaleElementReferenceException as e:
-        print('Thrown when a reference to an element is now "stale".')
-        print("Possible causes of StaleElementReferenceException include, but not limited to:")
-        print("  * You are no longer on the same page, or the page may have refreshed since the element")
-        print("    was located.")
-        print("  * The element may have been removed and re-added to the screen, since it was located.")
-        print("    Such as an element being relocated.")
-        print("  * Element may have been inside an iframe or another context which was refreshed.")
-        print(f"StaleElementReferenceException: {e}")
+        print('Thrown when a reference to an element is now "stale".', file=sys.stderr)
+        print("Possible causes of StaleElementReferenceException include, but not limited to:", file=sys.stderr)
+        print("  * You are no longer on the same page, or the page may have refreshed since the element", file=sys.stderr)
+        print("    was located.", file=sys.stderr)
+        print("  * The element may have been removed and re-added to the screen, since it was located.", file=sys.stderr)
+        print("    Such as an element being relocated.", file=sys.stderr)
+        print("  * Element may have been inside an iframe or another context which was refreshed.", file=sys.stderr)
+        print(f"StaleElementReferenceException: {e}", file=sys.stderr)
         sys.exit(1)
 
     except WebDriverException as e:
-        print('Base webdriver exception.')
-        print(f"WebDriverException: {e}")
+        print('Base webdriver exception.', file=sys.stderr)
+        print(f"WebDriverException: {e}", file=sys.stderr)
         sys.exit(1)
 
     finally:
@@ -247,7 +247,7 @@ if __name__ == "__main__":
             corellium_device_appium_udid = f'{TARGET_DEVICE_SERVICES_IP}:{DEFAULT_ADB_PORT}'
             log_stdout(f'Using Corellium virtual device at {corellium_device_appium_udid}.')
         case _:
-            print('ERROR: Please provide zero arguments or pass in the Corellium device services IP.')
+            print('ERROR: Please provide zero arguments or pass in the Corellium device services IP.', file=sys.stderr)
             sys.exit(1)
 
     run_app_automation(corellium_device_appium_udid)

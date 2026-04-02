@@ -10,11 +10,11 @@ install_appium_server_and_dependencies()
   #python3 -m pip install -U pymobiledevice3 # for ios devices
   python3 -m pip install -U Appium-Python-Client
   log_stdout 'Installed appium dependencies.'
-  log_stdout 'Installing appium and device driver.'
+  log_stdout 'Installing appium and device drivers.'
   npm install --location=global appium
   appium driver install uiautomator2
-  #appium driver install xcuitest # for ios devices
-  log_stdout 'Installed appium and device driver.'
+  appium driver install xcuitest
+  log_stdout 'Installed appium and device drivers.'
 }
 
 install_appium_runner_ios()

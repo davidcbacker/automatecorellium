@@ -684,7 +684,7 @@ wait_for_instance_status()
     if [ -z "${CURRENT_INSTANCE_STATUS}" ]; then
       log_warn "Failed to get instance status. Checking again in ${SLEEP_TIME_DEFAULT} seconds."
     elif [ "${CURRENT_INSTANCE_STATUS}" = "${FAILURE_INSTANCE_STATUS}" ]; then
-      log_error "Target is ${TARGET_INSTANCE_STATUS} but current status is "${CURRENT_INSTANCE_STATUS}" 
+      log_error "Target is ${TARGET_INSTANCE_STATUS} but current status is ${CURRENT_INSTANCE_STATUS}."
       exit 1
     fi
     sleep "${SLEEP_TIME_DEFAULT}"

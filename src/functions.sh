@@ -659,12 +659,18 @@ wait_for_instance_status()
   local INSTANCE_ID="${1:?}"
   local TARGET_INSTANCE_STATUS="${2:?}"
   local SLEEP_TIME_DEFAULT='2'
+  local FAILURE_INSTANCE_STATUS
 
   case "${TARGET_INSTANCE_STATUS}" in
-    'on' | 'off') ;;
     '')
       log_error 'TARGET_INSTANCE_STATUS parameter cannot be empty.'
       exit 1
+      ;;
+    'off')
+      FAILURE_INSTANCE_STATUS='on'
+      ;;
+    'on')
+      FAILURE_INSTANCE_STATUS='off'
       ;;
     *)
       log_error "Unsupported target instance status '${TARGET_INSTANCE_STATUS}'."
@@ -677,6 +683,9 @@ wait_for_instance_status()
   while [ "${CURRENT_INSTANCE_STATUS}" != "${TARGET_INSTANCE_STATUS}" ]; do
     if [ -z "${CURRENT_INSTANCE_STATUS}" ]; then
       log_warn "Failed to get instance status. Checking again in ${SLEEP_TIME_DEFAULT} seconds."
+    elif [ "${CURRENT_INSTANCE_STATUS}" = "${FAILURE_INSTANCE_STATUS}" ]; then
+      log_error "Target is ${TARGET_INSTANCE_STATUS} but current status is "${CURRENT_INSTANCE_STATUS}" 
+      exit 1
     fi
     sleep "${SLEEP_TIME_DEFAULT}"
     CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"

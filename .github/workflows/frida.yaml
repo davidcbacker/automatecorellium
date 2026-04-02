@@ -75,7 +75,7 @@ jobs:
             exit 1
           fi
       - name: Install Python
-        if: matrix.os == 'ubuntu-latest'
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         uses: actions/setup-python@v6
         with:
           cache: pip
@@ -91,6 +91,7 @@ jobs:
             --apitoken ${{ secrets[matrix.api_token_secret_key] }} \
             --endpoint ${{ secrets[matrix.api_endpoint_secret_key] }}
       - name: Wait until available cores
+        if: ${{ matrix.os == 'ubuntu-latest' || matrix.corellium-os == 'Android' }}
         timeout-minutes: 30
         run: |
           source ./src/functions.sh && set -euo pipefail
@@ -99,23 +100,34 @@ jobs:
           else
             wait_until_available_cores "${{ matrix.default_corellium_project }}" '6'
           fi
-      - name: Create instance
+      - name: Start or create instance
         timeout-minutes: 1
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
+          MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE: ${{ vars.MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE }}
         run: |
           source ./src/functions.sh && set -euo pipefail
-          log_stdout "Creating ephemeral instance."
-          CREATED_CORELLIUM_INSTANCE_ID="$(create_instance \
-            "${{ matrix.hardware_flavor }}" \
-            "${{ matrix.firmware_version }}" \
-            "${{ matrix.firmware_build }}" \
-            "${{ matrix.default_corellium_project }}" \
-            "${CORELLIUM_INSTANCE_NAME_PREFIX}")"
-          log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
-          echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
-          log_stdout 'Saved ephemeral instance ID as environmental variable.'
+          if [ "${{ matrix.os }}" = 'self-hosted' ] &&
+            [  "${{ matrix.corellium-os }}" = 'iOS' ] &&
+            does_instance_exist "${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}"; then
+            log_stdout "Starting instance ${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}."
+            start_instance "${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}"
+            log_stdout "Started instance ${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}."
+            echo "CORELLIUM_INSTANCE_ID=${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}" >> "${GITHUB_ENV}"
+            log_stdout 'Saved existing instance ID as environmental variable.'
+          else
+            log_stdout "Creating ephemeral instance."
+            CREATED_CORELLIUM_INSTANCE_ID="$(create_instance \
+              "${{ matrix.hardware_flavor }}" \
+              "${{ matrix.firmware_version }}" \
+              "${{ matrix.firmware_build }}" \
+              "${{ matrix.default_corellium_project }}" \
+              "${CORELLIUM_INSTANCE_NAME_PREFIX}")"
+            log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
+            echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
+            log_stdout 'Saved ephemeral instance ID as environmental variable.'
+          fi
       - name: Install additional runner dependencies
         run: |
           source ./src/functions.sh && set -euo pipefail
@@ -189,14 +201,21 @@ jobs:
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_app_id }}" \
             "${FRIDA_SCRIPT_PATH}"
-      - name: Delete instance
+      - name: Stop or delete instance
         if: always()
         timeout-minutes: 15
+        env:
+          MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE: ${{ vars.MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
             log_stdout 'CORELLIUM_INSTANCE_ID is not set.'
-          elif does_instance_exist "${CORELLIUM_INSTANCE_ID}"; then
+          elif ! does_instance_exist "${CORELLIUM_INSTANCE_ID}"; then
+            log_stdout "Instance ${CORELLIUM_INSTANCE_ID} does not exist."
+          elif [ "${CORELLIUM_INSTANCE_ID}" = "${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}" ]; then
+            log_stdout "Ready to stop iOS instance ${CORELLIUM_INSTANCE_ID} on Desktop Appliance."
+            stop_instance "${CORELLIUM_INSTANCE_ID}"
+          else
             log_stdout "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
             stop_instance "${CORELLIUM_INSTANCE_ID}" || true
             delete_instance "${CORELLIUM_INSTANCE_ID}"

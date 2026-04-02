@@ -10,11 +10,11 @@ install_appium_server_and_dependencies()
   #python3 -m pip install -U pymobiledevice3 # for ios devices
   python3 -m pip install -U Appium-Python-Client
   log_stdout 'Installed appium dependencies.'
-  log_stdout 'Installing appium and device driver.'
+  log_stdout 'Installing appium and device drivers.'
   npm install --location=global appium
   appium driver install uiautomator2
-  #appium driver install xcuitest # for ios devices
-  log_stdout 'Installed appium and device driver.'
+  appium driver install xcuitest
+  log_stdout 'Installed appium and device drivers.'
 }
 
 install_appium_runner_ios()
@@ -362,7 +362,7 @@ run_appium_interactions_cafe()
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   log_stdout 'Starting automated Appium interactions.'
-  PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe.py "${INSTANCE_SERVICES_IP}"
+  PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_android.py "${INSTANCE_SERVICES_IP}"
   log_stdout 'Finished automated Appium interactions.'
 }
 

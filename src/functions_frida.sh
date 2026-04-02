@@ -79,6 +79,10 @@ run_frida_script_device()
   FRIDA_DEVICE_ID="$(get_frida_device_id "${INSTANCE_ID}")"
   log_stdout "Spawning app ${APP_PACKAGE_NAME} with Frida script $(basename "${FRIDA_SCRIPT_PATH}")."
   if [ "${CI:-false}" = 'true' ]; then
+    command -v timeout > /dev/null || {
+      log_error 'Cannot find timeout dependency.'
+      exit 1
+    }
     local FRIDA_TIMEOUT_SECONDS='10'
     log_stdout "Frida script will timeout after ${FRIDA_TIMEOUT_SECONDS} seconds."
     timeout "${FRIDA_TIMEOUT_SECONDS}" \

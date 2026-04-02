@@ -94,12 +94,12 @@ def interact_with_app(driver: webdriver.Remote, driver_wait: WebDriverWait):
     el14 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
     el14.click()
 
-    log_stdout("Appium - Fill in customner info.")
+    log_stdout("Appium - Fill in customer info.")
     set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText", expected_value="Firstname", driver=driver, wait=driver_wait)
     set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText", expected_value="Lastname", driver=driver, wait=driver_wait)
     set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText", expected_value="3216540987", driver=driver, wait=driver_wait)
     save_screenshot(driver, TARGET_APP_CUSTOMER_PAGE_SCREENSHOT_FILENAME)
-    log_stdout("Appium - Submit customner info.")
+    log_stdout("Appium - Submit customer info.")
     el18 = driver.find_element(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
     el18.click()
 

@@ -695,8 +695,7 @@ wait_for_instance_status()
         log_error "Instance is in ${CURRENT_INSTANCE_STATUS} status."
         exit
         ;;
-      *)
-        ;;
+      *) ;;
     esac
     sleep "${SLEEP_TIME_DEFAULT}"
     CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"

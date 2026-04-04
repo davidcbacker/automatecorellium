@@ -659,15 +659,23 @@ wait_for_instance_status()
   local INSTANCE_ID="${1:?}"
   local TARGET_INSTANCE_STATUS="${2:?}"
   local SLEEP_TIME_DEFAULT='2'
+  local INSTANCE_ERROR_STATUS='error'
+  local INSTANCE_PAUSED_STATUS='paused'
+  local INSTANCE_FAILURE_STATUS
 
   case "${TARGET_INSTANCE_STATUS}" in
-    'on' | 'off') ;;
     '')
       log_error 'TARGET_INSTANCE_STATUS parameter cannot be empty.'
       exit 1
       ;;
+    'off')
+      INSTANCE_FAILURE_STATUS='on'
+      ;;
+    'on')
+      INSTANCE_FAILURE_STATUS='off'
+      ;;
     *)
-      log_error "Unsupported target instance status '${TARGET_INSTANCE_STATUS}'."
+      log_error 'Unknown target instance status.'
       exit 1
       ;;
   esac
@@ -675,9 +683,20 @@ wait_for_instance_status()
   local CURRENT_INSTANCE_STATUS
   CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
   while [ "${CURRENT_INSTANCE_STATUS}" != "${TARGET_INSTANCE_STATUS}" ]; do
-    if [ -z "${CURRENT_INSTANCE_STATUS}" ]; then
-      log_warn "Failed to get instance status. Checking again in ${SLEEP_TIME_DEFAULT} seconds."
-    fi
+    case "${CURRENT_INSTANCE_STATUS}" in
+      '')
+        log_warn "Failed to get instance status. Checking again in ${SLEEP_TIME_DEFAULT} seconds."
+        ;;
+      "${INSTANCE_FAILURE_STATUS}")
+        log_error "Target is ${TARGET_INSTANCE_STATUS}, but current status is ${CURRENT_INSTANCE_STATUS}."
+        exit 1
+        ;;
+      "${INSTANCE_ERROR_STATUS}" | "${INSTANCE_PAUSED_STATUS}")
+        log_error "Instance is in ${CURRENT_INSTANCE_STATUS} status."
+        exit
+        ;;
+      *) ;;
+    esac
     sleep "${SLEEP_TIME_DEFAULT}"
     CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
   done

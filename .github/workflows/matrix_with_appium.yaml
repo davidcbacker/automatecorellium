@@ -17,7 +17,6 @@ env:
   CORELLIUM_CAFE_PACKAGE: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
                             && 'com.corellium.cafe'
                             || 'com.corellium.Cafe' }}
-  CORELLIUM_CAFE_ACTIVITY: com.corellium.cafe/.ui.activities.MainActivity
   CORELLIUM_CAFE_SOURCE_URL: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
                             && 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
                             || 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa' }}
@@ -170,7 +169,7 @@ jobs:
         timeout-minutes: 15
         env:
           ANDROID_HOME: ${{ matrix.android_home_path }}
-          
+          CORELLIUM_CAFE_ACTIVITY: com.corellium.cafe/.ui.activities.MainActivity
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh

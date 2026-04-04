@@ -687,11 +687,11 @@ wait_for_instance_status()
       '')
         log_warn "Failed to get instance status. Checking again in ${SLEEP_TIME_DEFAULT} seconds."
         ;;
-      "${INSTANCE_FAILURE_STATUS}" | "${INSTANCE_PAUSED_STATUS}")
+      "${INSTANCE_FAILURE_STATUS}")
         log_error "Target is ${TARGET_INSTANCE_STATUS}, but current status is ${CURRENT_INSTANCE_STATUS}."
         exit 1
         ;;
-      "${INSTANCE_ERROR_STATUS}")
+      "${INSTANCE_ERROR_STATUS}" | "${INSTANCE_PAUSED_STATUS}")
         log_error "Instance is in ${CURRENT_INSTANCE_STATUS} status."
         exit
         ;;

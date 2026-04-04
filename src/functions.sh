@@ -893,7 +893,7 @@ add_instance_to_usbfluxd()
 {
   local INSTANCE_ID="${1:?}"
   local USBFLUXD_PORT='5000'
-  local INSTANCE_SERVICES_IP INSTANCE_USBFLUXD_SOCKET
+  local INSTANCE_SERVICES_IP INSTANCE_USBFLUXD_SOCKET USBFLUXCTL_LIST_OUTPUT
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
   command -v usbfluxctl > /dev/null || {
@@ -923,12 +923,18 @@ is_services_ip_listed_on_usbfluxctl()
   local INSTANCE_SERVICES_IP="${1:?}"
   local USBFLUXD_PORT='5000'
   local INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
+  echo "DEBUG - INSTANCE_USBFLUXD_SOCKET=${INSTANCE_USBFLUXD_SOCKET}"
+  local USBFLUXCTL_LIST
   command -v usbfluxctl > /dev/null || {
     log_error 'Cannot find usbfluxctl in local environment PATH.'
     exit 1
   }
-  echo "DEBUG - INSTANCE_USBFLUXD_SOCKET=${INSTANCE_USBFLUXD_SOCKET}"
-  if usbfluxctl list | grep "${INSTANCE_USBFLUXD_SOCKET}"; then
+  USBFLUXCTL_LIST="$(usbfluxctl list)" || {
+    log_error 'Failed to list devices with usbfluxctl.'
+    exit 1
+  }
+  echo "USBFLUXCTL_LIST=${USBFLUXCTL_LIST}"
+  if echo "${USBFLUXCTL_LIST}" | grep "${INSTANCE_USBFLUXD_SOCKET}"; then
     return 0
   else
     return 1

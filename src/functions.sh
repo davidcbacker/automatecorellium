@@ -843,6 +843,10 @@ connect_with_adb()
     log_warn 'Attempting to install adb dependency.'
     install_adb_dependency
   fi
+  is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" && {
+    log_stdout "ADB is already connected with ${INSTANCE_SERVICES_IP}"."
+    return
+  }
 
   log_stdout "Connecting over adb to ${ADB_CONNECT_SOCKET}."
   adb connect "${ADB_CONNECT_SOCKET}"
@@ -868,6 +872,10 @@ disconnect_with_adb()
     log_warn 'Attempting to install adb dependency.'
     install_adb_dependency
   fi
+  is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" || {
+    log_stdout "ADB is already disconnected with ${INSTANCE_SERVICES_IP}"."
+    return
+  }
 
   log_stdout "Disconnecting over adb from ${ADB_CONNECT_SOCKET}."
   adb disconnect "${ADB_CONNECT_SOCKET}"

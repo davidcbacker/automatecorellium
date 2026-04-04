@@ -927,8 +927,8 @@ run_usbfluxd_and_dependencies()
   fi
   case "$(uname -s)" in
     Darwin)
-      if [ -f /var/run/usbmuxd.orig ]; then
-        log_stdout 'Found /var/run/usbmuxd.orig, so USBFlux is probably already running.'
+      if pgrep -x "processname" > /dev/null; then
+        log_stdout 'Found usbfluxd process already running.'
       else
         log_stdout 'Starting usbfluxd.'
         /Applications/USBFlux.app/Contents/Resources/usbfluxd -f &

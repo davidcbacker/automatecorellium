@@ -927,6 +927,7 @@ is_services_ip_listed_on_usbfluxctl()
     log_error 'Cannot find usbfluxctl in local environment PATH.'
     exit 1
   }
+  echo "DEBUG - INSTANCE_USBFLUXD_SOCKET=${INSTANCE_USBFLUXD_SOCKET}"
   if usbfluxctl list | grep "${INSTANCE_USBFLUXD_SOCKET}"; then
     return 0
   else

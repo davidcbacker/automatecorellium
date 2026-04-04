@@ -7,7 +7,7 @@ check_env_vars()
   if [ -z "${CORELLIUM_API_ENDPOINT}" ]; then
     log_error 'CORELLIUM_API_ENDPOINT not set.'
     exit 1
-  elif [ -z "${CORELLIUM_API_TOKEN}" ]; then
+  elif [ -z "${CORELLIUM_API_TOKEN}" ]; thenx
     log_error 'CORELLIUM_API_TOKEN not set.'
     exit 1
   fi
@@ -844,7 +844,7 @@ connect_with_adb()
     install_adb_dependency
   fi
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" && {
-    log_stdout "ADB is already connected with ${INSTANCE_SERVICES_IP}"."
+    log_stdout "ADB is already connected with ${INSTANCE_SERVICES_IP}."
     return
   }
 
@@ -873,7 +873,7 @@ disconnect_with_adb()
     install_adb_dependency
   fi
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" || {
-    log_stdout "ADB is already disconnected with ${INSTANCE_SERVICES_IP}"."
+    log_stdout "ADB is already disconnected with ${INSTANCE_SERVICES_IP}."
     return
   }
 

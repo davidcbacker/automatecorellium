@@ -32,7 +32,7 @@ jobs:
 
   call-lint-workflow:
     name: Lint
-    needs: changes
+    needs: [ changes, call-lint-workflow ]
     permissions:
       pull-requests: read
     if: >-
@@ -48,7 +48,7 @@ jobs:
 
   call-matrix-workflow:
     name: MATRIX
-    needs: changes
+    needs: [ changes, call-lint-workflow ]
     if: >-
       ${{
         needs.changes.outputs.javascript-deps == 'true' ||

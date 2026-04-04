@@ -129,6 +129,9 @@ jobs:
           else
             install_usbfluxd_and_dependencies
           fi
+      - name: DEBUG ONLY find aapt2
+        run: |
+          find / -name aapt2 2>/dev/null
       - name: Wait for instance agent ready
         timeout-minutes: 30
         run: |

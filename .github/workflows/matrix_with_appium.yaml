@@ -31,6 +31,7 @@ jobs:
     runs-on: ${{ matrix.runner-os }}
     timeout-minutes: 60
     env:
+      ANDROID_HOME: ${{ matrix.android_home_path }}
       NODE_TLS_REJECT_UNAUTHORIZED: ${{ matrix.node_tls_reject_unauthorized }}
     strategy:
       fail-fast: false

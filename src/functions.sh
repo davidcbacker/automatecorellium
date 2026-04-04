@@ -59,7 +59,7 @@ log_error()
 
 log_warn()
 {
-  MAKE_CONSOLE_YELLOW="$(tput bold; tput setaf 6)"
+  MAKE_CONSOLE_YELLOW="$(tput bold && tput setaf 6)"
   MAKE_CONSOLE_NORMAL="$(tput sgr0)"
   local FRIENDLY_DATE
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"

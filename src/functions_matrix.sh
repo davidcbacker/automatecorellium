@@ -316,7 +316,7 @@ open_appium_session()
       "appium:udid": "${INSTANCE_SERVICES_IP}:${DEFAULT_ADB_PORT}",
       "appium:appPackage": "${APP_PACKAGE_NAME}",
       "appium:appActivity": "${APP_ACTIVITY_NAME}",
-      "appium:adbExecTimeout: 40000
+      "appium:adbExecTimeout": 40000
     },
     "firstMatch": [{}]
   }

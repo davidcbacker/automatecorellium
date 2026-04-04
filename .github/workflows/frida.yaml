@@ -205,7 +205,9 @@ jobs:
         timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail
-          if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
+          if [ -z "${CORELLIUM_INSTANCE_ID}" ]; then
+            log_stdout 'CORELLIUM_INSTANCE_ID is not set.'
+          elif [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
             disconnect_with_adb "${CORELLIUM_INSTANCE_ID}"
           else
             [ "$(uname -s)" = 'Darwin' ] &&

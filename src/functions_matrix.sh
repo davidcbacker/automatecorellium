@@ -212,7 +212,7 @@ run_full_matrix_assessment()
   log_stdout "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   wait_until_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
-  run_appium_interactions_cafe "${INSTANCE_ID}"
+  run_appium_interactions_cafe_android "${INSTANCE_ID}"
   ensure_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   stop_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
@@ -356,7 +356,7 @@ close_appium_session()
   fi
 }
 
-run_appium_interactions_cafe()
+run_appium_interactions_cafe_android()
 {
   local INSTANCE_ID="${1:?}"
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
@@ -366,13 +366,13 @@ run_appium_interactions_cafe()
   log_stdout 'Finished automated Appium interactions.'
 }
 
-run_appium_interactions_template()
+run_appium_interactions_template_android()
 {
   local INSTANCE_ID="${1:?}"
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   log_stdout 'Starting automated Appium interactions.'
-  python3 src/util/appium_interactions_template.py "${INSTANCE_SERVICES_IP}"
+  python3 src/util/appium_interactions_template_android.py "${INSTANCE_SERVICES_IP}"
   log_stdout 'Finished automated Appium interactions.'
 }
 

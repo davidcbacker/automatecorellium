@@ -881,7 +881,6 @@ disconnect_with_adb()
   log_stdout "Found no connected adb device at ${INSTANCE_SERVICES_IP}."
 }
 
-
 is_services_ip_conneted_with_adb()
 {
   local INSTANCE_SERVICES_IP="$1"

@@ -136,6 +136,7 @@ def interact_with_app(helper: AppiumHelper):
 
     log_stdout('Appium - Wait for blog page to load.')
     helper.wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText")
+    log_stdout('Appium - Interact with blog page.')
     helper.set_then_wait_until_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", expected_value="Testing")
     helper.save_screenshot(TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)
 

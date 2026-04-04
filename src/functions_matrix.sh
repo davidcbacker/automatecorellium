@@ -313,7 +313,8 @@ open_appium_session()
       "platformName": "Android",
       "appium:automationName": "UiAutomator2",
       "appium:udid": "${INSTANCE_SERVICES_IP}:${DEFAULT_ADB_PORT}",
-      "appium:appPackage": "${APP_PACKAGE_NAME}"
+      "appium:appPackage": "${APP_PACKAGE_NAME}",
+      "appium:adbExecTimeout: 60000
     },
     "firstMatch": [{}]
   }

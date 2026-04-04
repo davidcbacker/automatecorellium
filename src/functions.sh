@@ -856,6 +856,32 @@ connect_with_adb()
   log_stdout 'Found connected adb device.'
 }
 
+disconnect_with_adb()
+{
+  local INSTANCE_ID="${1:?}"
+  local INSTANCE_SERVICES_IP
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  local ADB_CONNECT_PORT='5001'
+  local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
+
+  if ! command -v adb > /dev/null; then
+    log_warn 'Attempting to install adb dependency.'
+    install_adb_dependency
+  fi
+
+  log_stdout "Disconnecting over adb from ${ADB_CONNECT_SOCKET}."
+  adb disconnect "${ADB_CONNECT_SOCKET}"
+  log_stdout "Disconnected over adb from ${ADB_CONNECT_SOCKET}."
+  log_stdout 'Looking for lingering adb connection.'
+  is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" && {
+    log_error "Unable to disconnect from ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
+    adb devices -l
+    exit 1
+  }
+  log_stdout "Found no connected adb device at ${INSTANCE_SERVICES_IP}."
+}
+
+
 is_services_ip_conneted_with_adb()
 {
   local INSTANCE_SERVICES_IP="$1"

@@ -983,6 +983,7 @@ is_services_ip_listed_on_usbfluxctl()
   }
   USBFLUXCTL_LIST="$(usbfluxctl list)" || {
     log_error 'Failed to list devices with usbfluxctl.'
+    echo "${USBFLUXCTL_LIST}"
     exit 1
   }
   echo "USBFLUXCTL_LIST=${USBFLUXCTL_LIST}"

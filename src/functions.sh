@@ -659,15 +659,23 @@ wait_for_instance_status()
   local INSTANCE_ID="${1:?}"
   local TARGET_INSTANCE_STATUS="${2:?}"
   local SLEEP_TIME_DEFAULT='2'
+  local INSTANCE_ERROR_STATUS='error'
+  local INSTANCE_PAUSED_STATUS='paused'
+  local INSTANCE_FAILURE_STATUS
 
   case "${TARGET_INSTANCE_STATUS}" in
-    'on' | 'off') ;;
     '')
       log_error 'TARGET_INSTANCE_STATUS parameter cannot be empty.'
       exit 1
       ;;
+    'off')
+      INSTANCE_FAILURE_STATUS='on'
+      ;;
+    'on')
+      INSTANCE_FAILURE_STATUS='off'
+      ;;
     *)
-      log_error "Unsupported target instance status '${TARGET_INSTANCE_STATUS}'."
+      log_error 'Unknown target instance status.'
       exit 1
       ;;
   esac
@@ -675,9 +683,20 @@ wait_for_instance_status()
   local CURRENT_INSTANCE_STATUS
   CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
   while [ "${CURRENT_INSTANCE_STATUS}" != "${TARGET_INSTANCE_STATUS}" ]; do
-    if [ -z "${CURRENT_INSTANCE_STATUS}" ]; then
-      log_warn "Failed to get instance status. Checking again in ${SLEEP_TIME_DEFAULT} seconds."
-    fi
+    case "${CURRENT_INSTANCE_STATUS}" in
+      '')
+        log_warn "Failed to get instance status. Checking again in ${SLEEP_TIME_DEFAULT} seconds."
+        ;;
+      "${INSTANCE_FAILURE_STATUS}")
+        log_error "Target is ${TARGET_INSTANCE_STATUS}, but current status is ${CURRENT_INSTANCE_STATUS}."
+        exit 1
+        ;;
+      "${INSTANCE_ERROR_STATUS}" | "${INSTANCE_PAUSED_STATUS}")
+        log_error "Instance is in ${CURRENT_INSTANCE_STATUS} status."
+        exit
+        ;;
+      *) ;;
+    esac
     sleep "${SLEEP_TIME_DEFAULT}"
     CURRENT_INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
   done
@@ -726,13 +745,25 @@ install_usbfluxd_and_dependencies()
     avahi-daemon
     build-essential
     git
-    libimobiledevice6
     libimobiledevice-utils
     libtool
     pkg-config
     python3-dev
     usbmuxd
   )
+
+  case "$(uname -m)" in
+    amd64 | x86_64)
+      USBFLUXD_APT_DEPS+=('libimobiledevice6')
+      ;;
+    aarch64 | arm64)
+      USBFLUXD_APT_DEPS+=('libimobiledevice-1.0-6')
+      ;;
+    *)
+      log_error "Unknown architecture '$(uname -m)'."
+      exit 1
+      ;;
+  esac
 
   local USBFLUXD_COMPILE_DEP_URLS=(
     'https://github.com/libimobiledevice/libplist'
@@ -828,6 +859,10 @@ connect_with_adb()
       log_error 'Failed attempt to install adb dependency.'
       exit 1
     }
+  fi
+  is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" && {
+    log_stdout "ADB is already connected with ${INSTANCE_SERVICES_IP}."
+    return
   }
 
   log_stdout "Connecting over adb to ${ADB_CONNECT_SOCKET}."
@@ -840,6 +875,35 @@ connect_with_adb()
     exit 1
   }
   log_stdout 'Found connected adb device.'
+}
+
+disconnect_with_adb()
+{
+  local INSTANCE_ID="${1:?}"
+  local INSTANCE_SERVICES_IP
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  local ADB_CONNECT_PORT='5001'
+  local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
+
+  if ! command -v adb > /dev/null; then
+    log_warn 'Attempting to install adb dependency.'
+    install_adb_dependency
+  fi
+  is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" || {
+    log_stdout "ADB is already disconnected with ${INSTANCE_SERVICES_IP}."
+    return
+  }
+
+  log_stdout "Disconnecting over adb from ${ADB_CONNECT_SOCKET}."
+  adb disconnect "${ADB_CONNECT_SOCKET}"
+  log_stdout "Disconnected over adb from ${ADB_CONNECT_SOCKET}."
+  log_stdout 'Looking for lingering adb connection.'
+  is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" && {
+    log_error "Unable to disconnect from ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
+    adb devices -l
+    exit 1
+  }
+  log_stdout "Found no connected adb device at ${INSTANCE_SERVICES_IP}."
 }
 
 is_services_ip_conneted_with_adb()
@@ -906,6 +970,22 @@ add_instance_to_usbfluxd()
   log_stdout "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
 }
 
+delete_instance_from_usbfluxd()
+{
+  local INSTANCE_ID="${1:?}"
+  local USBFLUXD_PORT='5000'
+  local INSTANCE_SERVICES_IP INSTANCE_USBFLUXD_SOCKET
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
+  command -v usbfluxctl > /dev/null || {
+    log_error 'Cannot find usbfluxctl in local environment PATH.'
+    exit 1
+  }
+  log_stdout "Removing device at ${INSTANCE_USBFLUXD_SOCKET} from usbfluxd via usbfluxctl."
+  usbfluxctl del "${INSTANCE_USBFLUXD_SOCKET}"
+  log_stdout "Removed device at ${INSTANCE_USBFLUXD_SOCKET} from usbfluxd via usbfluxctl."
+}
+
 verify_usbflux_connection()
 {
   local INSTANCE_ID="${1:?}"
@@ -945,7 +1025,7 @@ is_app_running_on_instance()
     APP_STATUS_JSON_RESPONSE="$(corellium instance apps \
       --instance "${INSTANCE_ID}" \
       --project "${PROJECT_ID}")" || {
-      log_error 'Failed again to check app status.'
+      log_error 'Failed to check app status again.'
       exit 1
     }
   }

@@ -21,7 +21,7 @@ matrix:
   - 'data/wordlist.txt'
   - 'src/functions.sh'
   - 'src/functions_matrix.sh'
-  - 'src/util/appium_interactions_cafe.py'
+  - 'src/util/appium_interactions_cafe*.py'
   - 'src/util/compress_matrix_artifacts.js'
 python:
   - 'requirements-pip-appium.txt'

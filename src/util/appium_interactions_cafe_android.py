@@ -27,7 +27,11 @@ class AppiumHelper:
 
     def __init__(self, driver: webdriver.Remote):
         self.driver = driver
-        self.wait = WebDriverWait(driver, APPIUM_DRIVER_EXPLICITLY_WAIT, ignored_exceptions=[StaleElementReferenceException])
+        self.wait = WebDriverWait(
+            driver=driver,
+            timeout=APPIUM_DRIVER_EXPLICITLY_WAIT,
+            ignored_exceptions=[StaleElementReferenceException]
+        )
 
 
     def save_screenshot(self, filename: str = "screenshot.png"):

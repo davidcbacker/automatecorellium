@@ -743,6 +743,7 @@ install_usbfluxd_and_dependencies()
     *)
       log_error "Unknown architecture '$(uname -m)'."
       exit 1
+      ;;
   esac
 
   local USBFLUXD_COMPILE_DEP_URLS=(

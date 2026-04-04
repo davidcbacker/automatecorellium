@@ -945,7 +945,7 @@ add_instance_to_usbfluxd()
   log_stdout "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
 }
 
-remove_instance_from_usbfluxd()
+delete_instance_from_usbfluxd()
 {
   local INSTANCE_ID="${1:?}"
   local USBFLUXD_PORT='5000'

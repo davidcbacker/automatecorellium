@@ -12,7 +12,7 @@ concurrency:
 
 env:
   TERM: xterm
-  VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn.ui.activities.MainActivity
+  VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
   CORELLIUM_INSTANCE_NAME_PREFIX: 'MATRIX Automation'
   CORELLIUM_CAFE_PACKAGE: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
                             && 'com.corellium.cafe'

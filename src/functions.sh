@@ -745,13 +745,25 @@ install_usbfluxd_and_dependencies()
     avahi-daemon
     build-essential
     git
-    libimobiledevice6
     libimobiledevice-utils
     libtool
     pkg-config
     python3-dev
     usbmuxd
   )
+
+  case "$(uname -m)" in
+    amd64 | x86_64)
+      USBFLUXD_APT_DEPS+=('libimobiledevice6')
+      ;;
+    aarch64 | arm64)
+      USBFLUXD_APT_DEPS+=('libimobiledevice-1.0-6')
+      ;;
+    *)
+      log_error "Unknown architecture '$(uname -m)'."
+      exit 1
+      ;;
+  esac
 
   local USBFLUXD_COMPILE_DEP_URLS=(
     'https://github.com/libimobiledevice/libplist'

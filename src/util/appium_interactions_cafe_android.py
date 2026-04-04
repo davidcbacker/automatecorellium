@@ -216,9 +216,8 @@ def run_app_automation(udid: str):
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
         log_stdout("Successfully loaded target app.")
         driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT * 1000)
-        helper = AppiumHelper(driver)
         log_stdout("Starting app interactions.")
-        interact_with_app(helper)
+        interact_with_app(AppiumHelper(driver))
         log_stdout("Finished app interactions.")
 
     except NoSuchElementException as e:

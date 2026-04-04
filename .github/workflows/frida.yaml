@@ -202,6 +202,7 @@ jobs:
             "${{ matrix.corellium_cafe_app_id }}" \
             "${FRIDA_SCRIPT_PATH}"
       - name: Disconnect from device
+        if: always()
         timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail

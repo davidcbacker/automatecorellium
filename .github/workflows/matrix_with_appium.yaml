@@ -132,6 +132,12 @@ jobs:
       - name: DEBUG ONLY find aapt2
         run: |
           find / -name aapt2 2>/dev/null
+      - name: DEBUG ONLY print build tools
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          ls -l /usr/lib/android-sdk/build-tools/ || true
+          ls -l /usr/local/lib/android/sdk/build-tools/ || true
       - name: Wait for instance agent ready
         timeout-minutes: 30
         run: |

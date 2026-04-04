@@ -170,12 +170,16 @@ jobs:
         timeout-minutes: 15
         env:
           ANDROID_HOME: ${{ matrix.android_home_path }}
+          CORELLIUM_CAFE_ACTIVITY: .ui.activities.MainActivity
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           run_appium_server
           log_stdout 'Opening Appium session.'
-          OPEN_APPIUM_SESSION_ID="$(open_appium_session "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}")"
+          OPEN_APPIUM_SESSION_ID="$(open_appium_session \
+            "${CORELLIUM_INSTANCE_ID}" \
+            "${CORELLIUM_CAFE_PACKAGE}" \
+            "${CORELLIUM_CAFE_ACTIVITY}")"
           log_stdout "Opened Appium session ${OPEN_APPIUM_SESSION_ID}."
           sleep 5
           log_stdout "Closing Appium session ${OPEN_APPIUM_SESSION_ID}."

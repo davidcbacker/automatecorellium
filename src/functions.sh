@@ -745,13 +745,25 @@ install_usbfluxd_and_dependencies()
     avahi-daemon
     build-essential
     git
-    libimobiledevice6
     libimobiledevice-utils
     libtool
     pkg-config
     python3-dev
     usbmuxd
   )
+
+  case "$(uname -m)" in
+    amd64 | x86_64)
+      USBFLUXD_APT_DEPS+=('libimobiledevice6')
+      ;;
+    aarch64 | arm64)
+      USBFLUXD_APT_DEPS+=('libimobiledevice-1.0-6')
+      ;;
+    *)
+      log_error "Unknown architecture '$(uname -m)'."
+      exit 1
+      ;;
+  esac
 
   local USBFLUXD_COMPILE_DEP_URLS=(
     'https://github.com/libimobiledevice/libplist'
@@ -843,6 +855,10 @@ connect_with_adb()
     log_warn 'Attempting to install adb dependency.'
     install_adb_dependency
   fi
+  is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" && {
+    log_stdout "ADB is already connected with ${INSTANCE_SERVICES_IP}."
+    return
+  }
 
   log_stdout "Connecting over adb to ${ADB_CONNECT_SOCKET}."
   adb connect "${ADB_CONNECT_SOCKET}"
@@ -854,6 +870,35 @@ connect_with_adb()
     exit 1
   }
   log_stdout 'Found connected adb device.'
+}
+
+disconnect_with_adb()
+{
+  local INSTANCE_ID="${1:?}"
+  local INSTANCE_SERVICES_IP
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  local ADB_CONNECT_PORT='5001'
+  local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
+
+  if ! command -v adb > /dev/null; then
+    log_warn 'Attempting to install adb dependency.'
+    install_adb_dependency
+  fi
+  is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" || {
+    log_stdout "ADB is already disconnected with ${INSTANCE_SERVICES_IP}."
+    return
+  }
+
+  log_stdout "Disconnecting over adb from ${ADB_CONNECT_SOCKET}."
+  adb disconnect "${ADB_CONNECT_SOCKET}"
+  log_stdout "Disconnected over adb from ${ADB_CONNECT_SOCKET}."
+  log_stdout 'Looking for lingering adb connection.'
+  is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" && {
+    log_error "Unable to disconnect from ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
+    adb devices -l
+    exit 1
+  }
+  log_stdout "Found no connected adb device at ${INSTANCE_SERVICES_IP}."
 }
 
 is_services_ip_conneted_with_adb()
@@ -918,6 +963,22 @@ add_instance_to_usbfluxd()
   log_stdout "Adding device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
   usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"
   log_stdout "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
+}
+
+delete_instance_from_usbfluxd()
+{
+  local INSTANCE_ID="${1:?}"
+  local USBFLUXD_PORT='5000'
+  local INSTANCE_SERVICES_IP INSTANCE_USBFLUXD_SOCKET
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
+  command -v usbfluxctl > /dev/null || {
+    log_error 'Cannot find usbfluxctl in local environment PATH.'
+    exit 1
+  }
+  log_stdout "Removing device at ${INSTANCE_USBFLUXD_SOCKET} from usbfluxd via usbfluxctl."
+  usbfluxctl del "${INSTANCE_USBFLUXD_SOCKET}"
+  log_stdout "Removed device at ${INSTANCE_USBFLUXD_SOCKET} from usbfluxd via usbfluxctl."
 }
 
 verify_usbflux_connection()

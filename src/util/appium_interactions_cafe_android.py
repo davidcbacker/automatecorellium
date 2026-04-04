@@ -23,11 +23,15 @@ from selenium.webdriver.support.expected_conditions import (
 from selenium.webdriver.support.ui import WebDriverWait
 
 class AppiumHelper:
-    """Wrapper around Appium driver + WebDriverWait to avoid passing them through the helper functions."""
+    """Wrapper around appium.webdriver and selenium.WebDriverWait to improve readability and reduce repeated code in interact_with_app()."""
 
-    def __init__(self, driver: webdriver.Remote, wait: WebDriverWait):
+    def __init__(self, driver: webdriver.Remote):
         self.driver = driver
-        self.wait = wait
+        self.wait = WebDriverWait(
+            driver=driver,
+            timeout=APPIUM_DRIVER_EXPLICITLY_WAIT,
+            ignored_exceptions=[StaleElementReferenceException]
+        )
 
 
     def save_screenshot(self, filename: str = "screenshot.png"):
@@ -84,6 +88,7 @@ class AppiumHelper:
                   f"{APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
             print(f"TimeoutException: {e}")
             sys.exit(1)
+
 
 # =====================================
 # ==== BEGIN CONSTANTS DEFINITIONS ====
@@ -211,10 +216,8 @@ def run_app_automation(udid: str):
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
         log_stdout("Successfully loaded target app.")
         driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT * 1000)
-        driver_wait = WebDriverWait(driver, APPIUM_DRIVER_EXPLICITLY_WAIT, ignored_exceptions=[StaleElementReferenceException])
-        helper = AppiumHelper(driver, driver_wait)
         log_stdout("Starting app interactions.")
-        interact_with_app(helper)
+        interact_with_app(AppiumHelper(driver))
         log_stdout("Finished app interactions.")
 
     except NoSuchElementException as e:

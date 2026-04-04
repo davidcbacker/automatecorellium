@@ -48,7 +48,7 @@ jobs:
 
   call-matrix-workflow:
     name: MATRIX
-    needs: changes
+    needs: [ changes, call-lint-workflow ]
     if: >-
       ${{
         needs.changes.outputs.javascript-deps == 'true' ||
@@ -59,7 +59,7 @@ jobs:
 
   call-frida-workflow:
     name: Frida
-    needs: changes
+    needs: [ changes, call-lint-workflow ]
     if: >-
       ${{
         needs.changes.outputs.frida == 'true' ||

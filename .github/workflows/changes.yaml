@@ -32,7 +32,7 @@ jobs:
 
   call-lint-workflow:
     name: Lint
-    needs: [ changes, call-lint-workflow ]
+    needs: changes
     permissions:
       pull-requests: read
     if: >-
@@ -59,7 +59,7 @@ jobs:
 
   call-frida-workflow:
     name: Frida
-    needs: changes
+    needs: [ changes, call-lint-workflow ]
     if: >-
       ${{
         needs.changes.outputs.frida == 'true' ||

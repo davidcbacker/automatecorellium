@@ -300,6 +300,7 @@ open_appium_session()
 {
   local INSTANCE_ID="${1:?}"
   local APP_PACKAGE_NAME="${2:?}"
+  local APP_ACTIVITY_NAME="${3:?}"
   local DEFAULT_APPIUM_PORT='4723'
   local DEFAULT_ADB_PORT='5001'
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
@@ -313,7 +314,8 @@ open_appium_session()
       "platformName": "Android",
       "appium:automationName": "UiAutomator2",
       "appium:udid": "${INSTANCE_SERVICES_IP}:${DEFAULT_ADB_PORT}",
-      "appium:appPackage": "${APP_PACKAGE_NAME}"
+      "appium:appPackage": "${APP_PACKAGE_NAME}",
+      "appium:appActivity": "${APP_ACTIVITY_NAME}"
     },
     "firstMatch": [{}]
   }

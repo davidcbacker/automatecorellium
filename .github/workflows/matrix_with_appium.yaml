@@ -253,6 +253,17 @@ jobs:
           log_stdout 'Downloaded MATRIX runtime artifacts from VM to CI runner.'
           ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
+      - name: Disconnect from device
+        timeout-minutes: 2
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+            disconnect_with_adb "${CORELLIUM_INSTANCE_ID}"
+          else
+            [ "$(uname -s)" = 'Darwin' ] &&
+              export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
+            delele_instance_from_usbfluxd "${CORELLIUM_INSTANCE_ID}"
+          fi
       - name: Delete instance
         if: always()
         timeout-minutes: 15

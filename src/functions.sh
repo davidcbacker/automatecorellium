@@ -719,7 +719,7 @@ install_adb_dependency()
 {
   command -v adb > /dev/null || {
     log_error 'Cannot find 'adb' dependency in PATH.'
-    [ "$(uname -s)" = 'Darwin' ] && return
+    [ "$(uname -s)" = 'Darwin' ] && exit 1
     log_warn 'Attempting to install adb dependency.'
     log_stdout 'Installing adb.'
     sudo apt-get -qq update

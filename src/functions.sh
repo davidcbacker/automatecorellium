@@ -724,7 +724,6 @@ ensure_adb_dependency()
     log_stdout 'Installing adb.'
     sudo apt-get -qq update
     sudo apt-get -qq install adb
-    ensure_adb_dependency
     if command -v adb > /dev/null; then
       log_stdout 'Installed adb.'
     else

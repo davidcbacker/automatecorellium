@@ -953,57 +953,49 @@ run_usbfluxd_and_dependencies()
   esac
 }
 
-add_instance_to_usbfluxd()
+add_instance_to_usbfluxd_and_verify()
 {
   local INSTANCE_ID="${1:?}"
   local USBFLUXD_PORT='5000'
-  local INSTANCE_SERVICES_IP INSTANCE_USBFLUXD_SOCKET
+  local INSTANCE_SERVICES_IP INSTANCE_UDID INSTANCE_USBFLUXD_SOCKET
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
   INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
   command -v usbfluxctl > /dev/null || {
     log_error 'Cannot find usbfluxctl in local environment PATH.'
     exit 1
   }
-  if is_services_ip_listed_on_usbfluxctl "${INSTANCE_SERVICES_IP}"; then
-    log_stdout "Socket ${INSTANCE_USBFLUXD_SOCKET} is already listed on usbfluxctl."
+  if is_udid_listed_on_idevice_id "${INSTANCE_UDID}"; then
+    log_stdout "Device ${INSTANCE_UDID} is already listed on usbfluxctl."
     usbfluxctl list
   else
-    log_stdout "Adding socket ${INSTANCE_USBFLUXD_SOCKET}  to usbfluxd via usbfluxctl."
+    log_stdout "Adding device ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd via usbfluxctl."
     usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"
     log_stdout "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd via usbfluxctl."
-    log_stdout "Verifying device at ${INSTANCE_USBFLUXD_SOCKET} via usbfluxctl."
-    is_services_ip_listed_on_usbfluxctl "{INSTANCE_SERVICES_IP}" || {
-      log_error "Failed to add ${INSTANCE_USBFLUXD_SOCKET} via usbfluxctl."
-      log_warn 'Running usbfluxctl list.'
-      usbfluxctl list
-      exit 1
-    }
+    log_stdout "Verifying device at ${INSTANCE_UDID} via idevice_id."
+    wait_until_udid_listed_on_idevice_id "${INSTANCE_UDID}"
     log_stdout "Verified device at ${INSTANCE_USBFLUXD_SOCKET} via usbfluxctl."
   fi
 }
 
-is_services_ip_listed_on_usbfluxctl()
+sleep_until_udid_listed_on_idevice_id()
 {
-  local INSTANCE_SERVICES_IP="${1:?}"
-  local USBFLUXD_PORT='5000'
-  local INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
-  echo "DEBUG - INSTANCE_USBFLUXD_SOCKET=${INSTANCE_USBFLUXD_SOCKET}"
-  local USBFLUXCTL_LIST
+  local INSTANCE_UDID="${1:?}"
   command -v usbfluxctl > /dev/null || {
     log_error 'Cannot find usbfluxctl in local environment PATH.'
     exit 1
   }
-  USBFLUXCTL_LIST="$(usbfluxctl list)" || {
-    log_error 'Failed to list devices with usbfluxctl.'
-    echo "${USBFLUXCTL_LIST}"
+  until idevice_id "{INSTANCE_UDID}"; do sleep 0.1; done
+}
+
+sleep_while_udid_listed_on_idevice_id()
+{
+  local INSTANCE_UDID="${1:?}"
+  command -v usbfluxctl > /dev/null || {
+    log_error 'Cannot find usbfluxctl in local environment PATH.'
     exit 1
   }
-  echo "USBFLUXCTL_LIST=${USBFLUXCTL_LIST}"
-  if echo "${USBFLUXCTL_LIST}" | grep "${INSTANCE_USBFLUXD_SOCKET}"; then
-    return 0
-  else
-    return 1
-  fi
+  while idevice_id "{INSTANCE_UDID}"; do sleep 0.1; done
 }
 
 delete_instance_from_usbfluxd()
@@ -1020,6 +1012,9 @@ delete_instance_from_usbfluxd()
   log_stdout "Removing device at ${INSTANCE_USBFLUXD_SOCKET} from usbfluxd via usbfluxctl."
   usbfluxctl del "${INSTANCE_USBFLUXD_SOCKET}"
   log_stdout "Removed device at ${INSTANCE_USBFLUXD_SOCKET} from usbfluxd via usbfluxctl."
+  log_stdout "Verifying no device at ${INSTANCE_UDID} via idevice_id."
+  sleep_while_udid_listed_on_idevice_id "${INSTANCE_UDID}"
+  log_stdout "Verified no device at ${INSTANCE_UDID} via idevice_id."
 }
 
 verify_usbflux_connection()
@@ -1034,7 +1029,7 @@ verify_usbflux_connection()
   done
   INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
   log_stdout 'Checking for usb connection with idevice_id.'
-  until idevice_id "${INSTANCE_UDID}"; do sleep 0.1; done
+  until is_udid_listed_on_idevice_id "${INSTANCE_UDID}"; do sleep 0.1; done
   log_stdout 'Found usb connection with idevice_id.'
   log_stdout 'Pairing to Corellium device with idevicepair.'
   until idevicepair --udid "${INSTANCE_UDID}" pair; do sleep 1; done

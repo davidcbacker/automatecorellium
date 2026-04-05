@@ -717,17 +717,21 @@ install_openvpn_dependencies()
 
 install_adb_dependency()
 {
-  [ "$(uname -s)" = 'Darwin' ] && return
-  log_stdout 'Installing adb.'
-  sudo apt-get -qq update
-  sudo apt-get -qq install adb
-
-  if command -v adb > /dev/null; then
-    log_stdout 'Installed adb.'
-  else
-    log_error 'Failed to install adb dependency'
-    exit 1
-  fi
+  command -v adb > /dev/null || {
+    log_error 'Cannot find 'adb' dependency in PATH.'
+    [ "$(uname -s)" = 'Darwin' ] && return
+    log_warn 'Attempting to install adb dependency.'
+    log_stdout 'Installing adb.'
+    sudo apt-get -qq update
+    sudo apt-get -qq install adb
+    install_adb_dependency
+    if command -v adb > /dev/null; then
+      log_stdout 'Installed adb.'
+    else
+      log_error 'Failed to install adb dependency.'
+      exit 1
+    fi
+  }
 }
 
 install_usbfluxd_and_dependencies()
@@ -851,10 +855,7 @@ connect_with_adb()
   local ADB_CONNECT_PORT='5001'
   local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
 
-  if ! command -v adb > /dev/null; then
-    log_warn 'Attempting to install adb dependency.'
-    install_adb_dependency
-  fi
+  install_adb_dependency
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" && {
     log_stdout "ADB is already connected with ${INSTANCE_SERVICES_IP}."
     return
@@ -880,10 +881,7 @@ disconnect_with_adb()
   local ADB_CONNECT_PORT='5001'
   local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
 
-  if ! command -v adb > /dev/null; then
-    log_warn 'Attempting to install adb dependency.'
-    install_adb_dependency
-  fi
+  install_adb_dependency
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" || {
     log_stdout "ADB is already disconnected with ${INSTANCE_SERVICES_IP}."
     return
@@ -907,11 +905,7 @@ is_services_ip_conneted_with_adb()
   local ADB_CONNECT_PORT='5001'
   local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
 
-  command -v adb > /dev/null || {
-    log_warn 'Attempting to install adb dependency.'
-    install_adb_dependency
-  }
-
+  install_adb_dependency
   if adb devices -l | grep -q "${ADB_CONNECT_SOCKET}"; then
     return 0
   else

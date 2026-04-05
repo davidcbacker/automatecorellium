@@ -167,7 +167,7 @@ jobs:
             [ "$(uname -s)" = 'Darwin' ] &&
               export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
             run_usbfluxd_and_dependencies
-            add_instance_to_usbfluxd "${CORELLIUM_INSTANCE_ID}"
+            add_instance_to_usbfluxd_and_verify "${CORELLIUM_INSTANCE_ID}"
             verify_usbflux_connection "${CORELLIUM_INSTANCE_ID}"
           fi
       - name: Install Corellium Cafe from URL

@@ -715,7 +715,7 @@ install_openvpn_dependencies()
   fi
 }
 
-install_adb_dependency()
+ensure_adb_dependency()
 {
   command -v adb > /dev/null || {
     log_error 'Cannot find 'adb' dependency in PATH.'
@@ -724,7 +724,7 @@ install_adb_dependency()
     log_stdout 'Installing adb.'
     sudo apt-get -qq update
     sudo apt-get -qq install adb
-    install_adb_dependency
+    ensure_adb_dependency
     if command -v adb > /dev/null; then
       log_stdout 'Installed adb.'
     else
@@ -855,7 +855,7 @@ connect_with_adb()
   local ADB_CONNECT_PORT='5001'
   local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
 
-  install_adb_dependency
+  ensure_adb_dependency
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" && {
     log_stdout "ADB is already connected with ${INSTANCE_SERVICES_IP}."
     return
@@ -881,7 +881,7 @@ disconnect_with_adb()
   local ADB_CONNECT_PORT='5001'
   local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
 
-  install_adb_dependency
+  ensure_adb_dependency
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" || {
     log_stdout "ADB is already disconnected with ${INSTANCE_SERVICES_IP}."
     return
@@ -905,7 +905,7 @@ is_services_ip_conneted_with_adb()
   local ADB_CONNECT_PORT='5001'
   local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
 
-  install_adb_dependency
+  ensure_adb_dependency
   if adb devices -l | grep -q "${ADB_CONNECT_SOCKET}"; then
     return 0
   else

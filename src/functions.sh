@@ -967,7 +967,6 @@ add_instance_to_usbfluxd_and_verify()
   }
   if is_udid_listed_on_idevice_id "${INSTANCE_UDID}"; then
     log_stdout "Device ${INSTANCE_UDID} is already listed on usbfluxctl."
-    usbfluxctl list
   else
     log_stdout "Adding device ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd via usbfluxctl."
     usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"

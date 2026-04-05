@@ -136,7 +136,7 @@ jobs:
             install_openvpn_dependencies
           fi
           if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
-            install_adb_dependency
+            ensure_adb_dependency
           else
             install_usbfluxd_and_dependencies
           fi

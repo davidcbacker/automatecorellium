@@ -859,7 +859,7 @@ connect_with_adb()
       log_error 'Failed attempt to install adb dependency.'
       exit 1
     }
-  fi
+  }
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" && {
     log_stdout "ADB is already connected with ${INSTANCE_SERVICES_IP}."
     return

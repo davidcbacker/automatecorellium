@@ -718,7 +718,7 @@ install_openvpn_dependencies()
 ensure_adb_dependency()
 {
   command -v adb > /dev/null || {
-    log_error 'Cannot find 'adb' dependency in PATH.'
+    log_error 'Cannot find adb dependency in PATH.'
     [ "$(uname -s)" = 'Darwin' ] && exit 1
     log_warn 'Attempting to install adb dependency.'
     log_stdout 'Installing adb.'

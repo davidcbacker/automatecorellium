@@ -990,7 +990,7 @@ sleep_until_udid_listed_on_idevice_id()
     log_error 'Cannot find usbfluxctl in local environment PATH.'
     exit 1
   }
-  until idevice_id "{INSTANCE_UDID}"; do sleep 0.1; done
+  until idevice_id "${INSTANCE_UDID}"; do sleep 0.1; done
 }
 
 sleep_while_udid_listed_on_idevice_id()
@@ -1000,7 +1000,7 @@ sleep_while_udid_listed_on_idevice_id()
     log_error 'Cannot find usbfluxctl in local environment PATH.'
     exit 1
   }
-  while idevice_id "{INSTANCE_UDID}"; do sleep 0.1; done
+  while idevice_id "${INSTANCE_UDID}"; do sleep 0.1; done
 }
 
 delete_instance_from_usbfluxd()

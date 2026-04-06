@@ -1001,8 +1001,9 @@ delete_instance_from_usbfluxd()
 {
   local INSTANCE_ID="${1:?}"
   local USBFLUXD_PORT='5000'
-  local INSTANCE_SERVICES_IP INSTANCE_USBFLUXD_SOCKET
+  local INSTANCE_SERVICES_IP INSTANCE_UDID INSTANCE_USBFLUXD_SOCKET
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
   INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
   command -v usbfluxctl > /dev/null || {
     log_error 'Cannot find usbfluxctl in local environment PATH.'

@@ -84,11 +84,10 @@ async function main() {
         console.log(`Agent for instance ${CORELLIUM_INSTANCE_ID} is ready.`);
 
         await execCommandOnInstance(agent, `tar -czvf ${zipOutputPath} ${zipInputArtifactsDir} ${zipInputAssessmentsDir}`);
-        await execCommandOnInstance(agent, `ls -l ${zipOutputPath}`);
         await execCommandOnInstance(agent, `sha256sum ${zipOutputPath}`);
+        await execCommandOnInstance(agent, `ls -l ${zipOutputPath}`);
 
         console.log('Script completed successfully.');
-        process.exit(0);
     } catch (error) {
         handleError(error, 'An error occurred during script execution.');
     }

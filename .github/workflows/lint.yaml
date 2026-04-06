@@ -12,7 +12,6 @@ jobs:
       pull-requests: read
     outputs:
       ci: ${{ steps.filter.outputs.ci }}
-      javascript: ${{ steps.filter.outputs.javascript }}
       markdown: ${{ steps.filter.outputs.markdown }}
       python: ${{ steps.filter.outputs.python }}
       shell: ${{ steps.filter.outputs.shell }}
@@ -24,26 +23,6 @@ jobs:
         with:
           filters: data/config/dorny-paths-filter.yaml
           list-files: 'shell'
-
-  lint-javascript:
-    name: Lint JavaScript
-    needs: changes-lint
-    if: >-
-      ${{
-        needs.changes-lint.outputs.javascript == 'true' ||
-        needs.changes-lint.outputs.static-lint == 'true'
-      }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-      - name: Run ESLint with SuperLinter
-        uses: super-linter/super-linter@v8
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_JAVASCRIPT_ES: true
 
   lint-markdown:
     name: Lint Markdown

@@ -449,3 +449,39 @@ ensure_matrix_check_outcomes_from_local_json_path()
     exit 1
   }
 }
+
+compress_matrix_runtime_artifacts()
+{
+  local INSTANCE_ID="${1:?}"
+  local INSTANCE_SERVICES_IP INSTANCE_FLAVOR
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  INSTANCE_FLAVOR="$(get_instance_flavor "${INSTANCE_ID}")"
+  case "${INSTANCE_FLAVOR}" in
+    ranchu)
+      DEVICE_TEMP_DIRECTORY='/data/local/tmp'
+      ;;
+    *)
+      DEVICE_TEMP_DIRECTORY='/tmp'
+      ;;
+  esac
+  local ARCHIVE_INPUT_ARTIFACTS_PATH="${DEVICE_TEMP_DIRECTORY}/artifacts/"
+  local ARCHIVE_INPUT_ASSESSMENT_PATH="${DEVICE_TEMP_DIRECTORY}/assessment.*/"
+  local ARCHIVE_OUTPUT_PATH='/tmp/matrix_artifacts.tar.gz'
+
+  local TARGET_COMMANDS=(
+    "tar -czvf ${ARCHIVE_OUTPUT_PATH} ${ARCHIVE_INPUT_ARTIFACTS_PATH} ${ARCHIVE_INPUT_ASSESSMENT_PATH}"
+    "ls -l ${ARCHIVE_OUTPUT_PATH}"
+    "sha256sum ${ARCHIVE_OUTPUT_PATH}"
+  )
+  for target_command in "${TARGET_COMMANDS[@]}"; do
+    if [ "${INSTANCE_FLAVOR}" = 'ranchu' ]; then
+      remote_code_execution_with_adb \
+        "${INSTANCE_SERVICES_IP}" \
+        "${target_command}"
+    else
+      remote_code_execution_with_ssh \
+        "${INSTANCE_SERVICES_IP}" \
+        "${target_command}"
+    fi
+  done
+}

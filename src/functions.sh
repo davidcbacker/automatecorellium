@@ -966,15 +966,21 @@ add_instance_to_usbfluxd_and_verify()
     exit 1
   }
   if is_udid_listed_on_idevice_id "${INSTANCE_UDID}"; then
-    log_stdout "Device ${INSTANCE_UDID} is already listed on usbfluxctl."
+    log_stdout "Device ${INSTANCE_UDID} is already listed on idevice_id."
   else
     log_stdout "Adding device ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd via usbfluxctl."
     usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"
     log_stdout "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd via usbfluxctl."
     log_stdout "Verifying device at ${INSTANCE_UDID} via idevice_id."
     sleep_until_udid_listed_on_idevice_id "${INSTANCE_UDID}"
-    log_stdout "Verified device at ${INSTANCE_USBFLUXD_SOCKET} via usbfluxctl."
+    log_stdout "Verified device at ${INSTANCE_USBFLUXD_SOCKET} via idevice_id."
   fi
+}
+
+is_udid_listed_on_idevice_id()
+{
+  local INSTANCE_UDID="${1:?}"
+  idevice_id "${INSTANCE_UDID}"
 }
 
 sleep_until_udid_listed_on_idevice_id()

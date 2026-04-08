@@ -895,7 +895,7 @@ connect_with_adb()
   log_stdout 'Found connected adb device.'
 }
 
-disconnect_from_device()
+disconnect_from_instance()
 {
   local INSTANCE_ID="${1:?}"
   local INSTANCE_FLAVOR

@@ -42,12 +42,12 @@ class AppiumHelper:
         log_stdout("Appium - Saved screenshot.")
 
 
-    def set_then_wait_until_element_value(self, by, value, expected_value):
+    def set_element_value(self, by, value, desired_value):
         '''Find an element, send keys, then wait until element value'''
         try:
-            found_element = self.driver.find_element(by=by, value=value)
-            found_element.send_keys(expected_value)
-            self.wait_until_element_value(by=by, value=value, expected_value=expected_value)
+            element = self.driver.find_element(by=by, value=value)
+            element.send_keys(desired_value)
+            self.wait_until_element_value(by=by, value=value, desired_value=desired_value)
         except TimeoutException as e:
             print(f"Timeout: Element not clickable after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
             print(f"TimeoutException: {e}")
@@ -78,13 +78,13 @@ class AppiumHelper:
             sys.exit(1)
 
 
-    def wait_until_element_value(self, by, value, expected_value):
+    def wait_until_element_value(self, by, value, desired_value):
         '''Wait until text is present in an element value then return the elemeent'''
         try:
             locator = (by, value)
-            return self.wait.until(text_to_be_present_in_element(locator, expected_value))
+            return self.wait.until(text_to_be_present_in_element(locator, text_=desired_value))
         except TimeoutException as e:
-            print(f"Timeout: Element value '{expected_value}' not present after "
+            print(f"Timeout: Element value '{desired_value}' not present after "
                   f"{APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
             print(f"TimeoutException: {e}")
             sys.exit(1)
@@ -127,8 +127,8 @@ def interact_with_app(helper: AppiumHelper):
     '''Interact with the target app using Appium commands.'''
 
     log_stdout("Appium - Interact with login page.")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText", expected_value="Hello@corellium.com")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText", expected_value="Password123")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText", desired_value="Hello@corellium.com")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText", desired_value="Password123")
     el3 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
     el3.click()
     helper.save_screenshot(TARGET_APP_LOGIN_PAGE_SCREENSHOT_FILENAME)
@@ -146,7 +146,7 @@ def interact_with_app(helper: AppiumHelper):
     log_stdout('Appium - Wait for blog page to load.')
     helper.wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText")
     log_stdout('Appium - Interact with blog page.')
-    helper.set_then_wait_until_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", expected_value="Testing")
+    helper.set_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", desired_value="Testing")
     helper.save_screenshot(TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)
 
     log_stdout("Appium - Return to home page.")
@@ -168,26 +168,26 @@ def interact_with_app(helper: AppiumHelper):
     el14.click()
 
     log_stdout("Appium - Fill in customer info.")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText", expected_value="Firstname")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText", expected_value="Lastname")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText", expected_value="3216540987")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText", desired_value="Firstname")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText", desired_value="Lastname")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText", desired_value="3216540987")
     helper.save_screenshot(TARGET_APP_CUSTOMER_PAGE_SCREENSHOT_FILENAME)
     log_stdout("Appium - Submit customer info.")
     el18 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
     el18.click()
 
     log_stdout("Appium - Fill in payment info.")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber", expected_value="2345678901234567")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration", expected_value="1234")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV", expected_value="135")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode", expected_value="24680")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber", desired_value="2345678901234567")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration", desired_value="1234")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV", desired_value="135")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode", desired_value="24680")
     helper.save_screenshot(TARGET_APP_PAYMENT_PAGE_SCREENSHOT_FILENAME)
     log_stdout("Appium - Submit payment info.")
     el23 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
     el23.click()
 
     log_stdout("Appium - Enter invalid promo code.")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode", expected_value="65432")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode", desired_value="65432")
     el25 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
     el25.click()
 

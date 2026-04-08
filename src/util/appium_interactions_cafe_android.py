@@ -225,7 +225,7 @@ def run_app_automation(udid: str):
     options.adb_exec_timeout = 40000
 
     signal.signal(signal.SIGALRM, alarm_timeout_handler)
-    log_stdout(f"Setting Appium automation timeout alarm for {APPIUM_AUTOMATION_ALARM_TIMEOUT} seconds.")
+    log_stdout(f"Setting Appium alarm timeout for {APPIUM_AUTOMATION_ALARM_TIMEOUT} seconds.")
     signal.alarm(APPIUM_AUTOMATION_ALARM_TIMEOUT)
 
     try:

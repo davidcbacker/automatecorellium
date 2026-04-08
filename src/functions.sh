@@ -59,14 +59,14 @@ log_error()
 
 log_warn()
 {
-  MAKE_CONSOLE_YELLOW="$(tput bold && tput setaf 6)"
+  MAKE_CONSOLE_CYAN="$(tput bold && tput setaf 6)"
   MAKE_CONSOLE_NORMAL="$(tput sgr0)"
   local FRIENDLY_DATE
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
       printf '%s[!] %s WARN: %s\n%s' \
-        "${MAKE_CONSOLE_YELLOW}" \
+        "${MAKE_CONSOLE_CYAN}" \
         "${FRIENDLY_DATE}" \
         "${arg}" \
         "${MAKE_CONSOLE_NORMAL}" \

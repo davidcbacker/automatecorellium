@@ -900,12 +900,19 @@ disconnect_from_instance()
   local INSTANCE_ID="${1:?}"
   local INSTANCE_FLAVOR
   INSTANCE_FLAVOR="${2:-"$(get_instance_flavor "${INSTANCE_ID}")"}"
-  if [ "${INSTANCE_FLAVOR}" = 'ranchu' ]; then
-    disconnect_with_adb "${INSTANCE_ID}"
-  else
-    [ "$(uname -s)" = 'Darwin' ] &&
-      export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
-    delete_instance_from_usbfluxd "${INSTANCE_ID}"
+  case "${INSTANCE_FLAVOR}" in 
+    ranchu)
+      disconnect_with_adb "${INSTANCE_ID}"
+      ;;
+    ipad* | iphone*)
+      [ "$(uname -s)" = 'Darwin' ] &&
+        export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
+      delete_instance_from_usbfluxd "${INSTANCE_ID}"
+      ;;
+    *)
+      log_error "Unknown flavor type ${INSTANCE_FLAVOR}."
+      exit 1
+      ;;
   fi
 }
 

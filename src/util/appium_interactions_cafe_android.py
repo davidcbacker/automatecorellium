@@ -58,7 +58,7 @@ class AppiumHelper:
         '''Wait until an element is clickable then return the element'''
         try:
             locator = (by, value)
-            return self.wait.until(element_to_be_clickable(locator))
+            return self.wait.until(element_to_be_clickable(locator=locator))
         except TimeoutException as e:
             print("Timeout: Element not clickable after "
                   f"{APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
@@ -70,7 +70,7 @@ class AppiumHelper:
         '''Wait until an element is visible then return the element'''
         try:
             locator = (by, value)
-            return self.wait.until(visibility_of_element_located(locator))
+            return self.wait.until(visibility_of_element_located(locator=locator))
         except TimeoutException as e:
             print("Timeout: Element not visible after "
                   f"{APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
@@ -82,7 +82,7 @@ class AppiumHelper:
         '''Wait until text is present in an element value then return the elemeent'''
         try:
             locator = (by, value)
-            return self.wait.until(text_to_be_present_in_element(locator, desired_value))
+            return self.wait.until(text_to_be_present_in_element(locator=locator, text_=desired_value))
         except TimeoutException as e:
             print(f"Timeout: Element value '{desired_value}' not present after "
                   f"{APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")

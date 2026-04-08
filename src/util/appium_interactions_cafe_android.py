@@ -206,10 +206,10 @@ def log_stdout(message: str):
 
 class AlarmTimeoutException(Exception):
     '''Exception raised when a SIGALRM signal triggers a timeout during Appium automation.'''
-    pass
 
 
 def alarm_timeout_handler(signum, frame):
+    '''Signal handler for SIGALRM that raises an AlarmTimeoutException.'''
     raise AlarmTimeoutException("Appium automation timed out.")
 
 
@@ -225,6 +225,7 @@ def run_app_automation(udid: str):
     options.adb_exec_timeout = 40000
 
     signal.signal(signal.SIGALRM, alarm_timeout_handler)
+    log_stdout(f"Setting Appium automation timeout alarm for {APPIUM_AUTOMATION_ALARM_TIMEOUT} seconds.")
     signal.alarm(APPIUM_AUTOMATION_ALARM_TIMEOUT)
 
     try:

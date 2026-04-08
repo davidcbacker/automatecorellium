@@ -188,7 +188,6 @@ def interact_with_app(helper: AppiumHelper):
     helper.click_when_ready(by=AppiumBy.ID, value="android:id/button1")
 
 
-
 def log_stdout(message: str):
     '''Print message to stdout with current timestamp'''
     current_datetime = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")

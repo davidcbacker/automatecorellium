@@ -913,7 +913,7 @@ disconnect_from_instance()
       log_error "Unknown flavor type ${INSTANCE_FLAVOR}."
       exit 1
       ;;
-  fi
+  esac
 }
 
 disconnect_with_adb()

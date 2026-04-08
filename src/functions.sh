@@ -851,7 +851,7 @@ connect_to_instance()
   local INSTANCE_ID="${1:?}"
   local INSTANCE_FLAVOR
   INSTANCE_FLAVOR="${2:-"$(get_instance_flavor "${INSTANCE_ID}")"}"
-  case "${INSTANCE_FLAVOR}"
+  case "${INSTANCE_FLAVOR}" in
     ranchu)
       connect_with_adb "${INSTANCE_ID}"
       ;;

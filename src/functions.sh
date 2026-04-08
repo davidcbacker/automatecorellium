@@ -875,7 +875,8 @@ connect_with_adb()
 disconnect_from_device()
 {
   local INSTANCE_ID="${1:?}"
-  local INSTANCE_FLAVOR="$(get_instance_flavor "${INSTANCE_ID}")"
+  local INSTANCE_FLAVOR
+  INSTANCE_FLAVOR="${2:-"$(get_instance_flavor "${INSTANCE_ID}")"}"
   if [ "${INSTANCE_FLAVOR}" = 'ranchu' ]; then
     disconnect_with_adb "${CORELLIUM_INSTANCE_ID}"
   else

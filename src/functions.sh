@@ -920,9 +920,13 @@ run_usbfluxd_and_dependencies()
   fi
   case "$(uname -s)" in
     Darwin)
-      log_stdout 'Starting usbfluxd.'
-      /Applications/USBFlux.app/Contents/Resources/usbfluxd -f &
-      log_stdout 'Started usbfluxd.'
+      if pgrep -x "processname" > /dev/null; then
+        log_stdout 'Found usbfluxd process already running.'
+      else
+        log_stdout 'Starting usbfluxd.'
+        /Applications/USBFlux.app/Contents/Resources/usbfluxd -f &
+        log_stdout 'Started usbfluxd.'
+      fi
       ;;
     Linux)
       log_stdout 'Starting usbmuxd service.'
@@ -942,28 +946,63 @@ run_usbfluxd_and_dependencies()
   esac
 }
 
-add_instance_to_usbfluxd()
+add_instance_to_usbfluxd_and_verify()
 {
   local INSTANCE_ID="${1:?}"
   local USBFLUXD_PORT='5000'
-  local INSTANCE_SERVICES_IP INSTANCE_USBFLUXD_SOCKET
+  local INSTANCE_SERVICES_IP INSTANCE_UDID INSTANCE_USBFLUXD_SOCKET
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
   INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
   command -v usbfluxctl > /dev/null || {
     log_error 'Cannot find usbfluxctl in local environment PATH.'
     exit 1
   }
-  log_stdout "Adding device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
-  usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"
-  log_stdout "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
+  if is_udid_listed_on_idevice_id "${INSTANCE_UDID}"; then
+    log_stdout "Device ${INSTANCE_UDID} is already listed on idevice_id."
+  else
+    log_stdout "Adding device ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd via usbfluxctl."
+    usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"
+    log_stdout "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd via usbfluxctl."
+    log_stdout "Verifying device at ${INSTANCE_UDID} via idevice_id."
+    sleep_until_udid_listed_on_idevice_id "${INSTANCE_UDID}"
+    log_stdout "Verified device at ${INSTANCE_USBFLUXD_SOCKET} via idevice_id."
+  fi
+}
+
+is_udid_listed_on_idevice_id()
+{
+  local INSTANCE_UDID="${1:?}"
+  idevice_id "${INSTANCE_UDID}"
+}
+
+sleep_until_udid_listed_on_idevice_id()
+{
+  local INSTANCE_UDID="${1:?}"
+  command -v usbfluxctl > /dev/null || {
+    log_error 'Cannot find usbfluxctl in local environment PATH.'
+    exit 1
+  }
+  until idevice_id "${INSTANCE_UDID}"; do sleep 0.1; done
+}
+
+sleep_while_udid_listed_on_idevice_id()
+{
+  local INSTANCE_UDID="${1:?}"
+  command -v usbfluxctl > /dev/null || {
+    log_error 'Cannot find usbfluxctl in local environment PATH.'
+    exit 1
+  }
+  while idevice_id "${INSTANCE_UDID}"; do sleep 0.1; done
 }
 
 delete_instance_from_usbfluxd()
 {
   local INSTANCE_ID="${1:?}"
   local USBFLUXD_PORT='5000'
-  local INSTANCE_SERVICES_IP INSTANCE_USBFLUXD_SOCKET
+  local INSTANCE_SERVICES_IP INSTANCE_UDID INSTANCE_USBFLUXD_SOCKET
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
   INSTANCE_USBFLUXD_SOCKET="${INSTANCE_SERVICES_IP}:${USBFLUXD_PORT}"
   command -v usbfluxctl > /dev/null || {
     log_error 'Cannot find usbfluxctl in local environment PATH.'
@@ -972,6 +1011,9 @@ delete_instance_from_usbfluxd()
   log_stdout "Removing device at ${INSTANCE_USBFLUXD_SOCKET} from usbfluxd via usbfluxctl."
   usbfluxctl del "${INSTANCE_USBFLUXD_SOCKET}"
   log_stdout "Removed device at ${INSTANCE_USBFLUXD_SOCKET} from usbfluxd via usbfluxctl."
+  log_stdout "Verifying no device at ${INSTANCE_UDID} via idevice_id."
+  sleep_while_udid_listed_on_idevice_id "${INSTANCE_UDID}"
+  log_stdout "Verified no device at ${INSTANCE_UDID} via idevice_id."
 }
 
 verify_usbflux_connection()
@@ -986,7 +1028,7 @@ verify_usbflux_connection()
   done
   INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
   log_stdout 'Checking for usb connection with idevice_id.'
-  until idevice_id "${INSTANCE_UDID}"; do sleep 0.1; done
+  until is_udid_listed_on_idevice_id "${INSTANCE_UDID}"; do sleep 0.1; done
   log_stdout 'Found usb connection with idevice_id.'
   log_stdout 'Pairing to Corellium device with idevicepair.'
   until idevicepair --udid "${INSTANCE_UDID}" pair; do sleep 1; done

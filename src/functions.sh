@@ -859,8 +859,8 @@ connect_to_instance()
       [ "$(uname -s)" = 'Darwin' ] &&
         export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
       run_usbfluxd_and_dependencies
-      add_instance_to_usbfluxd "${CORELLIUM_INSTANCE_ID}"
-      verify_usbflux_connection "${CORELLIUM_INSTANCE_ID}"
+      add_instance_to_usbfluxd "${INSTANCE_ID}"
+      verify_usbflux_connection "${INSTANCE_ID}"
       ;;
     *)
       log_error "Unknown flavor type ${INSTANCE_FLAVOR}."
@@ -901,11 +901,11 @@ disconnect_from_device()
   local INSTANCE_FLAVOR
   INSTANCE_FLAVOR="${2:-"$(get_instance_flavor "${INSTANCE_ID}")"}"
   if [ "${INSTANCE_FLAVOR}" = 'ranchu' ]; then
-    disconnect_with_adb "${CORELLIUM_INSTANCE_ID}"
+    disconnect_with_adb "${INSTANCE_ID}"
   else
     [ "$(uname -s)" = 'Darwin' ] &&
       export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
-    delete_instance_from_usbfluxd "${CORELLIUM_INSTANCE_ID}"
+    delete_instance_from_usbfluxd "${INSTANCE_ID}"
   fi
 }
 

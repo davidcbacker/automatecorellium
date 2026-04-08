@@ -45,8 +45,8 @@ class AppiumHelper:
     def set_element_value(self, by, value, desired_value):
         '''Find an element, send keys, then wait until element value'''
         try:
-            found_element = self.driver.find_element(by=by, value=value)
-            found_element.send_keys(desired_value)
+            element = self.driver.find_element(by=by, value=value)
+            element.send_keys(desired_value)
             self.wait_until_element_value(by=by, value=value, desired_value=desired_value)
         except TimeoutException as e:
             print(f"Timeout: Element not clickable after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")

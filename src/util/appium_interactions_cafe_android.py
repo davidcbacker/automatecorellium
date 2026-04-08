@@ -3,8 +3,8 @@ Automate Corellium virtual device interactions using Appium on Corellium Cafe An
 """
 
 import os
+import signal
 import sys
-import time
 from datetime import datetime, timezone
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
@@ -115,6 +115,10 @@ APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
 APPIUM_DRIVER_IMPLICITLY_WAIT=5 # seconds
 APPIUM_DRIVER_EXPLICITLY_WAIT=20 # seconds
 
+# ==== APPIUM AUTOMATION TIMEOUT ====
+APPIUM_AUTOMATION_ALARM_TIMEOUT=120 # seconds
+
+
 # =====================================
 # ===== END CONSTANTS DEFINITIONS =====
 # =====================================
@@ -200,6 +204,15 @@ def log_stdout(message: str):
     print(f"[-] {current_datetime} INFO: {message}")
 
 
+class AlarmTimeoutException(Exception):
+    '''Exception raised when a SIGALRM signal triggers a timeout during Appium automation.'''
+
+
+def alarm_timeout_handler(signum, frame):
+    '''Signal handler for SIGALRM that raises an AlarmTimeoutException.'''
+    raise AlarmTimeoutException("Appium automation timed out.")
+
+
 def run_app_automation(udid: str):
     '''Launch the app and interact using Appium commands.'''
     options = UiAutomator2Options()
@@ -211,6 +224,10 @@ def run_app_automation(udid: str):
     options.set_capability('appium:noReset', True)
     options.adb_exec_timeout = 40000
 
+    signal.signal(signal.SIGALRM, alarm_timeout_handler)
+    log_stdout(f"Setting Appium alarm timeout for {APPIUM_AUTOMATION_ALARM_TIMEOUT} seconds.")
+    signal.alarm(APPIUM_AUTOMATION_ALARM_TIMEOUT)
+
     try:
         log_stdout("Loading target app in Appium session.")
         driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
@@ -219,6 +236,11 @@ def run_app_automation(udid: str):
         log_stdout("Starting app interactions.")
         interact_with_app(AppiumHelper(driver))
         log_stdout("Finished app interactions.")
+
+    except AlarmTimeoutException as e:
+        print(f"Appium automation timed out after {APPIUM_AUTOMATION_ALARM_TIMEOUT} seconds.", file=sys.stderr)
+        print(f"AlarmTimeoutException: {e}", file=sys.stderr)
+        sys.exit(1)
 
     except NoSuchElementException as e:
         print("Thrown when element could not be found.", file=sys.stderr)
@@ -246,6 +268,7 @@ def run_app_automation(udid: str):
         sys.exit(1)
 
     finally:
+        signal.alarm(0)
         log_stdout("Closing appium session.")
         driver.quit()
         log_stdout("Closed appium session.")

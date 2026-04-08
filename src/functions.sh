@@ -872,6 +872,19 @@ connect_with_adb()
   log_stdout 'Found connected adb device.'
 }
 
+disconnect_from_device()
+{
+  local INSTANCE_ID="${1:?}"
+  local INSTANCE_FLAVOR="$(get_instance_flavor "${INSTANCE_ID}")"
+  if [ "${INSTANCE_FLAVOR}" = 'ranchu' ]; then
+    disconnect_with_adb "${CORELLIUM_INSTANCE_ID}"
+  else
+    [ "$(uname -s)" = 'Darwin' ] &&
+      export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
+    delete_instance_from_usbfluxd "${CORELLIUM_INSTANCE_ID}"
+  fi
+}
+
 disconnect_with_adb()
 {
   local INSTANCE_ID="${1:?}"

@@ -5,10 +5,10 @@
 check_env_vars()
 {
   if [ -z "${CORELLIUM_API_ENDPOINT}" ]; then
-    log_error 'CORELLIUM_API_ENDPOINT not set.'
+    log_error 'CORELLIUM_API_ENDPOINT unset or empty.'
     exit 1
   elif [ -z "${CORELLIUM_API_TOKEN}" ]; then
-    log_error 'CORELLIUM_API_TOKEN not set.'
+    log_error 'CORELLIUM_API_TOKEN unset or empty.'
     exit 1
   fi
 }

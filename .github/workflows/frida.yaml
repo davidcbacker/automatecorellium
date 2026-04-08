@@ -111,7 +111,6 @@ jobs:
           if [ "${{ matrix.os }}" = 'self-hosted' ] &&
             [  "${{ matrix.corellium-os }}" = 'iOS' ] &&
             does_instance_exist "${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}"; then
-            log_stdout "Starting instance ${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}."
             start_instance "${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}"
             log_stdout "Started instance ${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}."
             echo "CORELLIUM_INSTANCE_ID=${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}" >> "${GITHUB_ENV}"

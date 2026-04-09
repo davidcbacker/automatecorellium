@@ -131,10 +131,6 @@ APPIUM_DRIVER_EXPLICITLY_WAIT: int = 20 # seconds
 APPIUM_AUTOMATION_ALARM_TIMEOUT: int = 90 # seconds
 
 
-# ==== APPIUM AUTOMATION TIMEOUT ====
-APPIUM_AUTOMATION_ALARM_TIMEOUT=120 # seconds
-
-
 # =====================================
 # ===== END CONSTANTS DEFINITIONS =====
 # =====================================

@@ -860,9 +860,9 @@ connect_with_adb()
     return
   }
 
-  log_stdout "Connecting over adb to ${ADB_CONNECT_SOCKET}."
+  log_stdout "Connecting over adb to ${INSTANCE_SERVICES_IP}."
   adb connect "${ADB_CONNECT_SOCKET}"
-  log_stdout "Connected over adb to ${ADB_CONNECT_SOCKET}."
+  log_stdout "Connected over adb to ${INSTANCE_SERVICES_IP}."
   log_stdout 'Finding connected adb device.'
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" || {
     log_error "Unable to connect to ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
@@ -886,9 +886,9 @@ disconnect_with_adb()
     return
   }
 
-  log_stdout "Disconnecting over adb from ${ADB_CONNECT_SOCKET}."
+  log_stdout "Disconnecting over adb from ${INSTANCE_SERVICES_IP}."
   adb disconnect "${ADB_CONNECT_SOCKET}"
-  log_stdout "Disconnected over adb from ${ADB_CONNECT_SOCKET}."
+  log_stdout "Disconnected over adb from ${INSTANCE_SERVICES_IP}."
   log_stdout 'Looking for lingering adb connection.'
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" && {
     log_error "Unable to disconnect from ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."

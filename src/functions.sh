@@ -5,10 +5,10 @@
 check_env_vars()
 {
   if [ -z "${CORELLIUM_API_ENDPOINT}" ]; then
-    log_error 'CORELLIUM_API_ENDPOINT not set.'
+    log_error 'CORELLIUM_API_ENDPOINT unset or empty.'
     exit 1
   elif [ -z "${CORELLIUM_API_TOKEN}" ]; then
-    log_error 'CORELLIUM_API_TOKEN not set.'
+    log_error 'CORELLIUM_API_TOKEN unset or empty.'
     exit 1
   fi
 }
@@ -59,14 +59,14 @@ log_error()
 
 log_warn()
 {
-  MAKE_CONSOLE_YELLOW="$(tput bold && tput setaf 6)"
+  MAKE_CONSOLE_CYAN="$(tput bold && tput setaf 6)"
   MAKE_CONSOLE_NORMAL="$(tput sgr0)"
   local FRIENDLY_DATE
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
       printf '%s[!] %s WARN: %s\n%s' \
-        "${MAKE_CONSOLE_YELLOW}" \
+        "${MAKE_CONSOLE_CYAN}" \
         "${FRIENDLY_DATE}" \
         "${arg}" \
         "${MAKE_CONSOLE_NORMAL}" \

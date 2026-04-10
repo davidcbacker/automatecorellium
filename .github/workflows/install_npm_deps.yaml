@@ -1,11 +1,11 @@
-name: Bump NPM dependencies
+name: Install NPM dependencies
 
 on:
   workflow_dispatch:
 
 jobs:
   bump-deps:
-    name: Run npm install
+    name: Install NPM deps on self-hosted runner
     runs-on: self-hosted
     steps:
       - name: Run npm install

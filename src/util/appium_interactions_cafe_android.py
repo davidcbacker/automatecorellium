@@ -95,28 +95,40 @@ class AppiumHelper:
 # =====================================
 
 # ==== CORELLIUM DEVICE ====
-DEFAULT_SERVICES_IP = '10.11.1.1'
-DEFAULT_ADB_PORT = '5001'
+DEFAULT_SERVICES_IP: str = '10.11.1.1'
+DEFAULT_ADB_PORT: str = '5001'
 
 # ==== TARGET APP ====
-TARGET_APP_PACKAGE = 'com.corellium.cafe'
-TARGET_APP_ACTIVITY = '.ui.activities.MainActivity'
-TARGET_APP_LOGIN_PAGE_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_LOGIN_PAGE_SCREENSHOT_FILENAME', 'cafe_login_page.png')
-TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME', 'cafe_blog_page.png')
-TARGET_APP_CUSTOMER_PAGE_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_CUSTOMER_PAGE_SCREENSHOT_FILENAME', 'cafe_customer_page.png')
-TARGET_APP_PAYMENT_PAGE_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_PAYMENT_PAGE_SCREENSHOT_FILENAME', 'cafe_payment_page.png')
+TARGET_APP_PACKAGE: str = 'com.corellium.cafe'
+TARGET_APP_ACTIVITY: str = '.ui.activities.MainActivity'
+TARGET_APP_LOGIN_PAGE_SCREENSHOT_FILENAME: str = os.getenv(
+    key='CORELLIUM_CAFE_LOGIN_PAGE_SCREENSHOT_FILENAME',
+    default='cafe_login_page.png'
+)
+TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME: str = os.getenv(
+    key='CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME',
+    default='cafe_blog_page.png'
+)
+TARGET_APP_CUSTOMER_PAGE_SCREENSHOT_FILENAME: str = os.getenv(
+    key='CORELLIUM_CAFE_CUSTOMER_PAGE_SCREENSHOT_FILENAME',
+    default='cafe_customer_page.png'
+)
+TARGET_APP_PAYMENT_PAGE_SCREENSHOT_FILENAME: str = os.getenv(
+    key='CORELLIUM_CAFE_PAYMENT_PAGE_SCREENSHOT_FILENAME',
+    default='cafe_payment_page.png'
+)
 
 # ==== APPIUM SERVER ====
-APPIUM_SERVER_IP = '127.0.0.1'
-APPIUM_SERVER_PORT = '4723'
-APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
+APPIUM_SERVER_IP: str = '127.0.0.1'
+APPIUM_SERVER_PORT: str = '4723'
+APPIUM_SERVER_SOCKET: str = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
 
 # ==== APPIUM DRIVER ====
-APPIUM_DRIVER_IMPLICITLY_WAIT=5 # seconds
-APPIUM_DRIVER_EXPLICITLY_WAIT=20 # seconds
+APPIUM_DRIVER_IMPLICITLY_WAIT: int = 5 # seconds
+APPIUM_DRIVER_EXPLICITLY_WAIT: int = 20 # seconds
 
 # ==== APPIUM AUTOMATION TIMEOUT ====
-APPIUM_AUTOMATION_ALARM_TIMEOUT=120 # seconds
+APPIUM_AUTOMATION_ALARM_TIMEOUT: int = 90 # seconds
 
 
 # =====================================
@@ -131,7 +143,7 @@ def interact_with_app(helper: AppiumHelper):
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText", desired_value="Password123")
     el3 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
     el3.click()
-    helper.save_screenshot(TARGET_APP_LOGIN_PAGE_SCREENSHOT_FILENAME)
+    helper.save_screenshot(filename=TARGET_APP_LOGIN_PAGE_SCREENSHOT_FILENAME)
     el4 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
     el4.click()
 
@@ -147,7 +159,7 @@ def interact_with_app(helper: AppiumHelper):
     helper.wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText")
     log_stdout('Appium - Interact with blog page.')
     helper.set_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", desired_value="Testing")
-    helper.save_screenshot(TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)
+    helper.save_screenshot(filename=TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)
 
     log_stdout("Appium - Return to home page.")
     el9 = helper.wait_until_clickable(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
@@ -171,7 +183,7 @@ def interact_with_app(helper: AppiumHelper):
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText", desired_value="Firstname")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText", desired_value="Lastname")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText", desired_value="3216540987")
-    helper.save_screenshot(TARGET_APP_CUSTOMER_PAGE_SCREENSHOT_FILENAME)
+    helper.save_screenshot(filename=TARGET_APP_CUSTOMER_PAGE_SCREENSHOT_FILENAME)
     log_stdout("Appium - Submit customer info.")
     el18 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
     el18.click()
@@ -181,7 +193,7 @@ def interact_with_app(helper: AppiumHelper):
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration", desired_value="1234")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV", desired_value="135")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode", desired_value="24680")
-    helper.save_screenshot(TARGET_APP_PAYMENT_PAGE_SCREENSHOT_FILENAME)
+    helper.save_screenshot(filename=TARGET_APP_PAYMENT_PAGE_SCREENSHOT_FILENAME)
     log_stdout("Appium - Submit payment info.")
     el23 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
     el23.click()
@@ -230,11 +242,11 @@ def run_app_automation(udid: str):
 
     try:
         log_stdout("Loading target app in Appium session.")
-        driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
+        driver = webdriver.Remote(command_executor=APPIUM_SERVER_SOCKET, options=options)
         log_stdout("Successfully loaded target app.")
-        driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT * 1000)
+        driver.implicitly_wait(time_to_wait=APPIUM_DRIVER_IMPLICITLY_WAIT)
         log_stdout("Starting app interactions.")
-        interact_with_app(AppiumHelper(driver))
+        interact_with_app(helper=AppiumHelper(driver))
         log_stdout("Finished app interactions.")
 
     except AlarmTimeoutException as e:

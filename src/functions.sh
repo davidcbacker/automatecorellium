@@ -5,10 +5,10 @@
 check_env_vars()
 {
   if [ -z "${CORELLIUM_API_ENDPOINT}" ]; then
-    log_error 'CORELLIUM_API_ENDPOINT not set.'
+    log_error 'CORELLIUM_API_ENDPOINT unset or empty.'
     exit 1
   elif [ -z "${CORELLIUM_API_TOKEN}" ]; then
-    log_error 'CORELLIUM_API_TOKEN not set.'
+    log_error 'CORELLIUM_API_TOKEN unset or empty.'
     exit 1
   fi
 }
@@ -59,14 +59,14 @@ log_error()
 
 log_warn()
 {
-  MAKE_CONSOLE_YELLOW="$(tput bold && tput setaf 6)"
+  MAKE_CONSOLE_CYAN="$(tput bold && tput setaf 6)"
   MAKE_CONSOLE_NORMAL="$(tput sgr0)"
   local FRIENDLY_DATE
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
       printf '%s[!] %s WARN: %s\n%s' \
-        "${MAKE_CONSOLE_YELLOW}" \
+        "${MAKE_CONSOLE_CYAN}" \
         "${FRIENDLY_DATE}" \
         "${arg}" \
         "${MAKE_CONSOLE_NORMAL}" \
@@ -860,9 +860,9 @@ connect_with_adb()
     return
   }
 
-  log_stdout "Connecting over adb to ${ADB_CONNECT_SOCKET}."
+  log_stdout "Connecting over adb to ${INSTANCE_SERVICES_IP}."
   adb connect "${ADB_CONNECT_SOCKET}"
-  log_stdout "Connected over adb to ${ADB_CONNECT_SOCKET}."
+  log_stdout "Connected over adb to ${INSTANCE_SERVICES_IP}."
   log_stdout 'Finding connected adb device.'
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" || {
     log_error "Unable to connect to ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
@@ -886,9 +886,9 @@ disconnect_with_adb()
     return
   }
 
-  log_stdout "Disconnecting over adb from ${ADB_CONNECT_SOCKET}."
+  log_stdout "Disconnecting over adb from ${INSTANCE_SERVICES_IP}."
   adb disconnect "${ADB_CONNECT_SOCKET}"
-  log_stdout "Disconnected over adb from ${ADB_CONNECT_SOCKET}."
+  log_stdout "Disconnected over adb from ${INSTANCE_SERVICES_IP}."
   log_stdout 'Looking for lingering adb connection.'
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" && {
     log_error "Unable to disconnect from ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."

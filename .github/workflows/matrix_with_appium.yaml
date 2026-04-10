@@ -185,8 +185,8 @@ jobs:
           log_stdout "Closing Appium session ${OPEN_APPIUM_SESSION_ID}."
           close_appium_session "${OPEN_APPIUM_SESSION_ID}"
           log_stdout "Closed Appium session ${OPEN_APPIUM_SESSION_ID}."
-      - name: Run MATRIX assessment
-        id: matrix-run-1
+      - name: MATRIX scan
+        id: matrix-scan
         timeout-minutes: 30
         continue-on-error: true
         env:
@@ -203,9 +203,9 @@ jobs:
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
             "${MATRIX_WORDLIST_ID}"
-      - name: Retry MATRIX assessment if failed
-        id: matrix-run-2
-        if: steps.matrix-run-1.outcome == 'failure'
+      - name: MATRIX scan retry 1
+        id: matrix-scan-retry-1
+        if: steps.matrix-scan.outcome == 'failure'
         timeout-minutes: 30
         continue-on-error: true
         env:
@@ -221,9 +221,45 @@ jobs:
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
             "${MATRIX_WORDLIST_ID}"
-      - name: Retry MATRIX assessment if failed again
-        id: matrix-run-3
-        if: steps.matrix-run-2.outcome == 'failure'
+      - name: MATRIX scan retry 2
+        id: matrix-scan-retry-2
+        if: steps.matrix-scan-retry-1.outcome == 'failure'
+        timeout-minutes: 30
+        continue-on-error: true
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
+          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
+          MATRIX_WORDLIST_PATH: './data/wordlist.txt'
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          source ./src/functions_matrix.sh
+          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          run_full_matrix_assessment \
+            "${CORELLIUM_INSTANCE_ID}" \
+            "${CORELLIUM_CAFE_PACKAGE}" \
+            "${MATRIX_WORDLIST_ID}"
+      - name: MATRIX scan retry 3
+        id: matrix-scan-retry-3
+        if: steps.matrix-scan-retry-2.outcome == 'failure'
+        timeout-minutes: 30
+        continue-on-error: true
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
+          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
+          MATRIX_WORDLIST_PATH: './data/wordlist.txt'
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          source ./src/functions_matrix.sh
+          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          run_full_matrix_assessment \
+            "${CORELLIUM_INSTANCE_ID}" \
+            "${CORELLIUM_CAFE_PACKAGE}" \
+            "${MATRIX_WORDLIST_ID}"
+      - name: MATRIX scan retry 4
+        id: matrix-scan-retry-4
+        if: steps.matrix-scan-retry-3.outcome == 'failure'
         timeout-minutes: 30
         continue-on-error: false
         env:

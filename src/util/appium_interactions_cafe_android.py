@@ -22,8 +22,19 @@ from selenium.webdriver.support.expected_conditions import (
 )
 from selenium.webdriver.support.ui import WebDriverWait
 
+
+class AppiumConfig:
+    '''Class to read constants from a json file'''
+
+    def __init__(self, dict: Dict):
+        self.corellium = data["corellium"]
+        self.target_app = data["target_app"]
+        self.appium_server = data["appium_server"]
+        self.timeouts = data["timeouts"]
+
+
 class AppiumHelper:
-    """Wrapper around appium.webdriver and selenium.WebDriverWait to improve readability and reduce repeated code in interact_with_app()."""
+    '''Wrapper around appium.webdriver and selenium.WebDriverWait to improve readability and reduce repeated code in interact_with_app().'''
 
     def __init__(self, driver: webdriver.Remote):
         self.driver = driver

@@ -144,19 +144,13 @@ jobs:
           connect_to_vpn_for_instance \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ env.VPN_CONFIG_PATH }}"
-      - name: Connect to device
+      - name: Connect to instance
         timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail
-          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
-            connect_with_adb "${CORELLIUM_INSTANCE_ID}"
-          else
-            [ "$(uname -s)" = 'Darwin' ] &&
-              export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
-            run_usbfluxd_and_dependencies
-            add_instance_to_usbfluxd "${CORELLIUM_INSTANCE_ID}"
-            verify_usbflux_connection "${CORELLIUM_INSTANCE_ID}"
-          fi
+          connect_to_instance \
+            "${CORELLIUM_INSTANCE_ID}" \
+            "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}"
       - name: Install Corellium Cafe from URL
         timeout-minutes: 5
         env:
@@ -302,12 +296,10 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
             log_stdout 'CORELLIUM_INSTANCE_ID is not set.'
-          elif [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
-            disconnect_with_adb "${CORELLIUM_INSTANCE_ID}"
           else
-            [ "$(uname -s)" = 'Darwin' ] &&
-              export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
-            delete_instance_from_usbfluxd "${CORELLIUM_INSTANCE_ID}"
+            disconnect_from_instance \
+              "${CORELLIUM_INSTANCE_ID}" \
+              "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}"
           fi
       - name: Delete instance
         if: always()

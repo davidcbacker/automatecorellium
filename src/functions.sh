@@ -846,6 +846,29 @@ connect_to_vpn_for_instance()
   log_stdout 'Successful ping to the instance services IP.'
 }
 
+connect_to_instance()
+{
+  local INSTANCE_ID="${1:?}"
+  local INSTANCE_FLAVOR
+  INSTANCE_FLAVOR="${2:-"$(get_instance_flavor "${INSTANCE_ID}")"}"
+  case "${INSTANCE_FLAVOR}" in
+    ranchu)
+      connect_with_adb "${INSTANCE_ID}"
+      ;;
+    ipad* | iphone*)
+      [ "$(uname -s)" = 'Darwin' ] &&
+        export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
+      run_usbfluxd_and_dependencies
+      add_instance_to_usbfluxd "${INSTANCE_ID}"
+      verify_usbflux_connection "${INSTANCE_ID}"
+      ;;
+    *)
+      log_error "Unknown flavor type ${INSTANCE_FLAVOR}."
+      exit 1
+      ;;
+  esac
+}
+
 connect_with_adb()
 {
   local INSTANCE_ID="${1:?}"
@@ -870,6 +893,27 @@ connect_with_adb()
     exit 1
   }
   log_stdout 'Found connected adb device.'
+}
+
+disconnect_from_instance()
+{
+  local INSTANCE_ID="${1:?}"
+  local INSTANCE_FLAVOR
+  INSTANCE_FLAVOR="${2:-"$(get_instance_flavor "${INSTANCE_ID}")"}"
+  case "${INSTANCE_FLAVOR}" in
+    ranchu)
+      disconnect_with_adb "${INSTANCE_ID}"
+      ;;
+    ipad* | iphone*)
+      [ "$(uname -s)" = 'Darwin' ] &&
+        export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
+      delete_instance_from_usbfluxd "${INSTANCE_ID}"
+      ;;
+    *)
+      log_error "Unknown flavor type ${INSTANCE_FLAVOR}."
+      exit 1
+      ;;
+  esac
 }
 
 disconnect_with_adb()

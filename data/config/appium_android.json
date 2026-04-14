@@ -1,0 +1,25 @@
+{
+  "corellium": {
+    "default_services_ip": "10.11.1.1",
+    "adb_port": "5001"
+  },
+  "target_app": {
+    "package": "com.corellium.cafe",
+    "activity": ".ui.activities.MainActivity",
+    "screenshots": {
+      "login": "cafe_login_page.png",
+      "blog": "cafe_blog_page.png",
+      "customer": "cafe_customer_page.png",
+      "payment": "cafe_payment_page.png"
+    }
+  },
+  "appium_server": {
+    "ip": "127.0.0.1",
+    "port": "4723"
+  },
+  "timeouts": {
+    "implicit_wait": 5,
+    "explicit_wait": 20,
+    "automation_alarm": 120
+  }
+}

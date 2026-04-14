@@ -26,7 +26,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 class AppiumConfig:
     '''Class to read constants from a json file'''
 
-    def __init__(self, dict: Dict):
+    def __init__(self, data: dict):
         self.corellium = data["corellium"]
         self.target_app = data["target_app"]
         self.appium_server = data["appium_server"]
@@ -36,11 +36,11 @@ class AppiumConfig:
 class AppiumHelper:
     '''Wrapper around appium.webdriver and selenium.WebDriverWait to improve readability and reduce repeated code in interact_with_app().'''
 
-    def __init__(self, driver: webdriver.Remote):
+    def __init__(self, config: AppiumAndroudConfig, driver: webdriver.Remote):
         self.driver = driver
         self.wait = WebDriverWait(
             driver=driver,
-            timeout=APPIUM_DRIVER_EXPLICITLY_WAIT,
+            timeout=config.timeouts['explicit_wait'],
             ignored_exceptions=[StaleElementReferenceException]
         )
 
@@ -105,10 +105,6 @@ class AppiumHelper:
 # ==== BEGIN CONSTANTS DEFINITIONS ====
 # =====================================
 
-# ==== CORELLIUM DEVICE ====
-DEFAULT_SERVICES_IP: str = '10.11.1.1'
-DEFAULT_ADB_PORT: str = '5001'
-
 # ==== TARGET APP ====
 TARGET_APP_PACKAGE: str = 'com.corellium.cafe'
 TARGET_APP_ACTIVITY: str = '.ui.activities.MainActivity'
@@ -130,9 +126,6 @@ TARGET_APP_PAYMENT_PAGE_SCREENSHOT_FILENAME: str = os.getenv(
 )
 
 # ==== APPIUM SERVER ====
-APPIUM_SERVER_IP: str = '127.0.0.1'
-APPIUM_SERVER_PORT: str = '4723'
-APPIUM_SERVER_SOCKET: str = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
 
 # ==== APPIUM DRIVER ====
 APPIUM_DRIVER_IMPLICITLY_WAIT: int = 5 # seconds
@@ -146,7 +139,7 @@ APPIUM_AUTOMATION_ALARM_TIMEOUT: int = 90 # seconds
 # ===== END CONSTANTS DEFINITIONS =====
 # =====================================
 
-def interact_with_app(helper: AppiumHelper):
+def interact_with_app(config: AppiumAndroidConfig, helper: AppiumHelper):
     '''Interact with the target app using Appium commands.'''
 
     log_stdout("Appium - Interact with login page.")
@@ -154,7 +147,7 @@ def interact_with_app(helper: AppiumHelper):
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText", desired_value="Password123")
     el3 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
     el3.click()
-    helper.save_screenshot(filename=TARGET_APP_LOGIN_PAGE_SCREENSHOT_FILENAME)
+    helper.save_screenshot(filename=config.screenshots['asdf'])
     el4 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
     el4.click()
 
@@ -170,7 +163,7 @@ def interact_with_app(helper: AppiumHelper):
     helper.wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText")
     log_stdout('Appium - Interact with blog page.')
     helper.set_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", desired_value="Testing")
-    helper.save_screenshot(filename=TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)
+    helper.save_screenshot(filename=config.screenshots['asdf'])
 
     log_stdout("Appium - Return to home page.")
     el9 = helper.wait_until_clickable(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
@@ -194,7 +187,7 @@ def interact_with_app(helper: AppiumHelper):
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText", desired_value="Firstname")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText", desired_value="Lastname")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText", desired_value="3216540987")
-    helper.save_screenshot(filename=TARGET_APP_CUSTOMER_PAGE_SCREENSHOT_FILENAME)
+    helper.save_screenshot(filename=config.screenshots['asdf'])
     log_stdout("Appium - Submit customer info.")
     el18 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
     el18.click()
@@ -204,7 +197,7 @@ def interact_with_app(helper: AppiumHelper):
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration", desired_value="1234")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV", desired_value="135")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode", desired_value="24680")
-    helper.save_screenshot(filename=TARGET_APP_PAYMENT_PAGE_SCREENSHOT_FILENAME)
+    helper.save_screenshot(filename=config.screenshots['asdf'])
     log_stdout("Appium - Submit payment info.")
     el23 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
     el23.click()
@@ -236,32 +229,37 @@ def alarm_timeout_handler(signum, frame):
     raise AlarmTimeoutException("Appium automation timed out.")
 
 
-def run_app_automation(udid: str):
+def run_app_automation(config: AppiumAndroidConfig, udid: str):
     '''Launch the app and interact using Appium commands.'''
+
+    APPIUM_SERVER_IP: str = config.appium['server_ip']
+    APPIUM_SERVER_PORT: str = config.appium['port']
+    APPIUM_SERVER_SOCKET: str = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
+
     options = UiAutomator2Options()
     options.set_capability('platformName', 'Android')
     options.set_capability('appium:automationName', 'UiAutomator2')
     options.set_capability('appium:udid', udid)
-    options.set_capability('appium:appPackage', TARGET_APP_PACKAGE)
-    options.set_capability('appium:appActivity', TARGET_APP_ACTIVITY)
+    options.set_capability('appium:appPackage', config.target_app['package_name'])
+    options.set_capability('appium:appActivity', config.target_app['activity'])
     options.set_capability('appium:noReset', True)
     options.adb_exec_timeout = 40000
 
     signal.signal(signal.SIGALRM, alarm_timeout_handler)
-    log_stdout(f"Setting Appium alarm timeout for {APPIUM_AUTOMATION_ALARM_TIMEOUT} seconds.")
-    signal.alarm(APPIUM_AUTOMATION_ALARM_TIMEOUT)
+    log_stdout(f"Setting Appium alarm timeout for {config.timeouts['asdf']} seconds.")
+    signal.alarm(config.timeouts['asdf'])
 
     try:
         log_stdout("Loading target app in Appium session.")
         driver = webdriver.Remote(command_executor=APPIUM_SERVER_SOCKET, options=options)
         log_stdout("Successfully loaded target app.")
-        driver.implicitly_wait(time_to_wait=APPIUM_DRIVER_IMPLICITLY_WAIT)
+        driver.implicitly_wait(time_to_wait=config.timeouts['implicit_wait'])
         log_stdout("Starting app interactions.")
-        interact_with_app(helper=AppiumHelper(driver))
+        interact_with_app(helper=AppiumHelper(config=config, driver=driver))
         log_stdout("Finished app interactions.")
 
     except AlarmTimeoutException as e:
-        print(f"Appium automation timed out after {APPIUM_AUTOMATION_ALARM_TIMEOUT} seconds.", file=sys.stderr)
+        print(f"Appium automation timed out after {config.timeouts['asdf']} seconds.", file=sys.stderr)
         print(f"AlarmTimeoutException: {e}", file=sys.stderr)
         sys.exit(1)
 
@@ -298,16 +296,17 @@ def run_app_automation(udid: str):
 
 
 if __name__ == "__main__":
+    config = AppiumAndroidConfig(config)
     match len(sys.argv):
         case 1:
-            corellium_device_appium_udid = f'{DEFAULT_SERVICES_IP}:{DEFAULT_ADB_PORT}'
-            log_stdout(f'Defaulting to Corellium virtual device at {DEFAULT_SERVICES_IP}.')
+            TARGET_DEVICE_SERVICES_IP = config.corellium['default_services_ip']
+            corellium_device_appium_udid = f'{TARGET_DEVICE_SERVICES_IP}:{config.corellium['default_adb_port']}'
+            log_stdout(f'Defaulting to Corellium virtual device at {TARGET_DEVICE_SERVICES_IP}.')
         case 2:
             TARGET_DEVICE_SERVICES_IP = sys.argv[1]
-            corellium_device_appium_udid = f'{TARGET_DEVICE_SERVICES_IP}:{DEFAULT_ADB_PORT}'
+            corellium_device_appium_udid = f'{TARGET_DEVICE_SERVICES_IP}:{config.corellium['default_adb_port']}'
             log_stdout(f'Using Corellium virtual device at {corellium_device_appium_udid}.')
         case _:
             print('ERROR: Please provide zero arguments or pass in the Corellium device services IP.', file=sys.stderr)
             sys.exit(1)
-
-    run_app_automation(corellium_device_appium_udid)
+    run_app_automation(config, corellium_device_appium_udid)

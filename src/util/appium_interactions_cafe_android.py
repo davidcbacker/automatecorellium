@@ -205,9 +205,9 @@ def alarm_timeout_handler(signum, frame):
 def run_app_automation(config: AppiumConfig, udid: str):
     '''Launch the app and interact using Appium commands.'''
 
-    APPIUM_SERVER_IP: str = config.appium['server_ip']
-    APPIUM_SERVER_PORT: str = config.appium['port']
-    APPIUM_SERVER_SOCKET: str = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
+    appium_server_ip: str = config.appium['server_ip']
+    appium_server_port: str = config.appium['port']
+    appium_server_socket: str = f'http://{appium_server_ip}:{appium_server_port}'
 
     options = UiAutomator2Options()
     options.set_capability('platformName', 'Android')
@@ -225,7 +225,7 @@ def run_app_automation(config: AppiumConfig, udid: str):
 
     try:
         log_stdout("Loading target app in Appium session.")
-        driver = webdriver.Remote(command_executor=APPIUM_SERVER_SOCKET, options=options)
+        driver = webdriver.Remote(command_executor=appium_server_socket, options=options)
         log_stdout("Successfully loaded target app.")
         driver.implicitly_wait(time_to_wait=config.timeouts['implicit_wait'])
         log_stdout("Starting app interactions.")

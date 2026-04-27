@@ -2,6 +2,7 @@
 Automate Corellium virtual device interactions using Appium on Corellium Cafe Android app.
 """
 
+import json
 import os
 import signal
 import sys
@@ -112,24 +113,6 @@ class AppiumHelper:
 # =====================================
 
 # ==== TARGET APP ====
-TARGET_APP_PACKAGE: str = config.target_app['package']
-TARGET_APP_ACTIVITY: str =  config.target_app['activity']
-TARGET_APP_LOGIN_PAGE_SCREENSHOT_FILENAME: str = os.getenv(
-    key='CORELLIUM_CAFE_LOGIN_PAGE_SCREENSHOT_FILENAME',
-    default= config.target_app['screenshots']['login']
-)
-TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME: str = os.getenv(
-    key='CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME',
-    default='cafe_blog_page.png'
-)
-TARGET_APP_CUSTOMER_PAGE_SCREENSHOT_FILENAME: str = os.getenv(
-    key='CORELLIUM_CAFE_CUSTOMER_PAGE_SCREENSHOT_FILENAME',
-    default='cafe_customer_page.png'
-)
-TARGET_APP_PAYMENT_PAGE_SCREENSHOT_FILENAME: str = os.getenv(
-    key='CORELLIUM_CAFE_PAYMENT_PAGE_SCREENSHOT_FILENAME',
-    default='cafe_payment_page.png'
-)
 
 # ==== APPIUM SERVER ====
 
@@ -145,7 +128,7 @@ APPIUM_AUTOMATION_ALARM_TIMEOUT: int = 90 # seconds
 # ===== END CONSTANTS DEFINITIONS =====
 # =====================================
 
-def interact_with_app(config: AppiumAndroidConfig, helper: AppiumHelper):
+def interact_with_app(config: AppiumConfig, helper: AppiumHelper):
     '''Interact with the target app using Appium commands.'''
 
     log_stdout("Appium - Interact with login page.")
@@ -219,7 +202,7 @@ def alarm_timeout_handler(signum, frame):
     raise AlarmTimeoutException("Appium automation timed out.")
 
 
-def run_app_automation(config: AppiumAndroidConfig, udid: str):
+def run_app_automation(config: AppiumConfig, udid: str):
     '''Launch the app and interact using Appium commands.'''
 
     APPIUM_SERVER_IP: str = config.appium['server_ip']
@@ -290,13 +273,13 @@ if __name__ == "__main__":
     config_path = "data/config/appium_android.json"
     with open(config_path, 'r') as f:
         data = json.load(f)
-    config = AppiumAndroidConfig(data)
+    config = AppiumConfig(data)
     default_adb_port = config.corellium['default_adb_port']
     match len(sys.argv):
         case 1:
             target_device_services_ip = config.corellium['default_services_ip']
             corellium_device_appium_udid = f'{target_device_services_ip}:{default_adb_port}'
-            log_stdout(f'Defaulting to Corellium virtual device at {TARGET_DEVICE_SERVICES_IP}.')
+            log_stdout(f'Defaulting to Corellium virtual device at {target_device_services_ip}.')
         case 2:
             target_device_services_ip = sys.argv[1]
             corellium_device_appium_udid = f'{target_device_services_ip}:{default_adb_port}'
@@ -304,4 +287,4 @@ if __name__ == "__main__":
         case _:
             print('ERROR: Please provide zero arguments or pass in the Corellium device services IP.', file=sys.stderr)
             sys.exit(1)
-    run_app_automation(config, corellium_device_appium_udid)
+    run_app_automation(config=config, udid=corellium_device_appium_udid)

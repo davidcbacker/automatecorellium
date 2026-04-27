@@ -26,6 +26,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class AppiumConfig:
+    'Configuration container for Appium-related settings.'
     corellium: dict
     target_app: dict
     appium_server: dict

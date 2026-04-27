@@ -26,11 +26,11 @@ from selenium.webdriver.support.ui import WebDriverWait
 class AppiumConfig:
     '''Class to read constants from a json file'''
 
-    def __init__(self, data: dict):
-        self.corellium = data["corellium"]
-        self.target_app = data["target_app"]
-        self.appium_server = data["appium_server"]
-        self.timeouts = data["timeouts"]
+    def __init__(self, config_dict: dict):
+        self.corellium = config_dict["corellium"]
+        self.target_app = config_dict["target_app"]
+        self.appium_server = config_dict["appium_server"]
+        self.timeouts = config_dict["timeouts"]
 
 
 class AppiumHelper:

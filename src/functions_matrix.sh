@@ -359,6 +359,22 @@ close_appium_session()
   fi
 }
 
+run_appium_interactions_cafe()
+{
+  local INSTANCE_FLAVOR
+  INSTANCE_FLAVOR="$(get_instance_flavor "${INSTANCE_ID}")"
+  case "${INSTANCE_FLAVOR}" in
+    ranchu)
+      run_appium_interactions_cafe_android
+      ;;
+    ipad* | iphone*)
+      
+    *)
+      log_warn 'Unknown hardware type. Skipping app interactions.'
+      ;;
+
+}
+
 run_appium_interactions_cafe_android()
 {
   local INSTANCE_ID="${1:?}"
@@ -367,6 +383,16 @@ run_appium_interactions_cafe_android()
   log_stdout 'Starting automated Appium interactions.'
   PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_android.py "${INSTANCE_SERVICES_IP}"
   log_stdout 'Finished automated Appium interactions.'
+}
+
+run_appium_interactions_cafe_ios() 
+{
+  local INSTANCE_UDID
+  # INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
+  log_info 'Skipping Appium interactions on iOS for now.'
+  log_info 'Pausing for 10 seconds to simulate interactions.'
+  sleep 10
+  log_info 'Paused for 10 seconds to simulate interactions'
 }
 
 run_appium_interactions_template_android()

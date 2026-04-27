@@ -297,7 +297,10 @@ def run_app_automation(config: AppiumAndroidConfig, udid: str):
 
 
 if __name__ == "__main__":
-    config = AppiumAndroidConfig(config)
+    config_path = "data/config/appium_android.json"
+    with open(config_path, 'r') as f:
+        data = json.load(f)
+    config = AppiumAndroidConfig(data)
     default_adb_port = config.corellium['default_adb_port']
     match len(sys.argv):
         case 1:

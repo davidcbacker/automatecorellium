@@ -395,7 +395,7 @@ run_appium_interactions_cafe_ios()
   # log_stdout 'Starting automated Appium interactions.'
   # PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_ios.py "${INSTANCE_SERVICES_IP}"
   # log_stdout 'Finished automated Appium interactions.'
-  log_stdout 'Skipping Appium interactions on iOS for now.'
+  log_warn 'Skipping Appium interactions on iOS for now.'
   log_stdout 'Pausing for 10 seconds to simulate interactions.'
   sleep 10
   log_stdout 'Paused for 10 seconds to simulate interactions'

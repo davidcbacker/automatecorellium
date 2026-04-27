@@ -361,14 +361,15 @@ close_appium_session()
 
 run_appium_interactions_cafe()
 {
+  local INSTANCE_ID="${1:?}"
   local INSTANCE_FLAVOR
   INSTANCE_FLAVOR="$(get_instance_flavor "${INSTANCE_ID}")"
   case "${INSTANCE_FLAVOR}" in
     ipad* | iphone*)
-      run_appium_interactions_cafe_ios
+      run_appium_interactions_cafe_ios "${INSTANCE_ID}"
       ;;
     ranchu)
-      run_appium_interactions_cafe_android
+      run_appium_interactions_cafe_android "${INSTANCE_ID}"
       ;;
     *)
       log_warn 'Unknown hardware type. Skipping app interactions.'
@@ -388,6 +389,7 @@ run_appium_interactions_cafe_android()
 
 run_appium_interactions_cafe_ios()
 {
+  # local INSTANCE_ID="${1:?}"
   # local INSTANCE_UDID
   # INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
   # log_stdout 'Starting automated Appium interactions.'

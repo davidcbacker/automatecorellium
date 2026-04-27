@@ -212,7 +212,7 @@ run_full_matrix_assessment()
   log_stdout "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   wait_until_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
-  run_appium_interactions_cafe_android "${INSTANCE_ID}"
+  run_appium_interactions_cafe "${INSTANCE_ID}"
   ensure_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   stop_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
@@ -364,15 +364,16 @@ run_appium_interactions_cafe()
   local INSTANCE_FLAVOR
   INSTANCE_FLAVOR="$(get_instance_flavor "${INSTANCE_ID}")"
   case "${INSTANCE_FLAVOR}" in
+    ipad* | iphone*)
+      run_appium_interactions_cafe_ios
+      ;;
     ranchu)
       run_appium_interactions_cafe_android
       ;;
-    ipad* | iphone*)
-      
     *)
       log_warn 'Unknown hardware type. Skipping app interactions.'
       ;;
-
+  esac
 }
 
 run_appium_interactions_cafe_android()

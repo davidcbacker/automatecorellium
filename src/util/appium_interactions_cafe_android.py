@@ -275,15 +275,15 @@ if __name__ == "__main__":
     with open(file=CONFIG_PATH, mode='r', encoding='utf-8') as f:
         data = json.load(f)
     appium_config = AppiumConfig(**data)
-    default_adb_port = appium_config.corellium['default_adb_port']
+    adb_port = appium_config.corellium['adb_port']
     match len(sys.argv):
         case 1:
             target_device_services_ip = appium_config.corellium['default_services_ip']
-            corellium_device_appium_udid = f'{target_device_services_ip}:{default_adb_port}'
+            corellium_device_appium_udid = f'{target_device_services_ip}:{adb_port}'
             log_stdout(f'Defaulting to Corellium virtual device at {target_device_services_ip}.')
         case 2:
             target_device_services_ip = sys.argv[1]
-            corellium_device_appium_udid = f'{target_device_services_ip}:{default_adb_port}'
+            corellium_device_appium_udid = f'{target_device_services_ip}:{adb_port}'
             log_stdout(f'Using Corellium virtual device at {corellium_device_appium_udid}.')
         case _:
             print('ERROR: Please provide zero arguments or pass in the Corellium device services IP.', file=sys.stderr)

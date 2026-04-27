@@ -271,8 +271,8 @@ def run_app_automation(config: AppiumConfig, udid: str):
 
 
 if __name__ == "__main__":
-    config_path = "data/config/appium_android.json"
-    with open(config_path, 'r') as f:
+    CONFIG_PATH = "data/config/appium_android.json"
+    with open(CONFIG_PATH, 'r') as f:
         data = json.load(f)
     config = AppiumConfig(**data)
     default_adb_port = config.corellium['default_adb_port']

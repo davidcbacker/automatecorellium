@@ -29,7 +29,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        corellium-os: [Android, iOS]
+        corellium-os: [iOS, Android]
         runner-os: [ubuntu-latest, self-hosted]
         include:
           - corellium-os: Android

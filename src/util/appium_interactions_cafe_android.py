@@ -279,13 +279,13 @@ if __name__ == "__main__":
     match len(sys.argv):
         case 1:
             target_device_services_ip = config.corellium['default_services_ip']
-            udid = f'{target_device_services_ip}:{default_adb_port}'
+            corellium_device_appium_udid = f'{target_device_services_ip}:{default_adb_port}'
             log_stdout(f'Defaulting to Corellium virtual device at {target_device_services_ip}.')
         case 2:
             target_device_services_ip = sys.argv[1]
-            udid = f'{target_device_services_ip}:{default_adb_port}'
-            log_stdout(f'Using Corellium virtual device at {udid}.')
+            corellium_device_appium_udid = f'{target_device_services_ip}:{default_adb_port}'
+            log_stdout(f'Using Corellium virtual device at {corellium_device_appium_udid}.')
         case _:
             print('ERROR: Please provide zero arguments or pass in the Corellium device services IP.', file=sys.stderr)
             sys.exit(1)
-    run_app_automation(config=appium_config, udid=udid)
+    run_app_automation(config=appium_config, udid=corellium_device_appium_udid)

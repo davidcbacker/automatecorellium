@@ -386,9 +386,9 @@ run_appium_interactions_cafe_android()
   log_stdout 'Finished automated Appium interactions.'
 }
 
-run_appium_interactions_cafe_ios() 
+run_appium_interactions_cafe_ios()
 {
-  local INSTANCE_UDID
+  # local INSTANCE_UDID
   # INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
   log_info 'Skipping Appium interactions on iOS for now.'
   log_info 'Pausing for 10 seconds to simulate interactions.'

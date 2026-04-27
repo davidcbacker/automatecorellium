@@ -855,7 +855,7 @@ connect_to_instance()
     ranchu)
       connect_with_adb "${INSTANCE_ID}"
       ;;
-    ipad* | iphone*)
+    iOS | ipad* | iphone*)
       [ "$(uname -s)" = 'Darwin' ] &&
         export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
       run_usbfluxd_and_dependencies

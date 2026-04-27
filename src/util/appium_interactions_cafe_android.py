@@ -274,7 +274,7 @@ if __name__ == "__main__":
     CONFIG_PATH = "data/config/appium_android.json"
     with open(file=CONFIG_PATH, mode='r', encoding='utf-8') as f:
         data = json.load(f)
-    config = AppiumConfig(**data)
+    appium_config = AppiumConfig(**data)
     default_adb_port = config.corellium['default_adb_port']
     match len(sys.argv):
         case 1:
@@ -288,4 +288,4 @@ if __name__ == "__main__":
         case _:
             print('ERROR: Please provide zero arguments or pass in the Corellium device services IP.', file=sys.stderr)
             sys.exit(1)
-    run_app_automation(config=config, udid=corellium_device_appium_udid)
+    run_app_automation(config=appium_config, udid=corellium_device_appium_udid)

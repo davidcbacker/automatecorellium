@@ -6,6 +6,7 @@ import json
 import os
 import signal
 import sys
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
@@ -25,13 +26,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 
 class AppiumConfig:
-    '''Class to read constants from a json file'''
-
-    def __init__(self, config_dict: dict):
-        self.corellium = config_dict["corellium"]
-        self.target_app = config_dict["target_app"]
-        self.appium_server = config_dict["appium_server"]
-        self.timeouts = config_dict["timeouts"]
+    corellium: dict
+    target_app: dict
+    appium_server: dict
+    timeouts: dict
 
 
 class AppiumHelper:
@@ -273,7 +271,7 @@ if __name__ == "__main__":
     config_path = "data/config/appium_android.json"
     with open(config_path, 'r') as f:
         data = json.load(f)
-    config = AppiumConfig(data)
+    config = AppiumConfig(**data)
     default_adb_port = config.corellium['default_adb_port']
     match len(sys.argv):
         case 1:

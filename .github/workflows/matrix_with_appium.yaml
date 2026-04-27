@@ -131,7 +131,7 @@ jobs:
             install_appium_server_and_dependencies
             install_openvpn_dependencies
           fi
-          if [ "${{ matrix.corellium-os }}" = 'ranchu' ]; then
+          if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
             ensure_adb_dependency
           else
             install_usbfluxd_and_dependencies

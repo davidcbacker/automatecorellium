@@ -3,8 +3,8 @@ Automate Corellium virtual device interactions using Appium on Corellium Cafe An
 """
 
 import os
+import signal
 import sys
-import time
 from datetime import datetime, timezone
 from appium import webdriver
 from appium.options.android import UiAutomator2Options
@@ -34,6 +34,12 @@ class AppiumHelper:
         )
 
 
+    def click_when_ready(self, by, value):
+        '''Wait until an element is clickable then click it'''
+        element = self.wait_until_clickable(by=by, value=value)
+        element.click()
+
+
     def save_screenshot(self, filename: str = "screenshot.png"):
         '''Capture a screenshot and save to working directory'''
         screenshot_path: str = os.path.join(os.getcwd(), filename)
@@ -42,12 +48,12 @@ class AppiumHelper:
         log_stdout("Appium - Saved screenshot.")
 
 
-    def set_then_wait_until_element_value(self, by, value, expected_value):
+    def set_element_value(self, by, value, desired_value):
         '''Find an element, send keys, then wait until element value'''
         try:
-            found_element = self.driver.find_element(by=by, value=value)
-            found_element.send_keys(expected_value)
-            self.wait_until_element_value(by=by, value=value, expected_value=expected_value)
+            element = self.driver.find_element(by=by, value=value)
+            element.send_keys(desired_value)
+            self.wait_until_element_value(by=by, value=value, desired_value=desired_value)
         except TimeoutException as e:
             print(f"Timeout: Element not clickable after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
             print(f"TimeoutException: {e}")
@@ -78,13 +84,13 @@ class AppiumHelper:
             sys.exit(1)
 
 
-    def wait_until_element_value(self, by, value, expected_value):
+    def wait_until_element_value(self, by, value, desired_value):
         '''Wait until text is present in an element value then return the elemeent'''
         try:
             locator = (by, value)
-            return self.wait.until(text_to_be_present_in_element(locator, expected_value))
+            return self.wait.until(text_to_be_present_in_element(locator, text_=desired_value))
         except TimeoutException as e:
-            print(f"Timeout: Element value '{expected_value}' not present after "
+            print(f"Timeout: Element value '{desired_value}' not present after "
                   f"{APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
             print(f"TimeoutException: {e}")
             sys.exit(1)
@@ -95,25 +101,41 @@ class AppiumHelper:
 # =====================================
 
 # ==== CORELLIUM DEVICE ====
-DEFAULT_SERVICES_IP = '10.11.1.1'
-DEFAULT_ADB_PORT = '5001'
+DEFAULT_SERVICES_IP: str = '10.11.1.1'
+DEFAULT_ADB_PORT: str = '5001'
 
 # ==== TARGET APP ====
-TARGET_APP_PACKAGE = 'com.corellium.cafe'
-TARGET_APP_ACTIVITY = '.ui.activities.MainActivity'
-TARGET_APP_LOGIN_PAGE_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_LOGIN_PAGE_SCREENSHOT_FILENAME', 'cafe_login_page.png')
-TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME', 'cafe_blog_page.png')
-TARGET_APP_CUSTOMER_PAGE_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_CUSTOMER_PAGE_SCREENSHOT_FILENAME', 'cafe_customer_page.png')
-TARGET_APP_PAYMENT_PAGE_SCREENSHOT_FILENAME = os.getenv('CORELLIUM_CAFE_PAYMENT_PAGE_SCREENSHOT_FILENAME', 'cafe_payment_page.png')
+TARGET_APP_PACKAGE: str = 'com.corellium.cafe'
+TARGET_APP_ACTIVITY: str = '.ui.activities.MainActivity'
+TARGET_APP_LOGIN_PAGE_SCREENSHOT_FILENAME: str = os.getenv(
+    key='CORELLIUM_CAFE_LOGIN_PAGE_SCREENSHOT_FILENAME',
+    default='cafe_login_page.png'
+)
+TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME: str = os.getenv(
+    key='CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME',
+    default='cafe_blog_page.png'
+)
+TARGET_APP_CUSTOMER_PAGE_SCREENSHOT_FILENAME: str = os.getenv(
+    key='CORELLIUM_CAFE_CUSTOMER_PAGE_SCREENSHOT_FILENAME',
+    default='cafe_customer_page.png'
+)
+TARGET_APP_PAYMENT_PAGE_SCREENSHOT_FILENAME: str = os.getenv(
+    key='CORELLIUM_CAFE_PAYMENT_PAGE_SCREENSHOT_FILENAME',
+    default='cafe_payment_page.png'
+)
 
 # ==== APPIUM SERVER ====
-APPIUM_SERVER_IP = '127.0.0.1'
-APPIUM_SERVER_PORT = '4723'
-APPIUM_SERVER_SOCKET = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
+APPIUM_SERVER_IP: str = '127.0.0.1'
+APPIUM_SERVER_PORT: str = '4723'
+APPIUM_SERVER_SOCKET: str = f'http://{APPIUM_SERVER_IP}:{APPIUM_SERVER_PORT}'
 
 # ==== APPIUM DRIVER ====
-APPIUM_DRIVER_IMPLICITLY_WAIT=5 # seconds
-APPIUM_DRIVER_EXPLICITLY_WAIT=20 # seconds
+APPIUM_DRIVER_IMPLICITLY_WAIT: int = 5 # seconds
+APPIUM_DRIVER_EXPLICITLY_WAIT: int = 20 # seconds
+
+# ==== APPIUM AUTOMATION TIMEOUT ====
+APPIUM_AUTOMATION_ALARM_TIMEOUT: int = 90 # seconds
+
 
 # =====================================
 # ===== END CONSTANTS DEFINITIONS =====
@@ -123,81 +145,74 @@ def interact_with_app(helper: AppiumHelper):
     '''Interact with the target app using Appium commands.'''
 
     log_stdout("Appium - Interact with login page.")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText", expected_value="Hello@corellium.com")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText", expected_value="Password123")
-    el3 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
-    el3.click()
-    helper.save_screenshot(TARGET_APP_LOGIN_PAGE_SCREENSHOT_FILENAME)
-    el4 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
-    el4.click()
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText", desired_value="Hello@corellium.com")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText", desired_value="Password123")
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
+    helper.save_screenshot(filename=TARGET_APP_LOGIN_PAGE_SCREENSHOT_FILENAME)
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
 
     log_stdout("Appium - Open blog page.")
-    el5 = helper.wait_until_clickable(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
-    el5.click()
-    el6 = helper.wait_until_clickable(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Blog\")")
-    el6.click()
-    el7 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
-    el7.click()
+    helper.click_when_ready(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
+    helper.click_when_ready(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Blog\")")
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
 
     log_stdout('Appium - Wait for blog page to load.')
     helper.wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText")
     log_stdout('Appium - Interact with blog page.')
-    helper.set_then_wait_until_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", expected_value="Testing")
-    helper.save_screenshot(TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)
+    helper.set_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", desired_value="Testing")
+    helper.save_screenshot(filename=TARGET_APP_BLOG_PAGE_SCREENSHOT_FILENAME)
 
     log_stdout("Appium - Return to home page.")
-    el9 = helper.wait_until_clickable(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
-    el9.click()
-    el10 = helper.wait_until_clickable(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Home\")")
-    el10.click()
+    helper.click_when_ready(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
+    helper.click_when_ready(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Home\")")
 
     log_stdout("Appium - Add the first coffee option to cart.")
-    el11 = helper.wait_until_clickable(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
-    el11.click()
-    el12 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
-    el12.click()
+    helper.click_when_ready(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
 
     log_stdout("Appium - Open cart and begin checkout.")
-    el13 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/abmCart")
-    el13.click()
-    el14 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
-    el14.click()
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/abmCart")
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
 
     log_stdout("Appium - Fill in customer info.")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText", expected_value="Firstname")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText", expected_value="Lastname")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText", expected_value="3216540987")
-    helper.save_screenshot(TARGET_APP_CUSTOMER_PAGE_SCREENSHOT_FILENAME)
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText", desired_value="Firstname")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText", desired_value="Lastname")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText", desired_value="3216540987")
+    helper.save_screenshot(filename=TARGET_APP_CUSTOMER_PAGE_SCREENSHOT_FILENAME)
     log_stdout("Appium - Submit customer info.")
-    el18 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
-    el18.click()
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
 
     log_stdout("Appium - Fill in payment info.")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber", expected_value="2345678901234567")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration", expected_value="1234")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV", expected_value="135")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode", expected_value="24680")
-    helper.save_screenshot(TARGET_APP_PAYMENT_PAGE_SCREENSHOT_FILENAME)
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber", desired_value="2345678901234567")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration", desired_value="1234")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV", desired_value="135")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode", desired_value="24680")
+    helper.save_screenshot(filename=TARGET_APP_PAYMENT_PAGE_SCREENSHOT_FILENAME)
     log_stdout("Appium - Submit payment info.")
-    el23 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
-    el23.click()
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
 
     log_stdout("Appium - Enter invalid promo code.")
-    helper.set_then_wait_until_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode", expected_value="65432")
-    el25 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
-    el25.click()
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode", desired_value="65432")
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
 
     log_stdout("Appium - Submit order.")
-    el26 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/bvSubmitOrder")
-    el26.click()
-    el27 = helper.wait_until_clickable(by=AppiumBy.ID, value="android:id/button1")
-    el27.click()
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvSubmitOrder")
+    helper.click_when_ready(by=AppiumBy.ID, value="android:id/button1")
 
 
 def log_stdout(message: str):
     '''Print message to stdout with current timestamp'''
     current_datetime = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S")
     print(f"[-] {current_datetime} INFO: {message}")
+
+
+class AlarmTimeoutException(Exception):
+    '''Exception raised when a SIGALRM signal triggers a timeout during Appium automation.'''
+
+
+def alarm_timeout_handler(signum, frame):
+    '''Signal handler for SIGALRM that raises an AlarmTimeoutException.'''
+    raise AlarmTimeoutException("Appium automation timed out.")
 
 
 def run_app_automation(udid: str):
@@ -211,14 +226,23 @@ def run_app_automation(udid: str):
     options.set_capability('appium:noReset', True)
     options.adb_exec_timeout = 40000
 
+    signal.signal(signal.SIGALRM, alarm_timeout_handler)
+    log_stdout(f"Setting Appium alarm timeout for {APPIUM_AUTOMATION_ALARM_TIMEOUT} seconds.")
+    signal.alarm(APPIUM_AUTOMATION_ALARM_TIMEOUT)
+
     try:
         log_stdout("Loading target app in Appium session.")
-        driver = webdriver.Remote(APPIUM_SERVER_SOCKET, options=options)
+        driver = webdriver.Remote(command_executor=APPIUM_SERVER_SOCKET, options=options)
         log_stdout("Successfully loaded target app.")
-        driver.implicitly_wait(APPIUM_DRIVER_IMPLICITLY_WAIT)
+        driver.implicitly_wait(time_to_wait=APPIUM_DRIVER_IMPLICITLY_WAIT)
         log_stdout("Starting app interactions.")
-        interact_with_app(AppiumHelper(driver))
+        interact_with_app(helper=AppiumHelper(driver))
         log_stdout("Finished app interactions.")
+
+    except AlarmTimeoutException as e:
+        print(f"Appium automation timed out after {APPIUM_AUTOMATION_ALARM_TIMEOUT} seconds.", file=sys.stderr)
+        print(f"AlarmTimeoutException: {e}", file=sys.stderr)
+        sys.exit(1)
 
     except NoSuchElementException as e:
         print("Thrown when element could not be found.", file=sys.stderr)
@@ -246,6 +270,7 @@ def run_app_automation(udid: str):
         sys.exit(1)
 
     finally:
+        signal.alarm(0)
         log_stdout("Closing appium session.")
         driver.quit()
         log_stdout("Closed appium session.")

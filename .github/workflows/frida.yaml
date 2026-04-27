@@ -111,7 +111,6 @@ jobs:
           if [ "${{ matrix.os }}" = 'self-hosted' ] &&
             [  "${{ matrix.corellium-os }}" = 'iOS' ] &&
             does_instance_exist "${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}"; then
-            log_stdout "Starting instance ${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}."
             start_instance "${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}"
             log_stdout "Started instance ${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}."
             echo "CORELLIUM_INSTANCE_ID=${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}" >> "${GITHUB_ENV}"
@@ -161,15 +160,9 @@ jobs:
         timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail
-          if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
-            connect_with_adb "${CORELLIUM_INSTANCE_ID}"
-          else
-            [ "$(uname -s)" = 'Darwin' ] &&
-              export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
-            run_usbfluxd_and_dependencies
-            add_instance_to_usbfluxd "${CORELLIUM_INSTANCE_ID}"
-            verify_usbflux_connection "${CORELLIUM_INSTANCE_ID}"
-          fi
+          connect_to_instance \
+            "${CORELLIUM_INSTANCE_ID}" \
+            "${{ matrix.hardware_flavor }}"
       - name: Install Corellium Cafe from URL
         timeout-minutes: 5
         env:
@@ -179,8 +172,8 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           kill_app "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_app_id }}"
           install_app_from_url "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_source_url }}"
-      - name: Launch Cafe and run frida-ps
-        timeout-minutes: 10
+      - name: Launch Cafe
+        timeout-minutes: 2
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
@@ -189,6 +182,14 @@ jobs:
           source ./src/functions_frida.sh
           launch_app "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_app_id }}"
           sleep 5 # attempting to mitigate intermittent failure, issue 467
+      - name: Run frida-ps
+        timeout-minutes: 10
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
+          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          source ./src/functions_frida.sh
           run_frida_ps_device "${CORELLIUM_INSTANCE_ID}"
       - name: Run frida hook
         timeout-minutes: 2
@@ -208,12 +209,10 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
             log_stdout 'CORELLIUM_INSTANCE_ID is not set.'
-          elif [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
-            disconnect_with_adb "${CORELLIUM_INSTANCE_ID}"
           else
-            [ "$(uname -s)" = 'Darwin' ] &&
-              export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
-            delete_instance_from_usbfluxd "${CORELLIUM_INSTANCE_ID}"
+            disconnect_from_instance \
+              "${CORELLIUM_INSTANCE_ID}" \
+              "${{ matrix.hardware_flavor }}"
           fi
       - name: Stop or delete instance
         if: always()

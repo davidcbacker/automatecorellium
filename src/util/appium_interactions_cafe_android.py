@@ -230,7 +230,7 @@ def run_app_automation(config: AppiumConfig, udid: str):
         driver.implicitly_wait(time_to_wait=config.timeouts['implicit_wait'])
         log_stdout("Starting app interactions.")
         helper=AppiumHelper(timeout=config.timeouts['explicit_wait'], driver=driver)
-        interact_with_app(helper=helper)
+        interact_with_app(config=config, helper=helper)
         log_stdout("Finished app interactions.")
 
     except AlarmTimeoutException as e:

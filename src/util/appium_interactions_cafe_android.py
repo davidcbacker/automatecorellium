@@ -25,6 +25,7 @@ from selenium.webdriver.support.expected_conditions import (
 from selenium.webdriver.support.ui import WebDriverWait
 
 
+@dataclass
 class AppiumConfig:
     'Configuration container for Appium-related settings.'
     corellium: dict

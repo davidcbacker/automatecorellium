@@ -45,6 +45,12 @@ class AppiumHelper:
         )
 
 
+    def click_when_ready(self, by, value):
+        '''Wait until an element is clickable then click it'''
+        element = self.wait_until_clickable(by=by, value=value)
+        element.click()
+
+
     def save_screenshot(self, filename: str = "screenshot.png"):
         '''Capture a screenshot and save to working directory'''
         screenshot_path: str = os.path.join(os.getcwd(), filename)
@@ -145,19 +151,14 @@ def interact_with_app(config: AppiumAndroidConfig, helper: AppiumHelper):
     log_stdout("Appium - Interact with login page.")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText", desired_value="Hello@corellium.com")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText", desired_value="Password123")
-    el3 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
-    el3.click()
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
     helper.save_screenshot(filename=config.target_app['screenshots']['login'])
-    el4 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
-    el4.click()
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
 
     log_stdout("Appium - Open blog page.")
-    el5 = helper.wait_until_clickable(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
-    el5.click()
-    el6 = helper.wait_until_clickable(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Blog\")")
-    el6.click()
-    el7 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
-    el7.click()
+    helper.click_when_ready(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
+    helper.click_when_ready(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Blog\")")
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
 
     log_stdout('Appium - Wait for blog page to load.')
     helper.wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText")
@@ -166,22 +167,16 @@ def interact_with_app(config: AppiumAndroidConfig, helper: AppiumHelper):
     helper.save_screenshot(filename=config.target_app['screenshots']['blog'])
 
     log_stdout("Appium - Return to home page.")
-    el9 = helper.wait_until_clickable(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
-    el9.click()
-    el10 = helper.wait_until_clickable(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Home\")")
-    el10.click()
+    helper.click_when_ready(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
+    helper.click_when_ready(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Home\")")
 
     log_stdout("Appium - Add the first coffee option to cart.")
-    el11 = helper.wait_until_clickable(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
-    el11.click()
-    el12 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
-    el12.click()
+    helper.click_when_ready(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
 
     log_stdout("Appium - Open cart and begin checkout.")
-    el13 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/abmCart")
-    el13.click()
-    el14 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
-    el14.click()
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/abmCart")
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
 
     log_stdout("Appium - Fill in customer info.")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText", desired_value="Firstname")
@@ -189,8 +184,7 @@ def interact_with_app(config: AppiumAndroidConfig, helper: AppiumHelper):
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText", desired_value="3216540987")
     helper.save_screenshot(filename=config.target_app['screenshots']['customer'])
     log_stdout("Appium - Submit customer info.")
-    el18 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
-    el18.click()
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
 
     log_stdout("Appium - Fill in payment info.")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber", desired_value="2345678901234567")
@@ -199,19 +193,15 @@ def interact_with_app(config: AppiumAndroidConfig, helper: AppiumHelper):
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode", desired_value="24680")
     helper.save_screenshot(filename=config.target_app['screenshots']['payment'])
     log_stdout("Appium - Submit payment info.")
-    el23 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
-    el23.click()
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
 
     log_stdout("Appium - Enter invalid promo code.")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode", desired_value="65432")
-    el25 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
-    el25.click()
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
 
     log_stdout("Appium - Submit order.")
-    el26 = helper.wait_until_clickable(by=AppiumBy.ID, value="com.corellium.cafe:id/bvSubmitOrder")
-    el26.click()
-    el27 = helper.wait_until_clickable(by=AppiumBy.ID, value="android:id/button1")
-    el27.click()
+    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvSubmitOrder")
+    helper.click_when_ready(by=AppiumBy.ID, value="android:id/button1")
 
 
 def log_stdout(message: str):

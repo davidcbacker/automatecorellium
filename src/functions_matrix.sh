@@ -390,6 +390,9 @@ run_appium_interactions_cafe_ios()
 {
   # local INSTANCE_UDID
   # INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
+  # log_stdout 'Starting automated Appium interactions.'
+  # PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_ios.py "${INSTANCE_SERVICES_IP}"
+  # log_stdout 'Finished automated Appium interactions.'
   log_info 'Skipping Appium interactions on iOS for now.'
   log_info 'Pausing for 10 seconds to simulate interactions.'
   sleep 10

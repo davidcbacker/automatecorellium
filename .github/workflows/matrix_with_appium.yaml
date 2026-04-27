@@ -355,6 +355,7 @@ jobs:
           compression-level: 9
           if-no-files-found: error
       - name: Analyze MATRIX report results
+        if: ${{ matrix.corellium-os == 'Android' }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh

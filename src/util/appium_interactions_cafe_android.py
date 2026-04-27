@@ -275,10 +275,10 @@ if __name__ == "__main__":
     with open(file=CONFIG_PATH, mode='r', encoding='utf-8') as f:
         data = json.load(f)
     appium_config = AppiumConfig(**data)
-    default_adb_port = config.corellium['default_adb_port']
+    default_adb_port = appium_config.corellium['default_adb_port']
     match len(sys.argv):
         case 1:
-            target_device_services_ip = config.corellium['default_services_ip']
+            target_device_services_ip = appium_config.corellium['default_services_ip']
             corellium_device_appium_udid = f'{target_device_services_ip}:{default_adb_port}'
             log_stdout(f'Defaulting to Corellium virtual device at {target_device_services_ip}.')
         case 2:

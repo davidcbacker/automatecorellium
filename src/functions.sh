@@ -90,6 +90,19 @@ does_instance_exist()
   fi
 }
 
+is_instance_on()
+{
+  local INSTANCE_ID="${1:?}"
+  local INSTANCE_STATE_ON='on'
+  if corellium instance get --instance "${INSTANCE_ID}" 2> /dev/null |
+    jq -e --arg state_on "${INSTANCE_STATE_ON}" 'select(.state == $state_on)' > /dev/null; then
+    return 0
+  else
+    log_warn "Instance ${INSTANCE_ID} is not in an ${INSTANCE_STATE_ON} state."
+    return 1
+  fi
+}
+
 get_available_cores()
 {
   local PROJECT_ID="${1:?}"

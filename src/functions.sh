@@ -98,7 +98,7 @@ is_instance_on()
     jq -e --arg state_on "${INSTANCE_STATE_ON}" 'select(.state == $state_on)' > /dev/null; then
     return 0
   else
-    log_warn "Instance ${INSTANCE_ID} is not in an ${INSTANCE_STATE_ON} state."
+    log_warn "Instance ${INSTANCE_ID} is not ${INSTANCE_STATE_ON}."
     return 1
   fi
 }

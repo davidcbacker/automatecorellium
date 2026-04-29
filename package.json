@@ -4,5 +4,62 @@
   "private": true,
   "dependencies": {
     "@corellium/corellium-cli": "^1.5.1"
+  },
+  "overrides": {
+    "@babel/code-frame": {
+      "@babel/helper-validator-identifier": "$@babel/helper-validator-identifier"
+    },
+    "@babel/generator": {
+      "@babel/types": "$@babel/types"
+    },
+    "@babel/helper-compilation-targets": {
+      "@babel/compat-data": "$@babel/compat-data",
+      "@babel/helper-validator-option": "$@babel/helper-validator-option"
+    },
+    "@babel/helper-globals": {
+      "@babel/helper-validator-identifier": "$@babel/helper-validator-identifier"
+    },
+    "@babel/helper-module-imports": {
+      "@babel/traverse": "$@babel/traverse",
+      "@babel/types": "$@babel/types"
+    },
+    "@babel/helper-module-transforms": {
+      "@babel/helper-module-imports": "$@babel/helper-module-imports",
+      "@babel/helper-validator-identifier": "$@babel/helper-validator-identifier"
+    },
+    "@babel/helper-string-parser": {
+      "@babel/helper-validator-identifier": "$@babel/helper-validator-identifier"
+    },
+    "@babel/helpers": {
+      "@babel/template": "$@babel/template",
+      "@babel/types": "$@babel/types"
+    },
+    "@babel/parser": {
+      "@babel/types": "$@babel/types"
+    },
+    "@babel/template": {
+      "@babel/code-frame": "$@babel/code-frame",
+      "@babel/parser": "$@babel/parser"
+    },
+    "@babel/traverse": {
+      "@babel/code-frame": "$@babel/code-frame",
+      "@babel/generator": "$@babel/generator"
+    },
+    "@babel/types": {
+      "@babel/helper-string-parser": "$@babel/helper-string-parser",
+      "@babel/helper-validator-identifier": "$@babel/helper-validator-identifier"
+    },
+    "@jridgewell/gen-mapping": {
+      "@jridgewell/sourcemap-codec": "$@jridgewell/sourcemap-codec",
+      "@jridgewell/trace-mapping": "$@jridgewell/trace-mapping"
+    },
+    "@jridgewell/remapping": {
+      "@jridgewell/gen-mapping": "$@jridgewell/gen-mapping",
+      "@jridgewell/trace-mapping": "$@jridgewell/trace-mapping"
+    },
+    "@jridgewell/trace-mapping": {
+      "@jridgewell/resolve-uri": "$@jridgewell/resolve-uri",
+      "@jridgewell/sourcemap-codec": "$@jridgewell/sourcemap-codec"
+    }
   }
 }

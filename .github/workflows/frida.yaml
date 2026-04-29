@@ -92,6 +92,8 @@ jobs:
             --endpoint ${{ secrets[matrix.api_endpoint_secret_key] }}
       - name: Wait until available cores
         timeout-minutes: 30
+        env:
+          MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE: ${{ vars.MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then

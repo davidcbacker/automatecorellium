@@ -95,7 +95,12 @@ jobs:
         timeout-minutes: 30
         run: |
           source ./src/functions.sh && set -euo pipefail
-          if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
+          if [ "${{ matrix.os }}" = 'self-hosted' ] &&
+            [  "${{ matrix.corellium-os }}" = 'iOS' ] &&
+            does_instance_exist "${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}" &&
+            is_instance_on "${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}"; then
+            :
+          elif [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
             wait_until_available_cores "${{ matrix.default_corellium_project }}" '4'
           else
             wait_until_available_cores "${{ matrix.default_corellium_project }}" '6'

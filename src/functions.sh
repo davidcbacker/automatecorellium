@@ -90,6 +90,19 @@ does_instance_exist()
   fi
 }
 
+is_instance_on()
+{
+  local INSTANCE_ID="${1:?}"
+  local INSTANCE_STATE_ON='on'
+  if corellium instance get --instance "${INSTANCE_ID}" 2> /dev/null |
+    jq -e --arg state_on "${INSTANCE_STATE_ON}" 'select(.state == $state_on)' > /dev/null; then
+    return 0
+  else
+    log_warn "Instance ${INSTANCE_ID} is not ${INSTANCE_STATE_ON}."
+    return 1
+  fi
+}
+
 get_available_cores()
 {
   local PROJECT_ID="${1:?}"
@@ -1100,12 +1113,14 @@ remote_code_execution_with_adb()
 {
   local TARGET_SERVICES_IP="${1:?}"
   local COMMAND_TO_EXECUTE="${2:?}"
+  local TARGET_ADB_PORT='5001'
+  local TARGET_ADB_SOCKET="${TARGET_SERVICES_IP}:${TARGET_ADB_PORT}"
   log_stdout "Executing ${COMMAND_TO_EXECUTE} on device at ${TARGET_SERVICES_IP}."
   is_services_ip_conneted_with_adb "${TARGET_SERVICES_IP}" || {
     log_error "Cannot find adb connection to ${TARGET_SERVICES_IP}."
     exit 1
   }
-  adb shell su root "${COMMAND_TO_EXECUTE}" || {
+  adb -s "${TARGET_ADB_SOCKET}" shell su root "${COMMAND_TO_EXECUTE}" || {
     log_error 'Failed to execute remote command with ADB.'
     exit 1
   }

@@ -50,7 +50,7 @@ jobs:
             api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
             default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}
             android_home_path: ${{ vars.SELF_HOSTED_RUNNER_ANDROID_HOME_PATH }}
-            node_tls_reject_unauthorized: 0
+            node_tls_reject_unauthorized: 1
       max-parallel: 2
     steps:
       - name: Pull the latest code

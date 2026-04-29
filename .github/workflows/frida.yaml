@@ -99,7 +99,7 @@ jobs:
           elif [ "${{ matrix.os }}" = 'self-hosted' ] &&
             does_instance_exist "${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}" &&
             is_instance_on "${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}"; then
-            :
+            log_stdout "Instance ${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE} is already on."
           else
             wait_until_available_cores "${{ matrix.default_corellium_project }}" '6'
           fi

@@ -1107,7 +1107,7 @@ remote_code_execution_with_adb()
     log_error "Cannot find adb connection to ${TARGET_SERVICES_IP}."
     exit 1
   }
-  adb -s "${TARGET_SERVICES_IP}" shell su root "${COMMAND_TO_EXECUTE}" || {
+  adb -s "${TARGET_ADB_SOCKET}" shell su root "${COMMAND_TO_EXECUTE}" || {
     log_error 'Failed to execute remote command with ADB.'
     exit 1
   }

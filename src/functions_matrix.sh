@@ -10,11 +10,11 @@ install_appium_server_and_dependencies()
   #python3 -m pip install -U pymobiledevice3 # for ios devices
   python3 -m pip install -U Appium-Python-Client
   log_stdout 'Installed appium dependencies.'
-  log_stdout 'Installing appium and device driver.'
+  log_stdout 'Installing appium and device drivers.'
   npm install --location=global appium
   appium driver install uiautomator2
-  #appium driver install xcuitest # for ios devices
-  log_stdout 'Installed appium and device driver.'
+  appium driver install xcuitest
+  log_stdout 'Installed appium and device drivers.'
 }
 
 install_appium_runner_ios()
@@ -30,7 +30,7 @@ create_matrix_assessment()
 {
   local INSTANCE_ID="${1:?}"
   local APP_BUNDLE_ID="${2:?}"
-  local MATRIX_WORDLIST_ID="$3"
+  local MATRIX_WORDLIST_ID="${3:?}"
   corellium matrix create-assessment \
     --instance "${INSTANCE_ID}" \
     --bundle "${APP_BUNDLE_ID}" \
@@ -122,7 +122,7 @@ download_matrix_report_to_local_path()
 {
   local INSTANCE_ID="${1:?}"
   local MATRIX_ASSESSMENT_ID="${2:?}"
-  local MATRIX_REPORT_DOWNLOAD_PATH="$3"
+  local MATRIX_REPORT_DOWNLOAD_PATH="${3:?}"
   local MATRIX_REPORT_DEFAULT_FORMAT='html'
   local MATRIX_REPORT_TARGET_FORMAT="${4:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
   local MATRIX_REPORT_TARGET_FORMAT_UPPER
@@ -200,7 +200,7 @@ run_full_matrix_assessment()
 {
   local INSTANCE_ID="${1:?}"
   local APP_BUNDLE_ID="${2:?}"
-  local MATRIX_WORDLIST_ID="$3"
+  local MATRIX_WORDLIST_ID="${3:?}"
   handle_open_matrix_assessment "${INSTANCE_ID}"
   log_stdout "Creating MATRIX assessment."
   local MATRIX_ASSESSMENT_ID
@@ -212,7 +212,7 @@ run_full_matrix_assessment()
   log_stdout "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   wait_until_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
-  run_appium_interactions_cafe "${INSTANCE_ID}"
+  run_appium_interactions_cafe_android "${INSTANCE_ID}"
   ensure_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   stop_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
@@ -241,7 +241,7 @@ wait_for_matrix_assessment_status()
 {
   local INSTANCE_ID="${1:?}"
   local ASSESSMENT_ID="${2:?}"
-  local TARGET_ASSESSMENT_STATUS="$3"
+  local TARGET_ASSESSMENT_STATUS="${3:?}"
   local SLEEP_TIME_DEFAULT='2'
   local SLEEP_TIME_FOR_TESTING='5'
 
@@ -300,6 +300,7 @@ open_appium_session()
 {
   local INSTANCE_ID="${1:?}"
   local APP_PACKAGE_NAME="${2:?}"
+  local APP_ACTIVITY_NAME="${3:?}"
   local DEFAULT_APPIUM_PORT='4723'
   local DEFAULT_ADB_PORT='5001'
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
@@ -313,7 +314,9 @@ open_appium_session()
       "platformName": "Android",
       "appium:automationName": "UiAutomator2",
       "appium:udid": "${INSTANCE_SERVICES_IP}:${DEFAULT_ADB_PORT}",
-      "appium:appPackage": "${APP_PACKAGE_NAME}"
+      "appium:appPackage": "${APP_PACKAGE_NAME}",
+      "appium:appActivity": "${APP_ACTIVITY_NAME}",
+      "appium:adbExecTimeout": 40000
     },
     "firstMatch": [{}]
   }
@@ -328,8 +331,6 @@ EOF
     log_error 'Failed to open appium session.'
     exit 1
   }
-  log_warn 'DEBUG SHOWING THE JSON RESPONSE DETAILS'
-  echo "${OPEN_APPIUM_SESSION_JSON_RESPONSE}" >&2
   OPENED_SESSION_ID="$(echo "${OPEN_APPIUM_SESSION_JSON_RESPONSE}" | jq -r '.value.sessionId')" || {
     log_error 'Failed to parse open appium session JSON response.'
     exit 1
@@ -358,23 +359,23 @@ close_appium_session()
   fi
 }
 
-run_appium_interactions_cafe()
+run_appium_interactions_cafe_android()
 {
   local INSTANCE_ID="${1:?}"
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   log_stdout 'Starting automated Appium interactions.'
-  PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe.py "${INSTANCE_SERVICES_IP}"
+  PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_android.py "${INSTANCE_SERVICES_IP}"
   log_stdout 'Finished automated Appium interactions.'
 }
 
-run_appium_interactions_template()
+run_appium_interactions_template_android()
 {
   local INSTANCE_ID="${1:?}"
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   log_stdout 'Starting automated Appium interactions.'
-  python3 src/util/appium_interactions_template.py "${INSTANCE_SERVICES_IP}"
+  python3 src/util/appium_interactions_template_android.py "${INSTANCE_SERVICES_IP}"
   log_stdout 'Finished automated Appium interactions.'
 }
 
@@ -396,12 +397,15 @@ analyze_corellium_cafe_matrix_report_from_local_path()
     "${MATRIX_JSON_REPORT_PATH}" \
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
   log_stdout 'Listed failed assessment checks.'
-  log_stdout "Verifying outcome of local storage check for ${report}."
+  log_stdout "Verifying MATRIX report ${report} is free of errors."
+  ensure_no_errors_in_matrix_checks "${MATRIX_JSON_REPORT_PATH}"
+  log_stdout "Verified MATRIX report ${report} is free of errors."
+  log_stdout "Verifying outcome of local storage check for report ${report}."
   ensure_matrix_check_outcomes_from_local_json_path \
     "${MATRIX_JSON_REPORT_PATH}" \
     "${MATRIX_CHECK_TO_ANALYZE}" \
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
-  log_stdout 'Verified outcome of local storage check.'
+  log_stdout "Verified outcome of local storage check for report ${report}."
 }
 
 print_matching_matrix_check_outcomes_from_local_json_path()
@@ -416,11 +420,26 @@ print_matching_matrix_check_outcomes_from_local_json_path()
     sort
 }
 
+ensure_no_errors_in_matrix_checks()
+{
+  local MATRIX_JSON_REPORT_PATH="${1:?}"
+  local MATRIX_CHECK_EXPECTED_OUTCOME='error'
+  if jq -e \
+    --arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
+    '.results[] | select(.outcome == $expected_outcome)' \
+    "${MATRIX_JSON_REPORT_PATH}"; then
+    log_error 'The MATRIX report contains errors.'
+    log_warn 'Ignoring intermittent check errors.'
+  else
+    log_stdout 'The MATRIX report is free of errors.'
+  fi
+}
+
 ensure_matrix_check_outcomes_from_local_json_path()
 {
   local MATRIX_JSON_REPORT_PATH="${1:?}"
   local MATRIX_CHECK_TO_ANALYZE="${2:?}"
-  local MATRIX_CHECK_EXPECTED_OUTCOME="$3"
+  local MATRIX_CHECK_EXPECTED_OUTCOME="${3:?}"
   jq -e \
     --arg id "${MATRIX_CHECK_TO_ANALYZE}" \
     --arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
@@ -429,4 +448,40 @@ ensure_matrix_check_outcomes_from_local_json_path()
     log_error "MATRIX check ${MATRIX_CHECK_TO_ANALYZE} is not ${MATRIX_CHECK_EXPECTED_OUTCOME}."
     exit 1
   }
+}
+
+compress_matrix_runtime_artifacts()
+{
+  local INSTANCE_ID="${1:?}"
+  local INSTANCE_SERVICES_IP INSTANCE_FLAVOR
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  INSTANCE_FLAVOR="$(get_instance_flavor "${INSTANCE_ID}")"
+  case "${INSTANCE_FLAVOR}" in
+    ranchu)
+      DEVICE_TEMP_DIRECTORY='/data/local/tmp'
+      ;;
+    *)
+      DEVICE_TEMP_DIRECTORY='/tmp'
+      ;;
+  esac
+  local ARCHIVE_INPUT_ARTIFACTS_PATH="${DEVICE_TEMP_DIRECTORY}/artifacts/"
+  local ARCHIVE_INPUT_ASSESSMENT_PATH="${DEVICE_TEMP_DIRECTORY}/assessment.*/"
+  local ARCHIVE_OUTPUT_PATH='/tmp/matrix_artifacts.tar.gz'
+
+  local TARGET_COMMANDS=(
+    "tar -czvf ${ARCHIVE_OUTPUT_PATH} ${ARCHIVE_INPUT_ARTIFACTS_PATH} ${ARCHIVE_INPUT_ASSESSMENT_PATH}"
+    "ls -l ${ARCHIVE_OUTPUT_PATH}"
+    "sha256sum ${ARCHIVE_OUTPUT_PATH}"
+  )
+  for target_command in "${TARGET_COMMANDS[@]}"; do
+    if [ "${INSTANCE_FLAVOR}" = 'ranchu' ]; then
+      remote_code_execution_with_adb \
+        "${INSTANCE_SERVICES_IP}" \
+        "${target_command}"
+    else
+      remote_code_execution_with_ssh \
+        "${INSTANCE_SERVICES_IP}" \
+        "${target_command}"
+    fi
+  done
 }

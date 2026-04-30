@@ -8,6 +8,9 @@ frida:
   - 'src/functions_frida.sh'
   - 'src/util/frida_script_*.js'
   - 'src/util/frida_script_example.js'
+javascript:
+  - 'package.json'
+  - 'package-lock.json'
 markdown:
   - '*.md'
   - 'data/config/.markdownlint-cli2.jsonc'
@@ -18,7 +21,7 @@ matrix:
   - 'data/wordlist.txt'
   - 'src/functions.sh'
   - 'src/functions_matrix.sh'
-  - 'src/util/appium_interactions_cafe.py'
+  - 'src/util/appium_interactions_cafe*.py'
   - 'src/util/compress_matrix_artifacts.js'
 python:
   - 'requirements-pip-appium.txt'
@@ -28,10 +31,3 @@ shell:
   - 'src/*.sh'
 static-lint:
   - '.github/workflows/lint.yaml'
-javascript:
-  - 'package.json'
-  - 'package-lock.json'
-  - 'src/util/*.js'
-javascript-deps:
-  - 'package.json'
-  - 'package-lock.json'

@@ -108,26 +108,6 @@ class AppiumHelper:
             sys.exit(1)
 
 
-# =====================================
-# ==== BEGIN CONSTANTS DEFINITIONS ====
-# =====================================
-
-# ==== TARGET APP ====
-
-# ==== APPIUM SERVER ====
-
-# ==== APPIUM DRIVER ====
-APPIUM_DRIVER_IMPLICITLY_WAIT: int = 5 # seconds
-APPIUM_DRIVER_EXPLICITLY_WAIT: int = 20 # seconds
-
-# ==== APPIUM AUTOMATION TIMEOUT ====
-APPIUM_AUTOMATION_ALARM_TIMEOUT: int = 90 # seconds
-
-
-# =====================================
-# ===== END CONSTANTS DEFINITIONS =====
-# =====================================
-
 def interact_with_app(config: AppiumConfig, helper: AppiumHelper):
     '''Interact with the target app using Appium commands.'''
 

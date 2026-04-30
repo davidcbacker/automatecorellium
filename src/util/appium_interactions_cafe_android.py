@@ -205,8 +205,8 @@ def alarm_timeout_handler(signum, frame):
 def run_app_automation(config: AppiumConfig, udid: str):
     '''Launch the app and interact using Appium commands.'''
 
-    appium_server_ip: str = config.appium['server_ip']
-    appium_server_port: str = config.appium['port']
+    appium_server_ip: str = config.appium_server['server_ip']
+    appium_server_port: str = config.appium_server['port']
     appium_server_socket: str = f'http://{appium_server_ip}:{appium_server_port}'
 
     options = UiAutomator2Options()

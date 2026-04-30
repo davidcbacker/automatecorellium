@@ -67,7 +67,7 @@ class AppiumHelper:
             element.send_keys(desired_value)
             self.wait_until_element_value(by=by, value=value, desired_value=desired_value)
         except TimeoutException as e:
-            print(f"Timeout: Element not clickable after {APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
+            print(f"Timeout: Element not clickable after {self.timeout} seconds.")
             print(f"TimeoutException: {e}")
             sys.exit(1)
 
@@ -78,8 +78,7 @@ class AppiumHelper:
             locator = (by, value)
             return self.wait.until(element_to_be_clickable(locator))
         except TimeoutException as e:
-            print("Timeout: Element not clickable after "
-                  f"{APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
+            print(f"Timeout: Element not clickable after {self.timeout} seconds.")
             print(f"TimeoutException: {e}")
             sys.exit(1)
 
@@ -90,8 +89,7 @@ class AppiumHelper:
             locator = (by, value)
             return self.wait.until(visibility_of_element_located(locator))
         except TimeoutException as e:
-            print("Timeout: Element not visible after "
-                  f"{APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
+            print(f"Timeout: Element not visible after {self.timeout} seconds.")
             print(f"TimeoutException: {e}")
             sys.exit(1)
 
@@ -102,8 +100,7 @@ class AppiumHelper:
             locator = (by, value)
             return self.wait.until(text_to_be_present_in_element(locator, text_=desired_value))
         except TimeoutException as e:
-            print(f"Timeout: Element value '{desired_value}' not present after "
-                  f"{APPIUM_DRIVER_EXPLICITLY_WAIT} seconds.")
+            print(f"Timeout: Element value '{desired_value}' not present after {self.timeout} seconds.")
             print(f"TimeoutException: {e}")
             sys.exit(1)
 

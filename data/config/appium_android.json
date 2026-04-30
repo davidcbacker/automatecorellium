@@ -4,7 +4,7 @@
     "adb_port": "5001"
   },
   "target_app": {
-    "package": "com.corellium.cafe",
+    "package_name": "com.corellium.cafe",
     "activity": ".ui.activities.MainActivity",
     "screenshots": {
       "login": "cafe_login_page.png",

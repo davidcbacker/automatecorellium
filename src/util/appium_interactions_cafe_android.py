@@ -39,6 +39,7 @@ class AppiumHelper:
 
     def __init__(self, timeout: int, driver: webdriver.Remote):
         self.driver = driver
+        self.timeout = timeout
         self.wait = WebDriverWait(
             driver=driver,
             timeout=timeout,

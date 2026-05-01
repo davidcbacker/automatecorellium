@@ -18,8 +18,9 @@
     "port": "4723"
   },
   "timeouts": {
+    "adb_exec": 40000,
+    "automation_alarm": 120,
     "implicit_wait": 5,
-    "explicit_wait": 20,
-    "automation_alarm": 120
+    "explicit_wait": 20
   }
 }

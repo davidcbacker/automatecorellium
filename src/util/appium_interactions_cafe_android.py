@@ -106,14 +106,14 @@ class AppiumHelper:
             sys.exit(1)
 
 
-def interact_with_app(config: AppiumConfig, helper: AppiumHelper):
+def interact_with_app(helper: AppiumHelper, screenshots: dict):
     '''Interact with the target app using Appium commands.'''
 
     log_stdout("Appium - Interact with login page.")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText", desired_value="Hello@corellium.com")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText", desired_value="Password123")
     helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
-    helper.save_screenshot(filename=config.target_app['screenshots']['login'])
+    helper.save_screenshot(filename=screenshots['login'])
     helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
 
     log_stdout("Appium - Open blog page.")
@@ -125,7 +125,7 @@ def interact_with_app(config: AppiumConfig, helper: AppiumHelper):
     helper.wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText")
     log_stdout('Appium - Interact with blog page.')
     helper.set_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", desired_value="Testing")
-    helper.save_screenshot(filename=config.target_app['screenshots']['blog'])
+    helper.save_screenshot(filename=screenshots['blog'])
 
     log_stdout("Appium - Return to home page.")
     helper.click_when_ready(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
@@ -143,7 +143,7 @@ def interact_with_app(config: AppiumConfig, helper: AppiumHelper):
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText", desired_value="Firstname")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText", desired_value="Lastname")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText", desired_value="3216540987")
-    helper.save_screenshot(filename=config.target_app['screenshots']['customer'])
+    helper.save_screenshot(filename=screenshots['customer'])
     log_stdout("Appium - Submit customer info.")
     helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
 
@@ -152,7 +152,7 @@ def interact_with_app(config: AppiumConfig, helper: AppiumHelper):
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration", desired_value="1234")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV", desired_value="135")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode", desired_value="24680")
-    helper.save_screenshot(filename=config.target_app['screenshots']['payment'])
+    helper.save_screenshot(filename=screenshots['payment'])
     log_stdout("Appium - Submit payment info.")
     helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
 
@@ -208,7 +208,7 @@ def run_app_automation(config: AppiumConfig, udid: str):
         driver.implicitly_wait(time_to_wait=config.timeouts['implicit_wait'])
         log_stdout("Starting app interactions.")
         helper=AppiumHelper(timeout=config.timeouts['explicit_wait'], driver=driver)
-        interact_with_app(config=config, helper=helper)
+        interact_with_app(helper=helper, screenshots=config.target_app['screenshots'])
         log_stdout("Finished app interactions.")
 
     except AlarmTimeoutException as e:

@@ -396,9 +396,10 @@ run_appium_interactions_cafe_ios()
   # PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_ios.py "${INSTANCE_SERVICES_IP}"
   # log_stdout 'Finished automated Appium interactions.'
   log_warn 'Skipping Appium interactions on iOS for now.'
-  log_stdout 'Pausing for 10 seconds to simulate interactions.'
-  sleep 10
-  log_stdout 'Paused for 10 seconds to simulate interactions'
+  local TEMP_WORKAROUND_SLEEP_TIME='90'
+  log_stdout "Pausing for ${TEMP_WORKAROUND_SLEEP_TIME} seconds to simulate interactions."
+  sleep "${TEMP_WORKAROUND_SLEEP_TIME}"
+  log_stdout "Paused for ${TEMP_WORKAROUND_SLEEP_TIME} seconds to simulate interactions."
 }
 
 run_appium_interactions_template_android()

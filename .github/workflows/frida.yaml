@@ -101,7 +101,7 @@ jobs:
           elif [ "${{ matrix.os }}" = 'self-hosted' ] &&
             does_instance_exist "${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE}" &&
             is_instance_on "${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE}"; then
-            log_stdout "Instance ${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE} is already on."
+            log_info "Instance ${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE} is already on."
           else
             wait_until_available_cores "${{ matrix.default_corellium_project }}" '6'
           fi
@@ -117,20 +117,20 @@ jobs:
             [  "${{ matrix.corellium-os }}" = 'iOS' ] &&
             does_instance_exist "${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE}"; then
             start_instance "${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE}"
-            log_stdout "Started instance ${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE}."
+            log_info "Started instance ${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE}."
             echo "CORELLIUM_INSTANCE_ID=${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE}" >> "${GITHUB_ENV}"
-            log_stdout 'Saved existing instance ID as environmental variable.'
+            log_info 'Saved existing instance ID as environmental variable.'
           else
-            log_stdout "Creating ephemeral instance."
+            log_info "Creating ephemeral instance."
             CREATED_CORELLIUM_INSTANCE_ID="$(create_instance \
               "${{ matrix.hardware_flavor }}" \
               "${{ matrix.firmware_version }}" \
               "${{ matrix.firmware_build }}" \
               "${{ matrix.default_corellium_project }}" \
               "${CORELLIUM_INSTANCE_NAME_PREFIX}")"
-            log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
+            log_info "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
             echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
-            log_stdout 'Saved ephemeral instance ID as environmental variable.'
+            log_info 'Saved ephemeral instance ID as environmental variable.'
           fi
       - name: Install additional runner dependencies
         run: |
@@ -213,7 +213,7 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
-            log_stdout 'CORELLIUM_INSTANCE_ID is not set.'
+            log_info 'CORELLIUM_INSTANCE_ID is not set.'
           else
             disconnect_from_instance \
               "${CORELLIUM_INSTANCE_ID}" \
@@ -227,14 +227,14 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
-            log_stdout 'CORELLIUM_INSTANCE_ID is not set.'
+            log_info 'CORELLIUM_INSTANCE_ID is not set.'
           elif ! does_instance_exist "${CORELLIUM_INSTANCE_ID}"; then
-            log_stdout "Instance ${CORELLIUM_INSTANCE_ID} does not exist."
+            log_info "Instance ${CORELLIUM_INSTANCE_ID} does not exist."
           elif [ "${CORELLIUM_INSTANCE_ID}" = "${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE}" ]; then
-            log_stdout "Ready to stop iOS instance ${CORELLIUM_INSTANCE_ID} on Desktop Appliance."
+            log_info "Ready to stop iOS instance ${CORELLIUM_INSTANCE_ID} on Desktop Appliance."
             stop_instance "${CORELLIUM_INSTANCE_ID}"
           else
-            log_stdout "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
+            log_info "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
             stop_instance "${CORELLIUM_INSTANCE_ID}" || true
             delete_instance "${CORELLIUM_INSTANCE_ID}"
           fi

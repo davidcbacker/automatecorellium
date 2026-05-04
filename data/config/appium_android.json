@@ -7,10 +7,10 @@
     "package_name": "com.corellium.cafe",
     "activity": ".ui.activities.MainActivity",
     "screenshots": {
-      "login": "cafe_login_page.png",
-      "blog": "cafe_blog_page.png",
-      "customer": "cafe_customer_page.png",
-      "payment": "cafe_payment_page.png"
+      "login": "corellium_cafe_login_page.png",
+      "blog": "corellium_cafe_blog_page.png",
+      "customer": "corellium_cafe_customer_page.png",
+      "payment": "corellium_cafe_payment_page.png"
     }
   },
   "appium_server": {

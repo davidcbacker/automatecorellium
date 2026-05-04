@@ -5,10 +5,10 @@
 check_env_vars()
 {
   if [ -z "${CORELLIUM_API_ENDPOINT}" ]; then
-    log_error 'CORELLIUM_API_ENDPOINT not set.'
+    log_error 'CORELLIUM_API_ENDPOINT unset or empty.'
     exit 1
   elif [ -z "${CORELLIUM_API_TOKEN}" ]; then
-    log_error 'CORELLIUM_API_TOKEN not set.'
+    log_error 'CORELLIUM_API_TOKEN unset or empty.'
     exit 1
   fi
 }
@@ -59,14 +59,14 @@ log_error()
 
 log_warn()
 {
-  MAKE_CONSOLE_YELLOW="$(tput bold && tput setaf 6)"
+  MAKE_CONSOLE_CYAN="$(tput bold && tput setaf 6)"
   MAKE_CONSOLE_NORMAL="$(tput sgr0)"
   local FRIENDLY_DATE
   FRIENDLY_DATE="$(date +'%Y-%m-%dT%H:%M:%S')"
   if [ "$#" -gt 0 ]; then
     for arg in "$@"; do
       printf '%s[!] %s WARN: %s\n%s' \
-        "${MAKE_CONSOLE_YELLOW}" \
+        "${MAKE_CONSOLE_CYAN}" \
         "${FRIENDLY_DATE}" \
         "${arg}" \
         "${MAKE_CONSOLE_NORMAL}" \
@@ -86,6 +86,19 @@ does_instance_exist()
     return 0
   else
     log_warn "Instance ${INSTANCE_ID} does not exist."
+    return 1
+  fi
+}
+
+is_instance_on()
+{
+  local INSTANCE_ID="${1:?}"
+  local INSTANCE_STATE_ON='on'
+  if corellium instance get --instance "${INSTANCE_ID}" 2> /dev/null |
+    jq -e --arg state_on "${INSTANCE_STATE_ON}" 'select(.state == $state_on)' > /dev/null; then
+    return 0
+  else
+    log_warn "Instance ${INSTANCE_ID} is not ${INSTANCE_STATE_ON}."
     return 1
   fi
 }
@@ -846,6 +859,29 @@ connect_to_vpn_for_instance()
   log_stdout 'Successful ping to the instance services IP.'
 }
 
+connect_to_instance()
+{
+  local INSTANCE_ID="${1:?}"
+  local INSTANCE_FLAVOR
+  INSTANCE_FLAVOR="${2:-"$(get_instance_flavor "${INSTANCE_ID}")"}"
+  case "${INSTANCE_FLAVOR}" in
+    ranchu)
+      connect_with_adb "${INSTANCE_ID}"
+      ;;
+    ipad* | iphone*)
+      [ "$(uname -s)" = 'Darwin' ] &&
+        export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
+      run_usbfluxd_and_dependencies
+      add_instance_to_usbfluxd "${INSTANCE_ID}"
+      verify_usbflux_connection "${INSTANCE_ID}"
+      ;;
+    *)
+      log_error "Unknown flavor type ${INSTANCE_FLAVOR}."
+      exit 1
+      ;;
+  esac
+}
+
 connect_with_adb()
 {
   local INSTANCE_ID="${1:?}"
@@ -860,9 +896,9 @@ connect_with_adb()
     return
   }
 
-  log_stdout "Connecting over adb to ${ADB_CONNECT_SOCKET}."
+  log_stdout "Connecting over adb to ${INSTANCE_SERVICES_IP}."
   adb connect "${ADB_CONNECT_SOCKET}"
-  log_stdout "Connected over adb to ${ADB_CONNECT_SOCKET}."
+  log_stdout "Connected over adb to ${INSTANCE_SERVICES_IP}."
   log_stdout 'Finding connected adb device.'
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" || {
     log_error "Unable to connect to ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
@@ -870,6 +906,27 @@ connect_with_adb()
     exit 1
   }
   log_stdout 'Found connected adb device.'
+}
+
+disconnect_from_instance()
+{
+  local INSTANCE_ID="${1:?}"
+  local INSTANCE_FLAVOR
+  INSTANCE_FLAVOR="${2:-"$(get_instance_flavor "${INSTANCE_ID}")"}"
+  case "${INSTANCE_FLAVOR}" in
+    ranchu)
+      disconnect_with_adb "${INSTANCE_ID}"
+      ;;
+    ipad* | iphone*)
+      [ "$(uname -s)" = 'Darwin' ] &&
+        export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
+      delete_instance_from_usbfluxd "${INSTANCE_ID}"
+      ;;
+    *)
+      log_error "Unknown flavor type ${INSTANCE_FLAVOR}."
+      exit 1
+      ;;
+  esac
 }
 
 disconnect_with_adb()
@@ -886,9 +943,9 @@ disconnect_with_adb()
     return
   }
 
-  log_stdout "Disconnecting over adb from ${ADB_CONNECT_SOCKET}."
+  log_stdout "Disconnecting over adb from ${INSTANCE_SERVICES_IP}."
   adb disconnect "${ADB_CONNECT_SOCKET}"
-  log_stdout "Disconnected over adb from ${ADB_CONNECT_SOCKET}."
+  log_stdout "Disconnected over adb from ${INSTANCE_SERVICES_IP}."
   log_stdout 'Looking for lingering adb connection.'
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" && {
     log_error "Unable to disconnect from ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
@@ -1056,12 +1113,14 @@ remote_code_execution_with_adb()
 {
   local TARGET_SERVICES_IP="${1:?}"
   local COMMAND_TO_EXECUTE="${2:?}"
+  local TARGET_ADB_PORT='5001'
+  local TARGET_ADB_SOCKET="${TARGET_SERVICES_IP}:${TARGET_ADB_PORT}"
   log_stdout "Executing ${COMMAND_TO_EXECUTE} on device at ${TARGET_SERVICES_IP}."
   is_services_ip_conneted_with_adb "${TARGET_SERVICES_IP}" || {
     log_error "Cannot find adb connection to ${TARGET_SERVICES_IP}."
     exit 1
   }
-  adb shell su root "${COMMAND_TO_EXECUTE}" || {
+  adb -s "${TARGET_ADB_SOCKET}" shell su root "${COMMAND_TO_EXECUTE}" || {
     log_error 'Failed to execute remote command with ADB.'
     exit 1
   }

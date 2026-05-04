@@ -285,15 +285,25 @@ wait_for_matrix_assessment_status()
 
 run_appium_server()
 {
-  log_info 'Starting appium server.'
-  command -v appium > /dev/null || {
+  local APPIUM_SERVER_IP='127.0.0.1'
+  local APPIUM_SERVER_PORT='4723'
+  local APPIUM_SERVER_SOCKET="${APPIUM_SERVER_IP:?}:${APPIUM_SERVER_PORT}"
+  local APPIUM_SERVER_STATUS_URL="http://${APPIUM_SERVER_SOCKET}/status"
+  if ! command -v appium > /dev/null; then
     log_error 'Cannot find appium in PATH.'
     exit 1
-  }
-  appium &
-  until curl --silent http://127.0.0.1:4723/status |
-    jq -e '.value.ready == true' > /dev/null; do sleep 0.1; done
-  log_info 'Started appium server.'
+  elif curl --silent --max-time 2 "${APPIUM_SERVER_STATUS_URL}"; then
+    log_info "Found a healthy appium server at ${APPIUM_SERVER_SOCKET}."
+  elif lsof -i :"${APPIUM_SERVER_PORT}"; then
+    log_error "Cannot find a healthy appium server, but ${APPIUM_SERVER_PORT} is being used."
+    exit 1
+  else
+    log_info 'Starting appium server.'
+    appium &
+    until curl --silent "${APPIUM_SERVER_STATUS_URL}" |
+      jq -e '.value.ready == true' > /dev/null; do sleep 0.1; done
+    log_info 'Started appium server.'
+  fi
 }
 
 open_appium_session()

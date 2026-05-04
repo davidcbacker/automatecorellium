@@ -1,0 +1,20 @@
+{
+  "target_app": {
+    "package_name": "com.corellium.Cafe",
+    "screenshots": {
+      "login": "corellium_cafe_login_page.png",
+      "blog": "corellium_cafe_blog_page.png",
+      "order": "corellium_cafe_order_page.png",
+    }
+  },
+  "appium_server": {
+    "ip": "127.0.0.1",
+    "port": "4723"
+  },
+  "timeouts": {
+    "adb_exec": 40000,
+    "automation_alarm": 120,
+    "implicit_wait": 5,
+    "explicit_wait": 20
+  }
+}

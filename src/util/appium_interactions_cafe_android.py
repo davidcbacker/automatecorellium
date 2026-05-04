@@ -34,7 +34,7 @@ class AppiumHelper:
         )
 
 
-    def click_when_ready(self, by, value):
+    def click_when_ready(self, by: str, value: str):
         '''Wait until an element is clickable then click it'''
         element = self.wait_until_clickable(by=by, value=value)
         element.click()
@@ -48,7 +48,7 @@ class AppiumHelper:
         log_stdout("Appium - Saved screenshot.")
 
 
-    def set_element_value(self, by, value, desired_value):
+    def set_element_value(self, by: str, value: str, desired_value: str):
         '''Find an element, send keys, then wait until element value'''
         try:
             element = self.driver.find_element(by=by, value=value)
@@ -60,7 +60,7 @@ class AppiumHelper:
             sys.exit(1)
 
 
-    def wait_until_clickable(self, by, value):
+    def wait_until_clickable(self, by: str, value: str):
         '''Wait until an element is clickable then return the element'''
         try:
             locator = (by, value)
@@ -72,7 +72,7 @@ class AppiumHelper:
             sys.exit(1)
 
 
-    def wait_until_visible(self, by, value):
+    def wait_until_visible(self, by: str, value: str):
         '''Wait until an element is visible then return the element'''
         try:
             locator = (by, value)
@@ -84,7 +84,7 @@ class AppiumHelper:
             sys.exit(1)
 
 
-    def wait_until_element_value(self, by, value, desired_value):
+    def wait_until_element_value(self, by: str, value: str, desired_value):
         '''Wait until text is present in an element value then return the elemeent'''
         try:
             locator = (by, value)

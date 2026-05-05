@@ -19,7 +19,7 @@
   },
   "timeouts": {
     "adb_exec": 40000,
-    "automation_alarm": 120,
+    "automation_alarm": 90,
     "implicit_wait": 5,
     "explicit_wait": 20
   }

@@ -2,7 +2,7 @@ name: Scan with Corellium MATRIX
 
 on:
   schedule:
-    - cron: "17 */6 * * *"
+    - cron: "17 */12 * * *"
   workflow_call:
   workflow_dispatch:
 
@@ -106,16 +106,16 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
         run: |
           source ./src/functions.sh && set -euo pipefail
-          log_stdout "Creating instance."
+          log_info "Creating instance."
           CREATED_CORELLIUM_INSTANCE_ID="$(create_instance \
             "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" \
             "${{ vars.MATRIX_DEFAULT_FIRMWARE_VERSION }}" \
             "${{ vars.MATRIX_DEFAULT_FIRMWARE_BUILD }}" \
             "${{ matrix.default_corellium_project }}" \
             "${CORELLIUM_INSTANCE_NAME_PREFIX}")"
-          log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
+          log_info "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
           echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
-          log_stdout 'Updated environmental variables for ephemeral instance.'
+          log_info 'Updated environmental variables for ephemeral instance.'
       - name: Install additional runner dependencies
         run: |
           source ./src/functions.sh && set -euo pipefail
@@ -144,19 +144,13 @@ jobs:
           connect_to_vpn_for_instance \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ env.VPN_CONFIG_PATH }}"
-      - name: Connect to device
+      - name: Connect to instance
         timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail
-          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
-            connect_with_adb "${CORELLIUM_INSTANCE_ID}"
-          else
-            [ "$(uname -s)" = 'Darwin' ] &&
-              export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
-            run_usbfluxd_and_dependencies
-            add_instance_to_usbfluxd "${CORELLIUM_INSTANCE_ID}"
-            verify_usbflux_connection "${CORELLIUM_INSTANCE_ID}"
-          fi
+          connect_to_instance \
+            "${CORELLIUM_INSTANCE_ID}" \
+            "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}"
       - name: Install Corellium Cafe from URL
         timeout-minutes: 5
         env:
@@ -175,18 +169,18 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           run_appium_server
-          log_stdout 'Opening Appium session.'
+          log_info 'Opening Appium session.'
           OPEN_APPIUM_SESSION_ID="$(open_appium_session \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
             "${CORELLIUM_CAFE_ACTIVITY}")"
-          log_stdout "Opened Appium session ${OPEN_APPIUM_SESSION_ID}."
+          log_info "Opened Appium session ${OPEN_APPIUM_SESSION_ID}."
           sleep 5
-          log_stdout "Closing Appium session ${OPEN_APPIUM_SESSION_ID}."
+          log_info "Closing Appium session ${OPEN_APPIUM_SESSION_ID}."
           close_appium_session "${OPEN_APPIUM_SESSION_ID}"
-          log_stdout "Closed Appium session ${OPEN_APPIUM_SESSION_ID}."
-      - name: Run MATRIX assessment
-        id: matrix-run-1
+          log_info "Closed Appium session ${OPEN_APPIUM_SESSION_ID}."
+      - name: MATRIX scan
+        id: matrix-scan
         timeout-minutes: 30
         continue-on-error: true
         env:
@@ -198,14 +192,14 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
             "${MATRIX_WORDLIST_ID}"
-      - name: Retry MATRIX assessment if failed
-        id: matrix-run-2
-        if: steps.matrix-run-1.outcome == 'failure'
+      - name: MATRIX scan retry 1
+        id: matrix-scan-retry-1
+        if: steps.matrix-scan.outcome == 'failure'
         timeout-minutes: 30
         continue-on-error: true
         env:
@@ -216,14 +210,50 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
             "${MATRIX_WORDLIST_ID}"
-      - name: Retry MATRIX assessment if failed again
-        id: matrix-run-3
-        if: steps.matrix-run-2.outcome == 'failure'
+      - name: MATRIX scan retry 2
+        id: matrix-scan-retry-2
+        if: steps.matrix-scan-retry-1.outcome == 'failure'
+        timeout-minutes: 30
+        continue-on-error: true
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
+          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
+          MATRIX_WORDLIST_PATH: './data/wordlist.txt'
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          source ./src/functions_matrix.sh
+          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          run_full_matrix_assessment \
+            "${CORELLIUM_INSTANCE_ID}" \
+            "${CORELLIUM_CAFE_PACKAGE}" \
+            "${MATRIX_WORDLIST_ID}"
+      - name: MATRIX scan retry 3
+        id: matrix-scan-retry-3
+        if: steps.matrix-scan-retry-2.outcome == 'failure'
+        timeout-minutes: 30
+        continue-on-error: true
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
+          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
+          MATRIX_WORDLIST_PATH: './data/wordlist.txt'
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          source ./src/functions_matrix.sh
+          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          run_full_matrix_assessment \
+            "${CORELLIUM_INSTANCE_ID}" \
+            "${CORELLIUM_CAFE_PACKAGE}" \
+            "${MATRIX_WORDLIST_ID}"
+      - name: MATRIX scan retry 4
+        id: matrix-scan-retry-4
+        if: steps.matrix-scan-retry-3.outcome == 'failure'
         timeout-minutes: 30
         continue-on-error: false
         env:
@@ -234,7 +264,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
@@ -248,15 +278,15 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
-          log_stdout 'Compressing MATRIX runtime artifacts.'
+          log_info 'Compressing MATRIX runtime artifacts.'
           compress_matrix_runtime_artifacts "${CORELLIUM_INSTANCE_ID}"
-          log_stdout 'Compressed MATRIX runtime artifacts.'
-          log_stdout 'Downloading MATRIX runtime artifacts from VM to CI runner.'
+          log_info 'Compressed MATRIX runtime artifacts.'
+          log_info 'Downloading MATRIX runtime artifacts from VM to CI runner.'
           download_file_to_local_path \
             "${CORELLIUM_INSTANCE_ID}" \
             "${MATRIX_INSTANCE_ARTIFACTS_PATH}" \
             "${MATRIX_RUNNER_ARTIFACTS_PATH}"
-          log_stdout 'Downloaded MATRIX runtime artifacts from VM to CI runner.'
+          log_info 'Downloaded MATRIX runtime artifacts from VM to CI runner.'
           ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
       - name: Disconnect from device
@@ -265,13 +295,11 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
-            log_stdout 'CORELLIUM_INSTANCE_ID is not set.'
-          elif [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
-            disconnect_with_adb "${CORELLIUM_INSTANCE_ID}"
+            log_info 'CORELLIUM_INSTANCE_ID is not set.'
           else
-            [ "$(uname -s)" = 'Darwin' ] &&
-              export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
-            delete_instance_from_usbfluxd "${CORELLIUM_INSTANCE_ID}"
+            disconnect_from_instance \
+              "${CORELLIUM_INSTANCE_ID}" \
+              "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}"
           fi
       - name: Delete instance
         if: always()
@@ -282,9 +310,9 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
-            log_stdout 'CORELLIUM_INSTANCE_ID is not set.'
+            log_info 'CORELLIUM_INSTANCE_ID is not set.'
           elif does_instance_exist "${CORELLIUM_INSTANCE_ID}"; then
-            log_stdout "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
+            log_info "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
             stop_instance "${CORELLIUM_INSTANCE_ID}" || true
             delete_instance "${CORELLIUM_INSTANCE_ID}"
           fi

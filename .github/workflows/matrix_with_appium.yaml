@@ -113,16 +113,16 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
         run: |
           source ./src/functions.sh && set -euo pipefail
-          log_stdout "Creating instance."
+          log_info "Creating instance."
           CREATED_CORELLIUM_INSTANCE_ID="$(create_instance \
             "${{ matrix.hardware_flavor }}" \
             "${{ matrix.firmware_version }}" \
             "${{ matrix.firmware_build }}" \
             "${{ matrix.default_corellium_project }}" \
             "${CORELLIUM_INSTANCE_NAME_PREFIX}")"
-          log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
+          log_info "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
           echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
-          log_stdout 'Updated environmental variables for ephemeral instance.'
+          log_info 'Updated environmental variables for ephemeral instance.'
       - name: Install additional runner dependencies
         run: |
           source ./src/functions.sh && set -euo pipefail
@@ -177,16 +177,16 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           run_appium_server
-          log_stdout 'Opening Appium session.'
+          log_info 'Opening Appium session.'
           OPEN_APPIUM_SESSION_ID="$(open_appium_session \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_package_name }}" \
             "${CORELLIUM_CAFE_ACTIVITY}")"
-          log_stdout "Opened Appium session ${OPEN_APPIUM_SESSION_ID}."
+          log_info "Opened Appium session ${OPEN_APPIUM_SESSION_ID}."
           sleep 5
-          log_stdout "Closing Appium session ${OPEN_APPIUM_SESSION_ID}."
+          log_info "Closing Appium session ${OPEN_APPIUM_SESSION_ID}."
           close_appium_session "${OPEN_APPIUM_SESSION_ID}"
-          log_stdout "Closed Appium session ${OPEN_APPIUM_SESSION_ID}."
+          log_info "Closed Appium session ${OPEN_APPIUM_SESSION_ID}."
       - name: MATRIX scan
         id: matrix-scan
         timeout-minutes: 30
@@ -200,7 +200,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_package_name }}" \
@@ -218,7 +218,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_package_name }}" \
@@ -236,7 +236,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_package_name }}" \
@@ -254,7 +254,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_package_name }}" \
@@ -272,7 +272,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_stdout "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_package_name }}" \
@@ -287,15 +287,15 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
-          log_stdout 'Compressing MATRIX runtime artifacts.'
+          log_info 'Compressing MATRIX runtime artifacts.'
           compress_matrix_runtime_artifacts "${CORELLIUM_INSTANCE_ID}"
-          log_stdout 'Compressed MATRIX runtime artifacts.'
-          log_stdout 'Downloading MATRIX runtime artifacts from VM to CI runner.'
+          log_info 'Compressed MATRIX runtime artifacts.'
+          log_info 'Downloading MATRIX runtime artifacts from VM to CI runner.'
           download_file_to_local_path \
             "${CORELLIUM_INSTANCE_ID}" \
             "${MATRIX_INSTANCE_ARTIFACTS_PATH}" \
             "${MATRIX_RUNNER_ARTIFACTS_PATH}"
-          log_stdout 'Downloaded MATRIX runtime artifacts from VM to CI runner.'
+          log_info 'Downloaded MATRIX runtime artifacts from VM to CI runner.'
           ls -la "${MATRIX_RUNNER_ARTIFACTS_PATH}"
           sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
       - name: Disconnect from device
@@ -304,7 +304,7 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
-            log_stdout 'CORELLIUM_INSTANCE_ID is not set.'
+            log_info 'CORELLIUM_INSTANCE_ID is not set.'
           else
             disconnect_from_instance \
               "${CORELLIUM_INSTANCE_ID}" \
@@ -319,9 +319,9 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
-            log_stdout 'CORELLIUM_INSTANCE_ID is not set.'
+            log_info 'CORELLIUM_INSTANCE_ID is not set.'
           elif does_instance_exist "${CORELLIUM_INSTANCE_ID}"; then
-            log_stdout "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
+            log_info "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
             stop_instance "${CORELLIUM_INSTANCE_ID}" || true
             delete_instance "${CORELLIUM_INSTANCE_ID}"
           fi

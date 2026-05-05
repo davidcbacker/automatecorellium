@@ -13,7 +13,7 @@ check_env_vars()
   fi
 }
 
-log_stdout()
+log_info()
 {
   MAKE_CONSOLE_BLUE="$(tput setaf 4)"
   MAKE_CONSOLE_NORMAL="$(tput sgr0)"
@@ -28,7 +28,7 @@ log_stdout()
         "${MAKE_CONSOLE_NORMAL}"
     done
   else
-    log_error 'No argument supplied to log_stdout.'
+    log_error 'No argument supplied to log_info.'
     exit 1
   fi
 }
@@ -133,7 +133,7 @@ wait_until_available_cores()
     log_error 'Project ID must be set.'
     exit 1
   }
-  log_stdout "Waiting until ${REQUIRED_CORES} CPU cores are available."
+  log_info "Waiting until ${REQUIRED_CORES} CPU cores are available."
   local AVAILABLE_CORES
   AVAILABLE_CORES="$(get_available_cores "${PROJECT_ID}")"
   while [ "${AVAILABLE_CORES:-0}" -lt "${REQUIRED_CORES}" ]; do
@@ -141,7 +141,7 @@ wait_until_available_cores()
     sleep "${WAIT_CORES_SLEEP_TIME_SECONDS}"
     AVAILABLE_CORES="$(get_available_cores "${PROJECT_ID}")"
   done
-  log_stdout "${AVAILABLE_CORES} CPU cores are available."
+  log_info "${AVAILABLE_CORES} CPU cores are available."
 }
 
 create_instance()
@@ -218,15 +218,15 @@ delete_instance()
 {
   local INSTANCE_ID="${1:?}"
   does_instance_exist "${INSTANCE_ID}" || {
-    log_stdout "Instance ${INSTANCE_ID} does not exist, so nothing to delete."
+    log_info "Instance ${INSTANCE_ID} does not exist, so nothing to delete."
     return
   }
-  log_stdout "Deleting instance ${INSTANCE_ID}."
+  log_info "Deleting instance ${INSTANCE_ID}."
   corellium instance delete "${INSTANCE_ID}" > /dev/null || {
     log_error "Failed to delete instance ${INSTANCE_ID}."
     exit 1
   }
-  log_stdout "Deleted instance ${INSTANCE_ID}."
+  log_info "Deleted instance ${INSTANCE_ID}."
 }
 
 start_instance()
@@ -237,21 +237,21 @@ start_instance()
   does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in
     "${INSTANCE_STATUS_ON}")
-      log_stdout "Instance ${INSTANCE_ID} is already ${INSTANCE_STATUS_ON}."
+      log_info "Instance ${INSTANCE_ID} is already ${INSTANCE_STATUS_ON}."
       ;;
     "${INSTANCE_STATUS_CREATING}")
-      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_CREATING}. Waiting for ${INSTANCE_STATUS_ON} state."
+      log_info "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_CREATING}. Waiting for ${INSTANCE_STATUS_ON} state."
       wait_for_instance_status "${INSTANCE_ID}" "${INSTANCE_STATUS_ON}"
-      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
+      log_info "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
       ;;
     '')
       log_error "Failed to get status for instance ${INSTANCE_ID}."
       exit 1
       ;;
     *)
-      log_stdout "Starting instance ${INSTANCE_ID}."
+      log_info "Starting instance ${INSTANCE_ID}."
       corellium instance start "${INSTANCE_ID}" --wait > /dev/null
-      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
+      log_info "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
       ;;
   esac
 }
@@ -265,24 +265,24 @@ stop_instance()
   does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in
     "${INSTANCE_STATUS_OFF}")
-      log_stdout "Instance ${INSTANCE_ID} is already ${INSTANCE_STATUS_OFF}."
+      log_info "Instance ${INSTANCE_ID} is already ${INSTANCE_STATUS_OFF}."
       ;;
     "${INSTANCE_STATUS_CREATING}")
-      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_CREATING}. Waiting for ${INSTANCE_STATUS_ON} state."
+      log_info "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_CREATING}. Waiting for ${INSTANCE_STATUS_ON} state."
       wait_for_instance_status "${INSTANCE_ID}" "${INSTANCE_STATUS_ON}"
-      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
-      log_stdout "Stopping instance ${INSTANCE_ID}."
+      log_info "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_ON}."
+      log_info "Stopping instance ${INSTANCE_ID}."
       corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
-      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_OFF}."
+      log_info "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_OFF}."
       ;;
     '')
       log_error "Failed to get status for instance ${INSTANCE_ID}."
       exit 1
       ;;
     *)
-      log_stdout "Stopping instance ${INSTANCE_ID}."
+      log_info "Stopping instance ${INSTANCE_ID}."
       corellium instance stop "${INSTANCE_ID}" --wait > /dev/null
-      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_OFF}."
+      log_info "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_OFF}."
       ;;
   esac
 }
@@ -294,23 +294,23 @@ soft_stop_instance()
   does_instance_exist "${INSTANCE_ID}" || exit 1
   case "$(get_instance_status "${INSTANCE_ID}")" in
     "${INSTANCE_STATUS_OFF}")
-      log_stdout "Instance ${INSTANCE_ID} is already ${INSTANCE_STATUS_OFF}."
+      log_info "Instance ${INSTANCE_ID} is already ${INSTANCE_STATUS_OFF}."
       ;;
     '')
       log_error "Failed to get status for instance ${INSTANCE_ID}."
       exit 1
       ;;
     *)
-      log_stdout "Stopping instance ${INSTANCE_ID}."
+      log_info "Stopping instance ${INSTANCE_ID}."
       check_env_vars
       curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/stop" \
         -H "Accept: application/json" \
         -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
         -H "Content-Type: application/json" \
         -d '{"soft":true}'
-      log_stdout "Soft stopped instance ${INSTANCE_ID}. Waiting for ${INSTANCE_STATUS_OFF} state."
+      log_info "Soft stopped instance ${INSTANCE_ID}. Waiting for ${INSTANCE_STATUS_OFF} state."
       wait_for_instance_status "${INSTANCE_ID}" "${INSTANCE_STATUS_OFF}"
-      log_stdout "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_OFF}."
+      log_info "Instance ${INSTANCE_ID} is ${INSTANCE_STATUS_OFF}."
       ;;
   esac
 }
@@ -409,7 +409,7 @@ wait_until_agent_ready()
   local INSTANCE_STATUS_ON='on'
   local PROJECT_ID INSTANCE_STATUS
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
-  log_stdout 'Waiting until virtual device agent is ready.'
+  log_info 'Waiting until virtual device agent is ready.'
   # pass project ID into is_agent_ready() to reduce the number of API calls
   while ! is_agent_ready "${INSTANCE_ID}" "${PROJECT_ID}"; do
     INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
@@ -419,13 +419,13 @@ wait_until_agent_ready()
         ;;
       "${INSTANCE_STATUS_ON}") ;;
       *)
-        log_stdout "Instance is ${INSTANCE_STATUS} not ${INSTANCE_STATUS_ON}."
+        log_info "Instance is ${INSTANCE_STATUS} not ${INSTANCE_STATUS_ON}."
         exit 1
         ;;
     esac
     sleep "${AGENT_READY_SLEEP_TIME}"
   done
-  log_stdout 'Virtual device agent is ready.'
+  log_info 'Virtual device agent is ready.'
 }
 
 kill_app()
@@ -434,12 +434,12 @@ kill_app()
   local INSTANCE_ID="${1:?}"
   local APP_BUNDLE_ID="${2:?}"
   if [ "$(is_app_running "${INSTANCE_ID}" "${APP_BUNDLE_ID}")" = 'true' ]; then
-    log_stdout "Killing running app ${APP_BUNDLE_ID}."
+    log_info "Killing running app ${APP_BUNDLE_ID}."
     if curl --insecure --silent -X POST \
       "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/app/apps/${APP_BUNDLE_ID}/kill" \
       -H "Accept: application/json" \
       -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"; then
-      log_stdout "Killed running app ${APP_BUNDLE_ID}."
+      log_info "Killed running app ${APP_BUNDLE_ID}."
     else
       log_error "Failed to kill app ${APP_BUNDLE_ID}."
       exit 1
@@ -467,15 +467,15 @@ install_app_from_url()
   local APP_FILENAME
   APP_FILENAME="$(basename "${APP_URL}")"
 
-  log_stdout "Downloading ${APP_FILENAME}."
+  log_info "Downloading ${APP_FILENAME}."
   curl --silent --output "${APP_FILENAME}" "${APP_URL}" || {
     log_error "Failed to download app ${APP_FILENAME}."
     exit 1
   }
-  log_stdout "Downloaded ${APP_FILENAME}."
-  log_stdout "Size on disk is $(du -k "${APP_FILENAME}" | cut -f1) KiB."
+  log_info "Downloaded ${APP_FILENAME}."
+  log_info "Size on disk is $(du -k "${APP_FILENAME}" | cut -f1) KiB."
 
-  log_stdout "Installing ${APP_FILENAME}."
+  log_info "Installing ${APP_FILENAME}."
   corellium apps install \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \
@@ -483,7 +483,7 @@ install_app_from_url()
     log_error "Failed to install app ${APP_FILENAME}."
     exit 1
   }
-  log_stdout "Installed ${APP_FILENAME}."
+  log_info "Installed ${APP_FILENAME}."
 }
 
 launch_app()
@@ -493,12 +493,12 @@ launch_app()
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   kill_app "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
-  log_stdout "Launching app ${APP_BUNDLE_ID}."
+  log_info "Launching app ${APP_BUNDLE_ID}."
   if corellium apps open \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \
     --bundle "${APP_BUNDLE_ID}" > /dev/null; then
-    log_stdout "Launched app ${APP_BUNDLE_ID}."
+    log_info "Launched app ${APP_BUNDLE_ID}."
   else
     log_error "Failed to launch app ${APP_BUNDLE_ID}."
     exit 1
@@ -508,9 +508,9 @@ launch_app()
 unlock_instance()
 {
   local INSTANCE_ID="${1:?}"
-  log_stdout "Unlocking instance ${INSTANCE_ID}."
+  log_info "Unlocking instance ${INSTANCE_ID}."
   corellium instance unlock --instance "${INSTANCE_ID}" > /dev/null
-  log_stdout "Unlocked instance ${INSTANCE_ID}."
+  log_info "Unlocked instance ${INSTANCE_ID}."
 }
 
 is_app_running()
@@ -526,7 +526,7 @@ is_app_running()
 delete_unauthorized_devices()
 {
   if [[ -z "${AUTHORIZED_INSTANCES}" ]]; then
-    log_stdout "Error: AUTHORIZED_INSTANCES is empty or unset."
+    log_info "Error: AUTHORIZED_INSTANCES is empty or unset."
     return 1
   fi
 
@@ -548,14 +548,14 @@ delete_unauthorized_devices()
   }
 
   [[ ${#ALL_EXISTING_DEVICES[@]} -eq 0 ]] && {
-    log_stdout "No devices exist, so nothing to delete."
+    log_info "No devices exist, so nothing to delete."
     return
   }
 
   local UNAUTHORIZED_DEVICES=()
   local IS_DEVICE_AUTHORIZED
   for EXISTING_DEVICE in "${ALL_EXISTING_DEVICES[@]}"; do
-    log_stdout "Checking ${EXISTING_DEVICE}."
+    log_info "Checking ${EXISTING_DEVICE}."
     IS_DEVICE_AUTHORIZED='false'
     for AUTHORIZED_DEVICE in "${INSTANCES_TO_KEEP[@]}"; do
       if [ "${EXISTING_DEVICE}" = "${AUTHORIZED_DEVICE}" ]; then
@@ -564,23 +564,23 @@ delete_unauthorized_devices()
       fi
     done
     if [ "${IS_DEVICE_AUTHORIZED}" = 'true' ]; then
-      log_stdout "Device ${EXISTING_DEVICE} is authorized."
+      log_info "Device ${EXISTING_DEVICE} is authorized."
     else
-      log_stdout "Device ${EXISTING_DEVICE} is unauthorized."
+      log_info "Device ${EXISTING_DEVICE} is unauthorized."
       UNAUTHORIZED_DEVICES+=("${EXISTING_DEVICE}")
     fi
   done
 
   [[ ${#UNAUTHORIZED_DEVICES[@]} -eq 0 ]] && {
-    log_stdout "All devices are authorized, so nothing to delete."
+    log_info "All devices are authorized, so nothing to delete."
     return
   }
 
-  log_stdout "Deleting unauthorized devices."
+  log_info "Deleting unauthorized devices."
   for DEVICE_TO_DELETE in "${UNAUTHORIZED_DEVICES[@]}"; do
     delete_instance "${DEVICE_TO_DELETE}"
   done
-  log_stdout "Deleted unauthorized devices."
+  log_info "Deleted unauthorized devices."
 }
 
 start_demo_instances()
@@ -662,9 +662,9 @@ save_vpn_config_to_local_path()
   local VPN_CONFIG_DOWNLOAD_PATH="${2:?}"
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
-  log_stdout "Saving ovpn profile to ${VPN_CONFIG_DOWNLOAD_PATH}."
+  log_info "Saving ovpn profile to ${VPN_CONFIG_DOWNLOAD_PATH}."
   corellium project vpnConfig --project "${PROJECT_ID}" --path "${VPN_CONFIG_DOWNLOAD_PATH}"
-  log_stdout "Saved ovpn profile to ${VPN_CONFIG_DOWNLOAD_PATH}."
+  log_info "Saved ovpn profile to ${VPN_CONFIG_DOWNLOAD_PATH}."
 }
 
 wait_for_instance_status()
@@ -717,11 +717,11 @@ wait_for_instance_status()
 
 install_openvpn_dependencies()
 {
-  log_stdout 'Installing openvpn.'
+  log_info 'Installing openvpn.'
   sudo apt-get -qq update
   sudo apt-get -qq install --assume-yes --no-install-recommends openvpn
   if command -v openvpn > /dev/null; then
-    log_stdout 'Installed openvpn.'
+    log_info 'Installed openvpn.'
   else
     log_error 'Failed to install openvpn dependency'
     exit 1
@@ -734,11 +734,11 @@ ensure_adb_dependency()
     log_error 'Cannot find adb dependency in PATH.'
     [ "$(uname -s)" = 'Darwin' ] && exit 1
     log_warn 'Attempting to install adb dependency.'
-    log_stdout 'Installing adb.'
+    log_info 'Installing adb.'
     sudo apt-get -qq update
     sudo apt-get -qq install adb
     if command -v adb > /dev/null; then
-      log_stdout 'Installed adb.'
+      log_info 'Installed adb.'
     else
       log_error 'Failed to install adb dependency.'
       exit 1
@@ -791,36 +791,36 @@ install_usbfluxd_and_dependencies()
     usbfluxctl
   )
 
-  log_stdout 'Installing usbfluxd apt-get dependencies.'
+  log_info 'Installing usbfluxd apt-get dependencies.'
   sudo apt-get -qq update
   sudo apt-get -qq install --assume-yes --no-install-recommends "${USBFLUXD_APT_DEPS[@]}"
-  log_stdout 'Installed usbfluxd apt-get dependencies.'
+  log_info 'Installed usbfluxd apt-get dependencies.'
 
-  log_stdout 'Installing usbfluxd compiled dependencies.'
+  log_info 'Installing usbfluxd compiled dependencies.'
   local COMPILE_TEMP_DIR COMPILE_DEP_NAME
   COMPILE_TEMP_DIR="$(mktemp -d)"
   cd "${COMPILE_TEMP_DIR}/" || exit 1
   for COMPILE_DEP_URL in "${USBFLUXD_COMPILE_DEP_URLS[@]}"; do
     COMPILE_DEP_NAME="$(basename "${COMPILE_DEP_URL}")"
-    log_stdout "Cloning ${COMPILE_DEP_NAME}."
+    log_info "Cloning ${COMPILE_DEP_NAME}."
     git clone --quiet "${COMPILE_DEP_URL}" "${COMPILE_DEP_NAME}"
     cd "${COMPILE_TEMP_DIR}/${COMPILE_DEP_NAME}/" || exit 1
-    log_stdout "Generating Makefile for ${COMPILE_DEP_NAME}."
+    log_info "Generating Makefile for ${COMPILE_DEP_NAME}."
     ./autogen.sh > /dev/null 2>&1
-    log_stdout "Compiling ${COMPILE_DEP_NAME}."
+    log_info "Compiling ${COMPILE_DEP_NAME}."
     make --jobs "$(nproc)" 2>&1 | grep 'Making all in ' || make --jobs "$(nproc)"
-    log_stdout "Installing ${COMPILE_DEP_NAME}."
+    log_info "Installing ${COMPILE_DEP_NAME}."
     sudo make install | grep '/usr/bin/install '
     cd "${COMPILE_TEMP_DIR}/" || exit 1
-    log_stdout "Deleting build directory for ${COMPILE_DEP_NAME}."
+    log_info "Deleting build directory for ${COMPILE_DEP_NAME}."
     rm -rf "${COMPILE_DEP_NAME:?}/"
-    log_stdout "Installed ${COMPILE_DEP_NAME} and cleaned up build directory."
+    log_info "Installed ${COMPILE_DEP_NAME} and cleaned up build directory."
   done
-  log_stdout 'Installed usbfluxd compiled dependencies.'
+  log_info 'Installed usbfluxd compiled dependencies.'
 
   for EXPECTED_BINARY in "${USBFLUXD_EXPECTED_BINARIES[@]}"; do
     if command -v "${EXPECTED_BINARY}" > /dev/null; then
-      log_stdout "Installed ${EXPECTED_BINARY} at $(command -v "${EXPECTED_BINARY}")."
+      log_info "Installed ${EXPECTED_BINARY} at $(command -v "${EXPECTED_BINARY}")."
     else
       log_error "Failed to install ${EXPECTED_BINARY}."
       exit 1
@@ -844,19 +844,19 @@ connect_to_vpn_for_instance()
   fi
 
   save_vpn_config_to_local_path "${INSTANCE_ID}" "${OVPN_CONFIG_PATH}"
-  log_stdout 'Connecting to Corellium project VPN.'
+  log_info 'Connecting to Corellium project VPN.'
   sudo openvpn --config "${OVPN_CONFIG_PATH}" &
-  log_stdout 'Connected to Corellium project VPN.'
+  log_info 'Connected to Corellium project VPN.'
 
   # Wait for the tunnel to establish, find the VPN IPv4 address, and test the connection
   until ip addr show tap0 > /dev/null 2>&1; do sleep 0.1; done
-  log_stdout 'Found the project VPN tap0 interface.'
+  log_info 'Found the project VPN tap0 interface.'
   local INSTANCE_VPN_IP
   INSTANCE_VPN_IP="$(ip addr show tap0 | grep 'inet ' | awk '{print $2}' | cut -d'/' -f1)"
   until ping -c1 "${INSTANCE_VPN_IP}"; do sleep 0.1; done
-  log_stdout 'Successful ping to the project VPN IP.'
+  log_info 'Successful ping to the project VPN IP.'
   until ping -c1 "${INSTANCE_SERVICES_IP}"; do sleep 0.1; done
-  log_stdout 'Successful ping to the instance services IP.'
+  log_info 'Successful ping to the instance services IP.'
 }
 
 connect_to_instance()
@@ -892,20 +892,20 @@ connect_with_adb()
 
   ensure_adb_dependency
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" && {
-    log_stdout "ADB is already connected with ${INSTANCE_SERVICES_IP}."
+    log_info "ADB is already connected with ${INSTANCE_SERVICES_IP}."
     return
   }
 
-  log_stdout "Connecting over adb to ${INSTANCE_SERVICES_IP}."
+  log_info "Connecting over adb to ${INSTANCE_SERVICES_IP}."
   adb connect "${ADB_CONNECT_SOCKET}"
-  log_stdout "Connected over adb to ${INSTANCE_SERVICES_IP}."
-  log_stdout 'Finding connected adb device.'
+  log_info "Connected over adb to ${INSTANCE_SERVICES_IP}."
+  log_info 'Finding connected adb device.'
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" || {
     log_error "Unable to connect to ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
     adb devices -l
     exit 1
   }
-  log_stdout 'Found connected adb device.'
+  log_info 'Found connected adb device.'
 }
 
 disconnect_from_instance()
@@ -939,20 +939,20 @@ disconnect_with_adb()
 
   ensure_adb_dependency
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" || {
-    log_stdout "ADB is already disconnected with ${INSTANCE_SERVICES_IP}."
+    log_info "ADB is already disconnected with ${INSTANCE_SERVICES_IP}."
     return
   }
 
-  log_stdout "Disconnecting over adb from ${INSTANCE_SERVICES_IP}."
+  log_info "Disconnecting over adb from ${INSTANCE_SERVICES_IP}."
   adb disconnect "${ADB_CONNECT_SOCKET}"
-  log_stdout "Disconnected over adb from ${INSTANCE_SERVICES_IP}."
-  log_stdout 'Looking for lingering adb connection.'
+  log_info "Disconnected over adb from ${INSTANCE_SERVICES_IP}."
+  log_info 'Looking for lingering adb connection.'
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" && {
     log_error "Unable to disconnect from ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
     adb devices -l
     exit 1
   }
-  log_stdout "Found no connected adb device at ${INSTANCE_SERVICES_IP}."
+  log_info "Found no connected adb device at ${INSTANCE_SERVICES_IP}."
 }
 
 is_services_ip_conneted_with_adb()
@@ -977,21 +977,21 @@ run_usbfluxd_and_dependencies()
   fi
   case "$(uname -s)" in
     Darwin)
-      log_stdout 'Starting usbfluxd.'
+      log_info 'Starting usbfluxd.'
       /Applications/USBFlux.app/Contents/Resources/usbfluxd -f &
-      log_stdout 'Started usbfluxd.'
+      log_info 'Started usbfluxd.'
       ;;
     Linux)
-      log_stdout 'Starting usbmuxd service.'
+      log_info 'Starting usbmuxd service.'
       sudo systemctl start usbmuxd
       sudo systemctl status usbmuxd
-      log_stdout 'Started usbmuxd service.'
-      log_stdout 'Started avahi-daemon.'
+      log_info 'Started usbmuxd service.'
+      log_info 'Started avahi-daemon.'
       sudo avahi-daemon &
-      log_stdout 'Starting avahi-daemon.'
-      log_stdout 'Starting usbfluxd.'
+      log_info 'Starting avahi-daemon.'
+      log_info 'Starting usbfluxd.'
       sudo usbfluxd -f -n &
-      log_stdout 'Started usbfluxd.'
+      log_info 'Started usbfluxd.'
       ;;
     *)
       log_error "Cannot run usbmuxd. Unknown kernel type."
@@ -1010,9 +1010,9 @@ add_instance_to_usbfluxd()
     log_error 'Cannot find usbfluxctl in local environment PATH.'
     exit 1
   }
-  log_stdout "Adding device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
+  log_info "Adding device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
   usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"
-  log_stdout "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
+  log_info "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd."
 }
 
 delete_instance_from_usbfluxd()
@@ -1026,9 +1026,9 @@ delete_instance_from_usbfluxd()
     log_error 'Cannot find usbfluxctl in local environment PATH.'
     exit 1
   }
-  log_stdout "Removing device at ${INSTANCE_USBFLUXD_SOCKET} from usbfluxd via usbfluxctl."
+  log_info "Removing device at ${INSTANCE_USBFLUXD_SOCKET} from usbfluxd via usbfluxctl."
   usbfluxctl del "${INSTANCE_USBFLUXD_SOCKET}"
-  log_stdout "Removed device at ${INSTANCE_USBFLUXD_SOCKET} from usbfluxd via usbfluxctl."
+  log_info "Removed device at ${INSTANCE_USBFLUXD_SOCKET} from usbfluxd via usbfluxctl."
 }
 
 verify_usbflux_connection()
@@ -1042,18 +1042,18 @@ verify_usbflux_connection()
     }
   done
   INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
-  log_stdout 'Checking for usb connection with idevice_id.'
+  log_info 'Checking for usb connection with idevice_id.'
   until idevice_id "${INSTANCE_UDID}"; do sleep 0.1; done
-  log_stdout 'Found usb connection with idevice_id.'
-  log_stdout 'Pairing to Corellium device with idevicepair.'
+  log_info 'Found usb connection with idevice_id.'
+  log_info 'Pairing to Corellium device with idevicepair.'
   until idevicepair --udid "${INSTANCE_UDID}" pair; do sleep 1; done
-  log_stdout 'Paired to Corellium device with idevicepair.'
-  log_stdout 'Validing pairing to Corellium device with idevicepair.'
+  log_info 'Paired to Corellium device with idevicepair.'
+  log_info 'Validing pairing to Corellium device with idevicepair.'
   idevicepair --udid "${INSTANCE_UDID}" validate || {
     log_error 'Failed to validate that device is paired to host.'
     exit 1
   }
-  log_stdout 'Validated pairing to Corellium device with idevicepair.'
+  log_info 'Validated pairing to Corellium device with idevicepair.'
 }
 
 is_app_running_on_instance()
@@ -1115,7 +1115,7 @@ remote_code_execution_with_adb()
   local COMMAND_TO_EXECUTE="${2:?}"
   local TARGET_ADB_PORT='5001'
   local TARGET_ADB_SOCKET="${TARGET_SERVICES_IP}:${TARGET_ADB_PORT}"
-  log_stdout "Executing ${COMMAND_TO_EXECUTE} on device at ${TARGET_SERVICES_IP}."
+  log_info "Executing ${COMMAND_TO_EXECUTE} on device at ${TARGET_SERVICES_IP}."
   is_services_ip_conneted_with_adb "${TARGET_SERVICES_IP}" || {
     log_error "Cannot find adb connection to ${TARGET_SERVICES_IP}."
     exit 1
@@ -1131,7 +1131,7 @@ remote_code_execution_with_ssh()
 {
   local TARGET_SERVICES_IP="${1:?}"
   local COMMAND_TO_EXECUTE="${2:?}"
-  log_stdout "Executing ${COMMAND_TO_EXECUTE} on device at ${TARGET_SERVICES_IP}."
+  log_info "Executing ${COMMAND_TO_EXECUTE} on device at ${TARGET_SERVICES_IP}."
   # TODO need to handle authentication with either password or project SSH key
   ssh "root@${TARGET_SERVICES_IP}" "${COMMAND_TO_EXECUTE}" || {
     log_error 'Failed to execute remote command with SSH.'

@@ -28,7 +28,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 @dataclass
 class AppiumConfig:
     'Configuration container for Appium-related settings.'
-    corellium: dict
     target_app: dict
     appium_server: dict
     timeouts: dict

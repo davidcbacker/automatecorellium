@@ -4,7 +4,7 @@
     "screenshots": {
       "login": "corellium_cafe_login_page.png",
       "blog": "corellium_cafe_blog_page.png",
-      "order": "corellium_cafe_order_page.png",
+      "order": "corellium_cafe_order_page.png"
     }
   },
   "appium_server": {

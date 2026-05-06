@@ -140,8 +140,8 @@ def interact_with_app(helper: AppiumHelper, screenshots: dict):
     helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
 
     log_stdout("Appium - Fill in customer info.")
-    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText", desired_value="Firstname")
-    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText", desired_value="Lastname")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText", desired_value="Myfirst")
+    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText", desired_value="Mylast")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText", desired_value="3216540987")
     helper.save_screenshot(filename=screenshots['customer'])
     log_stdout("Appium - Submit customer info.")

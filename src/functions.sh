@@ -473,8 +473,14 @@ install_app_from_url()
     exit 1
   }
   log_info "Downloaded ${APP_FILENAME}."
-  log_info "Size on disk is $(du -k "${APP_FILENAME}" | cut -f1) KiB."
-
+  log_info 'Checking download size.'
+  local MINIMUM_DOWNLOADED_FILE_SIZE_IN_KIB='16'
+  local DOWNLOADED_FILE_DISK_USAGE_IN_KIB="$(du -k "${APP_FILENAME}" | cut -f1)"
+  [ "${DOWNLOADED_FILE_DISK_USAGE}" -lt "${MINIMUM_DOWNLOADED_FILE_SIZE_IN_KIB}" ] && {
+    log_error "Downloaded ${DOWNLOADED_FILE_DISK_USAGE_IN_KIB} KiB, below the minimum of ${MINIMUM_DOWNLOADED_FILE_SIZE_IN_KIB} KiB."
+    exit 1
+  }
+  log_info "Size on disk is ${DOWNLOADED_FILE_DISK_USAGE} KiB."
   log_info "Installing ${APP_FILENAME}."
   corellium apps install \
     --instance "${INSTANCE_ID}" \

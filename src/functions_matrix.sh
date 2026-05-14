@@ -343,9 +343,23 @@ open_appium_session_ios()
   local INSTANCE_ID="${1:?}"
   local APP_PACKAGE_NAME="${2:?}"
   local DEFAULT_APPIUM_PORT='4723'
-  local DEFAULT_ADB_PORT='5001'
-  local INSTANCE_UDID APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
+  local DEFAULT_APPIUM_RUNNER_PORT='8100'
+  local INSTANCE_UDID INSTANCE_SERVICES_IP APPIUM_RUNNER_JSON_RESPONSE
+  local APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
   INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  local APPIUM_RUNNER_SOCKET="${INSTANCE_SERVICES_IP}:${DEFAULT_APPIUM_RUNNER_PORT}"
+
+  log_info "Confirming appium runner is active on instance at ${INSTANCE_SERVICES_IP}."
+  APPIUM_RUNNER_JSON_RESPONSE="$(curl --silent --retry 5 "http://${APPIUM_RUNNER_SOCKET}/status")" || {
+    log_error 'Failed to check appium runner status.'
+    exit 1
+  }
+  echo "${GET_APPIUM_SESSION_JSON_RESPONSE}" | jq -e '.value.ready == true' > /dev/null || {
+    log_error 'Bad status response from appium runner'
+    exit 1
+  }
+  log_info "Confirmed appium runner is active at instance ${INSTANCE_SERVICES_IP}."
 
   APPIUM_SESSION_JSON_PAYLOAD=$(
     cat << EOF
@@ -354,9 +368,9 @@ open_appium_session_ios()
     "alwaysMatch": {
       "platformName": "iOS",
       "appium:automationName": "XCUITest",
-      "appium:udid": "${INSTANCE_SERVICES_IP}:${DEFAULT_ADB_PORT}",
-      "appium:appPackage": "${APP_PACKAGE_NAME}",
-      "appium:adbExecTimeout": 40000
+      "appium:udid": "${INSTANCE_UDID}",
+      "appium:bundleId": "${APP_PACKAGE_NAME}",
+      "appium:showXcodeLog": true
     },
     "firstMatch": [{}]
   }

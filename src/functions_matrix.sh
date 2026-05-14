@@ -295,7 +295,7 @@ run_appium_server()
   elif curl --silent --max-time 2 "${APPIUM_SERVER_STATUS_URL}"; then
     log_info "Found a healthy appium server at ${APPIUM_SERVER_SOCKET}."
   elif lsof -i :"${APPIUM_SERVER_PORT}"; then
-    log_error "Cannot find a healthy appium server, but ${APPIUM_SERVER_PORT} is being used."
+    log_error "Cannot find a healthy appium server, but port ${APPIUM_SERVER_PORT} is being used."
     exit 1
   else
     log_info 'Starting appium server.'

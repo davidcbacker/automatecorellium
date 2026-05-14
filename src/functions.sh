@@ -474,10 +474,10 @@ install_app_from_url()
   }
   log_info "Downloaded ${APP_FILENAME}."
   log_info 'Checking download size.'
-  local MINIMUM_DOWNLOADED_FILE_SIZE_IN_KIB='16'
+  local MINIMUM_FILE_SIZE_IN_KIB='16'
   local DOWNLOADED_FILE_SIZE_IN_KIB="$(du -k "${APP_FILENAME}" | cut -f1)"
-  [ "${DOWNLOADED_FILE_SIZE_IN_KIB}" -lt "${MINIMUM_DOWNLOADED_FILE_SIZE_IN_KIB}" ] && {
-    log_error "Downloaded ${DOWNLOADED_FILE_SIZE_IN_KIB} KiB, below the minimum of ${MINIMUM_DOWNLOADED_FILE_SIZE_IN_KIB} KiB."
+  [ "${DOWNLOADED_FILE_SIZE_IN_KIB}" -lt "${MINIMUM_FILE_SIZE_IN_KIB}" ] && {
+    log_error "Downloaded ${DOWNLOADED_FILE_SIZE_IN_KIB} KiB, below the minimum of ${MINIMUM_FILE_SIZE_IN_KIB} KiB."
     exit 1
   }
   log_info "Size on disk is ${DOWNLOADED_FILE_SIZE_IN_KIB} KiB."

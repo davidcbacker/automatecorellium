@@ -18,7 +18,9 @@ install_appium_server_and_dependencies()
 
 mount_developer_disk_image()
 {
+  log_info 'Auto-mounting disk image.'
   pymobiledevice3 mounter auto-mount
+  log_info 'Auto-mounted disk image.'
 }
 
 install_appium_runner_ios()

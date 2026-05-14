@@ -190,9 +190,9 @@ def run_app_automation(config: AppiumConfig, udid: str):
     options.set_capability('platformName', 'iOS')
     options.set_capability('appium:automationName', 'XCUITest')
     options.set_capability('appium:udid', udid)
-    options.set_capability('appium:appPackage', config.target_app['package_name'])
+    options.set_capability('appium:bundleId', config.target_app['package_name'])
     options.set_capability('appium:noReset', True)
-    options.adb_exec_timeout = config.timeouts['adb_exec']
+    options.set_capability('appium:showXcodeLog', True)
 
     signal.signal(signal.SIGALRM, alarm_timeout_handler)
     automation_alarm_timeout = config.timeouts['automation_alarm']
@@ -256,6 +256,6 @@ if __name__ == "__main__":
             corellium_device_appium_udid = sys.argv[1]
             log_stdout(f'Using Corellium virtual device with UDID {corellium_device_appium_udid}.')
         case _:
-            print('ERROR: Please pass in the Corellium device services IP.', file=sys.stderr)
+            print('ERROR: Please pass in the Corellium device UDID.', file=sys.stderr)
             sys.exit(1)
     run_app_automation(config=appium_config, udid=corellium_device_appium_udid)

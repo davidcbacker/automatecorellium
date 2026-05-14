@@ -188,7 +188,7 @@ def run_app_automation(config: AppiumConfig, udid: str):
 
     options = XCUITestOptions()
     options.set_capability('platformName', 'iOS')
-    options.set_capability('appium:automationName', 'XCUITest')
+    options.set_capability('appium:automationName', 'xcuitest')
     options.set_capability('appium:udid', udid)
     options.set_capability('appium:bundleId', config.target_app['package_name'])
     options.set_capability('appium:noReset', True)

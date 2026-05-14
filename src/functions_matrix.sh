@@ -39,14 +39,14 @@ launch_appium_runner_ios()
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   kill_app "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_BUNDLE_ID}"
-  log_info "Launching app ${APP_BUNDLE_ID}."
+  log_info "Launching app ${APPIUM_RUNNER_IOS_BUNDLE_ID}."
   if corellium apps open \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \
     --bundle "${APPIUM_RUNNER_IOS_BUNDLE_ID}" > /dev/null; then
-    log_info "Launched app ${APP_BUNDLE_ID}."
+    log_info "Launched app ${APPIUM_RUNNER_IOS_BUNDLE_ID}."
   else
-    log_error "Failed to launch app ${APP_BUNDLE_ID}."
+    log_error "Failed to launch app ${APPIUM_RUNNER_IOS_BUNDLE_ID}."
     exit 1
   fi
 }

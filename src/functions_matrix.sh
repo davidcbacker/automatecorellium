@@ -392,6 +392,7 @@ open_appium_session_ios()
   "capabilities": {
     "alwaysMatch": {
       "platformName": "iOS",
+      "platformVersion": "26.4.1",
       "appium:automationName": "XCUITest",
       "appium:udid": "${INSTANCE_UDID}",
       "appium:bundleId": "${APP_PACKAGE_NAME}",

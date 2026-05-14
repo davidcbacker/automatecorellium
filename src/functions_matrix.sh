@@ -38,7 +38,7 @@ launch_appium_runner_ios()
   local APPIUM_RUNNER_IOS_BUNDLE_ID='org.appium.WebDriverAgentRunner.xctrunner'
   local PROJECT_ID
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
-  kill_app "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
+  kill_app "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_BUNDLE_ID}"
   log_info "Launching app ${APP_BUNDLE_ID}."
   if corellium apps open \
     --instance "${INSTANCE_ID}" \

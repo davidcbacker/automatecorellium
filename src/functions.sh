@@ -462,11 +462,10 @@ install_app_from_url()
 {
   local INSTANCE_ID="${1:?}"
   local APP_URL="${2:?}"
-  local PROJECT_ID
+  local MINIMUM_FILE_SIZE_IN_KIB='16'
+  local PROJECT_ID APP_FILENAME DOWNLOADED_FILE_SIZE_IN_KIB
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
-  local APP_FILENAME
   APP_FILENAME="$(basename "${APP_URL}")"
-
   log_info "Downloading ${APP_FILENAME}."
   curl --silent --output "${APP_FILENAME}" "${APP_URL}" || {
     log_error "Failed to download app ${APP_FILENAME}."
@@ -474,8 +473,7 @@ install_app_from_url()
   }
   log_info "Downloaded ${APP_FILENAME}."
   log_info 'Checking download size.'
-  local MINIMUM_FILE_SIZE_IN_KIB='16'
-  local DOWNLOADED_FILE_SIZE_IN_KIB="$(du -k "${APP_FILENAME}" | cut -f1)"
+  DOWNLOADED_FILE_SIZE_IN_KIB="$(du -k "${APP_FILENAME}" | cut -f1)"
   [ "${DOWNLOADED_FILE_SIZE_IN_KIB}" -lt "${MINIMUM_FILE_SIZE_IN_KIB}" ] && {
     log_error "Downloaded ${DOWNLOADED_FILE_SIZE_IN_KIB} KiB, below the minimum of ${MINIMUM_FILE_SIZE_IN_KIB} KiB."
     exit 1

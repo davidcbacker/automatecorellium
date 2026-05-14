@@ -338,6 +338,46 @@ EOF
   echo "${OPENED_SESSION_ID}"
 }
 
+open_appium_session_ios()
+{
+  local INSTANCE_ID="${1:?}"
+  local APP_PACKAGE_NAME="${2:?}"
+  local DEFAULT_APPIUM_PORT='4723'
+  local DEFAULT_ADB_PORT='5001'
+  local INSTANCE_UDID APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
+  INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
+
+  APPIUM_SESSION_JSON_PAYLOAD=$(
+    cat << EOF
+{
+  "capabilities": {
+    "alwaysMatch": {
+      "platformName": "iOS",
+      "appium:automationName": "XCUITest",
+      "appium:udid": "${INSTANCE_SERVICES_IP}:${DEFAULT_ADB_PORT}",
+      "appium:appPackage": "${APP_PACKAGE_NAME}",
+      "appium:adbExecTimeout": 40000
+    },
+    "firstMatch": [{}]
+  }
+}
+EOF
+  )
+
+  OPEN_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent --retry 5 \
+    -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
+    -H "Content-Type: application/json" \
+    -d "${APPIUM_SESSION_JSON_PAYLOAD}")" || {
+    log_error 'Failed to open appium session.'
+    exit 1
+  }
+  OPENED_SESSION_ID="$(echo "${OPEN_APPIUM_SESSION_JSON_RESPONSE}" | jq -r '.value.sessionId')" || {
+    log_error 'Failed to parse open appium session JSON response.'
+    exit 1
+  }
+  echo "${OPENED_SESSION_ID}"
+}
+
 close_appium_session()
 {
   local SESSION_ID="${1:?}"

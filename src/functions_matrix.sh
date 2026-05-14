@@ -372,6 +372,7 @@ open_appium_session_ios()
   local INSTANCE_UDID INSTANCE_SERVICES_IP APPIUM_RUNNER_JSON_RESPONSE
   local APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
   INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
+  INSTANCE_UDID_NO_HYPENS="${INSTANCE_UDID//-/}"
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
   local APPIUM_RUNNER_SOCKET="${INSTANCE_SERVICES_IP}:${DEFAULT_APPIUM_RUNNER_PORT}"
 
@@ -394,7 +395,7 @@ open_appium_session_ios()
       "platformName": "iOS",
       "platformVersion": "26.4.1",
       "appium:automationName": "XCUITest",
-      "appium:udid": "${INSTANCE_UDID}",
+      "appium:udid": "${INSTANCE_UDID_NO_HYPENS}",
       "appium:bundleId": "${APP_PACKAGE_NAME}",
       "appium:showXcodeLog": true
     },

@@ -355,7 +355,7 @@ open_appium_session_ios()
     log_error 'Failed to check appium runner status.'
     exit 1
   }
-  echo "${GET_APPIUM_SESSION_JSON_RESPONSE}" | jq -e '.value.ready == true' > /dev/null || {
+  echo "${APPIUM_RUNNER_JSON_RESPONSE}" | jq -e '.value.ready == true' > /dev/null || {
     log_error 'Bad status response from appium runner'
     exit 1
   }

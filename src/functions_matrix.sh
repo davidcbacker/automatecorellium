@@ -16,6 +16,11 @@ install_appium_server_and_dependencies()
   log_info 'Installed appium and device drivers.'
 }
 
+mount_developer_disk_image()
+{
+  pymobiledevice3 mounter auto-mount
+}
+
 install_appium_runner_ios()
 {
   local INSTANCE_ID="${1:?}"
@@ -23,6 +28,25 @@ install_appium_runner_ios()
   local APPIUM_RUNNER_IOS_BUNDLE_ID='org.appium.WebDriverAgentRunner.xctrunner'
   kill_app "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_BUNDLE_ID}"
   install_app_from_url "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_URL}"
+}
+
+launch_appium_runner_ios()
+{
+  local INSTANCE_ID="${1:?}"
+  local APPIUM_RUNNER_IOS_BUNDLE_ID='org.appium.WebDriverAgentRunner.xctrunner'
+  local PROJECT_ID
+  PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
+  kill_app "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
+  log_info "Launching app ${APP_BUNDLE_ID}."
+  if corellium apps open \
+    --instance "${INSTANCE_ID}" \
+    --project "${PROJECT_ID}" \
+    --bundle "${APPIUM_RUNNER_IOS_BUNDLE_ID}" > /dev/null; then
+    log_info "Launched app ${APP_BUNDLE_ID}."
+  else
+    log_error "Failed to launch app ${APP_BUNDLE_ID}."
+    exit 1
+  fi
 }
 
 create_matrix_assessment()

@@ -1,7 +1,7 @@
 Hello@corellium.com
 Password123
-Firstname
-Lastname
+Myfirst
+Mylast
 3216540987
 2345678901234567
 24680

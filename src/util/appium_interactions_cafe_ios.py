@@ -1,5 +1,5 @@
 """
-Automate Corellium virtual device interactions using Appium on Corellium Cafe Android app.
+Automate Corellium virtual device interactions using Appium on Corellium Cafe iOS app.
 """
 
 import json
@@ -9,7 +9,7 @@ import sys
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from appium import webdriver
-from appium.options.android import UiAutomator2Options
+from appium.options.ios import XCUITestOptions
 from appium.webdriver.common.appiumby import AppiumBy
 from selenium.common.exceptions import (
     NoSuchElementException,
@@ -28,7 +28,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 @dataclass
 class AppiumConfig:
     'Configuration container for Appium-related settings.'
-    corellium: dict
     target_app: dict
     appium_server: dict
     timeouts: dict
@@ -109,60 +108,60 @@ class AppiumHelper:
 def interact_with_app(helper: AppiumHelper, screenshots: dict):
     '''Interact with the target app using Appium commands.'''
 
-    log_stdout("Appium - Interact with login page.")
-    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText", desired_value="Hello@corellium.com")
-    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText", desired_value="Password123")
-    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
-    helper.save_screenshot(filename=screenshots['login'])
-    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
-
-    log_stdout("Appium - Open blog page.")
-    helper.click_when_ready(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
-    helper.click_when_ready(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Blog\")")
-    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
-
-    log_stdout('Appium - Wait for blog page to load.')
-    helper.wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText")
-    log_stdout('Appium - Interact with blog page.')
-    helper.set_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", desired_value="Testing")
-    helper.save_screenshot(filename=screenshots['blog'])
-
-    log_stdout("Appium - Return to home page.")
-    helper.click_when_ready(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
-    helper.click_when_ready(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Home\")")
-
-    log_stdout("Appium - Add the first coffee option to cart.")
-    helper.click_when_ready(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().resourceId(\"com.corellium.cafe:id/ivdrink\").instance(0)")
-    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/fbAdd")
-
-    log_stdout("Appium - Open cart and begin checkout.")
-    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/abmCart")
-    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/tvCheckout")
-
-    log_stdout("Appium - Fill in customer info.")
-    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText", desired_value="Myfirst")
-    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText", desired_value="Mylast")
-    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText", desired_value="3216540987")
-    helper.save_screenshot(filename=screenshots['customer'])
-    log_stdout("Appium - Submit customer info.")
-    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
-
-    log_stdout("Appium - Fill in payment info.")
-    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCCNumber", desired_value="2345678901234567")
-    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration", desired_value="1234")
-    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV", desired_value="135")
-    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode", desired_value="24680")
-    helper.save_screenshot(filename=screenshots['payment'])
-    log_stdout("Appium - Submit payment info.")
-    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
-
-    log_stdout("Appium - Enter invalid promo code.")
-    helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPromoCode", desired_value="65432")
-    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvPromoCode")
-
-    log_stdout("Appium - Submit order.")
-    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvSubmitOrder")
-    helper.click_when_ready(by=AppiumBy.ID, value="android:id/button1")
+    el1 = helper.driver.find_element(by=AppiumBy.CLASS_NAME, value="XCUIElementTypeTextField")
+    el1.send_keys("Hello@corellium.com")
+    el2 = helper.driver.find_element(by=AppiumBy.CLASS_NAME, value="XCUIElementTypeSecureTextField")
+    el2.send_keys("Password123")
+    el3 = helper.driver.find_element(by=AppiumBy.IOS_CLASS_CHAIN, value="**/XCUIElementTypeButton[`name == \"Login\"`]")
+    el3.click()
+    el4 = helper.driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="OK")
+    el4.click()
+    el5 = helper.driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="OK")
+    el5.click()
+    el6 = helper.driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="house.fill")
+    el6.click()
+    el7 = helper.driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Corellium Blog")
+    el7.click()
+    el8 = helper.driver.find_element(by=AppiumBy.IOS_CLASS_CHAIN, value="**/XCUIElementTypeButton[`name == \"BackButton\"`]")
+    el8.click()
+    el9 = helper.driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="XSS Simulation")
+    el9.click()
+    el10 = helper.driver.find_element(by=AppiumBy.CLASS_NAME, value="XCUIElementTypeTextField")
+    el10.send_keys("Hello@corellium.com")
+    el11 = helper.driver.find_element(by=AppiumBy.IOS_CLASS_CHAIN, value="**/XCUIElementTypeButton[`name == \"Subscribe!\"`]")
+    el11.click()
+    el12 = helper.driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Close")
+    el12.click()
+    el13 = helper.driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="cup.and.saucer.fill")
+    el13.click()
+    el18 = helper.driver.find_element(by=AppiumBy.IOS_CLASS_CHAIN, value="**/XCUIElementTypeStaticText[`name == \"Coffee\"`]")
+    el18.click()
+    el19 = helper.driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Add to Cart")
+    el19.click()
+    el20 = helper.driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="cart.fill")
+    el20.click()
+    el21 = helper.driver.find_element(by=AppiumBy.CLASS_NAME, value="XCUIElementTypeTextField")
+    el21.send_keys("65432")
+    el22 = helper.driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Apply Discount")
+    el22.click()
+    el23 = helper.driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Checkout")
+    el23.click()
+    el24 = helper.driver.find_element(by=AppiumBy.IOS_CLASS_CHAIN, value="**/XCUIElementTypeTextField[`value == \"First Name\"`]")
+    el24.send_keys("Myfirst")
+    el25 = helper.driver.find_element(by=AppiumBy.IOS_CLASS_CHAIN, value="**/XCUIElementTypeTextField[`value == \"Last Name\"`]")
+    el25.send_keys("Mylast")
+    el26 = helper.driver.find_element(by=AppiumBy.IOS_CLASS_CHAIN, value="**/XCUIElementTypeTextField[`value == \"Credit Card\"`]")
+    el26.send_keys("2345678901234567")
+    el27 = helper.driver.find_element(by=AppiumBy.IOS_CLASS_CHAIN, value="**/XCUIElementTypeTextField[`value == \"CVV\"`]")
+    el27.send_keys("123")
+    el28 = helper.driver.find_element(by=AppiumBy.IOS_CLASS_CHAIN, value="**/XCUIElementTypeTextField[`value == \"Zipcode\"`]")
+    el28.send_keys("24680")
+    el29 = helper.driver.find_element(by=AppiumBy.IOS_CLASS_CHAIN, value="**/XCUIElementTypeTextField[`value == \"Phone Number\"`]")
+    el29.send_keys("3216540987")
+    el30 = helper.driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="Place Order")
+    el30.click()
+    el31 = helper.driver.find_element(by=AppiumBy.ACCESSIBILITY_ID, value="OK")
+    el31.click()
 
 
 def log_stdout(message: str):
@@ -187,14 +186,13 @@ def run_app_automation(config: AppiumConfig, udid: str):
     appium_server_port: str = config.appium_server['port']
     appium_server_socket: str = f'http://{appium_server_ip}:{appium_server_port}'
 
-    options = UiAutomator2Options()
-    options.set_capability('platformName', 'Android')
-    options.set_capability('appium:automationName', 'UiAutomator2')
+    options = XCUITestOptions()
+    options.set_capability('platformName', 'iOS')
+    options.set_capability('appium:automationName', 'xcuitest')
     options.set_capability('appium:udid', udid)
-    options.set_capability('appium:appPackage', config.target_app['package_name'])
-    options.set_capability('appium:appActivity', config.target_app['activity'])
+    options.set_capability('appium:bundleId', config.target_app['package_name'])
     options.set_capability('appium:noReset', True)
-    options.adb_exec_timeout = config.timeouts['adb_exec']
+    options.set_capability('appium:showXcodeLog', True)
 
     signal.signal(signal.SIGALRM, alarm_timeout_handler)
     automation_alarm_timeout = config.timeouts['automation_alarm']
@@ -249,21 +247,15 @@ def run_app_automation(config: AppiumConfig, udid: str):
 
 
 if __name__ == "__main__":
-    CONFIG_PATH = "data/config/appium_android.json"
+    CONFIG_PATH = "data/config/appium_ios.json"
     with open(file=CONFIG_PATH, mode='r', encoding='utf-8') as f:
         data = json.load(f)
     appium_config = AppiumConfig(**data)
-    adb_port = appium_config.corellium['adb_port']
     match len(sys.argv):
-        case 1:
-            target_device_services_ip = appium_config.corellium['default_services_ip']
-            corellium_device_appium_udid = f'{target_device_services_ip}:{adb_port}'
-            log_stdout(f'Defaulting to Corellium virtual device at {target_device_services_ip}.')
         case 2:
-            target_device_services_ip = sys.argv[1]
-            corellium_device_appium_udid = f'{target_device_services_ip}:{adb_port}'
-            log_stdout(f'Using Corellium virtual device at {corellium_device_appium_udid}.')
+            corellium_device_appium_udid = sys.argv[1]
+            log_stdout(f'Using Corellium virtual device with UDID {corellium_device_appium_udid}.')
         case _:
-            print('ERROR: Please provide zero arguments or pass in the Corellium device services IP.', file=sys.stderr)
+            print('ERROR: Please pass in the Corellium device UDID.', file=sys.stderr)
             sys.exit(1)
     run_app_automation(config=appium_config, udid=corellium_device_appium_udid)

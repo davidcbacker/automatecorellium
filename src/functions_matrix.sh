@@ -7,14 +7,20 @@ install_appium_server_and_dependencies()
   log_info 'Installing appium dependencies.'
   sudo apt-get -qq update
   sudo apt-get -qq install --assume-yes --no-install-recommends libusb-dev
-  #python3 -m pip install -U pymobiledevice3 # for ios devices
-  python3 -m pip install -U Appium-Python-Client
+  python3 -m pip install -U Appium-Python-Client pymobiledevice3
   log_info 'Installed appium dependencies.'
   log_info 'Installing appium and device drivers.'
   npm install --location=global appium
   appium driver install uiautomator2
   appium driver install xcuitest
   log_info 'Installed appium and device drivers.'
+}
+
+mount_developer_disk_image()
+{
+  log_info 'Auto-mounting disk image.'
+  pymobiledevice3 mounter auto-mount
+  log_info 'Auto-mounted disk image.'
 }
 
 install_appium_runner_ios()
@@ -24,6 +30,25 @@ install_appium_runner_ios()
   local APPIUM_RUNNER_IOS_BUNDLE_ID='org.appium.WebDriverAgentRunner.xctrunner'
   kill_app "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_BUNDLE_ID}"
   install_app_from_url "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_URL}"
+}
+
+launch_appium_runner_ios()
+{
+  local INSTANCE_ID="${1:?}"
+  local APPIUM_RUNNER_IOS_BUNDLE_ID='org.appium.WebDriverAgentRunner.xctrunner'
+  local PROJECT_ID
+  PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
+  kill_app "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_BUNDLE_ID}"
+  log_info "Launching app ${APPIUM_RUNNER_IOS_BUNDLE_ID}."
+  if corellium apps open \
+    --instance "${INSTANCE_ID}" \
+    --project "${PROJECT_ID}" \
+    --bundle "${APPIUM_RUNNER_IOS_BUNDLE_ID}" > /dev/null; then
+    log_info "Launched app ${APPIUM_RUNNER_IOS_BUNDLE_ID}."
+  else
+    log_error "Failed to launch app ${APPIUM_RUNNER_IOS_BUNDLE_ID}."
+    exit 1
+  fi
 }
 
 create_matrix_assessment()
@@ -317,6 +342,61 @@ open_appium_session()
       "appium:appPackage": "${APP_PACKAGE_NAME}",
       "appium:appActivity": "${APP_ACTIVITY_NAME}",
       "appium:adbExecTimeout": 40000
+    },
+    "firstMatch": [{}]
+  }
+}
+EOF
+  )
+
+  OPEN_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent --retry 5 \
+    -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
+    -H "Content-Type: application/json" \
+    -d "${APPIUM_SESSION_JSON_PAYLOAD}")" || {
+    log_error 'Failed to open appium session.'
+    exit 1
+  }
+  OPENED_SESSION_ID="$(echo "${OPEN_APPIUM_SESSION_JSON_RESPONSE}" | jq -r '.value.sessionId')" || {
+    log_error 'Failed to parse open appium session JSON response.'
+    exit 1
+  }
+  echo "${OPENED_SESSION_ID}"
+}
+
+open_appium_session_ios()
+{
+  local INSTANCE_ID="${1:?}"
+  local APP_PACKAGE_NAME="${2:?}"
+  local DEFAULT_APPIUM_PORT='4723'
+  local DEFAULT_APPIUM_RUNNER_PORT='8100'
+  local INSTANCE_UDID INSTANCE_SERVICES_IP APPIUM_RUNNER_JSON_RESPONSE
+  local APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
+  INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
+  INSTANCE_UDID_NO_HYPENS="${INSTANCE_UDID//-/}"
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  local APPIUM_RUNNER_SOCKET="${INSTANCE_SERVICES_IP}:${DEFAULT_APPIUM_RUNNER_PORT}"
+
+  log_info "Confirming appium runner is active on instance at ${INSTANCE_SERVICES_IP}."
+  APPIUM_RUNNER_JSON_RESPONSE="$(curl --silent --retry 5 "http://${APPIUM_RUNNER_SOCKET}/status")" || {
+    log_error 'Failed to check appium runner status.'
+    exit 1
+  }
+  echo "${APPIUM_RUNNER_JSON_RESPONSE}" | jq -e '.value.ready == true' > /dev/null || {
+    log_error 'Bad status response from appium runner'
+    exit 1
+  }
+  log_info "Confirmed appium runner is active at instance ${INSTANCE_SERVICES_IP}."
+
+  APPIUM_SESSION_JSON_PAYLOAD=$(
+    cat << EOF
+{
+  "capabilities": {
+    "alwaysMatch": {
+      "platformName": "iOS",
+      "appium:automationName": "xcuitest",
+      "appium:udid": "${INSTANCE_UDID_NO_HYPENS}",
+      "appium:bundleId": "${APP_PACKAGE_NAME}",
+      "appium:showXcodeLog": true
     },
     "firstMatch": [{}]
   }

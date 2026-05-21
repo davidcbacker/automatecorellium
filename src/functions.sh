@@ -462,7 +462,7 @@ install_app_from_url()
 {
   local INSTANCE_ID="${1:?}"
   local APP_URL="${2:?}"
-  local MINIMUM_FILE_SIZE_IN_KIB='16'
+  local MINIMUM_FILE_SIZE_IN_KIB='32'
   local PROJECT_ID APP_FILENAME DOWNLOADED_FILE_SIZE_IN_KIB
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   APP_FILENAME="$(basename "${APP_URL}")"

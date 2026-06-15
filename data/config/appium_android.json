@@ -18,6 +18,7 @@
     "screenshots": {
       "login": "corellium_cafe_login_page.png",
       "blog": "corellium_cafe_blog_page.png",
+      "cart": "corellium_cafe_cart_page.png",
       "customer": "corellium_cafe_customer_page.png",
       "payment": "corellium_cafe_payment_page.png"
     }

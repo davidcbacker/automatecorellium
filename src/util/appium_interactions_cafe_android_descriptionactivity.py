@@ -68,7 +68,7 @@ class AppiumHelper:
             element.send_keys(desired_value)
             self.wait_until_element_value(by=by, value=value, desired_value=desired_value)
         except TimeoutException as e:
-            print(f"Timeout: Element value not set after {self.timeout} seconds.")
+            print(f"Timeout: Element not clickable after {self.timeout} seconds.")
             print(f"TimeoutException: {e}")
             sys.exit(1)
 
@@ -122,8 +122,10 @@ def interact_with_app(helper: AppiumHelper, screenshots: dict):
     # helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
 
     # log_stdout('Appium - Wait for blog page to load.')
-    # helper.wait_until_visible(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Resources\")")
-    # helper.save_screenshot(filename=screenshots['blog'])
+    # helper.wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText")
+    # log_stdout('Appium - Interact with blog page.')
+    # helper.set_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", desired_value="Testing")
+    # helper.save_screenshot(filename=f"{screenshots['blog']}_{int(datetime.now(timezone.utc).timestamp() * 1000)}.png")
 
     log_stdout("Appium - Return to home page.")
     helper.click_when_ready(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
@@ -190,7 +192,7 @@ def run_app_automation(config: AppiumConfig, udid: str):
     options.set_capability('appium:automationName', 'UiAutomator2')
     options.set_capability('appium:udid', udid)
     options.set_capability('appium:appPackage', config.target_app['package_name'])
-    options.set_capability('appium:appActivity', config.target_app['activity'])
+    options.set_capability('appium:appActivity', config.target_app['description_activity'])
     options.set_capability('appium:noReset', False)
     options.adb_exec_timeout = config.timeouts['adb_exec']
 
@@ -247,21 +249,4 @@ def run_app_automation(config: AppiumConfig, udid: str):
 
 
 if __name__ == "__main__":
-    CONFIG_PATH = "data/config/appium_android.json"
-    with open(file=CONFIG_PATH, mode='r', encoding='utf-8') as f:
-        data = json.load(f)
-    appium_config = AppiumConfig(**data)
-    adb_port = appium_config.corellium['adb_port']
-    match len(sys.argv):
-        case 1:
-            target_device_services_ip = appium_config.corellium['default_services_ip']
-            corellium_device_appium_udid = f'{target_device_services_ip}:{adb_port}'
-            log_stdout(f'Defaulting to Corellium virtual device at {target_device_services_ip}.')
-        case 2:
-            target_device_services_ip = sys.argv[1]
-            corellium_device_appium_udid = f'{target_device_services_ip}:{adb_port}'
-            log_stdout(f'Using Corellium virtual device at {corellium_device_appium_udid}.')
-        case _:
-            print('ERROR: Please provide zero arguments or pass in the Corellium device services IP.', file=sys.stderr)
-            sys.exit(1)
-    run_app_automation(config=appium_config, udid=corellium_device_appium_udid)
+    log_stdout("This script isnt feasible because this page requires blah blah"

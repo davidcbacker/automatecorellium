@@ -4,11 +4,11 @@ set -o nounset
 # set -o pipefail
 
 TEST_SCRIPTS=(
+    'appium_interactions_cafe_android_mainactivity_login_page.py'
     'appium_interactions_cafe_android_cartactivity.py'
     'appium_interactions_cafe_android_customerinfoactivity.py'
     'appium_interactions_cafe_android_descriptionactivity.py'
     'appium_interactions_cafe_android_homeactivity.py'
-    'appium_interactions_cafe_android_mainactivity_login_page.py'
     'appium_interactions_cafe_android_orderactivity.py'
     'appium_interactions_cafe_android_orderreviewactivity.py'
     'appium_interactions_cafe_android_paymentactivity.py'
@@ -27,7 +27,6 @@ ADB_DEVICES=(
 
 cd "${HOME}/Documents/git/automatecorellium/"
 for script in "${TEST_SCRIPTS[@]}"; do
-    echo "Running test script: $script"
     for device in "${ADB_DEVICES[@]}"; do
         echo "Testing $script on device: $device"
         python3 "src/util/${script}" "${device}" \

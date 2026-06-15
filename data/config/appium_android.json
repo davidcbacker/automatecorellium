@@ -5,7 +5,16 @@
   },
   "target_app": {
     "package_name": "com.corellium.cafe",
-    "activity": ".ui.activities.MainActivity",
+    "main_activity": ".ui.activities.MainActivity",
+    "cart_activity": ".ui.activities.CartActivity",
+    "customer_info_activity": ".ui.activities.CustomerInfoActivity",
+    "home_activity": ".ui.activities.HomeActivity",
+    "order_activity": ".ui.activities.OrderActivity",
+    "order_review_activity": ".ui.activities.OrderReviewActivity",
+    "payment_activity": ".ui.activities.PaymentActivity",
+    "settings_activity": ".ui.activities.SettingsActivity",
+    "secret_activity": ".ui.activities.SecretActivity",
+    "web_view_activity": ".ui.activities.WebViewActivity",
     "screenshots": {
       "login": "corellium_cafe_login_page.png",
       "blog": "corellium_cafe_blog_page.png",

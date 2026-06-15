@@ -192,7 +192,7 @@ def run_app_automation(config: AppiumConfig, udid: str):
     options.set_capability('appium:automationName', 'UiAutomator2')
     options.set_capability('appium:udid', udid)
     options.set_capability('appium:appPackage', config.target_app['package_name'])
-    options.set_capability('appium:appActivity', config.target_app['activity'])
+    options.set_capability('appium:appActivity', config.target_app['description_activity'])
     options.set_capability('appium:noReset', False)
     options.adb_exec_timeout = config.timeouts['adb_exec']
 
@@ -249,21 +249,4 @@ def run_app_automation(config: AppiumConfig, udid: str):
 
 
 if __name__ == "__main__":
-    CONFIG_PATH = "data/config/appium_android.json"
-    with open(file=CONFIG_PATH, mode='r', encoding='utf-8') as f:
-        data = json.load(f)
-    appium_config = AppiumConfig(**data)
-    adb_port = appium_config.corellium['adb_port']
-    match len(sys.argv):
-        case 1:
-            target_device_services_ip = appium_config.corellium['default_services_ip']
-            corellium_device_appium_udid = f'{target_device_services_ip}:{adb_port}'
-            log_stdout(f'Defaulting to Corellium virtual device at {target_device_services_ip}.')
-        case 2:
-            target_device_services_ip = sys.argv[1]
-            corellium_device_appium_udid = f'{target_device_services_ip}:{adb_port}'
-            log_stdout(f'Using Corellium virtual device at {corellium_device_appium_udid}.')
-        case _:
-            print('ERROR: Please provide zero arguments or pass in the Corellium device services IP.', file=sys.stderr)
-            sys.exit(1)
-    run_app_automation(config=appium_config, udid=corellium_device_appium_udid)
+    log_stdout("This script isnt feasible because this page requires blah blah"

@@ -113,19 +113,19 @@ def interact_with_app(helper: AppiumHelper, screenshots: dict):
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/emailEditText", desired_value="Hello@corellium.com")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/passwordEditText", desired_value="Password123")
     helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/loginButton")
-    helper.save_screenshot(filename=screenshots['login'])
+    helper.save_screenshot(filename=f"{screenshots['login']}_{int(datetime.now(timezone.utc).timestamp() * 1000)}.png")
     helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/guestButton")
 
     log_stdout("Appium - Open blog page.")
     helper.click_when_ready(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
     helper.click_when_ready(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Blog\")")
-    helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
+    # helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
 
-    log_stdout('Appium - Wait for blog page to load.')
-    helper.wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText")
-    log_stdout('Appium - Interact with blog page.')
-    helper.set_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", desired_value="Testing")
-    helper.save_screenshot(filename=screenshots['blog'])
+    # log_stdout('Appium - Wait for blog page to load.')
+    # helper.wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText")
+    # log_stdout('Appium - Interact with blog page.')
+    # helper.set_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", desired_value="Testing")
+    # helper.save_screenshot(filename=f"{screenshots['blog']}_{int(datetime.now(timezone.utc).timestamp() * 1000)}.png")
 
     log_stdout("Appium - Return to home page.")
     helper.click_when_ready(by=AppiumBy.ACCESSIBILITY_ID, value="Open")
@@ -143,7 +143,7 @@ def interact_with_app(helper: AppiumHelper, screenshots: dict):
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/firstnameEditText", desired_value="Myfirst")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/lastnameEditText", desired_value="Mylast")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/phoneEditText", desired_value="3216540987")
-    helper.save_screenshot(filename=screenshots['customer'])
+    helper.save_screenshot(filename=f"{screenshots['customer']}_{int(datetime.now(timezone.utc).timestamp() * 1000)}.png")
     log_stdout("Appium - Submit customer info.")
     helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/submitButton")
 
@@ -152,7 +152,7 @@ def interact_with_app(helper: AppiumHelper, screenshots: dict):
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etExpiration", desired_value="1234")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etCVV", desired_value="135")
     helper.set_element_value(by=AppiumBy.ID, value="com.corellium.cafe:id/etPostalCode", desired_value="24680")
-    helper.save_screenshot(filename=screenshots['payment'])
+    helper.save_screenshot(filename=f"{screenshots['payment']}_{int(datetime.now(timezone.utc).timestamp() * 1000)}.png")
     log_stdout("Appium - Submit payment info.")
     helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvReviewOrder")
 
@@ -193,7 +193,7 @@ def run_app_automation(config: AppiumConfig, udid: str):
     options.set_capability('appium:udid', udid)
     options.set_capability('appium:appPackage', config.target_app['package_name'])
     options.set_capability('appium:appActivity', config.target_app['activity'])
-    options.set_capability('appium:noReset', True)
+    options.set_capability('appium:noReset', False)
     options.adb_exec_timeout = config.timeouts['adb_exec']
 
     signal.signal(signal.SIGALRM, alarm_timeout_handler)

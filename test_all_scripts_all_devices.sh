@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 set -o nounset
-# set -o pipefail
+set -o pipefail
 
 TEST_SCRIPTS=(
     'appium_interactions_cafe_android_mainactivity_login_page.py'
@@ -39,8 +39,9 @@ printf '\n'
 
 
 #for device in 10.11.1.17 10.11.1.15 10.11.1.13 10.11.1.11 10.11.1.9 10.11.1.7 10.11.1.5 10.11.1.3; do
-for device in $(seq 3 2 17); do
-  device="10.11.1.$device"
+# for device in $(seq 3 2 17); do
+  # device="10.11.1.$device"
+for device in "${ADB_DEVICES[@]}"; do
   adb connect $device:5001
   adb -s $device:5001 root
   curl --silent \

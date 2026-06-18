@@ -30,6 +30,7 @@ ADB_DEVICES=(
 )
 
 cd "${HOME}/Documents/git/automatecorellium/"
+[ -d output ] || mkdir output
 
 echo "Testing all scripts on these rooted ADB-connected devices:"
 for device in "${ADB_DEVICES[@]}"; do  

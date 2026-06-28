@@ -5,6 +5,9 @@ on:
     - cron: '2 23 * * 1-5'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   TERM: xterm
 

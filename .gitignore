@@ -9,3 +9,9 @@ corellium_cafe_*.png
 
 # output files
 output/
+
+# test apps
+Cafe.apk
+Cafe.ipa
+Corellium_Cafe.apk
+Corellium_Cafe.ipa

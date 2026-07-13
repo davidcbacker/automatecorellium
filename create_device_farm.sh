@@ -47,8 +47,6 @@ log_info "Sufficient cores are available for ${DEVICES_TO_CREATE} devices."
 log_info "Disconnecting from any existing ADB connections."
 adb disconnect
 
-
-
 CREATED_INSTANCE_IDS=()
 
 for ((i=1; i<=DEVICES_TO_CREATE; i++)); do
@@ -68,7 +66,7 @@ for ((i=1; i<=DEVICES_TO_CREATE; i++)); do
     elif [[ $CREATE_INSTANCE_RESPONSE =~ $UUID_REGEX ]]; then
         log_info "Successfully created device with instance ID: $CREATE_INSTANCE_RESPONSE"
         CREATED_INSTANCE_IDS+=("${CREATE_INSTANCE_RESPONSE}")
-        sleep 30 #
+        sleep 30
     else
         log_error "Failed to create device: $CREATE_INSTANCE_RESPONSE"
     fi
@@ -80,6 +78,7 @@ if [ "${#CREATED_INSTANCE_IDS[@]}" -eq 0 ]; then
 fi
 
 log_info "Created ${#CREATED_INSTANCE_IDS[@]} devices: ${CREATED_INSTANCE_IDS[*]}"
+
 
 log_info "Installing Corellium Cafe app on each device."
 for instance_id in "${CREATED_INSTANCE_IDS[@]}"; do
@@ -135,16 +134,6 @@ done
 log_info "All devices are connected, ADB is running as root, and Appium sessions are started."
 log_info "Waiting for 70 seconds to allow appium sessions to time out."
 sleep 70
-
-# for script in "${TEST_SCRIPTS[@]}"; do
-#     echo "Testing $script"
-#     for device in "${ADB_DEVICES[@]}"; do
-#         python3 "src/util/${script}" "${device}" \
-#             > "output/test_output_${device}.txt" \
-#             2> "output/test_stderr_${device}.txt" &
-#     done
-#     wait
-# done
 
 for script in "${TEST_SCRIPTS[@]}"; do
     echo "Testing $script"

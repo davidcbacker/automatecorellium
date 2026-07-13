@@ -138,7 +138,7 @@ sleep 70
 for script in "${TEST_SCRIPTS[@]}"; do
     echo "Testing $script"
     for instance_services_ip in "${CREATED_INSTANCE_SERVICES_IPS[@]}"; do
-        python3 "src/util/${script}" "${instance_services_ip}:5001" \
+        python3 "src/util/${script}" "${instance_services_ip}" \
             > "output/test_output_${instance_services_ip}.txt" \
             2> "output/test_stderr_${instance_services_ip}.txt" &
     done

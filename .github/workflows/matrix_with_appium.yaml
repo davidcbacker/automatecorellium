@@ -54,7 +54,7 @@ jobs:
       max-parallel: 2
     steps:
       - name: Pull the latest code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Node
         uses: actions/setup-node@v6
         with:

@@ -7,5 +7,6 @@ node_modules/
 # files in the base directory
 /*.apk
 /*.ipa
+/*.log
 /*.png
 /*.txt

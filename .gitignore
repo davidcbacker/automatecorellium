@@ -1,2 +1,11 @@
 .DS_Store
 node_modules/
+
+# files in the output directory
+/output/*
+
+# files in the base directory
+/*.apk
+/*.ipa
+/*.png
+/*.txt

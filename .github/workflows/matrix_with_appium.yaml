@@ -10,6 +10,9 @@ concurrency:
   group: ${{ github.event_name == 'schedule' && 'corellium-matrix-scheduled' || 'corellium-matrix-development' }}
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 env:
   TERM: xterm
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn

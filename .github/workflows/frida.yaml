@@ -10,6 +10,9 @@ concurrency:
   group: frida
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 env:
   TERM: xterm
   CORELLIUM_INSTANCE_NAME_PREFIX: 'Frida Automation'

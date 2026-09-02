@@ -4,6 +4,9 @@ on:
   workflow_call:
   workflow_dispatch:
 
+permissions:
+  contents: none
+
 jobs:
   changes-lint:
     name: Determine files to lint

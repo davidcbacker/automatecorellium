@@ -3,6 +3,9 @@ name: Install NPM dependencies
 on:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   bump-deps:
     name: Install NPM deps on self-hosted runner

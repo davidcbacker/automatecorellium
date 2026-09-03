@@ -136,9 +136,11 @@ jobs:
         timeout-minutes: 30
         run: |
           source ./src/functions.sh && set -euo pipefail
+          set -x
           start_instance "${CORELLIUM_INSTANCE_ID}"
           wait_until_agent_ready "${CORELLIUM_INSTANCE_ID}"
           # unlock_instance "${CORELLIUM_INSTANCE_ID}" # only for iOS
+          set +x
       - name: Connect to project VPN
         if: ${{ matrix.runner-os == 'ubuntu-latest' }}
         timeout-minutes: 2

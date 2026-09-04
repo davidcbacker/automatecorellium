@@ -180,7 +180,8 @@ EOF
   "name": "${NEW_INSTANCE_NAME}",
   "flavor": "${HARDWARE_FLAVOR}",
   "os": "${FIRMWARE_VERSION}",
-  "osbuild": "${FIRMWARE_BUILD}"
+  "osbuild": "${FIRMWARE_BUILD}",
+  "sbs": true
 }
 EOF
     )

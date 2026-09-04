@@ -79,7 +79,7 @@ jobs:
           fi
       - name: Install Python
         if: ${{ matrix.runner-os == 'ubuntu-latest' }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           cache: pip
           cache-dependency-path: requirements-pip-appium.txt

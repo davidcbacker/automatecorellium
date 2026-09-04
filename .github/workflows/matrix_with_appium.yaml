@@ -191,7 +191,7 @@ jobs:
           ANDROID_HOME: ${{ secrets.SELF_HOSTED_RUNNER_ANDROID_HOME_PATH }}
           CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
-          MATRIX_WORDLIST_PATH: './data/wordlist.txt'
+          MATRIX_WORDLIST_PATH: './data/wordlist.txt.zip'
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
@@ -209,7 +209,7 @@ jobs:
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
-          MATRIX_WORDLIST_PATH: './data/wordlist.txt'
+          MATRIX_WORDLIST_PATH: './data/wordlist.txt.zip'
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
@@ -227,7 +227,7 @@ jobs:
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
-          MATRIX_WORDLIST_PATH: './data/wordlist.txt'
+          MATRIX_WORDLIST_PATH: './data/wordlist.txt.zip'
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
@@ -245,7 +245,7 @@ jobs:
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
-          MATRIX_WORDLIST_PATH: './data/wordlist.txt'
+          MATRIX_WORDLIST_PATH: './data/wordlist.txt.zip'
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
@@ -263,7 +263,7 @@ jobs:
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
-          MATRIX_WORDLIST_PATH: './data/wordlist.txt'
+          MATRIX_WORDLIST_PATH: './data/wordlist.txt.zip'
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh

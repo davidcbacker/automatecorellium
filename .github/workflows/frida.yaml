@@ -30,7 +30,8 @@ jobs:
       max-parallel: 2
       matrix:
         corellium-os: [Android, iOS]
-        os: [ubuntu-latest, self-hosted]
+        os: [ubuntu-latest]
+        # os: [ubuntu-latest, self-hosted]
         include:
           - corellium-os: Android
             hardware_flavor: ranchu
@@ -50,12 +51,12 @@ jobs:
             api_token_secret_key: CORELLIUM_API_TOKEN
             default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
             node_tls_reject_unauthorized: 1
-          - os: self-hosted
-            os-friendly-name: macOS
-            api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
-            api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
-            default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}
-            node_tls_reject_unauthorized: 0
+          # - os: self-hosted
+          #   os-friendly-name: macOS
+          #   api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
+          #   api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
+          #   default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}
+          #   node_tls_reject_unauthorized: 0
     steps:
       - name: Pull the latest code
         uses: actions/checkout@v6

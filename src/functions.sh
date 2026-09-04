@@ -181,7 +181,7 @@ EOF
   "flavor": "${HARDWARE_FLAVOR}",
   "os": "${FIRMWARE_VERSION}",
   "osbuild": "${FIRMWARE_BUILD}",
-  "sbs: true"
+  "sbs": true
 }
 EOF
     )

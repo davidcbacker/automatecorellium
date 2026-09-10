@@ -69,7 +69,7 @@ class AppiumHelper:
             element.send_keys(desired_value)
             self.wait_until_element_value(by=by, value=value, desired_value=desired_value)
         except TimeoutException as e:
-            print(f"Timeout: Element not clickable after {self.timeout} seconds.")
+            print(f"Timeout: Element value not set after {self.timeout} seconds.")
             print(f"TimeoutException: {e}")
             sys.exit(1)
 
@@ -91,7 +91,7 @@ class AppiumHelper:
             locator = (by, value)
             return self.wait.until(presence_of_element_located(locator))
         except TimeoutException as e:
-            print(f"Timeout: Element not clickable after {self.timeout} seconds.")
+            print(f"Timeout: Element not present after {self.timeout} seconds.")
             print(f"TimeoutException: {e}")
             sys.exit(1)
 

@@ -636,14 +636,14 @@ download_file_to_local_path()
 }
 
 # Upload a file to the Corellium server and print the image ID to stdout
-upload_image_from_local_path()
+upload_wordlist_from_local_path()
 {
   local INSTANCE_ID="${1:?}"
   local LOCAL_FILE_PATH="${2:?}"
   local PROJECT_ID IMAGE_NAME
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   IMAGE_NAME="$(basename "${LOCAL_FILE_PATH}")"
-  local IMAGE_TYPE='extension'
+  local IMAGE_TYPE='mast-wordlist'
   local IMAGE_ENCODING='plain'
 
   # return the created image ID

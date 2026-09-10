@@ -195,7 +195,7 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
-          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
@@ -213,7 +213,7 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
-          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
@@ -231,7 +231,7 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
-          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
@@ -249,7 +249,7 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
-          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
@@ -267,7 +267,7 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
-          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \

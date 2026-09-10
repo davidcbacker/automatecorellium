@@ -134,7 +134,7 @@ def interact_with_app(helper: AppiumHelper, screenshots: dict):
     helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
 
     log_stdout('Appium - Wait for blog page to load.')
-    helper.wait_until_present(by=AppiumBy.CLASS_NAME, value="android.widget.EditText")
+    helper.wait_until_present(by=AppiumBy.ACCESSIBILITY_ID, value="home")
     log_stdout('Appium - Interact with blog page.')
     helper.set_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", desired_value="Testing")
     helper.save_screenshot(filename=screenshots['blog'])

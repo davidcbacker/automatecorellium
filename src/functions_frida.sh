@@ -4,10 +4,10 @@
 
 install_frida_dependencies()
 {
-  log_stdout 'Installing frida.'
+  log_info 'Installing frida.'
   local TARGET_FRIDA_VERSION='17.2.15'
   python3 -m pip install -U "frida==${TARGET_FRIDA_VERSION}" frida-tools
-  log_stdout 'Installed frida.'
+  log_info 'Installed frida.'
   # python3 -m pip install -U objection # Objection does not support Frida 17 yet
 }
 
@@ -32,12 +32,12 @@ run_frida_ps_device()
   local INSTANCE_ID="${1:?}"
   local FRIDA_DEVICE_ID
   FRIDA_DEVICE_ID="$(get_frida_device_id "${INSTANCE_ID}")"
-  log_stdout 'Listing running apps.'
+  log_info 'Listing running apps.'
   frida-ps --device "${FRIDA_DEVICE_ID}" --applications || {
     log_warn 'Failed to enumerate running apps. Retrying.'
     frida-ps --device "${FRIDA_DEVICE_ID}" --applications
   }
-  log_stdout 'Listed running apps.'
+  log_info 'Listed running apps.'
 }
 
 run_frida_ps_network()
@@ -52,22 +52,22 @@ run_frida_ps_network()
   fi
   local INSTANCE_SERVICES_IP
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
-  log_stdout 'Listing running apps.'
+  log_info 'Listing running apps.'
   frida-ps --host "${INSTANCE_SERVICES_IP}" --applications || {
     log_warn 'Failed to enumerate running apps. Retrying.'
     frida-ps --host "${INSTANCE_SERVICES_IP}" --applications
   }
-  log_stdout 'Listied running apps.'
+  log_info 'Listied running apps.'
 }
 
 run_frida_ps_usb()
 {
-  log_stdout 'Listing running apps.'
+  log_info 'Listing running apps.'
   frida-ps --usb --applications || {
     log_warn 'Failed to enumerate running apps. Retrying.'
     frida-ps --usb --applications
   }
-  log_stdout 'Listed running apps.'
+  log_info 'Listed running apps.'
 }
 
 run_frida_script_device()
@@ -77,26 +77,26 @@ run_frida_script_device()
   local FRIDA_SCRIPT_PATH="${3:?}"
   local FRIDA_DEVICE_ID
   FRIDA_DEVICE_ID="$(get_frida_device_id "${INSTANCE_ID}")"
-  log_stdout "Spawning app ${APP_PACKAGE_NAME} with Frida script $(basename "${FRIDA_SCRIPT_PATH}")."
+  log_info "Spawning app ${APP_PACKAGE_NAME} with Frida script $(basename "${FRIDA_SCRIPT_PATH}")."
   if [ "${CI:-false}" = 'true' ]; then
     command -v timeout > /dev/null || {
       log_error 'Cannot find timeout dependency.'
       exit 1
     }
     local FRIDA_TIMEOUT_SECONDS='10'
-    log_stdout "Frida script will timeout after ${FRIDA_TIMEOUT_SECONDS} seconds."
+    log_info "Frida script will timeout after ${FRIDA_TIMEOUT_SECONDS} seconds."
     timeout "${FRIDA_TIMEOUT_SECONDS}" \
       frida --device "${FRIDA_DEVICE_ID}" --file "${APP_PACKAGE_NAME}" --load "${FRIDA_SCRIPT_PATH}" || {
       local FAILURE_EXIT_STATUS="$?"
       if [ "${FAILURE_EXIT_STATUS}" -eq 124 ]; then
-        log_stdout "Frida successfully timed out after ${FRIDA_TIMEOUT_SECONDS} seconds."
+        log_info "Frida successfully timed out after ${FRIDA_TIMEOUT_SECONDS} seconds."
       else
         log_error "Unknown exit status ${FAILURE_EXIT_STATUS}."
         exit 1
       fi
     }
   else
-    log_stdout "Frida script will run indefinitely with no timeout."
+    log_info "Frida script will run indefinitely with no timeout."
     frida --device "${FRIDA_DEVICE_ID}" --file "${APP_PACKAGE_NAME}" --load "${FRIDA_SCRIPT_PATH}"
   fi
 }
@@ -105,23 +105,23 @@ run_frida_script_usb()
 {
   local APP_PACKAGE_NAME="${1:?}"
   local FRIDA_SCRIPT_PATH="${2:?}"
-  log_stdout "Spawning app ${APP_PACKAGE_NAME} with Frida script $(basename "${FRIDA_SCRIPT_PATH}")."
+  log_info "Spawning app ${APP_PACKAGE_NAME} with Frida script $(basename "${FRIDA_SCRIPT_PATH}")."
 
   if [ "${CI:-false}" = 'true' ]; then
     local FRIDA_TIMEOUT_SECONDS='10'
-    log_stdout "Frida script will timeout after ${FRIDA_TIMEOUT_SECONDS} seconds."
+    log_info "Frida script will timeout after ${FRIDA_TIMEOUT_SECONDS} seconds."
     timeout "${FRIDA_TIMEOUT_SECONDS}" \
       frida --usb --file "${APP_PACKAGE_NAME}" --load "${FRIDA_SCRIPT_PATH}" || {
       local FAILURE_EXIT_STATUS="$?"
       if [ "${FAILURE_EXIT_STATUS}" -eq 124 ]; then
-        log_stdout "Frida successfully timed out after ${FRIDA_TIMEOUT_SECONDS} seconds."
+        log_info "Frida successfully timed out after ${FRIDA_TIMEOUT_SECONDS} seconds."
       else
         log_error "Unknown exit status ${FAILURE_EXIT_STATUS}."
         exit 1
       fi
     }
   else
-    log_stdout "Frida script will run indefinitely with no timeout."
+    log_info "Frida script will run indefinitely with no timeout."
     frida --usb --file "${APP_PACKAGE_NAME}" --load "${FRIDA_SCRIPT_PATH}"
   fi
 }

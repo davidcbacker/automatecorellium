@@ -4,17 +4,23 @@
 
 install_appium_server_and_dependencies()
 {
-  log_stdout 'Installing appium dependencies.'
+  log_info 'Installing appium dependencies.'
   sudo apt-get -qq update
   sudo apt-get -qq install --assume-yes --no-install-recommends libusb-dev
-  #python3 -m pip install -U pymobiledevice3 # for ios devices
-  python3 -m pip install -U Appium-Python-Client
-  log_stdout 'Installed appium dependencies.'
-  log_stdout 'Installing appium and device drivers.'
+  python3 -m pip install -U Appium-Python-Client pymobiledevice3
+  log_info 'Installed appium dependencies.'
+  log_info 'Installing appium and device drivers.'
   npm install --location=global appium
   appium driver install uiautomator2
   appium driver install xcuitest
-  log_stdout 'Installed appium and device drivers.'
+  log_info 'Installed appium and device drivers.'
+}
+
+mount_developer_disk_image()
+{
+  log_info 'Auto-mounting disk image.'
+  pymobiledevice3 mounter auto-mount
+  log_info 'Auto-mounted disk image.'
 }
 
 install_appium_runner_ios()
@@ -24,6 +30,25 @@ install_appium_runner_ios()
   local APPIUM_RUNNER_IOS_BUNDLE_ID='org.appium.WebDriverAgentRunner.xctrunner'
   kill_app "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_BUNDLE_ID}"
   install_app_from_url "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_URL}"
+}
+
+launch_appium_runner_ios()
+{
+  local INSTANCE_ID="${1:?}"
+  local APPIUM_RUNNER_IOS_BUNDLE_ID='org.appium.WebDriverAgentRunner.xctrunner'
+  local PROJECT_ID
+  PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
+  kill_app "${INSTANCE_ID}" "${APPIUM_RUNNER_IOS_BUNDLE_ID}"
+  log_info "Launching app ${APPIUM_RUNNER_IOS_BUNDLE_ID}."
+  if corellium apps open \
+    --instance "${INSTANCE_ID}" \
+    --project "${PROJECT_ID}" \
+    --bundle "${APPIUM_RUNNER_IOS_BUNDLE_ID}" > /dev/null; then
+    log_info "Launched app ${APPIUM_RUNNER_IOS_BUNDLE_ID}."
+  else
+    log_error "Failed to launch app ${APPIUM_RUNNER_IOS_BUNDLE_ID}."
+    exit 1
+  fi
 }
 
 create_matrix_assessment()
@@ -43,7 +68,7 @@ start_matrix_monitoring()
   local INSTANCE_ID="${1:?}"
   local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_STATUS_MONITORING='monitoring'
-  log_stdout "Starting monitoring for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Starting monitoring for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix start-monitor \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
@@ -53,7 +78,7 @@ start_matrix_monitoring()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_MONITORING}" ||
     return 1
-  log_stdout "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_MONITORING}."
+  log_info "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_MONITORING}."
 }
 
 stop_matrix_monitoring()
@@ -61,7 +86,7 @@ stop_matrix_monitoring()
   local INSTANCE_ID="${1:?}"
   local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_STATUS_READY_FOR_TESTING='readyForTesting'
-  log_stdout "Stopping monitoring for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Stopping monitoring for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix stop-monitor \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
@@ -71,7 +96,7 @@ stop_matrix_monitoring()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_READY_FOR_TESTING}" ||
     return 1
-  log_stdout "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_READY_FOR_TESTING}."
+  log_info "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_READY_FOR_TESTING}."
 }
 
 test_matrix_evidence()
@@ -79,7 +104,7 @@ test_matrix_evidence()
   local INSTANCE_ID="${1:?}"
   local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_STATUS_COMPLETE='complete'
-  log_stdout "Running test for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Running test for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix test \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
@@ -89,7 +114,7 @@ test_matrix_evidence()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_COMPLETE}" ||
     return 1
-  log_stdout "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETE}."
+  log_info "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETE}."
 }
 
 get_matrix_report_id()
@@ -127,13 +152,13 @@ download_matrix_report_to_local_path()
   local MATRIX_REPORT_TARGET_FORMAT="${4:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
   local MATRIX_REPORT_TARGET_FORMAT_UPPER
   MATRIX_REPORT_TARGET_FORMAT_UPPER="$(echo "${MATRIX_REPORT_TARGET_FORMAT}" | tr '[:lower:]' '[:upper:]')"
-  log_stdout "Downloading ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Downloading ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   get_raw_matrix_report \
     "${INSTANCE_ID}" \
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_REPORT_TARGET_FORMAT}" \
     > "${MATRIX_REPORT_DOWNLOAD_PATH}"
-  log_stdout "Downloaded ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Downloaded ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 
 print_failed_matrix_checks()
@@ -153,12 +178,12 @@ delete_matrix_assessment()
 {
   local INSTANCE_ID="${1:?}"
   local MATRIX_ASSESSMENT_ID="${2:?}"
-  log_stdout "Deleting MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Deleting MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   corellium matrix delete-assessment \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
     > /dev/null
-  log_stdout "Deleted MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Deleted MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 
 get_open_matrix_assessment_json()
@@ -182,7 +207,7 @@ handle_open_matrix_assessment()
     log_warn "Assessment ${OPEN_MATRIX_ASSESSMENT_ID} is currently ${OPEN_MATRIX_ASSESSMENT_STATUS}."
     case "${OPEN_MATRIX_ASSESSMENT_STATUS}" in
       'testing')
-        log_stdout "Waiting until assessment ${OPEN_MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETE}."
+        log_info "Waiting until assessment ${OPEN_MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETE}."
         wait_for_matrix_assessment_status \
           "${INSTANCE_ID}" \
           "${OPEN_MATRIX_ASSESSMENT_ID}" \
@@ -202,21 +227,21 @@ run_full_matrix_assessment()
   local APP_BUNDLE_ID="${2:?}"
   local MATRIX_WORDLIST_ID="${3:?}"
   handle_open_matrix_assessment "${INSTANCE_ID}"
-  log_stdout "Creating MATRIX assessment."
+  log_info "Creating MATRIX assessment."
   local MATRIX_ASSESSMENT_ID
   MATRIX_ASSESSMENT_ID="$(create_matrix_assessment "${INSTANCE_ID}" "${APP_BUNDLE_ID}" "${MATRIX_WORDLIST_ID}")"
   if [ -z "${MATRIX_ASSESSMENT_ID}" ]; then
     log_error "Failed to create assessment."
     return 1
   fi
-  log_stdout "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   wait_until_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   run_appium_interactions_cafe_android "${INSTANCE_ID}"
   ensure_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   stop_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
-  log_stdout "Completed MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Completed MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   kill_app "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   download_matrix_report_to_local_path \
     "${INSTANCE_ID}" \
@@ -285,7 +310,7 @@ wait_for_matrix_assessment_status()
 
 run_appium_server()
 {
-  log_stdout 'Starting appium server.'
+  log_info 'Starting appium server.'
   command -v appium > /dev/null || {
     log_error 'Cannot find appium in PATH.'
     exit 1
@@ -293,7 +318,7 @@ run_appium_server()
   appium &
   until curl --silent http://127.0.0.1:4723/status |
     jq -e '.value.ready == true' > /dev/null; do sleep 0.1; done
-  log_stdout 'Started appium server.'
+  log_info 'Started appium server.'
 }
 
 open_appium_session()
@@ -338,6 +363,61 @@ EOF
   echo "${OPENED_SESSION_ID}"
 }
 
+open_appium_session_ios()
+{
+  local INSTANCE_ID="${1:?}"
+  local APP_PACKAGE_NAME="${2:?}"
+  local DEFAULT_APPIUM_PORT='4723'
+  local DEFAULT_APPIUM_RUNNER_PORT='8100'
+  local INSTANCE_UDID INSTANCE_SERVICES_IP APPIUM_RUNNER_JSON_RESPONSE
+  local APPIUM_SESSION_JSON_PAYLOAD OPEN_APPIUM_SESSION_JSON_RESPONSE OPENED_SESSION_ID
+  INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
+  INSTANCE_UDID_NO_HYPENS="${INSTANCE_UDID//-/}"
+  INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+  local APPIUM_RUNNER_SOCKET="${INSTANCE_SERVICES_IP}:${DEFAULT_APPIUM_RUNNER_PORT}"
+
+  log_info "Confirming appium runner is active on instance at ${INSTANCE_SERVICES_IP}."
+  APPIUM_RUNNER_JSON_RESPONSE="$(curl --silent --retry 5 "http://${APPIUM_RUNNER_SOCKET}/status")" || {
+    log_error 'Failed to check appium runner status.'
+    exit 1
+  }
+  echo "${APPIUM_RUNNER_JSON_RESPONSE}" | jq -e '.value.ready == true' > /dev/null || {
+    log_error 'Bad status response from appium runner'
+    exit 1
+  }
+  log_info "Confirmed appium runner is active at instance ${INSTANCE_SERVICES_IP}."
+
+  APPIUM_SESSION_JSON_PAYLOAD=$(
+    cat << EOF
+{
+  "capabilities": {
+    "alwaysMatch": {
+      "platformName": "iOS",
+      "appium:automationName": "xcuitest",
+      "appium:udid": "${INSTANCE_UDID_NO_HYPENS}",
+      "appium:bundleId": "${APP_PACKAGE_NAME}",
+      "appium:showXcodeLog": true
+    },
+    "firstMatch": [{}]
+  }
+}
+EOF
+  )
+
+  OPEN_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent --retry 5 \
+    -X POST "http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session" \
+    -H "Content-Type: application/json" \
+    -d "${APPIUM_SESSION_JSON_PAYLOAD}")" || {
+    log_error 'Failed to open appium session.'
+    exit 1
+  }
+  OPENED_SESSION_ID="$(echo "${OPEN_APPIUM_SESSION_JSON_RESPONSE}" | jq -r '.value.sessionId')" || {
+    log_error 'Failed to parse open appium session JSON response.'
+    exit 1
+  }
+  echo "${OPENED_SESSION_ID}"
+}
+
 close_appium_session()
 {
   local SESSION_ID="${1:?}"
@@ -352,7 +432,7 @@ close_appium_session()
   # Verify that the session ID is now invalid
   local GET_APPIUM_SESSION_JSON_RESPONSE
   GET_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent -X GET "${APPIUM_API_SESSION_URL}")"
-  if ! echo "${GET_APPIUM_SESSION_JSON_RESPONSE}" | jq -e '.value.error == "invalid session id"' > /dev/null; then
+  if ! printf '%s' "${GET_APPIUM_SESSION_JSON_RESPONSE}" | jq -e '.value.error == "invalid session id"' > /dev/null; then
     echo "${GET_APPIUM_SESSION_JSON_RESPONSE}"
     log_error "Appium session ${SESSION_ID} is still valid after close."
     exit 1
@@ -364,9 +444,9 @@ run_appium_interactions_cafe_android()
   local INSTANCE_ID="${1:?}"
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
-  log_stdout 'Starting automated Appium interactions.'
+  log_info 'Starting automated Appium interactions.'
   PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_android.py "${INSTANCE_SERVICES_IP}"
-  log_stdout 'Finished automated Appium interactions.'
+  log_info 'Finished automated Appium interactions.'
 }
 
 run_appium_interactions_template_android()
@@ -374,9 +454,9 @@ run_appium_interactions_template_android()
   local INSTANCE_ID="${1:?}"
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
-  log_stdout 'Starting automated Appium interactions.'
+  log_info 'Starting automated Appium interactions.'
   python3 src/util/appium_interactions_template_android.py "${INSTANCE_SERVICES_IP}"
-  log_stdout 'Finished automated Appium interactions.'
+  log_info 'Finished automated Appium interactions.'
 }
 
 analyze_corellium_cafe_matrix_report_from_local_path()
@@ -392,20 +472,20 @@ analyze_corellium_cafe_matrix_report_from_local_path()
     log_error "Failed to parse ${MATRIX_JSON_REPORT_PATH}."
     exit 1
   }
-  log_stdout "Listing failed assessment checks for ${report}."
+  log_info "Listing failed assessment checks for ${report}."
   print_matching_matrix_check_outcomes_from_local_json_path \
     "${MATRIX_JSON_REPORT_PATH}" \
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
-  log_stdout 'Listed failed assessment checks.'
-  log_stdout "Verifying MATRIX report ${report} is free of errors."
+  log_info 'Listed failed assessment checks.'
+  log_info "Verifying MATRIX report ${report} is free of errors."
   ensure_no_errors_in_matrix_checks "${MATRIX_JSON_REPORT_PATH}"
-  log_stdout "Verified MATRIX report ${report} is free of errors."
-  log_stdout "Verifying outcome of local storage check for report ${report}."
+  log_info "Verified MATRIX report ${report} is free of errors."
+  log_info "Verifying outcome of local storage check for report ${report}."
   ensure_matrix_check_outcomes_from_local_json_path \
     "${MATRIX_JSON_REPORT_PATH}" \
     "${MATRIX_CHECK_TO_ANALYZE}" \
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
-  log_stdout "Verified outcome of local storage check for report ${report}."
+  log_info "Verified outcome of local storage check for report ${report}."
 }
 
 print_matching_matrix_check_outcomes_from_local_json_path()
@@ -431,7 +511,7 @@ ensure_no_errors_in_matrix_checks()
     log_error 'The MATRIX report contains errors.'
     log_warn 'Ignoring intermittent check errors.'
   else
-    log_stdout 'The MATRIX report is free of errors.'
+    log_info 'The MATRIX report is free of errors.'
   fi
 }
 

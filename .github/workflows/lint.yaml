@@ -4,6 +4,9 @@ on:
   workflow_call:
   workflow_dispatch:
 
+permissions:
+  contents: none
+
 jobs:
   changes-lint:
     name: Determine files to lint
@@ -37,12 +40,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
       - name: Lint markdown docs
-        uses: DavidAnson/markdownlint-cli2-action@v23
+        uses: DavidAnson/markdownlint-cli2-action@v24
         with:
           config: data/config/.markdownlint-cli2.jsonc
           globs: '**/*.md'
       - name: Spellcheck markdown docs
-        uses: rojopolis/spellcheck-github-actions@0.60.0
+        uses: rojopolis/spellcheck-github-actions@0.66.0
         with:
           config_path: data/config/spellcheck.yaml
 

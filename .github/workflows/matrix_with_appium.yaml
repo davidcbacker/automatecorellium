@@ -196,7 +196,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_info "Uploaded wordlist as image ${MATRIX_WORDLIST_ID}."
+          log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
@@ -214,7 +214,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_info "Uploaded wordlist as image ${MATRIX_WORDLIST_ID}."
+          log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
@@ -232,7 +232,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_info "Uploaded wordlist as image ${MATRIX_WORDLIST_ID}."
+          log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
@@ -250,7 +250,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_info "Uploaded wordlist as image ${MATRIX_WORDLIST_ID}."
+          log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
@@ -268,7 +268,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_info "Uploaded wordlist as image ${MATRIX_WORDLIST_ID}."
+          log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \

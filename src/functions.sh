@@ -739,7 +739,7 @@ ensure_adb_dependency()
       log_error 'Cannot find adb dependency in PATH.'
       exit 1
     }
-    log_warn 'Attempting to install adb dependency.'
+    log_info 'Attempting to install adb dependency.'
     sudo apt-get -qq update
     sudo apt-get -qq install adb
     if command -v adb > /dev/null; then

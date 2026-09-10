@@ -122,9 +122,9 @@ def interact_with_app(helper: AppiumHelper, screenshots: dict):
     helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
 
     log_stdout('Appium - Wait for blog page to load.')
-    helper.wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText")
+    helper.wait_until_visible(by=AppiumBy.ID, value="search-input")
     log_stdout('Appium - Interact with blog page.')
-    helper.set_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", desired_value="Testing")
+    helper.set_element_value(by=AppiumBy.ID, value="search-input", desired_value="Testing")
     helper.save_screenshot(filename=screenshots['blog'])
 
     log_stdout("Appium - Return to home page.")

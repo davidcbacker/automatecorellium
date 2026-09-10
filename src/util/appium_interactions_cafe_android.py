@@ -19,6 +19,7 @@ from selenium.common.exceptions import (
 )
 from selenium.webdriver.support.expected_conditions import (
     element_to_be_clickable,
+    presence_of_element_located,
     text_to_be_present_in_element,
     visibility_of_element_located,
 )
@@ -84,6 +85,17 @@ class AppiumHelper:
             sys.exit(1)
 
 
+    def wait_until_present(self, by: str, value: str):
+        '''Wait until an element is present in the DOM then return the element'''
+        try:
+            locator = (by, value)
+            return self.wait.until(presence_of_element_located(locator))
+        except TimeoutException as e:
+            print(f"Timeout: Element not clickable after {self.timeout} seconds.")
+            print(f"TimeoutException: {e}")
+            sys.exit(1)
+
+
     def wait_until_visible(self, by: str, value: str):
         '''Wait until an element is visible then return the element'''
         try:
@@ -122,7 +134,7 @@ def interact_with_app(helper: AppiumHelper, screenshots: dict):
     helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
 
     log_stdout('Appium - Wait for blog page to load.')
-    helper.wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText")
+    helper.wait_until_present(by=AppiumBy.CLASS_NAME, value="android.widget.EditText")
     log_stdout('Appium - Interact with blog page.')
     helper.set_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", desired_value="Testing")
     helper.save_screenshot(filename=screenshots['blog'])

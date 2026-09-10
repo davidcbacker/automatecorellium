@@ -134,7 +134,7 @@ def interact_with_app(helper: AppiumHelper, screenshots: dict):
     helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
 
     log_stdout('Appium - Wait for blog page to load.')
-    helper.wait_until_present(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Resources\")")
+    helper.wait_until_visible(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Resources\")")
     helper.save_screenshot(filename=screenshots['blog'])
 
     log_stdout("Appium - Return to home page.")

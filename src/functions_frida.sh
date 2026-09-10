@@ -83,7 +83,7 @@ run_frida_script_device()
       log_error 'Cannot find timeout dependency.'
       exit 1
     }
-    local FRIDA_TIMEOUT_SECONDS='10'
+    local FRIDA_TIMEOUT_SECONDS='30'
     log_info "Frida script will timeout after ${FRIDA_TIMEOUT_SECONDS} seconds."
     timeout "${FRIDA_TIMEOUT_SECONDS}" \
       frida --device "${FRIDA_DEVICE_ID}" --file "${APP_PACKAGE_NAME}" --load "${FRIDA_SCRIPT_PATH}" || {
@@ -108,7 +108,7 @@ run_frida_script_usb()
   log_info "Spawning app ${APP_PACKAGE_NAME} with Frida script $(basename "${FRIDA_SCRIPT_PATH}")."
 
   if [ "${CI:-false}" = 'true' ]; then
-    local FRIDA_TIMEOUT_SECONDS='10'
+    local FRIDA_TIMEOUT_SECONDS='30'
     log_info "Frida script will timeout after ${FRIDA_TIMEOUT_SECONDS} seconds."
     timeout "${FRIDA_TIMEOUT_SECONDS}" \
       frida --usb --file "${APP_PACKAGE_NAME}" --load "${FRIDA_SCRIPT_PATH}" || {

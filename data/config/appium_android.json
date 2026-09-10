@@ -21,6 +21,6 @@
     "adb_exec": 40000,
     "automation_alarm": 120,
     "implicit_wait": 5,
-    "explicit_wait": 20
+    "explicit_wait": 40
   }
 }

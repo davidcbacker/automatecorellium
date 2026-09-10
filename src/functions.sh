@@ -743,7 +743,7 @@ ensure_adb_dependency()
     sudo apt-get -qq update
     sudo apt-get -qq install adb
     if command -v adb > /dev/null; then
-      log_info 'Installed adb dependencies.'
+      log_info 'Installed adb dependency.'
     else
       log_error 'Failed to install adb dependency.'
       exit 1

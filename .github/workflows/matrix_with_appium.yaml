@@ -45,8 +45,8 @@ jobs:
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
           - corellium-os: iOS
             hardware_flavor: iphone17pm
-            firmware_version: 26.1
-            firmware_build: 23B85
+            firmware_version: 26.5.2
+            firmware_build: 23F84
             corellium_cafe_package_name: com.corellium.Cafe
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
           - runner-os: ubuntu-latest

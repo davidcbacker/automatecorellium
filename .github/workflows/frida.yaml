@@ -9,6 +9,7 @@ on:
 concurrency:
   group: frida
   cancel-in-progress: false
+  queue: max
 
 permissions:
   contents: read
@@ -41,8 +42,8 @@ jobs:
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
           - corellium-os: iOS
             hardware_flavor: iphone17pm
-            firmware_version: 26.1
-            firmware_build: 23B85
+            firmware_version: 26.5.2
+            firmware_build: 23F84
             corellium_cafe_app_id: com.corellium.Cafe
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
           - os: ubuntu-latest

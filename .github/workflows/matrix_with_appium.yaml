@@ -18,12 +18,6 @@ env:
   TERM: xterm
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
   CORELLIUM_INSTANCE_NAME_PREFIX: 'MATRIX Automation'
-  CORELLIUM_CAFE_PACKAGE: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
-                            && 'com.corellium.cafe'
-                            || 'com.corellium.Cafe' }}
-  CORELLIUM_CAFE_SOURCE_URL: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
-                            && 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
-                            || 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa' }}
   CORELLIUM_CAFE_LOGIN_PAGE_SCREENSHOT_FILENAME: corellium_cafe_login_page.png
   CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME: corellium_cafe_blog_page.png
   CORELLIUM_CAFE_CUSTOMER_PAGE_SCREENSHOT_FILENAME: corellium_cafe_customer_info.png
@@ -31,7 +25,7 @@ env:
 
 jobs:
   corellium-matrixscan:
-    name: Scan with MATRIX [Android, ${{ matrix.runner-os-friendly-name }}]
+    name: Scan with MATRIX [${{ matrix.corellium-os }}, ${{ matrix.runner-os-friendly-name }}]
     runs-on: ${{ matrix.runner-os }}
     timeout-minutes: 60
     env:
@@ -39,9 +33,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        corellium-os: [iOS, Android]
         runner-os: [ubuntu-latest]
         # runner-os: [ubuntu-latest, self-hosted]
         include:
+          - corellium-os: Android
+            hardware_flavor: ranchu
+            firmware_version: 16.0.0
+            firmware_build: 'r2 userdebug'
+            corellium_cafe_package_name: com.corellium.cafe
+            corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
+          - corellium-os: iOS
+            hardware_flavor: iphone17pm
+            firmware_version: 26.5.2
+            firmware_build: 23F84
+            corellium_cafe_package_name: com.corellium.Cafe
+            corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
           - runner-os: ubuntu-latest
             runner-os-friendly-name: Ubuntu
             api_endpoint_secret_key: CORELLIUM_API_ENDPOINT
@@ -99,7 +106,7 @@ jobs:
         timeout-minutes: 30
         run: |
           source ./src/functions.sh && set -euo pipefail
-          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+          if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
             wait_until_available_cores "${{ matrix.default_corellium_project }}" '4'
           else
             wait_until_available_cores "${{ matrix.default_corellium_project }}" '6'
@@ -113,9 +120,9 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           log_info "Creating instance."
           CREATED_CORELLIUM_INSTANCE_ID="$(create_instance \
-            "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" \
-            "${{ vars.MATRIX_DEFAULT_FIRMWARE_VERSION }}" \
-            "${{ vars.MATRIX_DEFAULT_FIRMWARE_BUILD }}" \
+            "${{ matrix.hardware_flavor }}" \
+            "${{ matrix.firmware_version }}" \
+            "${{ matrix.firmware_build }}" \
             "${{ matrix.default_corellium_project }}" \
             "${CORELLIUM_INSTANCE_NAME_PREFIX}")"
           log_info "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
@@ -129,7 +136,7 @@ jobs:
             install_appium_server_and_dependencies
             install_openvpn_dependencies
           fi
-          if [ "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}" = 'ranchu' ]; then
+          if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
             ensure_adb_dependency
           else
             install_usbfluxd_and_dependencies
@@ -155,7 +162,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           connect_to_instance \
             "${CORELLIUM_INSTANCE_ID}" \
-            "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}"
+            "${{ matrix.hardware_flavor }}"
       - name: Install Corellium Cafe from URL
         timeout-minutes: 5
         env:
@@ -163,9 +170,10 @@ jobs:
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
         run: |
           source ./src/functions.sh && set -euo pipefail
-          kill_app "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_PACKAGE}"
-          install_app_from_url "${CORELLIUM_INSTANCE_ID}" "${CORELLIUM_CAFE_SOURCE_URL}"
+          kill_app "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_package_name }}"
+          install_app_from_url "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_source_url }}"
       - name: Start Appium server and run session test
+        if: ${{ matrix.corellium-os == 'Android' }}
         timeout-minutes: 15
         env:
           ANDROID_HOME: ${{ matrix.android_home_path }}
@@ -177,7 +185,7 @@ jobs:
           log_info 'Opening Appium session.'
           OPEN_APPIUM_SESSION_ID="$(open_appium_session \
             "${CORELLIUM_INSTANCE_ID}" \
-            "${CORELLIUM_CAFE_PACKAGE}" \
+            "${{ matrix.corellium_cafe_package_name }}" \
             "${CORELLIUM_CAFE_ACTIVITY}")"
           log_info "Opened Appium session ${OPEN_APPIUM_SESSION_ID}."
           sleep 5
@@ -200,7 +208,7 @@ jobs:
           log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
-            "${CORELLIUM_CAFE_PACKAGE}" \
+            "${{ matrix.corellium_cafe_package_name }}" \
             "${MATRIX_WORDLIST_ID}"
       - name: MATRIX scan retry 1
         id: matrix-scan-retry-1
@@ -218,7 +226,7 @@ jobs:
           log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
-            "${CORELLIUM_CAFE_PACKAGE}" \
+            "${{ matrix.corellium_cafe_package_name }}" \
             "${MATRIX_WORDLIST_ID}"
       - name: MATRIX scan retry 2
         id: matrix-scan-retry-2
@@ -236,7 +244,7 @@ jobs:
           log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
-            "${CORELLIUM_CAFE_PACKAGE}" \
+            "${{ matrix.corellium_cafe_package_name }}" \
             "${MATRIX_WORDLIST_ID}"
       - name: MATRIX scan retry 3
         id: matrix-scan-retry-3
@@ -254,7 +262,7 @@ jobs:
           log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
-            "${CORELLIUM_CAFE_PACKAGE}" \
+            "${{ matrix.corellium_cafe_package_name }}" \
             "${MATRIX_WORDLIST_ID}"
       - name: MATRIX scan retry 4
         id: matrix-scan-retry-4
@@ -272,9 +280,10 @@ jobs:
           log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
-            "${CORELLIUM_CAFE_PACKAGE}" \
+            "${{ matrix.corellium_cafe_package_name }}" \
             "${MATRIX_WORDLIST_ID}"
       - name: Download MATRIX runtime artifacts from VM
+        if: ${{ matrix.corellium-os == 'Android' }}
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
@@ -304,7 +313,7 @@ jobs:
           else
             disconnect_from_instance \
               "${CORELLIUM_INSTANCE_ID}" \
-              "${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR }}"
+              "${{ matrix.hardware_flavor }}"
           fi
       - name: Delete instance
         if: always()
@@ -322,6 +331,7 @@ jobs:
             delete_instance "${CORELLIUM_INSTANCE_ID}"
           fi
       - name: Upload artifact 'MATRIX runtime artifacts'
+        if: ${{ matrix.corellium-os == 'Android' }}
         uses: actions/upload-artifact@v7
         with:
           name: matrix-runtime-artifacts-${{ runner.os }}
@@ -338,6 +348,7 @@ jobs:
           compression-level: 9
           if-no-files-found: error
       - name: Upload artifact 'Appium screenshots'
+        if: ${{ matrix.corellium-os == 'Android' }}
         uses: actions/upload-artifact@v7
         with:
           name: appium-screenshots-${{ runner.os }}
@@ -349,6 +360,7 @@ jobs:
           compression-level: 9
           if-no-files-found: error
       - name: Analyze MATRIX report results
+        if: ${{ matrix.corellium-os == 'Android' }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh

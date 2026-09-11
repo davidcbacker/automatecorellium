@@ -736,14 +736,15 @@ install_openvpn_dependencies()
 ensure_adb_dependency()
 {
   command -v adb > /dev/null || {
-    log_error 'Cannot find adb dependency in PATH.'
-    [ "$(uname -s)" = 'Darwin' ] && exit 1
-    log_warn 'Attempting to install adb dependency.'
-    log_info 'Installing adb.'
+    [ "$(uname -s)" = 'Darwin' ] && {
+      log_error 'Cannot find adb dependency in PATH.'
+      exit 1
+    }
+    log_info 'Installing adb dependency.'
     sudo apt-get -qq update
     sudo apt-get -qq install adb
     if command -v adb > /dev/null; then
-      log_info 'Installed adb.'
+      log_info 'Installed adb dependency.'
     else
       log_error 'Failed to install adb dependency.'
       exit 1

@@ -5,6 +5,9 @@ on:
     - cron: '49 5 * * 1-5'
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 env:
   TERM: xterm
 
@@ -32,9 +35,9 @@ jobs:
             node_tls_reject_unauthorized: 0
     steps:
       - name: Pull the latest code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           cache: 'npm'
           node-version: 24

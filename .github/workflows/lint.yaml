@@ -122,4 +122,4 @@ jobs:
       - name: Lint
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          ./actionlint -color -verbose
+          ./actionlint -color -verbose -ignore 'unexpected key "queue" for "concurrency" section'

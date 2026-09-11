@@ -9,6 +9,10 @@ on:
 concurrency:
   group: ${{ github.event_name == 'schedule' && 'corellium-matrix-scheduled' || 'corellium-matrix-development' }}
   cancel-in-progress: false
+  queue: max
+
+permissions:
+  contents: read
 
 env:
   TERM: xterm
@@ -30,7 +34,8 @@ jobs:
       fail-fast: false
       matrix:
         corellium-os: [iOS, Android]
-        runner-os: [ubuntu-latest, self-hosted]
+        runner-os: [ubuntu-latest]
+        # runner-os: [ubuntu-latest, self-hosted]
         include:
           - corellium-os: Android
             hardware_flavor: ranchu
@@ -51,19 +56,19 @@ jobs:
             default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
             android_home_path: ${{ vars.ACTIONS_UBUNTU_RUNNER_ANDROID_HOME_PATH }}
             node_tls_reject_unauthorized: 1
-          - runner-os: self-hosted
-            runner-os-friendly-name: macOS
-            api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
-            api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
-            default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}
-            android_home_path: ${{ vars.SELF_HOSTED_RUNNER_ANDROID_HOME_PATH }}
-            node_tls_reject_unauthorized: 0
+          # - runner-os: self-hosted
+          #   runner-os-friendly-name: macOS
+          #   api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
+          #   api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
+          #   default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}
+          #   android_home_path: ${{ vars.SELF_HOSTED_RUNNER_ANDROID_HOME_PATH }}
+          #   node_tls_reject_unauthorized: 0
       max-parallel: 2
     steps:
       - name: Pull the latest code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           cache: 'npm'
           node-version: 24
@@ -199,8 +204,8 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
-          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_package_name }}" \
@@ -217,8 +222,8 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
-          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_package_name }}" \
@@ -235,8 +240,8 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
-          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_package_name }}" \
@@ -253,8 +258,8 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
-          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_package_name }}" \
@@ -271,8 +276,8 @@ jobs:
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
-          MATRIX_WORDLIST_ID="$(upload_image_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
+          log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_package_name }}" \

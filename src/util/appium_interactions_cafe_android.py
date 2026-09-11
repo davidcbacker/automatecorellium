@@ -68,7 +68,7 @@ class AppiumHelper:
             element.send_keys(desired_value)
             self.wait_until_element_value(by=by, value=value, desired_value=desired_value)
         except TimeoutException as e:
-            print(f"Timeout: Element not clickable after {self.timeout} seconds.")
+            print(f"Timeout: Element value not set after {self.timeout} seconds.")
             print(f"TimeoutException: {e}")
             sys.exit(1)
 
@@ -122,9 +122,7 @@ def interact_with_app(helper: AppiumHelper, screenshots: dict):
     helper.click_when_ready(by=AppiumBy.ID, value="com.corellium.cafe:id/bvBlog")
 
     log_stdout('Appium - Wait for blog page to load.')
-    helper.wait_until_visible(by=AppiumBy.CLASS_NAME, value="android.widget.EditText")
-    log_stdout('Appium - Interact with blog page.')
-    helper.set_element_value(by=AppiumBy.CLASS_NAME, value="android.widget.EditText", desired_value="Testing")
+    helper.wait_until_visible(by=AppiumBy.ANDROID_UIAUTOMATOR, value="new UiSelector().text(\"Resources\")")
     helper.save_screenshot(filename=screenshots['blog'])
 
     log_stdout("Appium - Return to home page.")

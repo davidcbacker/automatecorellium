@@ -180,13 +180,14 @@ EOF
   "name": "${NEW_INSTANCE_NAME}",
   "flavor": "${HARDWARE_FLAVOR}",
   "os": "${FIRMWARE_VERSION}",
-  "osbuild": "${FIRMWARE_BUILD}"
+  "osbuild": "${FIRMWARE_BUILD}",
+  "sbs": true
 }
 EOF
     )
   fi
 
-  CREATE_INSTANCE_RESPONSE_JSON="$(curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
+  CREATE_INSTANCE_RESPONSE_JSON="$(curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v3/instances" \
     -H "Accept: application/json" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
     -H "Content-Type: application/json" \
@@ -303,7 +304,7 @@ soft_stop_instance()
     *)
       log_info "Stopping instance ${INSTANCE_ID}."
       check_env_vars
-      curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/stop" \
+      curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v3/instances/${INSTANCE_ID}/stop" \
         -H "Accept: application/json" \
         -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
         -H "Content-Type: application/json" \
@@ -436,7 +437,7 @@ kill_app()
   if [ "$(is_app_running "${INSTANCE_ID}" "${APP_BUNDLE_ID}")" = 'true' ]; then
     log_info "Killing running app ${APP_BUNDLE_ID}."
     if curl --insecure --silent -X POST \
-      "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/app/apps/${APP_BUNDLE_ID}/kill" \
+      "${CORELLIUM_API_ENDPOINT}/api/v3/instances/${INSTANCE_ID}/agent/v1/app/apps/${APP_BUNDLE_ID}/kill" \
       -H "Accept: application/json" \
       -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"; then
       log_info "Killed running app ${APP_BUNDLE_ID}."
@@ -462,19 +463,23 @@ install_app_from_url()
 {
   local INSTANCE_ID="${1:?}"
   local APP_URL="${2:?}"
-  local PROJECT_ID
+  local MINIMUM_FILE_SIZE_IN_KIB='32'
+  local PROJECT_ID APP_FILENAME DOWNLOADED_FILE_SIZE_IN_KIB
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
-  local APP_FILENAME
   APP_FILENAME="$(basename "${APP_URL}")"
-
   log_info "Downloading ${APP_FILENAME}."
   curl --silent --output "${APP_FILENAME}" "${APP_URL}" || {
     log_error "Failed to download app ${APP_FILENAME}."
     exit 1
   }
   log_info "Downloaded ${APP_FILENAME}."
-  log_info "Size on disk is $(du -k "${APP_FILENAME}" | cut -f1) KiB."
-
+  log_info 'Checking download size.'
+  DOWNLOADED_FILE_SIZE_IN_KIB="$(du -k "${APP_FILENAME}" | cut -f1)"
+  [ "${DOWNLOADED_FILE_SIZE_IN_KIB}" -lt "${MINIMUM_FILE_SIZE_IN_KIB}" ] && {
+    log_error "Downloaded ${DOWNLOADED_FILE_SIZE_IN_KIB} KiB, below the minimum of ${MINIMUM_FILE_SIZE_IN_KIB} KiB."
+    exit 1
+  }
+  log_info "Size on disk is ${DOWNLOADED_FILE_SIZE_IN_KIB} KiB."
   log_info "Installing ${APP_FILENAME}."
   corellium apps install \
     --instance "${INSTANCE_ID}" \
@@ -624,21 +629,21 @@ download_file_to_local_path()
   local encoded_download_path="${FILE_DOWNLOAD_PATH//\//%2F}"
 
   curl --insecure --silent -X GET \
-    "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/file/device/${encoded_download_path}" \
+    "${CORELLIUM_API_ENDPOINT}/api/v3/instances/${INSTANCE_ID}/agent/v1/file/device/${encoded_download_path}" \
     -H "Accept: application/octet-stream" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
     -o "${LOCAL_SAVE_PATH}"
 }
 
 # Upload a file to the Corellium server and print the image ID to stdout
-upload_image_from_local_path()
+upload_wordlist_from_local_path()
 {
   local INSTANCE_ID="${1:?}"
   local LOCAL_FILE_PATH="${2:?}"
   local PROJECT_ID IMAGE_NAME
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   IMAGE_NAME="$(basename "${LOCAL_FILE_PATH}")"
-  local IMAGE_TYPE='extension'
+  local IMAGE_TYPE='mast-wordlist'
   local IMAGE_ENCODING='plain'
 
   # return the created image ID
@@ -731,14 +736,15 @@ install_openvpn_dependencies()
 ensure_adb_dependency()
 {
   command -v adb > /dev/null || {
-    log_error 'Cannot find adb dependency in PATH.'
-    [ "$(uname -s)" = 'Darwin' ] && exit 1
-    log_warn 'Attempting to install adb dependency.'
-    log_info 'Installing adb.'
+    [ "$(uname -s)" = 'Darwin' ] && {
+      log_error 'Cannot find adb dependency in PATH.'
+      exit 1
+    }
+    log_info 'Installing adb dependency.'
     sudo apt-get -qq update
     sudo apt-get -qq install adb
     if command -v adb > /dev/null; then
-      log_info 'Installed adb.'
+      log_info 'Installed adb dependency.'
     else
       log_error 'Failed to install adb dependency.'
       exit 1

@@ -187,7 +187,7 @@ EOF
     )
   fi
 
-  CREATE_INSTANCE_RESPONSE_JSON="$(curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances" \
+  CREATE_INSTANCE_RESPONSE_JSON="$(curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v3/instances" \
     -H "Accept: application/json" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
     -H "Content-Type: application/json" \
@@ -304,7 +304,7 @@ soft_stop_instance()
     *)
       log_info "Stopping instance ${INSTANCE_ID}."
       check_env_vars
-      curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/stop" \
+      curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v3/instances/${INSTANCE_ID}/stop" \
         -H "Accept: application/json" \
         -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
         -H "Content-Type: application/json" \
@@ -437,7 +437,7 @@ kill_app()
   if [ "$(is_app_running "${INSTANCE_ID}" "${APP_BUNDLE_ID}")" = 'true' ]; then
     log_info "Killing running app ${APP_BUNDLE_ID}."
     if curl --insecure --silent -X POST \
-      "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/app/apps/${APP_BUNDLE_ID}/kill" \
+      "${CORELLIUM_API_ENDPOINT}/api/v3/instances/${INSTANCE_ID}/agent/v1/app/apps/${APP_BUNDLE_ID}/kill" \
       -H "Accept: application/json" \
       -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"; then
       log_info "Killed running app ${APP_BUNDLE_ID}."
@@ -629,7 +629,7 @@ download_file_to_local_path()
   local encoded_download_path="${FILE_DOWNLOAD_PATH//\//%2F}"
 
   curl --insecure --silent -X GET \
-    "${CORELLIUM_API_ENDPOINT}/api/v1/instances/${INSTANCE_ID}/agent/v1/file/device/${encoded_download_path}" \
+    "${CORELLIUM_API_ENDPOINT}/api/v3/instances/${INSTANCE_ID}/agent/v1/file/device/${encoded_download_path}" \
     -H "Accept: application/octet-stream" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" \
     -o "${LOCAL_SAVE_PATH}"
@@ -736,14 +736,15 @@ install_openvpn_dependencies()
 ensure_adb_dependency()
 {
   command -v adb > /dev/null || {
-    log_error 'Cannot find adb dependency in PATH.'
-    [ "$(uname -s)" = 'Darwin' ] && exit 1
-    log_warn 'Attempting to install adb dependency.'
-    log_info 'Installing adb.'
+    [ "$(uname -s)" = 'Darwin' ] && {
+      log_error 'Cannot find adb dependency in PATH.'
+      exit 1
+    }
+    log_info 'Installing adb dependency.'
     sudo apt-get -qq update
     sudo apt-get -qq install adb
     if command -v adb > /dev/null; then
-      log_info 'Installed adb.'
+      log_info 'Installed adb dependency.'
     else
       log_error 'Failed to install adb dependency.'
       exit 1

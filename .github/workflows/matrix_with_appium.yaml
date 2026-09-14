@@ -9,6 +9,7 @@ on:
 concurrency:
   group: ${{ github.event_name == 'schedule' && 'corellium-matrix-scheduled' || 'corellium-matrix-development' }}
   cancel-in-progress: false
+  queue: max
 
 permissions:
   contents: read
@@ -16,7 +17,6 @@ permissions:
 env:
   TERM: xterm
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
-  CORELLIUM_INSTANCE_NAME_PREFIX: 'MATRIX Automation'
   CORELLIUM_CAFE_PACKAGE: ${{ vars.MATRIX_DEFAULT_HARDWARE_FLAVOR == 'ranchu'
                             && 'com.corellium.cafe'
                             || 'com.corellium.Cafe' }}
@@ -58,9 +58,9 @@ jobs:
       max-parallel: 2
     steps:
       - name: Pull the latest code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           cache: 'npm'
           node-version: 24
@@ -79,7 +79,7 @@ jobs:
           fi
       - name: Install Python
         if: ${{ matrix.runner-os == 'ubuntu-latest' }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           cache: pip
           cache-dependency-path: requirements-pip-appium.txt
@@ -108,6 +108,7 @@ jobs:
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
+          CORELLIUM_INSTANCE_NAME_PREFIX: 'MATRIX Automation'
         run: |
           source ./src/functions.sh && set -euo pipefail
           log_info "Creating instance."
@@ -196,7 +197,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
@@ -214,7 +215,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
@@ -232,7 +233,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
@@ -250,7 +251,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \
@@ -268,7 +269,7 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
-          log_info "Created new wordlist image with ID ${MATRIX_WORDLIST_ID}."
+          log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
           run_full_matrix_assessment \
             "${CORELLIUM_INSTANCE_ID}" \
             "${CORELLIUM_CAFE_PACKAGE}" \

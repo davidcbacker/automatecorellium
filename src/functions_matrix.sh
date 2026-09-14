@@ -324,7 +324,7 @@ run_appium_server()
     exit 1
   else
     log_info 'Starting appium server.'
-    appium &
+    appium --config data/config/appium_server.json &
     until curl --silent "${APPIUM_SERVER_STATUS_URL}" |
       jq -e '.value.ready == true' > /dev/null; do sleep 0.1; done
     log_info 'Started appium server.'

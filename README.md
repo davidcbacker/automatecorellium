@@ -11,7 +11,7 @@ See the current CI pass/fail status of dynamic and static checks.
 ### Scheduled runs
 
 [![Corellium MATRIX with Appium](https://github.com/davidcbacker/automatecorellium/actions/workflows/matrix_with_appium.yaml/badge.svg?branch=master&event=schedule)](https://github.com/davidcbacker/automatecorellium/actions/workflows/matrix_with_appium.yaml)
-[![Run Frida on Corellium](https://github.com/davidcbacker/automatecorellium/actions/workflows/frida.yaml/badge.svg)](https://github.com/davidcbacker/automatecorellium/actions/workflows/frida.yaml?query=event%3Aschedule+branch%3Amaster)
+[![Run Frida](https://github.com/davidcbacker/automatecorellium/actions/workflows/frida.yaml/badge.svg?branch=master&event=schedule)](https://github.com/davidcbacker/automatecorellium/actions/workflows/frida.yaml)
 
 [![Start Corellium devices](https://github.com/davidcbacker/automatecorellium/actions/workflows/start_devices.yaml/badge.svg?branch=master&event=schedule)](https://github.com/davidcbacker/automatecorellium/actions/workflows/start_devices.yaml)
 [![Stop Corellium devices](https://github.com/davidcbacker/automatecorellium/actions/workflows/stop_devices.yaml/badge.svg)](https://github.com/davidcbacker/automatecorellium/actions/workflows/stop_devices.yaml)

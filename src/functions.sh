@@ -996,9 +996,9 @@ run_usbfluxd_and_dependencies()
       sudo systemctl start usbmuxd
       sudo systemctl status usbmuxd
       log_info 'Started usbmuxd service.'
-      log_info 'Started avahi-daemon.'
-      sudo avahi-daemon &
       log_info 'Starting avahi-daemon.'
+      sudo avahi-daemon &
+      log_info 'Started avahi-daemon.'
       log_info 'Starting usbfluxd.'
       sudo usbfluxd -f -n &
       log_info 'Started usbfluxd.'

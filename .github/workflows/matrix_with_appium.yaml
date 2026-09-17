@@ -17,7 +17,6 @@ permissions:
 env:
   TERM: xterm
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
-  CORELLIUM_INSTANCE_NAME_PREFIX: 'MATRIX Automation'
   CORELLIUM_CAFE_LOGIN_PAGE_SCREENSHOT_FILENAME: corellium_cafe_login_page.png
   CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME: corellium_cafe_blog_page.png
   CORELLIUM_CAFE_CUSTOMER_PAGE_SCREENSHOT_FILENAME: corellium_cafe_customer_info.png
@@ -87,7 +86,7 @@ jobs:
           fi
       - name: Install Python
         if: ${{ matrix.runner-os == 'ubuntu-latest' }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           cache: pip
           cache-dependency-path: requirements-pip-appium.txt
@@ -116,6 +115,7 @@ jobs:
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
+          CORELLIUM_INSTANCE_NAME_PREFIX: 'MATRIX Automation'
         run: |
           source ./src/functions.sh && set -euo pipefail
           log_info "Creating instance."

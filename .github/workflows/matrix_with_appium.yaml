@@ -334,14 +334,14 @@ jobs:
         if: ${{ matrix.corellium-os == 'Android' }}
         uses: actions/upload-artifact@v7
         with:
-          name: matrix-runtime-artifacts-${{ runner.os }}
+          name: matrix-runtime-artifacts-${{ matrix.corellium-os }}-${{ runner.os }}
           path: ${{ runner.temp }}/matrix_artifacts.tar.gz
           compression-level: 9
           if-no-files-found: error
       - name: Upload artifact 'MATRIX reports'
         uses: actions/upload-artifact@v7
         with:
-          name: matrix-reports-${{ runner.os }}
+          name: matrix-reports--${{ matrix.corellium-os }}-${{ runner.os }}
           path: |
             matrix_report_*.html
             matrix_report_*.json
@@ -351,7 +351,7 @@ jobs:
         if: ${{ matrix.corellium-os == 'Android' }}
         uses: actions/upload-artifact@v7
         with:
-          name: appium-screenshots-${{ runner.os }}
+          name: appium-screenshots-${{ matrix.corellium-os }}-${{ runner.os }}
           path: |
             ${{ env.CORELLIUM_CAFE_LOGIN_PAGE_SCREENSHOT_FILENAME }}
             ${{ env.CORELLIUM_CAFE_BLOG_PAGE_SCREENSHOT_FILENAME }}

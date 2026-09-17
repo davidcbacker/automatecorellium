@@ -878,7 +878,7 @@ connect_to_instance()
       [ "$(uname -s)" = 'Darwin' ] &&
         export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
       run_usbfluxd_and_dependencies
-      add_instance_to_usbfluxd "${INSTANCE_ID}"
+      add_instance_to_usbfluxd_and_verify "${INSTANCE_ID}"
       verify_usbflux_connection "${INSTANCE_ID}"
       ;;
     *)

@@ -1,0 +1,9 @@
+{
+  "server": {
+    "address": "0.0.0.0",
+    "log": "output/appium.log",
+    "log-level": "debug",
+    "log-timestamp": true,
+    "port": 4723
+  }
+}

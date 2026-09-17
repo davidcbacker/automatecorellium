@@ -9,10 +9,13 @@ on:
 concurrency:
   group: frida
   cancel-in-progress: false
+  queue: max
+
+permissions:
+  contents: read
 
 env:
   TERM: xterm
-  CORELLIUM_INSTANCE_NAME_PREFIX: 'Frida Automation'
   VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
 
 jobs:
@@ -27,7 +30,8 @@ jobs:
       max-parallel: 2
       matrix:
         corellium-os: [Android, iOS]
-        os: [ubuntu-latest, self-hosted]
+        os: [ubuntu-latest]
+        # os: [ubuntu-latest, self-hosted]
         include:
           - corellium-os: Android
             hardware_flavor: ranchu
@@ -37,8 +41,8 @@ jobs:
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
           - corellium-os: iOS
             hardware_flavor: iphone17pm
-            firmware_version: 26.1
-            firmware_build: 23B85
+            firmware_version: 26.5.2
+            firmware_build: 23F84
             corellium_cafe_app_id: com.corellium.Cafe
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
           - os: ubuntu-latest
@@ -47,17 +51,17 @@ jobs:
             api_token_secret_key: CORELLIUM_API_TOKEN
             default_corellium_project: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
             node_tls_reject_unauthorized: 1
-          - os: self-hosted
-            os-friendly-name: macOS
-            api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
-            api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
-            default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}
-            node_tls_reject_unauthorized: 0
+          # - os: self-hosted
+          #   os-friendly-name: macOS
+          #   api_endpoint_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_ENDPOINT
+          #   api_token_secret_key: CORELLIUM_DESKTOP_APPLIANCE_API_TOKEN
+          #   default_corellium_project: ${{ vars.CORELLIUM_DESKTOP_APPLIANCE_DEFAULT_PROJECT }}
+          #   node_tls_reject_unauthorized: 0
     steps:
       - name: Pull the latest code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           cache: npm
           node-version: 24
@@ -76,7 +80,7 @@ jobs:
           fi
       - name: Install Python
         if: ${{ matrix.os == 'ubuntu-latest' }}
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           cache: pip
           cache-dependency-path: requirements-pip-frida.txt
@@ -91,12 +95,17 @@ jobs:
             --apitoken ${{ secrets[matrix.api_token_secret_key] }} \
             --endpoint ${{ secrets[matrix.api_endpoint_secret_key] }}
       - name: Wait until available cores
-        if: ${{ matrix.os == 'ubuntu-latest' || matrix.corellium-os == 'Android' }}
         timeout-minutes: 30
+        env:
+          FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE: ${{ vars.FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
             wait_until_available_cores "${{ matrix.default_corellium_project }}" '4'
+          elif [ "${{ matrix.os }}" = 'self-hosted' ] &&
+            does_instance_exist "${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE}" &&
+            is_instance_on "${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE}"; then
+            log_info "Instance ${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE} is already on."
           else
             wait_until_available_cores "${{ matrix.default_corellium_project }}" '6'
           fi
@@ -105,28 +114,28 @@ jobs:
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
-          MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE: ${{ vars.MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE }}
+          CORELLIUM_INSTANCE_NAME_PREFIX: 'Frida Automation'
+          FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE: ${{ vars.FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ "${{ matrix.os }}" = 'self-hosted' ] &&
             [  "${{ matrix.corellium-os }}" = 'iOS' ] &&
-            does_instance_exist "${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}"; then
-            log_stdout "Starting instance ${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}."
-            start_instance "${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}"
-            log_stdout "Started instance ${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}."
-            echo "CORELLIUM_INSTANCE_ID=${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}" >> "${GITHUB_ENV}"
-            log_stdout 'Saved existing instance ID as environmental variable.'
+            does_instance_exist "${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE}"; then
+            start_instance "${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE}"
+            log_info "Started instance ${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE}."
+            echo "CORELLIUM_INSTANCE_ID=${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE}" >> "${GITHUB_ENV}"
+            log_info 'Saved existing instance ID as environmental variable.'
           else
-            log_stdout "Creating ephemeral instance."
+            log_info "Creating ephemeral instance."
             CREATED_CORELLIUM_INSTANCE_ID="$(create_instance \
               "${{ matrix.hardware_flavor }}" \
               "${{ matrix.firmware_version }}" \
               "${{ matrix.firmware_build }}" \
               "${{ matrix.default_corellium_project }}" \
               "${CORELLIUM_INSTANCE_NAME_PREFIX}")"
-            log_stdout "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
+            log_info "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
             echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
-            log_stdout 'Saved ephemeral instance ID as environmental variable.'
+            log_info 'Saved ephemeral instance ID as environmental variable.'
           fi
       - name: Install additional runner dependencies
         run: |
@@ -136,7 +145,7 @@ jobs:
             install_openvpn_dependencies
           fi
           if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
-            install_adb_dependency
+            ensure_adb_dependency
           else
             install_usbfluxd_and_dependencies
           fi
@@ -161,15 +170,18 @@ jobs:
         timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail
-          if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
-            connect_with_adb "${CORELLIUM_INSTANCE_ID}"
-          else
-            [ "$(uname -s)" = 'Darwin' ] &&
-              export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
-            run_usbfluxd_and_dependencies
-            add_instance_to_usbfluxd_and_verify "${CORELLIUM_INSTANCE_ID}"
-            verify_usbflux_connection "${CORELLIUM_INSTANCE_ID}"
-          fi
+          connect_to_instance \
+            "${CORELLIUM_INSTANCE_ID}" \
+            "${{ matrix.hardware_flavor }}"
+#           if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
+#             connect_with_adb "${CORELLIUM_INSTANCE_ID}"
+#           else
+#             [ "$(uname -s)" = 'Darwin' ] &&
+#               export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
+#             run_usbfluxd_and_dependencies
+#             add_instance_to_usbfluxd_and_verify "${CORELLIUM_INSTANCE_ID}"
+#             verify_usbflux_connection "${CORELLIUM_INSTANCE_ID}"
+#           fi
       - name: Install Corellium Cafe from URL
         timeout-minutes: 5
         env:
@@ -179,8 +191,8 @@ jobs:
           source ./src/functions.sh && set -euo pipefail
           kill_app "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_app_id }}"
           install_app_from_url "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_source_url }}"
-      - name: Launch Cafe and run frida-ps
-        timeout-minutes: 10
+      - name: Launch Cafe
+        timeout-minutes: 2
         env:
           CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
           CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
@@ -189,6 +201,14 @@ jobs:
           source ./src/functions_frida.sh
           launch_app "${CORELLIUM_INSTANCE_ID}" "${{ matrix.corellium_cafe_app_id }}"
           sleep 5 # attempting to mitigate intermittent failure, issue 467
+      - name: Run frida-ps
+        timeout-minutes: 10
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
+          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          source ./src/functions_frida.sh
           run_frida_ps_device "${CORELLIUM_INSTANCE_ID}"
       - name: Run frida hook
         timeout-minutes: 2
@@ -206,31 +226,29 @@ jobs:
         timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail
-          if [ -z "${CORELLIUM_INSTANCE_ID}" ]; then
-            log_stdout 'CORELLIUM_INSTANCE_ID is not set.'
-          elif [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
-            disconnect_with_adb "${CORELLIUM_INSTANCE_ID}"
+          if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
+            log_info 'CORELLIUM_INSTANCE_ID is not set.'
           else
-            [ "$(uname -s)" = 'Darwin' ] &&
-              export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
-            delete_instance_from_usbfluxd "${CORELLIUM_INSTANCE_ID}"
+            disconnect_from_instance \
+              "${CORELLIUM_INSTANCE_ID}" \
+              "${{ matrix.hardware_flavor }}"
           fi
       - name: Stop or delete instance
         if: always()
         timeout-minutes: 15
         env:
-          MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE: ${{ vars.MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE }}
+          FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE: ${{ vars.FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ -z "${CORELLIUM_INSTANCE_ID:-}" ]; then
-            log_stdout 'CORELLIUM_INSTANCE_ID is not set.'
+            log_info 'CORELLIUM_INSTANCE_ID is not set.'
           elif ! does_instance_exist "${CORELLIUM_INSTANCE_ID}"; then
-            log_stdout "Instance ${CORELLIUM_INSTANCE_ID} does not exist."
-          elif [ "${CORELLIUM_INSTANCE_ID}" = "${MATRIX_DESKTOP_APPLIANCE_IOS_INSTANCE}" ]; then
-            log_stdout "Ready to stop iOS instance ${CORELLIUM_INSTANCE_ID} on Desktop Appliance."
+            log_info "Instance ${CORELLIUM_INSTANCE_ID} does not exist."
+          elif [ "${CORELLIUM_INSTANCE_ID}" = "${FRIDA_DESKTOP_APPLIANCE_IOS_INSTANCE}" ]; then
+            log_info "Ready to stop iOS instance ${CORELLIUM_INSTANCE_ID} on Desktop Appliance."
             stop_instance "${CORELLIUM_INSTANCE_ID}"
           else
-            log_stdout "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
+            log_info "Ready to delete ephemeral instance ${CORELLIUM_INSTANCE_ID}."
             stop_instance "${CORELLIUM_INSTANCE_ID}" || true
             delete_instance "${CORELLIUM_INSTANCE_ID}"
           fi

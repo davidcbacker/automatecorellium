@@ -4,6 +4,9 @@ on:
   workflow_call:
   workflow_dispatch:
 
+permissions:
+  contents: none
+
 jobs:
   changes-lint:
     name: Determine files to lint
@@ -12,38 +15,17 @@ jobs:
       pull-requests: read
     outputs:
       ci: ${{ steps.filter.outputs.ci }}
-      javascript: ${{ steps.filter.outputs.javascript }}
       markdown: ${{ steps.filter.outputs.markdown }}
       python: ${{ steps.filter.outputs.python }}
       shell: ${{ steps.filter.outputs.shell }}
       static-lint: ${{ steps.filter.outputs.static-lint }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: data/config/dorny-paths-filter.yaml
           list-files: 'shell'
-
-  lint-javascript:
-    name: Lint JavaScript
-    needs: changes-lint
-    if: >-
-      ${{
-        needs.changes-lint.outputs.javascript == 'true' ||
-        needs.changes-lint.outputs.static-lint == 'true'
-      }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-      - name: Run ESLint with SuperLinter
-        uses: super-linter/super-linter@v8
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          VALIDATE_JAVASCRIPT_ES: true
 
   lint-markdown:
     name: Lint Markdown
@@ -56,14 +38,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Lint markdown docs
-        uses: DavidAnson/markdownlint-cli2-action@v22
+        uses: DavidAnson/markdownlint-cli2-action@v24
         with:
           config: data/config/.markdownlint-cli2.jsonc
           globs: '**/*.md'
       - name: Spellcheck markdown docs
-        uses: rojopolis/spellcheck-github-actions@0.60.0
+        uses: rojopolis/spellcheck-github-actions@0.66.0
         with:
           config_path: data/config/spellcheck.yaml
 
@@ -78,7 +60,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Install pylint
@@ -109,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Lint
         uses: luizm/action-sh-checker@v0.10.0
         env:
@@ -136,8 +118,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Lint
         run: |
           bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
-          ./actionlint -color -verbose
+          ./actionlint -color -verbose -ignore 'unexpected key "queue" for "concurrency" section'

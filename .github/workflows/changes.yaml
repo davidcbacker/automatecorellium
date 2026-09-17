@@ -6,6 +6,9 @@ on:
   pull_request:
     branches: master
 
+permissions:
+  contents: read
+
 jobs:
   changes:
     name: Check which files changed
@@ -16,14 +19,13 @@ jobs:
       ci: ${{ steps.filter.outputs.ci }}
       frida: ${{ steps.filter.outputs.frida }}
       javascript: ${{ steps.filter.outputs.javascript }}
-      javascript-deps: ${{ steps.filter.outputs.javascript-deps }}
       markdown: ${{ steps.filter.outputs.markdown }}
       matrix: ${{ steps.filter.outputs.matrix }}
       python: ${{ steps.filter.outputs.python }}
       shell: ${{ steps.filter.outputs.shell }}
       static-lint: ${{ steps.filter.outputs.static-lint }}      
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
         id: filter
         with:
@@ -51,7 +53,7 @@ jobs:
     needs: [ changes, call-lint-workflow ]
     if: >-
       ${{
-        needs.changes.outputs.javascript-deps == 'true' ||
+        needs.changes.outputs.javascript == 'true' ||
         needs.changes.outputs.matrix == 'true'
       }}
     uses: ./.github/workflows/matrix_with_appium.yaml
@@ -63,7 +65,7 @@ jobs:
     if: >-
       ${{
         needs.changes.outputs.frida == 'true' ||
-        needs.changes.outputs.javascript-deps == 'true'
+        needs.changes.outputs.javascript == 'true'
       }}
     uses: ./.github/workflows/frida.yaml
     secrets: inherit

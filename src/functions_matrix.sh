@@ -68,7 +68,7 @@ start_matrix_monitoring()
   local INSTANCE_ID="${1:?}"
   local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_STATUS_MONITORING='monitoring'
-  log_info "Starting monitoring for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Starting MATRIX assessment monitoring."
   corellium matrix start-monitor \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
@@ -78,7 +78,7 @@ start_matrix_monitoring()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_MONITORING}" ||
     return 1
-  log_info "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_MONITORING}."
+  log_info "Started MATRIX assessment monitoring."
 }
 
 stop_matrix_monitoring()
@@ -86,7 +86,7 @@ stop_matrix_monitoring()
   local INSTANCE_ID="${1:?}"
   local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_STATUS_READY_FOR_TESTING='readyForTesting'
-  log_info "Stopping monitoring for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Stopping MATRIX assessment monitoring."
   corellium matrix stop-monitor \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
@@ -96,7 +96,7 @@ stop_matrix_monitoring()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_READY_FOR_TESTING}" ||
     return 1
-  log_info "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_READY_FOR_TESTING}."
+  log_info "Stopped MATRIX assessment monitoring."
 }
 
 test_matrix_evidence()
@@ -104,7 +104,7 @@ test_matrix_evidence()
   local INSTANCE_ID="${1:?}"
   local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_STATUS_COMPLETE='complete'
-  log_info "Running test for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Running MATRIX assessment test."
   corellium matrix test \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
@@ -114,7 +114,7 @@ test_matrix_evidence()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_COMPLETE}" ||
     return 1
-  log_info "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETE}."
+  log_info "Finished MATRIX assessment test."
 }
 
 get_matrix_report_id()
@@ -152,13 +152,13 @@ download_matrix_report_to_local_path()
   local MATRIX_REPORT_TARGET_FORMAT="${4:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
   local MATRIX_REPORT_TARGET_FORMAT_UPPER
   MATRIX_REPORT_TARGET_FORMAT_UPPER="$(echo "${MATRIX_REPORT_TARGET_FORMAT}" | tr '[:lower:]' '[:upper:]')"
-  log_info "Downloading ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Downloading MATRIX assessment ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report."
   get_raw_matrix_report \
     "${INSTANCE_ID}" \
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_REPORT_TARGET_FORMAT}" \
     > "${MATRIX_REPORT_DOWNLOAD_PATH}"
-  log_info "Downloaded ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Downloaded MATRIX assessment ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report."
 }
 
 print_failed_matrix_checks()

@@ -78,7 +78,7 @@ start_matrix_monitoring()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_MONITORING}" ||
     return 1
-  log_info "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_MONITORING}."
+  log_info "Started monitoring for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 
 stop_matrix_monitoring()
@@ -96,7 +96,7 @@ stop_matrix_monitoring()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_READY_FOR_TESTING}" ||
     return 1
-  log_info "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_READY_FOR_TESTING}."
+  log_info "Stopped monitoring for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 
 test_matrix_evidence()
@@ -114,7 +114,7 @@ test_matrix_evidence()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_COMPLETE}" ||
     return 1
-  log_info "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETE}."
+  log_info "Finished test for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 
 get_matrix_report_id()

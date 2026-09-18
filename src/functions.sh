@@ -945,7 +945,7 @@ disconnect_with_adb()
 
   ensure_adb_dependency
   is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" || {
-    log_info "ADB is already disconnected with ${INSTANCE_SERVICES_IP}."
+    log_info "ADB is already disconnected from ${INSTANCE_SERVICES_IP}."
     return
   }
 

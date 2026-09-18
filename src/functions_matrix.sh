@@ -472,9 +472,9 @@ run_appium_interactions_cafe_android()
   local INSTANCE_ID="${1:?}"
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
-  log_info 'Starting automated Appium interactions.'
+  log_info 'Starting Appium interactions.'
   PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_android.py "${INSTANCE_SERVICES_IP}"
-  log_info 'Finished automated Appium interactions.'
+  log_info 'Finished Appium interactions.'
 }
 
 run_appium_interactions_cafe_ios()

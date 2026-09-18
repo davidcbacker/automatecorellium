@@ -305,6 +305,7 @@ jobs:
           sha256sum "${MATRIX_RUNNER_ARTIFACTS_PATH}"
       - name: Disconnect from device
         if: always()
+        continue-on-error: true
         timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail
@@ -313,7 +314,12 @@ jobs:
           else
             disconnect_from_instance \
               "${CORELLIUM_INSTANCE_ID}" \
-              "${{ matrix.hardware_flavor }}"
+              "${{ matrix.hardware_flavor }}" || {
+              log_error 'Unable to disconnect from device. Retrying.'
+              disconnect_from_instance \
+                "${CORELLIUM_INSTANCE_ID}" \
+                "${{ matrix.hardware_flavor }}"
+            }
           fi
       - name: Delete instance
         if: always()

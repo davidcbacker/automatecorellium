@@ -68,7 +68,7 @@ start_matrix_monitoring()
   local INSTANCE_ID="${1:?}"
   local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_STATUS_MONITORING='monitoring'
-  log_info "Starting monitoring for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Starting MATRIX assessment monitoring."
   corellium matrix start-monitor \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
@@ -78,7 +78,7 @@ start_matrix_monitoring()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_MONITORING}" ||
     return 1
-  log_info "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_MONITORING}."
+  log_info "Started MATRIX assessment monitoring."
 }
 
 stop_matrix_monitoring()
@@ -86,7 +86,7 @@ stop_matrix_monitoring()
   local INSTANCE_ID="${1:?}"
   local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_STATUS_READY_FOR_TESTING='readyForTesting'
-  log_info "Stopping monitoring for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Stopping MATRIX assessment monitoring."
   corellium matrix stop-monitor \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
@@ -96,7 +96,7 @@ stop_matrix_monitoring()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_READY_FOR_TESTING}" ||
     return 1
-  log_info "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_READY_FOR_TESTING}."
+  log_info "Stopped MATRIX assessment monitoring."
 }
 
 test_matrix_evidence()
@@ -104,7 +104,7 @@ test_matrix_evidence()
   local INSTANCE_ID="${1:?}"
   local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_STATUS_COMPLETE='complete'
-  log_info "Running test for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Running MATRIX assessment test."
   corellium matrix test \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
@@ -114,7 +114,7 @@ test_matrix_evidence()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_COMPLETE}" ||
     return 1
-  log_info "MATRIX assessment ${MATRIX_ASSESSMENT_ID} is ${MATRIX_STATUS_COMPLETE}."
+  log_info "Finished MATRIX assessment test."
 }
 
 get_matrix_report_id()
@@ -152,13 +152,13 @@ download_matrix_report_to_local_path()
   local MATRIX_REPORT_TARGET_FORMAT="${4:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
   local MATRIX_REPORT_TARGET_FORMAT_UPPER
   MATRIX_REPORT_TARGET_FORMAT_UPPER="$(echo "${MATRIX_REPORT_TARGET_FORMAT}" | tr '[:lower:]' '[:upper:]')"
-  log_info "Downloading ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Downloading MATRIX assessment ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report."
   get_raw_matrix_report \
     "${INSTANCE_ID}" \
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_REPORT_TARGET_FORMAT}" \
     > "${MATRIX_REPORT_DOWNLOAD_PATH}"
-  log_info "Downloaded ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report for MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
+  log_info "Downloaded MATRIX assessment ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report."
 }
 
 print_failed_matrix_checks()
@@ -237,7 +237,7 @@ run_full_matrix_assessment()
   log_info "Created MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
   start_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   wait_until_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
-  run_appium_interactions_cafe_android "${INSTANCE_ID}"
+  run_appium_interactions_cafe "${INSTANCE_ID}"
   ensure_app_is_running_on_instance "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   stop_matrix_monitoring "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
   test_matrix_evidence "${INSTANCE_ID}" "${MATRIX_ASSESSMENT_ID}"
@@ -449,6 +449,24 @@ close_appium_session()
   fi
 }
 
+run_appium_interactions_cafe()
+{
+  local INSTANCE_ID="${1:?}"
+  local INSTANCE_FLAVOR
+  INSTANCE_FLAVOR="$(get_instance_flavor "${INSTANCE_ID}")"
+  case "${INSTANCE_FLAVOR}" in
+    ipad* | iphone*)
+      run_appium_interactions_cafe_ios "${INSTANCE_ID}"
+      ;;
+    ranchu)
+      run_appium_interactions_cafe_android "${INSTANCE_ID}"
+      ;;
+    *)
+      log_warn 'Unknown hardware type. Skipping app interactions.'
+      ;;
+  esac
+}
+
 run_appium_interactions_cafe_android()
 {
   local INSTANCE_ID="${1:?}"
@@ -457,6 +475,21 @@ run_appium_interactions_cafe_android()
   log_info 'Starting automated Appium interactions.'
   PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_android.py "${INSTANCE_SERVICES_IP}"
   log_info 'Finished automated Appium interactions.'
+}
+
+run_appium_interactions_cafe_ios()
+{
+  # local INSTANCE_ID="${1:?}"
+  # local INSTANCE_UDID
+  # INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
+  # log_info 'Starting automated Appium interactions.'
+  # PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_ios.py "${INSTANCE_SERVICES_IP}"
+  # log_info 'Finished automated Appium interactions.'
+  log_warn 'Skipping Appium interactions on iOS for now.'
+  local TEMP_WORKAROUND_SLEEP_TIME='90'
+  log_warn "Pausing for ${TEMP_WORKAROUND_SLEEP_TIME} seconds to simulate interactions."
+  sleep "${TEMP_WORKAROUND_SLEEP_TIME}"
+  log_warn "Paused for ${TEMP_WORKAROUND_SLEEP_TIME} seconds to simulate interactions."
 }
 
 run_appium_interactions_template_android()

@@ -173,15 +173,6 @@ jobs:
           connect_to_instance \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.hardware_flavor }}"
-#           if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
-#             connect_with_adb "${CORELLIUM_INSTANCE_ID}"
-#           else
-#             [ "$(uname -s)" = 'Darwin' ] &&
-#               export PATH="/Applications/USBFlux.app/Contents/Resources:${PATH}"
-#             run_usbfluxd_and_dependencies
-#             add_instance_to_usbfluxd_and_verify "${CORELLIUM_INSTANCE_ID}"
-#             verify_usbflux_connection "${CORELLIUM_INSTANCE_ID}"
-#           fi
       - name: Install Corellium Cafe from URL
         timeout-minutes: 5
         env:

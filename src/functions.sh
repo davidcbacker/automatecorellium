@@ -1026,7 +1026,6 @@ add_instance_to_usbfluxd_and_verify()
   else
     log_info "Adding device ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd via usbfluxctl."
     usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"
-    usbfluxctl add "${INSTANCE_USBFLUXD_SOCKET}"
     log_info "Added device at ${INSTANCE_USBFLUXD_SOCKET} to usbfluxd via usbfluxctl."
     log_info "Verifying device at ${INSTANCE_UDID} via idevice_id."
     sleep_until_udid_listed_on_idevice_id "${INSTANCE_UDID}"

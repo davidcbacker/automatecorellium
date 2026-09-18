@@ -68,7 +68,7 @@ start_matrix_monitoring()
   local INSTANCE_ID="${1:?}"
   local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_STATUS_MONITORING='monitoring'
-  log_info "Starting MATRIX assessment monitoring."
+  log_info "Starting monitoring for MATRIX assessment."
   corellium matrix start-monitor \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
@@ -78,7 +78,7 @@ start_matrix_monitoring()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_MONITORING}" ||
     return 1
-  log_info "Started MATRIX assessment monitoring."
+  log_info "Started monitoring for MATRIX assessment."
 }
 
 stop_matrix_monitoring()
@@ -86,7 +86,7 @@ stop_matrix_monitoring()
   local INSTANCE_ID="${1:?}"
   local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_STATUS_READY_FOR_TESTING='readyForTesting'
-  log_info "Stopping MATRIX assessment monitoring."
+  log_info "Stopping monitoring for MATRIX assessment."
   corellium matrix stop-monitor \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
@@ -96,7 +96,7 @@ stop_matrix_monitoring()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_READY_FOR_TESTING}" ||
     return 1
-  log_info "Stopped MATRIX assessment monitoring."
+  log_info "Stopped monitoring for MATRIX assessment."
 }
 
 test_matrix_evidence()
@@ -104,7 +104,7 @@ test_matrix_evidence()
   local INSTANCE_ID="${1:?}"
   local MATRIX_ASSESSMENT_ID="${2:?}"
   local MATRIX_STATUS_COMPLETE='complete'
-  log_info "Running MATRIX assessment test."
+  log_info "Running test for MATRIX assessment."
   corellium matrix test \
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
@@ -114,7 +114,7 @@ test_matrix_evidence()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_COMPLETE}" ||
     return 1
-  log_info "Finished MATRIX assessment test."
+  log_info "Finished test for MATRIX assessment."
 }
 
 get_matrix_report_id()
@@ -152,13 +152,13 @@ download_matrix_report_to_local_path()
   local MATRIX_REPORT_TARGET_FORMAT="${4:-${MATRIX_REPORT_DEFAULT_FORMAT}}"
   local MATRIX_REPORT_TARGET_FORMAT_UPPER
   MATRIX_REPORT_TARGET_FORMAT_UPPER="$(echo "${MATRIX_REPORT_TARGET_FORMAT}" | tr '[:lower:]' '[:upper:]')"
-  log_info "Downloading MATRIX assessment ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report."
+  log_info "Downloading ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report for MATRIX assessment."
   get_raw_matrix_report \
     "${INSTANCE_ID}" \
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_REPORT_TARGET_FORMAT}" \
     > "${MATRIX_REPORT_DOWNLOAD_PATH}"
-  log_info "Downloaded MATRIX assessment ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report."
+  log_info "Downloaded ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report for MATRIX assessment."
 }
 
 print_failed_matrix_checks()
@@ -472,9 +472,9 @@ run_appium_interactions_cafe_android()
   local INSTANCE_ID="${1:?}"
   local INSTANCE_SERVICES_IP APPIUM_SESSION_JSON_PAYLOAD
   INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
-  log_info 'Starting automated Appium interactions.'
+  log_info 'Starting Appium interactions.'
   PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_android.py "${INSTANCE_SERVICES_IP}"
-  log_info 'Finished automated Appium interactions.'
+  log_info 'Finished Appium interactions.'
 }
 
 run_appium_interactions_cafe_ios()

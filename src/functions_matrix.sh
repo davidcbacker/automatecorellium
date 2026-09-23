@@ -608,3 +608,14 @@ compress_matrix_runtime_artifacts()
     fi
   done
 }
+
+upload_wordlist_from_local_path()
+{
+  local INSTANCE_ID="${1:?}"
+  local LOCAL_FILE_PATH="${2:?}"
+  local WORDLIST_IMAGE_TYPE='mast-wordlist'
+  upload_image_from_local_path \
+    "${INSTANCE_ID}" \
+    "${LOCAL_FILE_PATH}" \
+    "${WORDLIST_IMAGE_TYPE}"
+}

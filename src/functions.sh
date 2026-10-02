@@ -763,6 +763,11 @@ install_usbfluxd_and_dependencies()
     fi
   }
 
+  command -v git clone > /dev/null || {
+    log_error 'Unable to find git in PATH.'
+    exit 1
+  }
+
   local USBFLUXD_APT_DEPS=(
     avahi-daemon
     build-essential

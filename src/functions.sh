@@ -797,41 +797,29 @@ install_usbfluxd_and_dependencies()
     usbfluxctl
   )
 
-  log_info 'Installing usbfluxd apt-get dependencies.'
+  log_info 'Installing usbfluxd and dependencies.'
   sudo apt-get -qq update
   sudo apt-get -qq install --assume-yes --no-install-recommends "${USBFLUXD_APT_DEPS[@]}"
-  log_info 'Installed usbfluxd apt-get dependencies.'
-
-  log_info 'Installing usbfluxd compiled dependencies.'
   local COMPILE_TEMP_DIR COMPILE_DEP_NAME
   COMPILE_TEMP_DIR="$(mktemp -d)"
   cd "${COMPILE_TEMP_DIR}/" || exit 1
   for COMPILE_DEP_URL in "${USBFLUXD_COMPILE_DEP_URLS[@]}"; do
     COMPILE_DEP_NAME="$(basename "${COMPILE_DEP_URL}")"
-    log_info "Cloning ${COMPILE_DEP_NAME}."
     git clone --quiet "${COMPILE_DEP_URL}" "${COMPILE_DEP_NAME}"
     cd "${COMPILE_TEMP_DIR}/${COMPILE_DEP_NAME}/" || exit 1
-    log_info "Generating Makefile for ${COMPILE_DEP_NAME}."
     ./autogen.sh > /dev/null 2>&1
-    log_info "Compiling ${COMPILE_DEP_NAME}."
     make --jobs "$(nproc)" 2>&1 | grep 'Making all in ' || make --jobs "$(nproc)"
-    log_info "Installing ${COMPILE_DEP_NAME}."
     sudo make install | grep '/usr/bin/install '
     cd "${COMPILE_TEMP_DIR}/" || exit 1
-    log_info "Deleting build directory for ${COMPILE_DEP_NAME}."
     rm -rf "${COMPILE_DEP_NAME:?}/"
-    log_info "Installed ${COMPILE_DEP_NAME} and cleaned up build directory."
   done
-  log_info 'Installed usbfluxd compiled dependencies.'
-
   for EXPECTED_BINARY in "${USBFLUXD_EXPECTED_BINARIES[@]}"; do
-    if command -v "${EXPECTED_BINARY}" > /dev/null; then
-      log_info "Installed ${EXPECTED_BINARY} at $(command -v "${EXPECTED_BINARY}")."
-    else
+    if ! command -v "${EXPECTED_BINARY}" > /dev/null; then
       log_error "Failed to install ${EXPECTED_BINARY}."
       exit 1
     fi
   done
+  log_info 'Installed usbfluxd and dependencies.'
   cd "${HOME}/" || exit 1
   rm -rf "${COMPILE_TEMP_DIR:?}/"
 }

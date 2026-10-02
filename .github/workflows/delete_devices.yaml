@@ -1,4 +1,4 @@
-name: Delete Corellium devices
+name: Devices - Delete unauthorized
 
 on:
   schedule:

@@ -2,7 +2,7 @@ name: Devices - Start
 
 on:
   schedule:
-    - cron: '50 06 * * 1-5'
+    - cron: '50 05 * * 1-5'
   workflow_dispatch:
 
 permissions:

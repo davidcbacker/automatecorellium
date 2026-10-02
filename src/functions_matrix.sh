@@ -4,16 +4,14 @@
 
 install_appium_server_and_dependencies()
 {
-  log_info 'Installing appium dependencies.'
+  log_info 'Installing appium and dependencies.'
   sudo apt-get -qq update
   sudo apt-get -qq install --assume-yes --no-install-recommends libusb-dev
   python3 -m pip install -U Appium-Python-Client pymobiledevice3
-  log_info 'Installed appium dependencies.'
-  log_info 'Installing appium and device drivers.'
   npm install --location=global appium
   appium driver install uiautomator2
   appium driver install xcuitest
-  log_info 'Installed appium and device drivers.'
+  log_info 'Installed appium and dependencies.'
 }
 
 mount_developer_disk_image()

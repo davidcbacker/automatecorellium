@@ -2,7 +2,7 @@ name: Devices - Delete unauthorized
 
 on:
   schedule:
-    - cron: '49 5 * * 1-5'
+    - cron: '49 1 * * 1-5'
   workflow_dispatch:
 
 permissions:

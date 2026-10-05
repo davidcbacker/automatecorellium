@@ -582,7 +582,7 @@ delete_unauthorized_devices()
     return
   }
 
-  log_info "Deleting unauthorized devices."
+  log_info "Deleting ${#UNAUTHORIZED_DEVICES[@]} unauthorized devices."
   for DEVICE_TO_DELETE in "${UNAUTHORIZED_DEVICES[@]}"; do
     delete_instance "${DEVICE_TO_DELETE}"
   done

@@ -356,6 +356,10 @@ get_instance_services_ip()
     log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
     exit 1
   }
+  if [ -z "${INSTANCE_SERVICES_IP}" ] || [ "${INSTANCE_SERVICES_IP}" = 'null' ]; then
+    log_error "Blank services IP for instance ${INSTANCE_ID}."
+    exit 1
+  fi
   echo "${INSTANCE_SERVICES_IP}"
 }
 

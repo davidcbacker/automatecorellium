@@ -251,6 +251,15 @@ run_full_matrix_assessment()
     "${MATRIX_ASSESSMENT_ID}" \
     "matrix_report_${MATRIX_ASSESSMENT_ID}.json" \
     'json'
+  # The Corellium Cafe report checks are Android-specific (they assert on an
+  # android MASVS check id), so only run them for the ranchu flavor. Running
+  # them here folds report validation into the retried MATRIX scan step.
+  local INSTANCE_FLAVOR
+  INSTANCE_FLAVOR="$(get_instance_flavor "${INSTANCE_ID}")"
+  if [ "${INSTANCE_FLAVOR}" = 'ranchu' ]; then
+    analyze_corellium_cafe_matrix_report_from_local_path \
+      "matrix_report_${MATRIX_ASSESSMENT_ID}.json"
+  fi
 }
 
 get_matrix_assessment_status()
@@ -513,20 +522,20 @@ analyze_corellium_cafe_matrix_report_from_local_path()
     log_error "Failed to parse ${MATRIX_JSON_REPORT_PATH}."
     exit 1
   }
-  log_info "Listing failed assessment checks for ${report}."
+  log_info "Listing failed assessment checks for ${MATRIX_JSON_REPORT_PATH}."
   print_matching_matrix_check_outcomes_from_local_json_path \
     "${MATRIX_JSON_REPORT_PATH}" \
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
   log_info 'Listed failed assessment checks.'
-  log_info "Verifying MATRIX report ${report} is free of errors."
+  log_info "Verifying MATRIX report ${MATRIX_JSON_REPORT_PATH} is free of errors."
   ensure_no_errors_in_matrix_checks "${MATRIX_JSON_REPORT_PATH}"
-  log_info "Verified MATRIX report ${report} is free of errors."
-  log_info "Verifying outcome of local storage check for report ${report}."
+  log_info "Verified MATRIX report ${MATRIX_JSON_REPORT_PATH} is free of errors."
+  log_info "Verifying outcome of local storage check for report ${MATRIX_JSON_REPORT_PATH}."
   ensure_matrix_check_outcomes_from_local_json_path \
     "${MATRIX_JSON_REPORT_PATH}" \
     "${MATRIX_CHECK_TO_ANALYZE}" \
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
-  log_info "Verified outcome of local storage check for report ${report}."
+  log_info "Verified outcome of local storage check for report ${MATRIX_JSON_REPORT_PATH}."
 }
 
 print_matching_matrix_check_outcomes_from_local_json_path()

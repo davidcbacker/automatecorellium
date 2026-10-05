@@ -556,6 +556,7 @@ delete_unauthorized_devices()
     log_info "No devices exist, so nothing to delete."
     return
   }
+  log_info "Found ${#ALL_EXISTING_DEVICES[@]} devices."
 
   local UNAUTHORIZED_DEVICES=()
   local IS_DEVICE_AUTHORIZED

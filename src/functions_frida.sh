@@ -5,8 +5,7 @@
 install_frida_dependencies()
 {
   log_info 'Installing frida.'
-  local TARGET_FRIDA_VERSION='17.2.15'
-  python3 -m pip install -U "frida==${TARGET_FRIDA_VERSION}" frida-tools
+  python3 -m pip install -U -r requirements.txt
   log_info 'Installed frida.'
   # python3 -m pip install -U objection # Objection does not support Frida 17 yet
 }

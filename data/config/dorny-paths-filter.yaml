@@ -27,8 +27,7 @@ matrix:
   - 'src/util/appium_interactions_cafe_ios.py‎'
   - 'src/util/compress_matrix_artifacts.js'
 python:
-  - 'requirements-pip-appium.txt'
-  - 'requirements-pip-frida.txt'
+  - 'requirements.txt'
   - 'src/util/*.py'
 shell:
   - 'src/*.sh'

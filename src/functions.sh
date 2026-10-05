@@ -499,15 +499,20 @@ launch_app()
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   kill_app "${INSTANCE_ID}" "${APP_BUNDLE_ID}"
   log_info "Launching app ${APP_BUNDLE_ID}."
-  if corellium apps open \
+  corellium apps open \
     --instance "${INSTANCE_ID}" \
     --project "${PROJECT_ID}" \
-    --bundle "${APP_BUNDLE_ID}" > /dev/null; then
-    log_info "Launched app ${APP_BUNDLE_ID}."
-  else
-    log_error "Failed to launch app ${APP_BUNDLE_ID}."
-    exit 1
-  fi
+    --bundle "${APP_BUNDLE_ID}" > /dev/null || {
+    log_warn "Failed to launch app ${APP_BUNDLE_ID}. Retrying."
+    corellium apps open \
+      --instance "${INSTANCE_ID}" \
+      --project "${PROJECT_ID}" \
+      --bundle "${APP_BUNDLE_ID}" > /dev/null || {
+      log_error "Failed to launch app ${APP_BUNDLE_ID}."
+      exit 1
+    }
+  }
+  log_info "Launched app ${APP_BUNDLE_ID}."
 }
 
 unlock_instance()

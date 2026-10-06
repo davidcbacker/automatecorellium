@@ -227,7 +227,6 @@ delete_instance()
     log_error "Failed to delete instance ${INSTANCE_ID}."
     exit 1
   }
-  log_info "Deleted instance ${INSTANCE_ID}."
 }
 
 start_instance()
@@ -556,11 +555,11 @@ delete_unauthorized_devices()
     log_info "No devices exist, so nothing to delete."
     return
   }
+  log_info "Found ${#ALL_EXISTING_DEVICES[@]} devices."
 
   local UNAUTHORIZED_DEVICES=()
   local IS_DEVICE_AUTHORIZED
   for EXISTING_DEVICE in "${ALL_EXISTING_DEVICES[@]}"; do
-    log_info "Checking ${EXISTING_DEVICE}."
     IS_DEVICE_AUTHORIZED='false'
     for AUTHORIZED_DEVICE in "${INSTANCES_TO_KEEP[@]}"; do
       if [ "${EXISTING_DEVICE}" = "${AUTHORIZED_DEVICE}" ]; then
@@ -581,7 +580,7 @@ delete_unauthorized_devices()
     return
   }
 
-  log_info "Deleting unauthorized devices."
+  log_info "Deleting ${#UNAUTHORIZED_DEVICES[@]} unauthorized devices."
   for DEVICE_TO_DELETE in "${UNAUTHORIZED_DEVICES[@]}"; do
     delete_instance "${DEVICE_TO_DELETE}"
   done

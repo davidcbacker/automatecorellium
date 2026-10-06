@@ -526,16 +526,12 @@ analyze_corellium_cafe_matrix_report_from_local_path()
   print_matching_matrix_check_outcomes_from_local_json_path \
     "${MATRIX_JSON_REPORT_PATH}" \
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
-  log_info 'Listed failed assessment checks.'
-  log_info "Verifying MATRIX report ${MATRIX_JSON_REPORT_PATH} is free of errors."
   ensure_no_errors_in_matrix_checks "${MATRIX_JSON_REPORT_PATH}"
-  log_info "Verified MATRIX report ${MATRIX_JSON_REPORT_PATH} is free of errors."
-  log_info "Verifying outcome of local storage check for report ${MATRIX_JSON_REPORT_PATH}."
+  log_info "Verifying outcome of local storage check for ${MATRIX_JSON_REPORT_PATH}."
   ensure_matrix_check_outcomes_from_local_json_path \
     "${MATRIX_JSON_REPORT_PATH}" \
     "${MATRIX_CHECK_TO_ANALYZE}" \
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
-  log_info "Verified outcome of local storage check for report ${MATRIX_JSON_REPORT_PATH}."
 }
 
 print_matching_matrix_check_outcomes_from_local_json_path()
@@ -557,7 +553,7 @@ ensure_no_errors_in_matrix_checks()
   if jq -e \
     --arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
     '.results[] | select(.outcome == $expected_outcome)' \
-    "${MATRIX_JSON_REPORT_PATH}"; then
+    "${MATRIX_JSON_REPORT_PATH}" > /dev/null; then
     log_error 'The MATRIX report contains errors.'
     log_warn 'Ignoring intermittent check errors.'
   else

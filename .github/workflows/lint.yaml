@@ -2,6 +2,27 @@ name: Lint
 
 on:
   workflow_call:
+    inputs:
+      ci:
+        description: 'Whether CI files changed (passed in to avoid re-running paths-filter).'
+        type: string
+        default: ''
+      markdown:
+        description: 'Whether Markdown files changed (passed in to avoid re-running paths-filter).'
+        type: string
+        default: ''
+      python:
+        description: 'Whether Python files changed (passed in to avoid re-running paths-filter).'
+        type: string
+        default: ''
+      shell:
+        description: 'Whether shell files changed (passed in to avoid re-running paths-filter).'
+        type: string
+        default: ''
+      static-lint:
+        description: 'Whether static-lint config changed (passed in to avoid re-running paths-filter).'
+        type: string
+        default: ''
   workflow_dispatch:
 
 permissions:
@@ -14,14 +35,18 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
-      ci: ${{ steps.filter.outputs.ci }}
-      markdown: ${{ steps.filter.outputs.markdown }}
-      python: ${{ steps.filter.outputs.python }}
-      shell: ${{ steps.filter.outputs.shell }}
-      static-lint: ${{ steps.filter.outputs.static-lint }}
+      ci: ${{ steps.filter.outputs.ci || inputs.ci }}
+      markdown: ${{ steps.filter.outputs.markdown || inputs.markdown }}
+      python: ${{ steps.filter.outputs.python || inputs.python }}
+      shell: ${{ steps.filter.outputs.shell || inputs.shell }}
+      static-lint: ${{ steps.filter.outputs.static-lint || inputs.static-lint }}
     steps:
-      - uses: actions/checkout@v7
-      - uses: dorny/paths-filter@v4
+      # When called from changes.yaml the filter outputs are passed in as
+      # inputs, so paths-filter only needs to run for a direct workflow_dispatch.
+      - if: github.event_name == 'workflow_dispatch'
+        uses: actions/checkout@v7
+      - if: github.event_name == 'workflow_dispatch'
+        uses: dorny/paths-filter@v4
         id: filter
         with:
           filters: data/config/dorny-paths-filter.yaml

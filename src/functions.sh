@@ -722,15 +722,14 @@ wait_for_instance_status()
 
 install_openvpn_dependencies()
 {
-  log_info 'Installing openvpn.'
+  log_info 'Installing openvpn and dependencies.'
   sudo apt-get -qq update
   sudo apt-get -qq install --assume-yes --no-install-recommends openvpn
-  if command -v openvpn > /dev/null; then
-    log_info 'Installed openvpn.'
-  else
+  if ! command -v openvpn > /dev/null; then
     log_error 'Failed to install openvpn dependency'
     exit 1
   fi
+  log_info 'Installed openvpn and dependencies.'
 }
 
 ensure_adb_dependency()
@@ -740,15 +739,14 @@ ensure_adb_dependency()
       log_error 'Cannot find adb dependency in PATH.'
       exit 1
     }
-    log_info 'Installing adb dependency.'
+    log_info 'Installing adb and dependencies.'
     sudo apt-get -qq update
     sudo apt-get -qq install adb
-    if command -v adb > /dev/null; then
-      log_info 'Installed adb dependency.'
-    else
+    if ! command -v adb > /dev/null; then
       log_error 'Failed to install adb dependency.'
       exit 1
     fi
+    log_info 'Installed adb and dependencies.'
   }
 }
 

@@ -227,7 +227,6 @@ delete_instance()
     log_error "Failed to delete instance ${INSTANCE_ID}."
     exit 1
   }
-  log_info "Deleted instance ${INSTANCE_ID}."
 }
 
 start_instance()

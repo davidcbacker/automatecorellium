@@ -368,6 +368,11 @@ EOF
     log_error 'Failed to parse open appium session JSON response.'
     exit 1
   }
+  if [ -z "${OPENED_SESSION_ID}" ] || [ "${OPENED_SESSION_ID}" = 'null' ]; then
+    echo "${OPEN_APPIUM_SESSION_JSON_RESPONSE}" >&2
+    log_error 'Opened a null Appium session.'
+    exit 1
+  fi
   echo "${OPENED_SESSION_ID}"
 }
 
@@ -423,6 +428,11 @@ EOF
     log_error 'Failed to parse open appium session JSON response.'
     exit 1
   }
+  if [ -z "${OPENED_SESSION_ID}" ] || [ "${OPENED_SESSION_ID}" = 'null' ]; then
+    echo "${OPEN_APPIUM_SESSION_JSON_RESPONSE}" >&2
+    log_error 'Opened a null Appium session.'
+    exit 1
+  fi
   echo "${OPENED_SESSION_ID}"
 }
 

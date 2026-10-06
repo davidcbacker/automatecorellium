@@ -561,7 +561,6 @@ delete_unauthorized_devices()
   local UNAUTHORIZED_DEVICES=()
   local IS_DEVICE_AUTHORIZED
   for EXISTING_DEVICE in "${ALL_EXISTING_DEVICES[@]}"; do
-    log_info "Checking ${EXISTING_DEVICE}."
     IS_DEVICE_AUTHORIZED='false'
     for AUTHORIZED_DEVICE in "${INSTANCES_TO_KEEP[@]}"; do
       if [ "${EXISTING_DEVICE}" = "${AUTHORIZED_DEVICE}" ]; then

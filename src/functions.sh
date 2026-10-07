@@ -949,12 +949,31 @@ disconnect_with_adb()
   adb disconnect "${ADB_CONNECT_SOCKET}"
   log_info "Disconnected over adb from ${INSTANCE_SERVICES_IP}."
   log_info 'Looking for lingering adb connection.'
-  is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" && {
+  wait_until_adb_disconnected "${INSTANCE_SERVICES_IP}" || {
     log_error "Unable to disconnect from ${INSTANCE_ID} at ${ADB_CONNECT_SOCKET}."
     adb devices -l
     exit 1
   }
   log_info "Found no connected adb device at ${INSTANCE_SERVICES_IP}."
+}
+
+wait_until_adb_disconnected()
+{
+  local INSTANCE_SERVICES_IP="${1:?}"
+  local ADB_CONNECT_PORT='5001'
+  local ADB_CONNECT_SOCKET="${INSTANCE_SERVICES_IP}:${ADB_CONNECT_PORT}"
+  local DISCONNECT_MAX_ATTEMPTS='10'
+  local DISCONNECT_SLEEP_TIME_SECONDS='1'
+
+  ensure_adb_dependency
+  local ATTEMPT
+  for ((ATTEMPT = 1; ATTEMPT <= DISCONNECT_MAX_ATTEMPTS; ATTEMPT++)); do
+    is_services_ip_conneted_with_adb "${INSTANCE_SERVICES_IP}" || return 0
+    log_warn "ADB still connected to ${INSTANCE_SERVICES_IP} (attempt ${ATTEMPT} of ${DISCONNECT_MAX_ATTEMPTS})."
+    adb disconnect "${ADB_CONNECT_SOCKET}" > /dev/null 2>&1
+    sleep "${DISCONNECT_SLEEP_TIME_SECONDS}"
+  done
+  return 1
 }
 
 is_services_ip_conneted_with_adb()

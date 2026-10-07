@@ -251,6 +251,16 @@ run_full_matrix_assessment()
     "${MATRIX_ASSESSMENT_ID}" \
     "matrix_report_${MATRIX_ASSESSMENT_ID}.json" \
     'json'
+  # TODO: either use a flavor arg or abstract away flavor from this function
+  # The Corellium Cafe report checks are Android-specific (they assert on an
+  # android MASVS check id), so only run them for the ranchu flavor. Running
+  # them here folds report validation into the retried MATRIX scan step.
+  local INSTANCE_FLAVOR
+  INSTANCE_FLAVOR="$(get_instance_flavor "${INSTANCE_ID}")"
+  if [ "${INSTANCE_FLAVOR}" = 'ranchu' ]; then
+    analyze_corellium_cafe_matrix_report_from_local_path \
+      "matrix_report_${MATRIX_ASSESSMENT_ID}.json"
+  fi
 }
 
 get_matrix_assessment_status()

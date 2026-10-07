@@ -308,6 +308,10 @@ wait_for_matrix_assessment_status()
 
 run_appium_server()
 {
+  [ -z "${ANDROID_HOME:-}" ] && [ -z "${ANDROID_SDK_ROOT:-}" ] && {
+    log_error 'Neither ANDROID_HOME nor ANDROID_SDK_ROOT environment variable is set.'
+    exit 1
+  }
   local APPIUM_SERVER_IP='127.0.0.1'
   local APPIUM_SERVER_PORT='4723'
   local APPIUM_SERVER_SOCKET="${APPIUM_SERVER_IP:?}:${APPIUM_SERVER_PORT}"

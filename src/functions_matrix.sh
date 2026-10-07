@@ -548,7 +548,7 @@ print_errored_matrix_tests()
   local MATRIX_OUTCOME_ERROR='error'
   print_matching_matrix_check_outcomes \
     "${MATRIX_JSON_REPORT_PATH}" \
-    "${MATRIX_OUTCOME_FAILURE}"
+    "${MATRIX_OUTCOME_ERROR}"
 }
 
 print_matching_matrix_check_outcomes()

@@ -514,7 +514,7 @@ run_appium_interactions_template_android()
   log_info 'Finished automated Appium interactions.'
 }
 
-analyze_corellium_cafe_matrix_report_from_local_path()
+analyze_corellium_cafe_matrix_report()
 {
   local MATRIX_JSON_REPORT_PATH="${1:?}"
   local MATRIX_CHECK_TO_ANALYZE='masvs-storage-1-android-12'

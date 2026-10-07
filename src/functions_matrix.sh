@@ -505,10 +505,10 @@ run_appium_interactions_cafe_ios()
   # local INSTANCE_UDID
   # INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
   # log_info 'Starting automated Appium interactions.'
-  # PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_ios.py "${INSTANCE_SERVICES_IP}"
+  # PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_ios.py "${INSTANCE_UDID}"
   # log_info 'Finished automated Appium interactions.'
+  local TEMP_WORKAROUND_SLEEP_TIME='20'
   log_warn 'Skipping Appium interactions on iOS for now.'
-  local TEMP_WORKAROUND_SLEEP_TIME='90'
   log_warn "Pausing for ${TEMP_WORKAROUND_SLEEP_TIME} seconds to simulate interactions."
   sleep "${TEMP_WORKAROUND_SLEEP_TIME}"
   log_warn "Paused for ${TEMP_WORKAROUND_SLEEP_TIME} seconds to simulate interactions."

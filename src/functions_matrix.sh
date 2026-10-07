@@ -308,6 +308,10 @@ wait_for_matrix_assessment_status()
 
 run_appium_server()
 {
+  [ -z "${ANDROID_HOME:-}" ] && [ -z "${ANDROID_SDK_ROOT:-}" ] && {
+    log_error 'Neither ANDROID_HOME nor ANDROID_SDK_ROOT environment variable is set.'
+    exit 1
+  }
   local APPIUM_SERVER_IP='127.0.0.1'
   local APPIUM_SERVER_PORT='4723'
   local APPIUM_SERVER_SOCKET="${APPIUM_SERVER_IP:?}:${APPIUM_SERVER_PORT}"
@@ -368,6 +372,11 @@ EOF
     log_error 'Failed to parse open appium session JSON response.'
     exit 1
   }
+  if [ -z "${OPENED_SESSION_ID}" ] || [ "${OPENED_SESSION_ID}" = 'null' ]; then
+    echo "${OPEN_APPIUM_SESSION_JSON_RESPONSE}" >&2
+    log_error 'Opened a null Appium session.'
+    exit 1
+  fi
   echo "${OPENED_SESSION_ID}"
 }
 
@@ -423,6 +432,11 @@ EOF
     log_error 'Failed to parse open appium session JSON response.'
     exit 1
   }
+  if [ -z "${OPENED_SESSION_ID}" ] || [ "${OPENED_SESSION_ID}" = 'null' ]; then
+    echo "${OPEN_APPIUM_SESSION_JSON_RESPONSE}" >&2
+    log_error 'Opened a null Appium session.'
+    exit 1
+  fi
   echo "${OPENED_SESSION_ID}"
 }
 
@@ -513,20 +527,16 @@ analyze_corellium_cafe_matrix_report_from_local_path()
     log_error "Failed to parse ${MATRIX_JSON_REPORT_PATH}."
     exit 1
   }
-  log_info "Listing failed assessment checks for ${report}."
+  log_info "Listing failed assessment checks for ${MATRIX_JSON_REPORT_PATH}."
   print_matching_matrix_check_outcomes_from_local_json_path \
     "${MATRIX_JSON_REPORT_PATH}" \
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
-  log_info 'Listed failed assessment checks.'
-  log_info "Verifying MATRIX report ${report} is free of errors."
   ensure_no_errors_in_matrix_checks "${MATRIX_JSON_REPORT_PATH}"
-  log_info "Verified MATRIX report ${report} is free of errors."
-  log_info "Verifying outcome of local storage check for report ${report}."
+  log_info "Verifying outcome of local storage check for ${MATRIX_JSON_REPORT_PATH}."
   ensure_matrix_check_outcomes_from_local_json_path \
     "${MATRIX_JSON_REPORT_PATH}" \
     "${MATRIX_CHECK_TO_ANALYZE}" \
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
-  log_info "Verified outcome of local storage check for report ${report}."
 }
 
 print_matching_matrix_check_outcomes_from_local_json_path()
@@ -548,7 +558,7 @@ ensure_no_errors_in_matrix_checks()
   if jq -e \
     --arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
     '.results[] | select(.outcome == $expected_outcome)' \
-    "${MATRIX_JSON_REPORT_PATH}"; then
+    "${MATRIX_JSON_REPORT_PATH}" > /dev/null; then
     log_error 'The MATRIX report contains errors.'
     log_warn 'Ignoring intermittent check errors.'
   else

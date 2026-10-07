@@ -227,7 +227,6 @@ delete_instance()
     log_error "Failed to delete instance ${INSTANCE_ID}."
     exit 1
   }
-  log_info "Deleted instance ${INSTANCE_ID}."
 }
 
 start_instance()
@@ -356,6 +355,10 @@ get_instance_services_ip()
     log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
     exit 1
   }
+  if [ -z "${INSTANCE_SERVICES_IP}" ] || [ "${INSTANCE_SERVICES_IP}" = 'null' ]; then
+    log_error "Blank services IP for instance ${INSTANCE_ID}."
+    exit 1
+  fi
   echo "${INSTANCE_SERVICES_IP}"
 }
 
@@ -556,11 +559,11 @@ delete_unauthorized_devices()
     log_info "No devices exist, so nothing to delete."
     return
   }
+  log_info "Found ${#ALL_EXISTING_DEVICES[@]} devices."
 
   local UNAUTHORIZED_DEVICES=()
   local IS_DEVICE_AUTHORIZED
   for EXISTING_DEVICE in "${ALL_EXISTING_DEVICES[@]}"; do
-    log_info "Checking ${EXISTING_DEVICE}."
     IS_DEVICE_AUTHORIZED='false'
     for AUTHORIZED_DEVICE in "${INSTANCES_TO_KEEP[@]}"; do
       if [ "${EXISTING_DEVICE}" = "${AUTHORIZED_DEVICE}" ]; then
@@ -581,7 +584,7 @@ delete_unauthorized_devices()
     return
   }
 
-  log_info "Deleting unauthorized devices."
+  log_info "Deleting ${#UNAUTHORIZED_DEVICES[@]} unauthorized devices."
   for DEVICE_TO_DELETE in "${UNAUTHORIZED_DEVICES[@]}"; do
     delete_instance "${DEVICE_TO_DELETE}"
   done
@@ -761,6 +764,11 @@ install_usbfluxd_and_dependencies()
       log_error "Please install the USBFlux application from the Corellium virtual device's Connect tab."
       exit 1
     fi
+  }
+
+  command -v git > /dev/null || {
+    log_error 'Unable to find git in PATH.'
+    exit 1
   }
 
   local USBFLUXD_APT_DEPS=(

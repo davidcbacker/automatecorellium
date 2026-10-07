@@ -47,6 +47,12 @@ jobs:
         needs.changes.outputs.shell == 'true'
       }}
     uses: ./.github/workflows/lint.yaml
+    with:
+      ci: ${{ needs.changes.outputs.ci }}
+      markdown: ${{ needs.changes.outputs.markdown }}
+      python: ${{ needs.changes.outputs.python }}
+      shell: ${{ needs.changes.outputs.shell }}
+      static-lint: ${{ needs.changes.outputs.static-lint }}
 
   call-matrix-workflow:
     name: MATRIX

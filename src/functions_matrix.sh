@@ -524,9 +524,8 @@ analyze_corellium_cafe_matrix_report_from_local_path()
     exit 1
   }
   log_info "Listing failed assessment checks for ${MATRIX_JSON_REPORT_PATH}."
-  print_failed_matrix_tests
-  print_high_severity_failed_check_count \
-    "${MATRIX_JSON_REPORT_PATH}"
+  print_failed_matrix_tests "${MATRIX_JSON_REPORT_PATH}"
+  print_high_severity_failed_check_count "${MATRIX_JSON_REPORT_PATH}"
   ensure_no_errors_in_matrix_checks "${MATRIX_JSON_REPORT_PATH}"
   log_info "Verifying outcome of local storage check for ${MATRIX_JSON_REPORT_PATH}."
   ensure_matrix_check_outcomes_from_local_json_path \
@@ -598,7 +597,8 @@ ensure_matrix_check_outcomes_from_local_json_path()
     --arg id "${MATRIX_CHECK_TO_ANALYZE}" \
     --arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
     '.results[] | select(.id == $id) | .outcome == $expected_outcome' \
-    "${MATRIX_JSON_REPORT_PATH}" || {
+    "${MATRIX_JSON_REPORT_PATH}" \
+    > /dev/null || {
     log_error "MATRIX check ${MATRIX_CHECK_TO_ANALYZE} is not ${MATRIX_CHECK_EXPECTED_OUTCOME}."
     exit 1
   }

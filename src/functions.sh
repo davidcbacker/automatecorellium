@@ -435,15 +435,13 @@ kill_app()
   local APP_BUNDLE_ID="${2:?}"
   if [ "$(is_app_running "${INSTANCE_ID}" "${APP_BUNDLE_ID}")" = 'true' ]; then
     log_info "Killing running app ${APP_BUNDLE_ID}."
-    if curl --insecure --silent -X POST \
+    curl --insecure --silent -X POST \
       "${CORELLIUM_API_ENDPOINT}/api/v3/instances/${INSTANCE_ID}/agent/v1/app/apps/${APP_BUNDLE_ID}/kill" \
       -H "Accept: application/json" \
-      -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"; then
-      log_info "Killed running app ${APP_BUNDLE_ID}."
-    else
+      -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}" || {
       log_error "Failed to kill app ${APP_BUNDLE_ID}."
       exit 1
-    fi
+    }
   fi
 }
 

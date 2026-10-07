@@ -527,7 +527,7 @@ analyze_corellium_cafe_matrix_report_from_local_path()
   print_matching_matrix_check_outcomes_from_local_json_path \
     "${MATRIX_JSON_REPORT_PATH}" \
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
-  print_high_severity_failed_matrix_check_count_from_local_json_path \
+  print_critical_and_high_severity_failed_matrix_check_count_from_local_json_path \
     "${MATRIX_JSON_REPORT_PATH}"
   ensure_no_errors_in_matrix_checks "${MATRIX_JSON_REPORT_PATH}"
   log_info "Verifying outcome of local storage check for ${MATRIX_JSON_REPORT_PATH}."
@@ -549,14 +549,14 @@ print_matching_matrix_check_outcomes_from_local_json_path()
     sort
 }
 
-print_high_severity_failed_matrix_check_count_from_local_json_path()
+print_critical_and_high_severity_failed_matrix_check_count_from_local_json_path()
 {
   local MATRIX_JSON_REPORT_PATH="${1:?}"
   local HIGH_SEVERITY_FAILED_CHECK_COUNT
   HIGH_SEVERITY_FAILED_CHECK_COUNT="$(jq -r \
-    '[.results[] | select(.severity == "high" and .outcome == "fail")] | length' \
+    '[.results[] | select((.severity == "critical" or .severity == "high") and .outcome == "fail")] | length' \
     "${MATRIX_JSON_REPORT_PATH}")"
-  log_info "Found ${HIGH_SEVERITY_FAILED_CHECK_COUNT} high-severity failed checks."
+  log_info "Found ${HIGH_SEVERITY_FAILED_CHECK_COUNT} critical- or high-severity failed checks."
 }
 
 ensure_no_errors_in_matrix_checks()

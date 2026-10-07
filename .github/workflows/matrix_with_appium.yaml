@@ -206,7 +206,7 @@ jobs:
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
-          run_full_matrix_assessment \
+          run_full_matrix_assessment_on_cafe \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_package_name }}" \
             "${MATRIX_WORDLIST_ID}"
@@ -224,7 +224,7 @@ jobs:
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
-          run_full_matrix_assessment \
+          run_full_matrix_assessment_on_cafe \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_package_name }}" \
             "${MATRIX_WORDLIST_ID}"
@@ -242,7 +242,7 @@ jobs:
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
-          run_full_matrix_assessment \
+          run_full_matrix_assessment_on_cafe \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_package_name }}" \
             "${MATRIX_WORDLIST_ID}"
@@ -260,7 +260,7 @@ jobs:
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
-          run_full_matrix_assessment \
+          run_full_matrix_assessment_on_cafe \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_package_name }}" \
             "${MATRIX_WORDLIST_ID}"
@@ -278,7 +278,7 @@ jobs:
           source ./src/functions_matrix.sh
           MATRIX_WORDLIST_ID="$(upload_wordlist_from_local_path "${CORELLIUM_INSTANCE_ID}" "${MATRIX_WORDLIST_PATH}")"
           log_info "Uploaded wordlist image ${MATRIX_WORDLIST_ID}."
-          run_full_matrix_assessment \
+          run_full_matrix_assessment_on_cafe \
             "${CORELLIUM_INSTANCE_ID}" \
             "${{ matrix.corellium_cafe_package_name }}" \
             "${MATRIX_WORDLIST_ID}"

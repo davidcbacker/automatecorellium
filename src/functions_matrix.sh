@@ -219,7 +219,7 @@ handle_open_matrix_assessment()
   fi
 }
 
-run_full_matrix_assessment()
+run_full_matrix_assessment_on_cafe()
 {
   local INSTANCE_ID="${1:?}"
   local APP_BUNDLE_ID="${2:?}"

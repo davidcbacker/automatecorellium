@@ -219,7 +219,7 @@ handle_open_matrix_assessment()
   fi
 }
 
-run_full_matrix_assessment()
+run_full_matrix_assessment_on_cafe()
 {
   local INSTANCE_ID="${1:?}"
   local APP_BUNDLE_ID="${2:?}"
@@ -251,6 +251,16 @@ run_full_matrix_assessment()
     "${MATRIX_ASSESSMENT_ID}" \
     "matrix_report_${MATRIX_ASSESSMENT_ID}.json" \
     'json'
+  # TODO: either use a flavor arg or abstract away flavor from this function
+  # The Corellium Cafe report checks are Android-specific (they assert on an
+  # android MASVS check id), so only run them for the ranchu flavor. Running
+  # them here folds report validation into the retried MATRIX scan step.
+  local INSTANCE_FLAVOR
+  INSTANCE_FLAVOR="$(get_instance_flavor "${INSTANCE_ID}")"
+  if [ "${INSTANCE_FLAVOR}" = 'ranchu' ]; then
+    analyze_corellium_cafe_matrix_report_from_local_path \
+      "matrix_report_${MATRIX_ASSESSMENT_ID}.json"
+  fi
 }
 
 get_matrix_assessment_status()
@@ -308,6 +318,10 @@ wait_for_matrix_assessment_status()
 
 run_appium_server()
 {
+  [ -z "${ANDROID_HOME:-}" ] && [ -z "${ANDROID_SDK_ROOT:-}" ] && {
+    log_error 'Neither ANDROID_HOME nor ANDROID_SDK_ROOT environment variable is set.'
+    exit 1
+  }
   local APPIUM_SERVER_IP='127.0.0.1'
   local APPIUM_SERVER_PORT='4723'
   local APPIUM_SERVER_SOCKET="${APPIUM_SERVER_IP:?}:${APPIUM_SERVER_PORT}"
@@ -491,10 +505,10 @@ run_appium_interactions_cafe_ios()
   # local INSTANCE_UDID
   # INSTANCE_UDID="$(get_instance_udid "${INSTANCE_ID}")"
   # log_info 'Starting automated Appium interactions.'
-  # PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_ios.py "${INSTANCE_SERVICES_IP}"
+  # PYTHONUNBUFFERED=1 python3 src/util/appium_interactions_cafe_ios.py "${INSTANCE_UDID}"
   # log_info 'Finished automated Appium interactions.'
+  local TEMP_WORKAROUND_SLEEP_TIME='20'
   log_warn 'Skipping Appium interactions on iOS for now.'
-  local TEMP_WORKAROUND_SLEEP_TIME='90'
   log_warn "Pausing for ${TEMP_WORKAROUND_SLEEP_TIME} seconds to simulate interactions."
   sleep "${TEMP_WORKAROUND_SLEEP_TIME}"
   log_warn "Paused for ${TEMP_WORKAROUND_SLEEP_TIME} seconds to simulate interactions."
@@ -527,6 +541,8 @@ analyze_corellium_cafe_matrix_report()
   print_matching_matrix_check_outcomes_from_local_json_path \
     "${MATRIX_JSON_REPORT_PATH}" \
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
+  print_high_severity_failed_matrix_check_count_from_local_json_path \
+    "${MATRIX_JSON_REPORT_PATH}"
   ensure_no_errors_in_matrix_checks "${MATRIX_JSON_REPORT_PATH}"
   log_info "Verifying outcome of local storage check for ${MATRIX_JSON_REPORT_PATH}."
   ensure_matrix_check_outcomes_from_local_json_path \
@@ -545,6 +561,16 @@ print_matching_matrix_check_outcomes_from_local_json_path()
     '.results[] | select(.outcome == $expected_outcome) | "\(.name) [\(.id)]"' \
     "${MATRIX_JSON_REPORT_PATH}" |
     sort
+}
+
+print_high_severity_failed_matrix_check_count_from_local_json_path()
+{
+  local MATRIX_JSON_REPORT_PATH="${1:?}"
+  local HIGH_SEVERITY_FAILED_CHECK_COUNT
+  HIGH_SEVERITY_FAILED_CHECK_COUNT="$(jq -r \
+    '[.results[] | select(.severity == "high" and .outcome == "fail")] | length' \
+    "${MATRIX_JSON_REPORT_PATH}")"
+  log_info "Found ${HIGH_SEVERITY_FAILED_CHECK_COUNT} high-severity failed checks."
 }
 
 ensure_no_errors_in_matrix_checks()

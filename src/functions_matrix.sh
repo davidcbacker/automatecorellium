@@ -258,7 +258,7 @@ run_full_matrix_assessment_on_cafe()
   local INSTANCE_FLAVOR
   INSTANCE_FLAVOR="$(get_instance_flavor "${INSTANCE_ID}")"
   if [ "${INSTANCE_FLAVOR}" = 'ranchu' ]; then
-    analyze_corellium_cafe_matrix_report_from_local_path \
+    analyze_corellium_cafe_matrix_report \
       "matrix_report_${MATRIX_ASSESSMENT_ID}.json"
   fi
 }

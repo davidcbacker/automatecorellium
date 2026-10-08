@@ -79,6 +79,8 @@ fi
 
 log_info "Created ${#CREATED_INSTANCE_IDS[@]} devices: ${CREATED_INSTANCE_IDS[*]}"
 
+log_info 'Please PRESS ANY KEY to continue'
+read -rn1
 
 log_info "Installing Corellium Cafe app on each device."
 for instance_id in "${CREATED_INSTANCE_IDS[@]}"; do

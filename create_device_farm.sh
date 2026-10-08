@@ -79,9 +79,6 @@ fi
 
 log_info "Created ${#CREATED_INSTANCE_IDS[@]} devices: ${CREATED_INSTANCE_IDS[*]}"
 
-log_info 'Please PRESS ANY KEY to continue'
-read -rn1
-
 log_info "Installing Corellium Cafe app on each device."
 for instance_id in "${CREATED_INSTANCE_IDS[@]}"; do
     log_info "Waiting for device with instance ID ${instance_id} to be ready."
@@ -90,6 +87,8 @@ for instance_id in "${CREATED_INSTANCE_IDS[@]}"; do
 done
 
 log_info "All devices are ready and Corellium Cafe app is installed."
+log_info 'Please PRESS ANY KEY to continue'
+read -rn1
 
 # build out an array of instance services IPs for each created instance
 

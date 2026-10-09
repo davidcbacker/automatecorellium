@@ -77,11 +77,11 @@ if [ "${#CREATED_INSTANCE_IDS[@]}" -eq 0 ]; then
     exit 1
 fi
 
-log_info "Created ${#CREATED_INSTANCE_IDS[@]} devices: ${CREATED_INSTANCE_IDS[*]}"
+log_info "Created ${#CREATED_INSTANCE_IDS[@]} devices."
 
 log_info "Installing Corellium Cafe app on each device."
 for instance_id in "${CREATED_INSTANCE_IDS[@]}"; do
-    log_info "Waiting for device with instance ID ${instance_id} to be ready."
+    log_info "Waiting for device ${instance_id} to be ready."
     wait_until_agent_ready "${instance_id}"
     install_app_from_url "${instance_id}" "${CORELLIUM_CAFE_SOURCE_URL}"
 done
@@ -91,7 +91,6 @@ log_info 'Please PRESS ANY KEY to continue'
 read -rn1
 
 # build out an array of instance services IPs for each created instance
-
 CREATED_INSTANCE_SERVICES_IPS=()
 for instance_id in "${CREATED_INSTANCE_IDS[@]}"; do
     instance_services_ip="$(get_instance_services_ip "${instance_id}")"
@@ -102,7 +101,7 @@ for instance_id in "${CREATED_INSTANCE_IDS[@]}"; do
     fi
 done
 
-log_info "Listing all created instance services IPs:"
+log_info "Listing all created instance IDs:"
 echo "Created instance IDs: ${CREATED_INSTANCE_IDS[*]}"
 log_info "Listing all created instance services IPs:"
 echo "Created instance services IPs: ${CREATED_INSTANCE_SERVICES_IPS[*]}"

@@ -151,7 +151,6 @@ create_instance()
   local FIRMWARE_BUILD="${3:?}"
   local PROJECT_ID="${4:?}"
   check_env_vars
-  log_warn "DEBUG REMOVE THIS LINE PROJECT_ID=${PROJECT_ID}"
   local NEW_INSTANCE_NAME NEW_INSTANCE_NAME_PREFIX
   if [ -n "${5:-}" ]; then
     NEW_INSTANCE_NAME_PREFIX="$5"

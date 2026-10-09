@@ -166,7 +166,7 @@ create_instance()
   "project": "${PROJECT_ID}",
   "name": "${NEW_INSTANCE_NAME}",
   "flavor": "${HARDWARE_FLAVOR}",
-  "os": "${FIRMWARE_VERSION}",
+  "osVersion": "${FIRMWARE_VERSION}",
   "osbuild": "${FIRMWARE_BUILD}",
   "bootOptions": {"cores": 4,"ram": 4096}
 }
@@ -179,7 +179,7 @@ EOF
   "project": "${PROJECT_ID}",
   "name": "${NEW_INSTANCE_NAME}",
   "flavor": "${HARDWARE_FLAVOR}",
-  "os": "${FIRMWARE_VERSION}",
+  "osVersion": "${FIRMWARE_VERSION}",
   "osbuild": "${FIRMWARE_BUILD}",
   "sbs": true
 }

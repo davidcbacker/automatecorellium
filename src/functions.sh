@@ -164,7 +164,7 @@ create_instance()
     CREATE_INSTANCE_REQUEST_DATA=$(
       cat << EOF
 {
-  "project": "${PROJECT_ID}",
+  "projectId": "${PROJECT_ID}",
   "name": "${NEW_INSTANCE_NAME}",
   "flavor": "${HARDWARE_FLAVOR}",
   "osVersion": "${FIRMWARE_VERSION}",
@@ -177,7 +177,7 @@ EOF
     CREATE_INSTANCE_REQUEST_DATA=$(
       cat << EOF
 {
-  "project": "${PROJECT_ID}",
+  "projectId": "${PROJECT_ID}",
   "name": "${NEW_INSTANCE_NAME}",
   "flavor": "${HARDWARE_FLAVOR}",
   "osVersion": "${FIRMWARE_VERSION}",

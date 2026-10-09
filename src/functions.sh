@@ -167,7 +167,7 @@ create_instance()
   "name": "${NEW_INSTANCE_NAME}",
   "flavor": "${HARDWARE_FLAVOR}",
   "osVersion": "${FIRMWARE_VERSION}",
-  "osbuild": "${FIRMWARE_BUILD}",
+  "osBuild": "${FIRMWARE_BUILD}",
   "bootOptions": {"cores": 4,"ram": 4096}
 }
 EOF
@@ -180,7 +180,7 @@ EOF
   "name": "${NEW_INSTANCE_NAME}",
   "flavor": "${HARDWARE_FLAVOR}",
   "osVersion": "${FIRMWARE_VERSION}",
-  "osbuild": "${FIRMWARE_BUILD}",
+  "osBuild": "${FIRMWARE_BUILD}",
   "sbs": true
 }
 EOF

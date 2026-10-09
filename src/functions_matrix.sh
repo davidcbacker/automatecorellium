@@ -533,11 +533,8 @@ analyze_corellium_cafe_matrix_report()
     exit 1
   }
   log_info "Listing failed assessment checks for ${MATRIX_JSON_REPORT_PATH}."
-  print_matching_matrix_check_outcomes_from_local_json_path \
-    "${MATRIX_JSON_REPORT_PATH}" \
-    "${MATRIX_CHECK_EXPECTED_OUTCOME}"
-  print_high_severity_failed_matrix_check_count_from_local_json_path \
-    "${MATRIX_JSON_REPORT_PATH}"
+  print_failed_matrix_tests "${MATRIX_JSON_REPORT_PATH}"
+  print_high_severity_failed_check_count "${MATRIX_JSON_REPORT_PATH}"
   ensure_no_errors_in_matrix_checks "${MATRIX_JSON_REPORT_PATH}"
   log_info "Verifying outcome of local storage check for ${MATRIX_JSON_REPORT_PATH}."
   ensure_matrix_check_outcomes_from_local_json_path \
@@ -546,7 +543,23 @@ analyze_corellium_cafe_matrix_report()
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
 }
 
-print_matching_matrix_check_outcomes_from_local_json_path()
+print_failed_matrix_tests()
+{
+  local MATRIX_OUTCOME_FAILURE='fail'
+  print_matching_matrix_check_outcomes \
+    "${MATRIX_JSON_REPORT_PATH}" \
+    "${MATRIX_OUTCOME_FAILURE}"
+}
+
+print_errored_matrix_tests()
+{
+  local MATRIX_OUTCOME_ERROR='error'
+  print_matching_matrix_check_outcomes \
+    "${MATRIX_JSON_REPORT_PATH}" \
+    "${MATRIX_OUTCOME_ERROR}"
+}
+
+print_matching_matrix_check_outcomes()
 {
   local MATRIX_JSON_REPORT_PATH="${1:?}"
   local MATRIX_CHECK_DEFAULT_EXPECTED_OUTCOME='fail'
@@ -558,7 +571,7 @@ print_matching_matrix_check_outcomes_from_local_json_path()
     sort
 }
 
-print_high_severity_failed_matrix_check_count_from_local_json_path()
+print_high_severity_failed_check_count()
 {
   local MATRIX_JSON_REPORT_PATH="${1:?}"
   local HIGH_SEVERITY_FAILED_CHECK_COUNT
@@ -577,6 +590,7 @@ ensure_no_errors_in_matrix_checks()
     '.results[] | select(.outcome == $expected_outcome)' \
     "${MATRIX_JSON_REPORT_PATH}" > /dev/null; then
     log_error 'The MATRIX report contains errors.'
+    print_errored_matrix_tests "${MATRIX_JSON_REPORT_PATH}"
     log_warn 'Ignoring intermittent check errors.'
   else
     log_info 'The MATRIX report is free of errors.'
@@ -592,7 +606,8 @@ ensure_matrix_check_outcomes_from_local_json_path()
     --arg id "${MATRIX_CHECK_TO_ANALYZE}" \
     --arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
     '.results[] | select(.id == $id) | .outcome == $expected_outcome' \
-    "${MATRIX_JSON_REPORT_PATH}" || {
+    "${MATRIX_JSON_REPORT_PATH}" \
+    > /dev/null || {
     log_error "MATRIX check ${MATRIX_CHECK_TO_ANALYZE} is not ${MATRIX_CHECK_EXPECTED_OUTCOME}."
     exit 1
   }

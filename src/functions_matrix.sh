@@ -76,7 +76,6 @@ start_matrix_monitoring()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_MONITORING}" ||
     return 1
-  log_info "Started monitoring for MATRIX assessment."
 }
 
 stop_matrix_monitoring()
@@ -94,7 +93,6 @@ stop_matrix_monitoring()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_READY_FOR_TESTING}" ||
     return 1
-  log_info "Stopped monitoring for MATRIX assessment."
 }
 
 test_matrix_evidence()
@@ -112,7 +110,6 @@ test_matrix_evidence()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_STATUS_COMPLETE}" ||
     return 1
-  log_info "Finished test for MATRIX assessment."
 }
 
 get_matrix_report_id()
@@ -156,7 +153,6 @@ download_matrix_report_to_local_path()
     "${MATRIX_ASSESSMENT_ID}" \
     "${MATRIX_REPORT_TARGET_FORMAT}" \
     > "${MATRIX_REPORT_DOWNLOAD_PATH}"
-  log_info "Downloaded ${MATRIX_REPORT_TARGET_FORMAT_UPPER} report for MATRIX assessment."
 }
 
 print_failed_matrix_checks()
@@ -181,7 +177,6 @@ delete_matrix_assessment()
     --instance "${INSTANCE_ID}" \
     --assessment "${MATRIX_ASSESSMENT_ID}" \
     > /dev/null
-  log_info "Deleted MATRIX assessment ${MATRIX_ASSESSMENT_ID}."
 }
 
 get_open_matrix_assessment_json()
@@ -258,7 +253,7 @@ run_full_matrix_assessment_on_cafe()
   local INSTANCE_FLAVOR
   INSTANCE_FLAVOR="$(get_instance_flavor "${INSTANCE_ID}")"
   if [ "${INSTANCE_FLAVOR}" = 'ranchu' ]; then
-    analyze_corellium_cafe_matrix_report_from_local_path \
+    analyze_corellium_cafe_matrix_report \
       "matrix_report_${MATRIX_ASSESSMENT_ID}.json"
   fi
 }
@@ -524,7 +519,7 @@ run_appium_interactions_template_android()
   log_info 'Finished automated Appium interactions.'
 }
 
-analyze_corellium_cafe_matrix_report_from_local_path()
+analyze_corellium_cafe_matrix_report()
 {
   local MATRIX_JSON_REPORT_PATH="${1:?}"
   local MATRIX_CHECK_TO_ANALYZE='masvs-storage-1-android-12'

@@ -334,7 +334,17 @@ get_instance_id_from_snapshot_id()
     log_error 'Failed to parse JSON response.'
     exit 1
   }
-  echo "${GET_SNAPSHOT_RESPONSE_JSON}" | jq -r '.instance'
+  INSTANCE_ID_FROM_SNAPSHOT="$(echo "${GET_SNAPSHOT_RESPONSE_JSON}" | jq -r '.instance')" || {
+    echo "${GET_SNAPSHOT_RESPONSE_JSON}"
+    log_error 'Failed to find instance ID in JSON response.'
+    exit 1
+  }
+  if [ -z "${INSTANCE_ID_FROM_SNAPSHOT}" ] || [ "${INSTANCE_ID_FROM_SNAPSHOT}" = 'null' ]; then
+    echo "${GET_SNAPSHOT_RESPONSE_JSON}"
+    log_error 'Instance ID from JSON response is empty or null'.
+    exit 1
+  fi
+  echo "${INSTANCE_ID_FROM_SNAPSHOT}"
 }
 
 get_instance_json()

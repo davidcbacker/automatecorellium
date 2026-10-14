@@ -45,4 +45,5 @@ jobs:
           RESTORE_SNAPSHOTS: ${{ vars.RESTORE_SNAPSHOTS }}
         run: |
           source ./src/functions.sh && set -euo pipefail
+          set -x
           restore_demo_instance_snapshots

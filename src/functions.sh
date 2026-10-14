@@ -315,6 +315,27 @@ soft_stop_instance()
   esac
 }
 
+restore_snapshot()
+{
+  local SNAPSHOT_ID="${1:?}"
+  INSTANCE_ID="$(get_instance_id_from_snapshot_id"${SNAPSHOT_ID}")
+  curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v3/instances/${INSTANCE_ID}/snapshots/${SNAPSHOT_ID}/restore" \
+    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
+}
+
+get_instance_id_from_snapshot_id()
+{
+  local SNAPSHOT_ID="${1:?}"
+  GET_SNAPSHOT_RESPONSE_JSON="$(curl --insecure --silent -X GET "${CORELLIUM_API_ENDPOINT}/api/v3/snapshots/${SNAPSHOT_ID}" \
+    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}")"
+  echo "${GET_SNAPSHOT_RESPONSE_JSON}" | jq '.' > /dev/null 2>&1 || {
+    echo "${GET_SNAPSHOT_RESPONSE_JSON}"
+    log_error 'Failed to parse JSON response.'
+    exit 1
+  }
+  echo "${GET_SNAPSHOT_RESPONSE_JSON}" | jq -r '.instance'
+}
+
 get_instance_json()
 {
   local INSTANCE_ID="${1:?}"
@@ -623,6 +644,22 @@ stop_demo_instances()
   done <<< "${STOP_INSTANCES}"
   for INSTANCE_ID in "${INSTANCES_TO_STOP[@]}"; do
     stop_instance "${INSTANCE_ID}"
+  done
+}
+
+restore_demo_instance_snapshots()
+{
+  local SNAPSHOT_RESTORE_SLEEP_TIME='30'
+  local THIS_SNAPSHOT_TO_RESTORE
+  local SHAPSHOTS_TO_RESTORE=()
+  while IFS= read -r line; do
+    THIS_SNAPSHOT_TO_RESTORE="$(echo "${line}" | tr -d '\r\n')"
+    if [ -n "${THIS_SNAPSHOT_TO_RESTORE}" ]; then
+      INSTANCES_TO_START+=("${THIS_SNAPSHOT_TO_RESTORE}")
+    fi
+  done <<< "${RESTORE_SNAPSHOTS}"
+  for SNAPSHOT_ID in "${SNAPSHOTS_TO_RESTORE[@]}"; do
+    restore_snapshot "${SNAPSHOT_ID}"
   done
 }
 

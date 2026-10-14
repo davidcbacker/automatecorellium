@@ -315,6 +315,38 @@ soft_stop_instance()
   esac
 }
 
+restore_snapshot()
+{
+  local SNAPSHOT_ID="${1:?}"
+  INSTANCE_ID="$(get_instance_id_from_snapshot_id "${SNAPSHOT_ID}")"
+  log_info "Restoring snapshot ${SNAPSHOT_ID} on instance ${INSTANCE_ID}"
+  curl --insecure -X POST "${CORELLIUM_API_ENDPOINT}/api/v3/instances/${INSTANCE_ID}/snapshots/${SNAPSHOT_ID}/restore" \
+    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
+}
+
+get_instance_id_from_snapshot_id()
+{
+  local SNAPSHOT_ID="${1:?}"
+  GET_SNAPSHOT_RESPONSE_JSON="$(curl "${CORELLIUM_API_ENDPOINT}/api/v3/snapshots/${SNAPSHOT_ID}" \
+    -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}")"
+  echo "${GET_SNAPSHOT_RESPONSE_JSON}" | jq '.' > /dev/null 2>&1 || {
+    echo "${GET_SNAPSHOT_RESPONSE_JSON}"
+    log_error 'Failed to parse JSON response.'
+    exit 1
+  }
+  INSTANCE_ID_FROM_SNAPSHOT="$(echo "${GET_SNAPSHOT_RESPONSE_JSON}" | jq -r '.instance')" || {
+    echo "${GET_SNAPSHOT_RESPONSE_JSON}"
+    log_error 'Failed to find instance ID in JSON response.'
+    exit 1
+  }
+  if [ -z "${INSTANCE_ID_FROM_SNAPSHOT}" ] || [ "${INSTANCE_ID_FROM_SNAPSHOT}" = 'null' ]; then
+    echo "${GET_SNAPSHOT_RESPONSE_JSON}"
+    log_error 'Instance ID from JSON response is empty or null'.
+    exit 1
+  fi
+  echo "${INSTANCE_ID_FROM_SNAPSHOT}"
+}
+
 get_instance_json()
 {
   local INSTANCE_ID="${1:?}"
@@ -623,6 +655,23 @@ stop_demo_instances()
   done <<< "${STOP_INSTANCES}"
   for INSTANCE_ID in "${INSTANCES_TO_STOP[@]}"; do
     stop_instance "${INSTANCE_ID}"
+  done
+}
+
+restore_demo_instance_snapshots()
+{
+  local SNAPSHOT_RESTORE_SLEEP_TIME='90'
+  local THIS_SNAPSHOT_TO_RESTORE
+  local SNAPSHOTS_TO_RESTORE=()
+  while IFS= read -r line; do
+    THIS_SNAPSHOT_TO_RESTORE="$(echo "${line}" | tr -d '\r\n')"
+    if [ -n "${THIS_SNAPSHOT_TO_RESTORE}" ]; then
+      SNAPSHOTS_TO_RESTORE+=("${THIS_SNAPSHOT_TO_RESTORE}")
+    fi
+  done <<< "${RESTORE_SNAPSHOTS}"
+  for SNAPSHOT_ID in "${SNAPSHOTS_TO_RESTORE[@]}"; do
+    restore_snapshot "${SNAPSHOT_ID}"
+    sleep "${SNAPSHOT_RESTORE_SLEEP_TIME}"
   done
 }
 

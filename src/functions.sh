@@ -649,7 +649,7 @@ stop_demo_instances()
 
 restore_demo_instance_snapshots()
 {
-  local SNAPSHOT_RESTORE_SLEEP_TIME='30'
+  local SNAPSHOT_RESTORE_SLEEP_TIME='90'
   local THIS_SNAPSHOT_TO_RESTORE
   local SNAPSHOTS_TO_RESTORE=()
   while IFS= read -r line; do
@@ -660,6 +660,7 @@ restore_demo_instance_snapshots()
   done <<< "${RESTORE_SNAPSHOTS}"
   for SNAPSHOT_ID in "${SNAPSHOTS_TO_RESTORE[@]}"; do
     restore_snapshot "${SNAPSHOT_ID}"
+    sleep "${SNAPSHOT_RESTORE_SLEEP_TIME}"
   done
 }
 

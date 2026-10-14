@@ -327,7 +327,7 @@ restore_snapshot()
 get_instance_id_from_snapshot_id()
 {
   local SNAPSHOT_ID="${1:?}"
-  GET_SNAPSHOT_RESPONSE_JSON="$(curl --insecure "${CORELLIUM_API_ENDPOINT}/api/v3/snapshots/${SNAPSHOT_ID}" \
+  GET_SNAPSHOT_RESPONSE_JSON="$(curl "${CORELLIUM_API_ENDPOINT}/api/v3/snapshots/${SNAPSHOT_ID}" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}")"
   echo "${GET_SNAPSHOT_RESPONSE_JSON}" | jq '.' > /dev/null 2>&1 || {
     echo "${GET_SNAPSHOT_RESPONSE_JSON}"

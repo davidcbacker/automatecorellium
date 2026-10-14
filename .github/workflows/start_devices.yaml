@@ -13,7 +13,7 @@ env:
 
 jobs:
   corellium-start:
-    name: Start devices and restore snapshots
+    name: Start and snapshots
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code

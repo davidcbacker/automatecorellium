@@ -40,7 +40,7 @@ jobs:
           start_demo_instances
       - name: Restore snapshots
         env:
-          SNAPSHOTS_TO_RESTORE: ${{ vars.SNAPSHOTS_TO_RESTORE }}
+          RESTORE_SNAPSHOTS: ${{ vars.RESTORE_SNAPSHOTS }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           restore_demo_instance_snapshots

@@ -31,7 +31,7 @@ jobs:
         run: |
           corellium login \
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
-            --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
+            --endpoint ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Start Corellium virtual devices
         env:
           START_INSTANCES: ${{ vars.START_INSTANCES }}
@@ -40,6 +40,8 @@ jobs:
           start_demo_instances
       - name: Restore snapshots
         env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_TOKEN }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_ENDPOINT }}
           RESTORE_SNAPSHOTS: ${{ vars.RESTORE_SNAPSHOTS }}
         run: |
           source ./src/functions.sh && set -euo pipefail

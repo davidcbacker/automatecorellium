@@ -628,7 +628,7 @@ start_demo_instances()
   done <<< "${START_INSTANCES}"
   for INSTANCE_ID in "${INSTANCES_TO_START[@]}"; do
     start_instance "${INSTANCE_ID}"
-    sleep "${INSTANCE_START_SLEEP_TIME}"
+    # sleep "${INSTANCE_START_SLEEP_TIME}"
   done
 }
 

@@ -651,11 +651,11 @@ restore_demo_instance_snapshots()
 {
   local SNAPSHOT_RESTORE_SLEEP_TIME='30'
   local THIS_SNAPSHOT_TO_RESTORE
-  local SHAPSHOTS_TO_RESTORE=()
+  local SNAPSHOTS_TO_RESTORE=()
   while IFS= read -r line; do
     THIS_SNAPSHOT_TO_RESTORE="$(echo "${line}" | tr -d '\r\n')"
     if [ -n "${THIS_SNAPSHOT_TO_RESTORE}" ]; then
-      INSTANCES_TO_START+=("${THIS_SNAPSHOT_TO_RESTORE}")
+      SNAPSHOTS_TO_RESTORE+=("${THIS_SNAPSHOT_TO_RESTORE}")
     fi
   done <<< "${RESTORE_SNAPSHOTS}"
   for SNAPSHOT_ID in "${SNAPSHOTS_TO_RESTORE[@]}"; do

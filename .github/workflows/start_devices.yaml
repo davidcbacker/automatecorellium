@@ -1,4 +1,4 @@
-name: Devices - Start and Restore Snapshots
+name: Devices - Start
 
 on:
   schedule:
@@ -13,7 +13,7 @@ env:
 
 jobs:
   corellium-start:
-    name: Start devices
+    name: Start devices and restore snapshots
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code

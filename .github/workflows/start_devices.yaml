@@ -1,4 +1,4 @@
-name: Devices - Start
+name: Devices - Start and restore
 
 on:
   schedule:

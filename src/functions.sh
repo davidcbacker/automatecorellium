@@ -319,7 +319,8 @@ restore_snapshot()
 {
   local SNAPSHOT_ID="${1:?}"
   INSTANCE_ID="$(get_instance_id_from_snapshot_id "${SNAPSHOT_ID}")"
-  curl --insecure --silent -X POST "${CORELLIUM_API_ENDPOINT}/api/v3/instances/${INSTANCE_ID}/snapshots/${SNAPSHOT_ID}/restore" \
+  echo "DEBUG INSTANCE_ID=${INSTANCE_ID}"
+  curl --insecure -X POST "${CORELLIUM_API_ENDPOINT}/api/v3/instances/${INSTANCE_ID}/snapshots/${SNAPSHOT_ID}/restore" \
     -H "Authorization: Bearer ${CORELLIUM_API_TOKEN}"
 }
 

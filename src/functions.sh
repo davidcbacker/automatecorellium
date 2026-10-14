@@ -628,7 +628,7 @@ delete_unauthorized_devices()
 
 start_demo_instances()
 {
-  # local INSTANCE_START_SLEEP_TIME='30'
+  local INSTANCE_START_SLEEP_TIME='30'
   local THIS_INSTANCE_TO_START
   local INSTANCES_TO_START=()
   while IFS= read -r line; do
@@ -639,7 +639,7 @@ start_demo_instances()
   done <<< "${START_INSTANCES}"
   for INSTANCE_ID in "${INSTANCES_TO_START[@]}"; do
     start_instance "${INSTANCE_ID}"
-    # sleep "${INSTANCE_START_SLEEP_TIME}"
+    sleep "${INSTANCE_START_SLEEP_TIME}"
   done
 }
 

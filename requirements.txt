@@ -1,4 +1,4 @@
 Appium-Python-Client
 pymobiledevice3
-frida==17.22.2
+frida==17.23.2
 frida-tools

@@ -90,7 +90,7 @@ jobs:
         with:
           cache: pip
           cache-dependency-path: requirements.txt
-          python-version: 3.14
+          python-version: 3.15
       - name: Install API dependencies
         run: |
           npm ci --no-audit --no-fund

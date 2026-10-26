@@ -8,6 +8,13 @@
   "gitAuthor": "Renovate Bot <bot@renovateapp.com>",
   "minimumReleaseAge": "14 days",
   "onboarding": false,
+  "packageRules": [
+    {
+      "description": "Frida is bumped with Corellium releases, not Frida's own version history",
+      "matchPackageNames": ["frida", "frida-tools"],
+      "enabled": false
+    }
+  ],
   "platform": "github",
   "rebaseWhen": "behind-base",
   "repositories": ["davidcbacker/automatecorellium"]

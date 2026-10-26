@@ -1,0 +1,267 @@
+name: Appium Android Device Farm
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: appium-android-farm
+  cancel-in-progress: false
+  queue: max
+
+permissions:
+  contents: read
+
+env:
+  TERM: xterm
+  VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
+  ANDROID_FARM_DEVICE_COUNT: 2
+  ANDROID_FARM_CORES_PER_DEVICE: 4
+  CORELLIUM_HARDWARE_FLAVOR: ranchu
+  CORELLIUM_FIRMWARE_VERSION: 16.0.0
+  CORELLIUM_FIRMWARE_BUILD: 'r2 userdebug'
+  CORELLIUM_CAFE_APP_ID: com.corellium.cafe
+  CORELLIUM_CAFE_SOURCE_URL: 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
+  CORELLIUM_CAFE_ACTIVITY: .ui.activities.WebViewActivity
+
+jobs:
+  appium-android-farm:
+    name: Appium Android Device Farm [Ubuntu]
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Pull the latest code
+        uses: actions/checkout@v7
+      - name: Install Node
+        uses: actions/setup-node@v7
+        with:
+          cache: 'npm'
+          node-version: 24
+      - name: Check Node package lock
+        run: |
+          npm install --package-lock-only --quiet --no-audit --no-fund
+          if ! git diff --quiet package-lock.json; then
+            {
+              echo -e "\nERROR:\n  Your package-lock.json is out of sync with dependencies."
+              echo -e "\nTO FIX:\n  Run 'npm install --package-lock-only' and commit changes."
+              echo -e "\nGIT DIFF RESULTS:\n"
+              git diff package-lock.json
+            } >&2
+            exit 1
+          fi
+      - name: Install Python
+        uses: actions/setup-python@v7
+        with:
+          cache: pip
+          cache-dependency-path: requirements.txt
+          python-version: 3.14
+      - name: Install API dependencies
+        run: |
+          npm ci --no-audit --no-fund
+          echo "$(pwd)/node_modules/.bin" >> "${GITHUB_PATH}"
+      - name: Log in to Corellium
+        run: |
+          corellium login \
+            --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
+            --endpoint ${{ secrets.CORELLIUM_API_ENDPOINT }}
+      - name: Install additional runner dependencies
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          source ./src/functions_matrix.sh
+          install_appium_server_and_dependencies
+          install_openvpn_dependencies
+          ensure_adb_dependency
+      - name: Wait until available cores
+        timeout-minutes: 30
+        env:
+          CORELLIUM_DEFAULT_PROJECT: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          CORES_REQUIRED=$((ANDROID_FARM_DEVICE_COUNT * ANDROID_FARM_CORES_PER_DEVICE))
+          log_info "Checking for ${CORES_REQUIRED} available cores in project."
+          wait_until_available_cores "${CORELLIUM_DEFAULT_PROJECT}" "${CORES_REQUIRED}"
+          log_info "Sufficient cores are available for ${ANDROID_FARM_DEVICE_COUNT} devices."
+      - name: Create devices
+        timeout-minutes: 15
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          CORELLIUM_DEFAULT_PROJECT: ${{ vars.CORELLIUM_DEFAULT_PROJECT }}
+          CORELLIUM_INSTANCE_NAME_PREFIX: 'Android Device Farm'
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          CREATED_INSTANCE_IDS=()
+          for ((i = 1; i <= ANDROID_FARM_DEVICE_COUNT; i++)); do
+            log_info "Creating device ${i} of ${ANDROID_FARM_DEVICE_COUNT}."
+            wait_until_available_cores \
+              "${CORELLIUM_DEFAULT_PROJECT}" \
+              "${ANDROID_FARM_CORES_PER_DEVICE}"
+            CREATED_CORELLIUM_INSTANCE_ID="$(create_instance \
+              "${CORELLIUM_HARDWARE_FLAVOR}" \
+              "${CORELLIUM_FIRMWARE_VERSION}" \
+              "${CORELLIUM_FIRMWARE_BUILD}" \
+              "${CORELLIUM_DEFAULT_PROJECT}" \
+              "${CORELLIUM_INSTANCE_NAME_PREFIX}")"
+            log_info "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
+            CREATED_INSTANCE_IDS+=("${CREATED_CORELLIUM_INSTANCE_ID}")
+            sleep 30
+          done
+          echo "CORELLIUM_INSTANCE_IDS=${CREATED_INSTANCE_IDS[*]}" >> "${GITHUB_ENV}"
+          log_info "Saved ${#CREATED_INSTANCE_IDS[@]} ephemeral instance IDs as an environment variable."
+      - name: Wait for device agents ready
+        timeout-minutes: 30
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          read -ra INSTANCE_IDS <<< "${CORELLIUM_INSTANCE_IDS}"
+          for INSTANCE_ID in "${INSTANCE_IDS[@]}"; do
+            log_info "Starting and waiting for agent on instance ${INSTANCE_ID}."
+            start_instance "${INSTANCE_ID}"
+            wait_until_agent_ready "${INSTANCE_ID}"
+          done
+      - name: Connect to project VPN
+        timeout-minutes: 2
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          read -ra INSTANCE_IDS <<< "${CORELLIUM_INSTANCE_IDS}"
+          connect_to_vpn_for_instance \
+            "${INSTANCE_IDS[0]}" \
+            "${VPN_CONFIG_PATH}"
+      - name: Connect to devices
+        timeout-minutes: 5
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          read -ra INSTANCE_IDS <<< "${CORELLIUM_INSTANCE_IDS}"
+          CREATED_INSTANCE_SERVICES_IPS=()
+          for INSTANCE_ID in "${INSTANCE_IDS[@]}"; do
+            connect_to_instance "${INSTANCE_ID}" "${CORELLIUM_HARDWARE_FLAVOR}"
+            INSTANCE_SERVICES_IP="$(get_instance_services_ip "${INSTANCE_ID}")"
+            CREATED_INSTANCE_SERVICES_IPS+=("${INSTANCE_SERVICES_IP}")
+          done
+          echo "CREATED_INSTANCE_SERVICES_IPS=${CREATED_INSTANCE_SERVICES_IPS[*]}" >> "${GITHUB_ENV}"
+          log_info "Saved ${#CREATED_INSTANCE_SERVICES_IPS[@]} instance services IPs as an environment variable."
+      - name: Install Corellium Cafe from URL on each device
+        timeout-minutes: 10
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          read -ra INSTANCE_IDS <<< "${CORELLIUM_INSTANCE_IDS}"
+          for INSTANCE_ID in "${INSTANCE_IDS[@]}"; do
+            kill_app "${INSTANCE_ID}" "${CORELLIUM_CAFE_APP_ID}"
+            install_app_from_url "${INSTANCE_ID}" "${CORELLIUM_CAFE_SOURCE_URL}"
+          done
+      - name: Run Appium interactions on the device farm
+        timeout-minutes: 30
+        env:
+          ANDROID_HOME: ${{ vars.ACTIONS_UBUNTU_RUNNER_ANDROID_HOME_PATH }}
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          source ./src/functions_matrix.sh
+          run_appium_server
+          read -ra INSTANCE_SERVICES_IPS <<< "${CREATED_INSTANCE_SERVICES_IPS}"
+          TEST_SCRIPTS=(
+            appium_interactions_cafe_android_mainactivity_login_page.py
+            appium_interactions_cafe_android_cartactivity.py
+            appium_interactions_cafe_android_customerinfoactivity.py
+            appium_interactions_cafe_android_descriptionactivity.py
+            appium_interactions_cafe_android_homeactivity.py
+            appium_interactions_cafe_android_orderactivity.py
+            appium_interactions_cafe_android_orderreviewactivity.py
+            appium_interactions_cafe_android_paymentactivity.py
+            appium_interactions_cafe_android_secretactivity.py
+            appium_interactions_cafe_android_settingsactivity.py
+            appium_interactions_cafe_android_webviewactivity.py
+            appium_interactions_cafe_android_full_flow_no_blog.py
+          )
+          FAILED=0
+          for SCRIPT in "${TEST_SCRIPTS[@]}"; do
+            log_info "Running ${SCRIPT} on all ${#INSTANCE_SERVICES_IPS[@]} devices."
+            SCRIPT_PIDS=()
+            for INSTANCE_SERVICES_IP in "${INSTANCE_SERVICES_IPS[@]}"; do
+              PYTHONUNBUFFERED=1 python3 "src/util/${SCRIPT}" "${INSTANCE_SERVICES_IP}" &
+              SCRIPT_PIDS+=("$!")
+            done
+            for SCRIPT_PID in "${SCRIPT_PIDS[@]}"; do
+              wait "${SCRIPT_PID}" || FAILED=1
+            done
+          done
+          [ "${FAILED}" -eq 0 ] || {
+            log_error 'One or more Appium interaction scripts failed.'
+            exit 1
+          }
+          log_info 'Finished Appium interactions on all devices.'
+      - name: Disconnect from devices
+        if: always()
+        continue-on-error: true
+        timeout-minutes: 5
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          if [ -z "${CORELLIUM_INSTANCE_IDS:-}" ]; then
+            log_info 'CORELLIUM_INSTANCE_IDS is not set.'
+          else
+            read -ra INSTANCE_IDS <<< "${CORELLIUM_INSTANCE_IDS}"
+            for INSTANCE_ID in "${INSTANCE_IDS[@]}"; do
+              disconnect_from_instance "${INSTANCE_ID}" "${CORELLIUM_HARDWARE_FLAVOR}" || {
+                log_error "Unable to disconnect from device ${INSTANCE_ID}. Retrying."
+                disconnect_from_instance "${INSTANCE_ID}" "${CORELLIUM_HARDWARE_FLAVOR}"
+              }
+            done
+          fi
+      - name: Delete devices
+        if: always()
+        timeout-minutes: 15
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          if [ -z "${CORELLIUM_INSTANCE_IDS:-}" ]; then
+            log_info 'CORELLIUM_INSTANCE_IDS is not set.'
+          else
+            read -ra INSTANCE_IDS <<< "${CORELLIUM_INSTANCE_IDS}"
+            for INSTANCE_ID in "${INSTANCE_IDS[@]}"; do
+              if does_instance_exist "${INSTANCE_ID}"; then
+                log_info "Ready to delete ephemeral instance ${INSTANCE_ID}."
+                stop_instance "${INSTANCE_ID}" || true
+                delete_instance "${INSTANCE_ID}"
+              fi
+            done
+          fi
+      - name: Upload artifact 'Appium screenshots'
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: appium-screenshots-android-farm
+          path: |
+            corellium_cafe_*.png
+          compression-level: 9
+          if-no-files-found: ignore
+      - name: Clean up Corellium auth and processes
+        if: always()
+        timeout-minutes: 1
+        env:
+          CORELLIUM_CLI_PROFILE: '/home/runner/.config/.corellium/profile.json'
+        run: |
+          readonly FILES_TO_DELETE=(
+            "${CORELLIUM_CLI_PROFILE}"
+            "${VPN_CONFIG_PATH}"
+          )
+          PROCS_TO_KILL=(
+            MainThread
+            appium
+            avahi-daemon
+            openvpn
+          )
+          for FILE_PATH in "${FILES_TO_DELETE[@]}"; do
+            if [ -f "${FILE_PATH}" ]; then
+              echo "[+] Deleting ${FILE_PATH}"
+              rm -f "${FILE_PATH}"
+            fi
+          done
+          for PROCESS in "${PROCS_TO_KILL[@]}"; do
+            if pgrep "${PROCESS}" > /dev/null 2>&1; then
+              echo "[+] Killing ${PROCESS}"
+              sudo killall "${PROCESS}"
+              echo "[+] Killed ${PROCESS}"
+            fi
+          done

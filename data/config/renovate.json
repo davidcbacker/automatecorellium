@@ -9,6 +9,6 @@
   "minimumReleaseAge": "14 days",
   "onboarding": false,
   "platform": "github",
-  "rebaseWhen": "behind-base",
+  "rebaseWhen": "behind-base-branch",
   "repositories": ["davidcbacker/automatecorellium"]
 }

@@ -786,10 +786,7 @@ install_usbfluxd_and_dependencies()
   )
 
   case "$(uname -m)" in
-    amd64 | x86_64)
-      USBFLUXD_APT_DEPS+=('libimobiledevice6')
-      ;;
-    aarch64 | arm64)
+    amd64 | x86_64 | aarch64 | arm64)
       USBFLUXD_APT_DEPS+=('libimobiledevice-1.0-6')
       ;;
     *)

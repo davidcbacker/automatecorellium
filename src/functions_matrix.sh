@@ -450,6 +450,7 @@ close_appium_session()
   local SESSION_ID="${1:?}"
   local DEFAULT_APPIUM_PORT='4723'
   local APPIUM_API_SESSION_URL="http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session/${SESSION_ID}"
+
   curl --silent -X DELETE "${APPIUM_API_SESSION_URL}" \
     -H "Content-Type: application/json" > /dev/null || {
     log_error 'Failed to close session.'
@@ -458,7 +459,8 @@ close_appium_session()
 
   # Verify that the session ID is now invalid
   local GET_APPIUM_SESSION_JSON_RESPONSE
-  GET_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent -X GET "${APPIUM_API_SESSION_URL}")"
+  GET_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent -X GET "${APPIUM_API_SESSION_URL}/appium/capabilities")"
+
   if ! printf '%s' "${GET_APPIUM_SESSION_JSON_RESPONSE}" | jq -e '.value.error == "invalid session id"' > /dev/null; then
     echo "${GET_APPIUM_SESSION_JSON_RESPONSE}"
     log_error "Appium session ${SESSION_ID} is still valid after close."

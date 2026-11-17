@@ -137,7 +137,7 @@ jobs:
           cache: pip
           cache-dependency-path: requirements.txt
           python-version: 3.14
-      - name: Install additional runner dependencies
+      - name: Install additional dependencies
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_frida.sh

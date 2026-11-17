@@ -78,13 +78,6 @@ jobs:
             } >&2
             exit 1
           fi
-      - name: Install Python
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        uses: actions/setup-python@v7
-        with:
-          cache: pip
-          cache-dependency-path: requirements.txt
-          python-version: 3.14
       - name: Install API dependencies
         run: |
           npm ci --no-audit --no-fund
@@ -137,6 +130,13 @@ jobs:
             echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
             log_info 'Saved ephemeral instance ID as environmental variable.'
           fi
+      - name: Install Python
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        uses: actions/setup-python@v7
+        with:
+          cache: pip
+          cache-dependency-path: requirements.txt
+          python-version: 3.14
       - name: Install additional runner dependencies
         run: |
           source ./src/functions.sh && set -euo pipefail

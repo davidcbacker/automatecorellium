@@ -391,7 +391,7 @@ is_instance_panicked()
   local INSTANCE_ID="${1:?}"
   local GET_INSTANCE_JSON
   GET_INSTANCE_JSON="$(get_instance_json "${INSTANCE_ID}")"
-  INSTANCE_PANICKED_STATUS="$(echo "${GET_INSTANCE_JSON}" | jq -r '.state')" || {
+  INSTANCE_PANICKED_STATUS="$(echo "${GET_INSTANCE_JSON}" | jq -r '.panicked')" || {
     log_error "Failed to find panicked status from GET JSON response for instance ${INSTANCE_ID}."
     exit 1
   }

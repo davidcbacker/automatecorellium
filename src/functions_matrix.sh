@@ -450,6 +450,7 @@ close_appium_session()
   local SESSION_ID="${1:?}"
   local DEFAULT_APPIUM_PORT='4723'
   local APPIUM_API_SESSION_URL="http://127.0.0.1:${DEFAULT_APPIUM_PORT}/session/${SESSION_ID}"
+
   curl --silent -X DELETE "${APPIUM_API_SESSION_URL}" \
     -H "Content-Type: application/json" > /dev/null || {
     log_error 'Failed to close session.'
@@ -458,7 +459,8 @@ close_appium_session()
 
   # Verify that the session ID is now invalid
   local GET_APPIUM_SESSION_JSON_RESPONSE
-  GET_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent -X GET "${APPIUM_API_SESSION_URL}")"
+  GET_APPIUM_SESSION_JSON_RESPONSE="$(curl --silent -X GET "${APPIUM_API_SESSION_URL}/appium/capabilities")"
+
   if ! printf '%s' "${GET_APPIUM_SESSION_JSON_RESPONSE}" | jq -e '.value.error == "invalid session id"' > /dev/null; then
     echo "${GET_APPIUM_SESSION_JSON_RESPONSE}"
     log_error "Appium session ${SESSION_ID} is still valid after close."
@@ -533,11 +535,8 @@ analyze_corellium_cafe_matrix_report()
     exit 1
   }
   log_info "Listing failed assessment checks for ${MATRIX_JSON_REPORT_PATH}."
-  print_matching_matrix_check_outcomes_from_local_json_path \
-    "${MATRIX_JSON_REPORT_PATH}" \
-    "${MATRIX_CHECK_EXPECTED_OUTCOME}"
-  print_high_severity_failed_matrix_check_count_from_local_json_path \
-    "${MATRIX_JSON_REPORT_PATH}"
+  print_failed_matrix_tests "${MATRIX_JSON_REPORT_PATH}"
+  print_high_severity_failed_check_count "${MATRIX_JSON_REPORT_PATH}"
   ensure_no_errors_in_matrix_checks "${MATRIX_JSON_REPORT_PATH}"
   log_info "Verifying outcome of local storage check for ${MATRIX_JSON_REPORT_PATH}."
   ensure_matrix_check_outcomes_from_local_json_path \
@@ -546,7 +545,23 @@ analyze_corellium_cafe_matrix_report()
     "${MATRIX_CHECK_EXPECTED_OUTCOME}"
 }
 
-print_matching_matrix_check_outcomes_from_local_json_path()
+print_failed_matrix_tests()
+{
+  local MATRIX_OUTCOME_FAILURE='fail'
+  print_matching_matrix_check_outcomes \
+    "${MATRIX_JSON_REPORT_PATH}" \
+    "${MATRIX_OUTCOME_FAILURE}"
+}
+
+print_errored_matrix_tests()
+{
+  local MATRIX_OUTCOME_ERROR='error'
+  print_matching_matrix_check_outcomes \
+    "${MATRIX_JSON_REPORT_PATH}" \
+    "${MATRIX_OUTCOME_ERROR}"
+}
+
+print_matching_matrix_check_outcomes()
 {
   local MATRIX_JSON_REPORT_PATH="${1:?}"
   local MATRIX_CHECK_DEFAULT_EXPECTED_OUTCOME='fail'
@@ -558,7 +573,7 @@ print_matching_matrix_check_outcomes_from_local_json_path()
     sort
 }
 
-print_high_severity_failed_matrix_check_count_from_local_json_path()
+print_high_severity_failed_check_count()
 {
   local MATRIX_JSON_REPORT_PATH="${1:?}"
   local HIGH_SEVERITY_FAILED_CHECK_COUNT
@@ -577,6 +592,7 @@ ensure_no_errors_in_matrix_checks()
     '.results[] | select(.outcome == $expected_outcome)' \
     "${MATRIX_JSON_REPORT_PATH}" > /dev/null; then
     log_error 'The MATRIX report contains errors.'
+    print_errored_matrix_tests "${MATRIX_JSON_REPORT_PATH}"
     log_warn 'Ignoring intermittent check errors.'
   else
     log_info 'The MATRIX report is free of errors.'
@@ -592,7 +608,8 @@ ensure_matrix_check_outcomes_from_local_json_path()
     --arg id "${MATRIX_CHECK_TO_ANALYZE}" \
     --arg expected_outcome "${MATRIX_CHECK_EXPECTED_OUTCOME}" \
     '.results[] | select(.id == $id) | .outcome == $expected_outcome' \
-    "${MATRIX_JSON_REPORT_PATH}" || {
+    "${MATRIX_JSON_REPORT_PATH}" \
+    > /dev/null || {
     log_error "MATRIX check ${MATRIX_CHECK_TO_ANALYZE} is not ${MATRIX_CHECK_EXPECTED_OUTCOME}."
     exit 1
   }

@@ -41,8 +41,8 @@ jobs:
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.apk'
           - corellium-os: iOS
             hardware_flavor: iphone17pm
-            firmware_version: 26.5.2
-            firmware_build: 23F84
+            firmware_version: 27.0.1
+            firmware_build: 24A446
             corellium_cafe_app_id: com.corellium.Cafe
             corellium_cafe_source_url: 'https://www.corellium.com/hubfs/Corellium_Cafe.ipa'
           - os: ubuntu-latest
@@ -78,13 +78,6 @@ jobs:
             } >&2
             exit 1
           fi
-      - name: Install Python
-        if: ${{ matrix.os == 'ubuntu-latest' }}
-        uses: actions/setup-python@v7
-        with:
-          cache: pip
-          cache-dependency-path: requirements.txt
-          python-version: 3.14
       - name: Install API dependencies
         run: |
           npm ci --no-audit --no-fund
@@ -137,7 +130,14 @@ jobs:
             echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
             log_info 'Saved ephemeral instance ID as environmental variable.'
           fi
-      - name: Install additional runner dependencies
+      - name: Install Python
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        uses: actions/setup-python@v7
+        with:
+          cache: pip
+          cache-dependency-path: requirements.txt
+          python-version: 3.14
+      - name: Install additional dependencies
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_frida.sh

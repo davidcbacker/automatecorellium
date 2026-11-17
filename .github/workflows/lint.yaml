@@ -65,12 +65,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
       - name: Lint markdown docs
-        uses: DavidAnson/markdownlint-cli2-action@v24
+        uses: DavidAnson/markdownlint-cli2-action@v25
         with:
           config: data/config/.markdownlint-cli2.jsonc
           globs: '**/*.md'
       - name: Spellcheck markdown docs
-        uses: rojopolis/spellcheck-github-actions@0.66.0
+        uses: rojopolis/spellcheck-github-actions@0.68.0
         with:
           config_path: data/config/spellcheck.yaml
 

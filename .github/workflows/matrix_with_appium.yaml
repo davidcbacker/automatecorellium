@@ -84,13 +84,6 @@ jobs:
             } >&2
             exit 1
           fi
-      - name: Install Python
-        if: ${{ matrix.runner-os == 'ubuntu-latest' }}
-        uses: actions/setup-python@v7
-        with:
-          cache: pip
-          cache-dependency-path: requirements.txt
-          python-version: 3.14
       - name: Install API dependencies
         run: |
           npm ci --no-audit --no-fund
@@ -128,7 +121,14 @@ jobs:
           log_info "Created instance ${CREATED_CORELLIUM_INSTANCE_ID}."
           echo "CORELLIUM_INSTANCE_ID=${CREATED_CORELLIUM_INSTANCE_ID}" >> "${GITHUB_ENV}"
           log_info 'Updated environmental variables for ephemeral instance.'
-      - name: Install additional runner dependencies
+      - name: Install Python
+        if: ${{ matrix.runner-os == 'ubuntu-latest' }}
+        uses: actions/setup-python@v7
+        with:
+          cache: pip
+          cache-dependency-path: requirements.txt
+          python-version: 3.14
+      - name: Install additional dependencies
         run: |
           source ./src/functions.sh && set -euo pipefail
           source ./src/functions_matrix.sh

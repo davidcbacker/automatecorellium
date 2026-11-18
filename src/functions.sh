@@ -444,10 +444,10 @@ wait_until_agent_ready()
         exit 1
         ;;
     esac
-    if is_instance_panicked "${INSTANCE_ID}"; then
+    is_instance_panicked "${INSTANCE_ID}" && {
       log_error "Instance ${INSTANCE_ID} is in a panicked state."
       exit 1
-    fi
+    }
     sleep "${AGENT_READY_SLEEP_TIME}"
   done
   log_info 'Virtual device agent is ready.'

@@ -6,6 +6,9 @@ on:
   workflow_call:
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 concurrency:
   group: appium-device-farm
   cancel-in-progress: false

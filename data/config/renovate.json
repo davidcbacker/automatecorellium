@@ -16,6 +16,6 @@
     }
   ],
   "platform": "github",
-  "rebaseWhen": "behind-base",
+  "rebaseWhen": "behind-base-branch",
   "repositories": ["davidcbacker/automatecorellium"]
 }

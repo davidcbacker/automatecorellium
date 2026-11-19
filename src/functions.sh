@@ -380,16 +380,34 @@ get_instance_flavor()
   local GET_INSTANCE_RESPONSE_JSON INSTANCE_FLAVOR
   GET_INSTANCE_JSON="$(get_instance_json "${INSTANCE_ID}")"
   INSTANCE_FLAVOR="$(echo "${GET_INSTANCE_JSON}" | jq -r '.flavor')" || {
-    log_error "Failed to parse get details JSON response for instance ${INSTANCE_ID}."
+    log_error "Failed to find flavor from GET JSON response for instance ${INSTANCE_ID}."
     exit 1
   }
   echo "${INSTANCE_FLAVOR}"
 }
 
+is_instance_panicked()
+{
+  local INSTANCE_ID="${1:?}"
+  local GET_INSTANCE_JSON
+  GET_INSTANCE_JSON="$(get_instance_json "${INSTANCE_ID}")"
+  INSTANCE_PANICKED_STATUS="$(echo "${GET_INSTANCE_JSON}" | jq -r '.panicked')" || {
+    log_error "Failed to find panicked status from GET JSON response for instance ${INSTANCE_ID}."
+    exit 1
+  }
+  if [ "${INSTANCE_PANICKED_STATUS}" = 'true' ]; then
+    return 0
+  elif [ "${INSTANCE_PANICKED_STATUS}" = 'false' ]; then
+    return 1
+  else
+    log_error "Unexpected instance panicked status '${INSTANCE_PANICKED_STATUS}' was found."
+    exit 1
+  fi
+}
+
 is_agent_ready()
 {
   local INSTANCE_ID="${1:?}"
-  # pass in project ID to reduce the number of API calls
   local PROJECT_ID="${2:?}"
   local AGENT_READY_JSON_RESPONSE AGENT_READY_STATUS
   AGENT_READY_JSON_RESPONSE="$(corellium ready --instance "${INSTANCE_ID}" --project "${PROJECT_ID}" 2> /dev/null)" || {
@@ -414,7 +432,6 @@ wait_until_agent_ready()
   local PROJECT_ID INSTANCE_STATUS
   PROJECT_ID="$(get_project_from_instance_id "${INSTANCE_ID}")"
   log_info 'Waiting until virtual device agent is ready.'
-  # pass project ID into is_agent_ready() to reduce the number of API calls
   while ! is_agent_ready "${INSTANCE_ID}" "${PROJECT_ID}"; do
     INSTANCE_STATUS="$(get_instance_status "${INSTANCE_ID}")"
     case "${INSTANCE_STATUS}" in
@@ -427,6 +444,10 @@ wait_until_agent_ready()
         exit 1
         ;;
     esac
+    is_instance_panicked "${INSTANCE_ID}" && {
+      log_error "Instance ${INSTANCE_ID} is in a panicked state."
+      exit 1
+    }
     sleep "${AGENT_READY_SLEEP_TIME}"
   done
   log_info 'Virtual device agent is ready.'

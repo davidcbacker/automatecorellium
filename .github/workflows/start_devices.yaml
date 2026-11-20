@@ -1,4 +1,4 @@
-name: Devices - Start
+name: Devices - Start and restore
 
 on:
   schedule:
@@ -13,7 +13,7 @@ env:
 
 jobs:
   corellium-start:
-    name: Start devices
+    name: Start and restore
     runs-on: ubuntu-latest
     steps:
       - name: Pull the latest code
@@ -31,10 +31,18 @@ jobs:
         run: |
           corellium login \
             --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
-            --endpoint  ${{ secrets.CORELLIUM_API_ENDPOINT }}
+            --endpoint ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Start Corellium virtual devices
         env:
           START_INSTANCES: ${{ vars.START_INSTANCES }}
         run: |
           source ./src/functions.sh && set -euo pipefail
           start_demo_instances
+      - name: Restore snapshots
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          RESTORE_SNAPSHOTS: ${{ vars.RESTORE_SNAPSHOTS }}
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          restore_demo_instance_snapshots

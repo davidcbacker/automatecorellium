@@ -16,6 +16,7 @@ jobs:
     permissions:
       pull-requests: read
     outputs:
+      appium: ${{ steps.filter.outputs.appium }}
       ci: ${{ steps.filter.outputs.ci }}
       frida: ${{ steps.filter.outputs.frida }}
       javascript: ${{ steps.filter.outputs.javascript }}
@@ -23,7 +24,7 @@ jobs:
       matrix: ${{ steps.filter.outputs.matrix }}
       python: ${{ steps.filter.outputs.python }}
       shell: ${{ steps.filter.outputs.shell }}
-      static-lint: ${{ steps.filter.outputs.static-lint }}      
+      static-lint: ${{ steps.filter.outputs.static-lint }}
     steps:
       - uses: actions/checkout@v7
       - uses: dorny/paths-filter@v4
@@ -39,6 +40,7 @@ jobs:
       pull-requests: read
     if: >-
       ${{
+        needs.changes.outputs.appium == 'true' ||
         needs.changes.outputs.ci == 'true' ||
         needs.changes.outputs.javascript == 'true' ||
         needs.changes.outputs.markdown == 'true' ||
@@ -48,6 +50,7 @@ jobs:
       }}
     uses: ./.github/workflows/lint.yaml
     with:
+      appium: ${{ needs.changes.outputs.appium }}
       ci: ${{ needs.changes.outputs.ci }}
       markdown: ${{ needs.changes.outputs.markdown }}
       python: ${{ needs.changes.outputs.python }}
@@ -74,4 +77,11 @@ jobs:
         needs.changes.outputs.javascript == 'true'
       }}
     uses: ./.github/workflows/frida.yaml
+    secrets: inherit
+
+  call-appium-device-farm:
+    name: Appium device farm
+    needs: [ changes, call-lint-workflow ]
+    if: ${{ needs.changes.outputs.appium == 'true' }}
+    uses: ./.github/workflows/appium_device_farm.yaml
     secrets: inherit

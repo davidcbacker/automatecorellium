@@ -59,31 +59,33 @@ jobs:
         run: |
           echo "Logging in with secret keys ${{ matrix.api_endpoint_secret_key }} and ${{ matrix.api_token_secret_key }}"
           corellium login \
-            --apitoken ${{ secrets[matrix.api_token_secret_key] }} \
-            --endpoint ${{ secrets[matrix.api_endpoint_secret_key] }}
+            --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
+            --endpoint ${{ secrets.CORELLIUM_API_ENDPOINT }}
       - name: Wait until available cores
         timeout-minutes: 30
         run: |
           source ./src/functions.sh && set -euo pipefail
           if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
-            wait_until_available_cores "${{ matrix.default_corellium_project }}" '4'
+            wait_until_available_cores "${{ matrix.default_corellium_project }}" '2'
           else
             wait_until_available_cores "${{ matrix.default_corellium_project }}" '6'
           fi
       - name: Create instances
         timeout-minutes: 1
         env:
-          CORELLIUM_API_ENDPOINT: ${{ secrets[matrix.api_endpoint_secret_key] }}
-          CORELLIUM_API_TOKEN: ${{ secrets[matrix.api_token_secret_key] }}
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
           CORELLIUM_INSTANCE_NAME_PREFIX: 'MATRIX Automation'
         run: |
           source ./src/functions.sh && set -euo pipefail
           log_info "Creating instances."
-          DEVICE_FARM_INSTANCE_IDS=$(create_device_farm_instancees)
+          CREATED_DEVICE_FARM_INSTANCE_IDS=$(create_device_farm_instancees)
           log_info "Created instances:"
           for device_id in ${DEVICE_FARM_INSTANCE_IDS[&]}; do
             log_info "${device_id}"
           done
+          echo "DEVICE_FARM_INSTANCE_IDS=$(CREATED_DEVICE_FARM_INSTANCE_IDS[*])" >> "${GITHUB_ENV}"
+          log_info 'Updated environmental variables for ephemeral instance.'
       - name: Install additional runner dependencies
         run: |
           source ./src/functions.sh && set -euo pipefail
@@ -97,11 +99,14 @@ jobs:
         timeout-minutes: 30
         run: |
           source ./src/functions.sh && set -euo pipefail
-          [ -z "${CORELLIUM_INSTANCE_ID}" ] &&
-            log_error "No instance id" &&
+          [ -z "${DEVICE_FARM_INSTANCE_IDS}" ] &&
+            log_error "No instance IDs array." &&
             exit 1
-          start_instance "${CORELLIUM_INSTANCE_ID}"
-          wait_until_agent_ready "${CORELLIUM_INSTANCE_ID}"
+          read -r -a DEVICE_FARM_INSTANCE_IDS <<< "${DEVICE_FARM_INSTANCE_IDS}"
+          for corellium_instance_id in ${DEVICE_FARM_INSTANCE_IDS[@]}; do
+            start_instance "${corellium_instance_id}"
+            wait_until_agent_ready "${corellium_instance_id}"
+          done
           # unlock_instance "${CORELLIUM_INSTANCE_ID}" # only for iOS
       - name: Connect to project VPN
         if: ${{ matrix.runner-os == 'ubuntu-latest' }}
@@ -111,6 +116,69 @@ jobs:
           [ -z "${CORELLIUM_INSTANCE_ID}" ] &&
             log_error "No instance id" &&
             exit 1
+          [ -z "${DEVICE_FARM_INSTANCE_IDS}" ] &&
+            log_error "No instance IDs array." &&
+            exit 1
+          read -r -a DEVICE_FARM_INSTANCE_IDS <<< "${DEVICE_FARM_INSTANCE_IDS}"
           connect_to_vpn_for_instance \
-            "${CORELLIUM_INSTANCE_ID}" \
+            "${DEVICE_FARM_INSTANCE_IDS[0]}" \
             "${{ env.VPN_CONFIG_PATH }}"
+      - name: Connect to device farm instances
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          [ -z "${DEVICE_FARM_INSTANCE_IDS}" ] &&
+            log_error "No instance IDs array." &&
+            exit 1
+          read -r -a DEVICE_FARM_INSTANCE_IDS <<< "${DEVICE_FARM_INSTANCE_IDS}"
+          for corellium_instance_id in ${DEVICE_FARM_INSTANCE_IDS[@]}; do
+            connect_to_instance "${corellium_instance_id}"
+          done
+      - name: Start Appium server
+        run: |
+          echo "TODO"
+          # appium --config data/config/appium_server &
+      - name: Start Appium server Create test sessions to prepare devices
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          [ -z "${DEVICE_FARM_INSTANCE_IDS}" ] &&
+            log_error "No instance IDs array." &&
+            exit 1
+          read -r -a DEVICE_FARM_INSTANCE_IDS <<< "${DEVICE_FARM_INSTANCE_IDS}"
+          for corellium_instance_id in ${DEVICE_FARM_INSTANCE_IDS[@]}; do
+            corellium_instance_services_ip="$(get_instance_services_ip "${corellium_instance_id})"
+            create_test_appium_session "${corellium_instance_services_ip}"
+          done
+      - name: Run Appuim scripts on devices
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          [ -z "${DEVICE_FARM_INSTANCE_IDS}" ] &&
+            log_error "No instance IDs array." &&
+            exit 1
+          read -r -a DEVICE_FARM_INSTANCE_IDS <<< "${DEVICE_FARM_INSTANCE_IDS}"
+          for corellium_instance_id in ${DEVICE_FARM_INSTANCE_IDS[@]}; do
+            corellium_instance_services_ip="$(get_instance_services_ip "${corellium_instance_id})"
+            connect_to_instance "${corellium_instance_id}"
+          done
+      - name: Disconnect from devices
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          [ -z "${DEVICE_FARM_INSTANCE_IDS}" ] &&
+            log_error "No instance IDs array." &&
+            exit 1
+          read -r -a DEVICE_FARM_INSTANCE_IDS <<< "${DEVICE_FARM_INSTANCE_IDS}"
+          for corellium_instance_id in ${DEVICE_FARM_INSTANCE_IDS[@]}; do
+            connect_to_instance "${corellium_instance_id}"
+          done
+      - name: Delete instances
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          [ -z "${DEVICE_FARM_INSTANCE_IDS}" ] &&
+            log_error "No instance IDs array." &&
+            exit 1
+          read -r -a DEVICE_FARM_INSTANCE_IDS <<< "${DEVICE_FARM_INSTANCE_IDS}"
+          for corellium_instance_id in ${DEVICE_FARM_INSTANCE_IDS[@]}; do
+            delete_instance "${corellium_instance_id}"
+          done
+      - name: Clean up runner environment
+        run: |
+          echo 'TODO kill processes and delete the vpn and such'

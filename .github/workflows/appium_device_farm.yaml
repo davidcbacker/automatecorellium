@@ -32,7 +32,6 @@ jobs:
           cache: 'npm'
           node-version: 24
       - name: Check Node package lock
-        continue-on-error: ${{ matrix.runner-os != 'ubuntu-latest' }}
         run: |
           npm install --package-lock-only --quiet --no-audit --no-fund
           if ! git diff --quiet package-lock.json; then
@@ -45,7 +44,6 @@ jobs:
             exit 1
           fi
       - name: Install Python
-        if: ${{ matrix.runner-os == 'ubuntu-latest' }}
         uses: actions/setup-python@v7
         with:
           cache: pip
@@ -109,7 +107,6 @@ jobs:
           done
           # unlock_instance "${CORELLIUM_INSTANCE_ID}" # only for iOS
       - name: Connect to project VPN
-        if: ${{ matrix.runner-os == 'ubuntu-latest' }}
         timeout-minutes: 2
         run: |
           source ./src/functions.sh && set -euo pipefail

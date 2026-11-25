@@ -1,7 +1,12 @@
-ci:
-  - '.github/workflows/*.yaml'
-  - '.github/workflows/*.yml'
-  - 'data/config/**'
+appium:
+  - '.github/workflows/matrix_with_appium.yaml'
+  - 'data/config/appium_android.json'
+  - 'data/config/appium_ios.json'
+  - 'data/config/appium_server.json'
+  - 'src/functions.sh'
+  - 'src/functions_appium.sh'
+  - 'src/functions_matrix.sh'
+  - 'src/util/appium_device_farm*.py'
 frida:
   - '.github/workflows/frida.yaml'
   - 'src/functions.sh'
@@ -20,8 +25,10 @@ matrix:
   - '.github/workflows/matrix_with_appium.yaml'
   - 'data/config/appium_android.json'
   - 'data/config/appium_ios.json'
+  - 'data/config/appium_server.json'
   - 'data/wordlist.txt'
   - 'src/functions.sh'
+  - 'src/functions_appium.sh'
   - 'src/functions_matrix.sh'
   - 'src/util/appium_interactions_cafe_android.py'
   - 'src/util/appium_interactions_cafe_ios.py'

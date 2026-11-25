@@ -1,0 +1,181 @@
+name: Appium Device Farm
+
+on:
+  schedule:
+    - cron: "47 23 * * *"
+  workflow_call:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: appium-device-farm
+  cancel-in-progress: false
+  queue: max
+
+env:
+  TERM: xterm
+  VPN_CONFIG_PATH: /home/runner/my_vpn_config.ovpn
+
+jobs:
+  appium-device-farm:
+    name: Run Appium device farm
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Pull the latest code
+        uses: actions/checkout@v7
+      - name: Install Node
+        uses: actions/setup-node@v7
+        with:
+          cache: 'npm'
+          node-version: 24
+      - name: Check Node package lock
+        run: |
+          npm install --package-lock-only --quiet --no-audit --no-fund
+          if ! git diff --quiet package-lock.json; then
+            {
+              echo -e "\nERROR:\n  Your package-lock.json is out of sync with dependencies."
+              echo -e "\nTO FIX:\n  Run 'npm install --package-lock-only' and commit changes."
+              echo -e "\nGIT DIFF RESULTS:\n"
+              git diff package-lock.json
+            } >&2
+            exit 1
+          fi
+      - name: Install Python
+        uses: actions/setup-python@v7
+        with:
+          cache: pip
+          cache-dependency-path: requirements.txt
+          python-version: 3.14
+      - name: Install API dependencies
+        run: |
+          npm ci --no-audit --no-fund
+          echo "$(pwd)/node_modules/.bin" >> "${GITHUB_PATH}"
+      - name: Log in to Corellium
+        run: |
+          echo "Logging in with secret keys ${{ matrix.api_endpoint_secret_key }} and ${{ matrix.api_token_secret_key }}"
+          corellium login \
+            --apitoken ${{ secrets.CORELLIUM_API_TOKEN }} \
+            --endpoint ${{ secrets.CORELLIUM_API_ENDPOINT }}
+      - name: Wait until available cores
+        timeout-minutes: 30
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          if [ "${{ matrix.hardware_flavor }}" = 'ranchu' ]; then
+            wait_until_available_cores "${{ matrix.default_corellium_project }}" '2'
+          else
+            wait_until_available_cores "${{ matrix.default_corellium_project }}" '6'
+          fi
+      - name: Create instances
+        timeout-minutes: 1
+        env:
+          CORELLIUM_API_ENDPOINT: ${{ secrets.CORELLIUM_API_ENDPOINT }}
+          CORELLIUM_API_TOKEN: ${{ secrets.CORELLIUM_API_TOKEN }}
+          CORELLIUM_INSTANCE_NAME_PREFIX: 'MATRIX Automation'
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          log_info "Creating instances."
+          CREATED_DEVICE_FARM_INSTANCE_IDS=$(create_device_farm_instancees)
+          log_info "Created instances:"
+          for device_id in ${DEVICE_FARM_INSTANCE_IDS[&]}; do
+            log_info "${device_id}"
+          done
+          echo "DEVICE_FARM_INSTANCE_IDS=$(CREATED_DEVICE_FARM_INSTANCE_IDS[*])" >> "${GITHUB_ENV}"
+          log_info 'Updated environmental variables for ephemeral instance.'
+      - name: Install additional runner dependencies
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          source ./src/functions_matrix.sh
+          install_appium_server_and_dependencies
+          install_openvpn_dependencies
+          ensure_adb_dependency
+          # install_usbfluxd_and_dependencies # iOS only
+          fi
+      - name: Wait for instance agent ready
+        timeout-minutes: 30
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          [ -z "${DEVICE_FARM_INSTANCE_IDS}" ] &&
+            log_error "No instance IDs array." &&
+            exit 1
+          read -r -a DEVICE_FARM_INSTANCE_IDS <<< "${DEVICE_FARM_INSTANCE_IDS}"
+          for corellium_instance_id in ${DEVICE_FARM_INSTANCE_IDS[@]}; do
+            start_instance "${corellium_instance_id}"
+            wait_until_agent_ready "${corellium_instance_id}"
+          done
+          # unlock_instance "${CORELLIUM_INSTANCE_ID}" # only for iOS
+      - name: Connect to project VPN
+        timeout-minutes: 2
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          [ -z "${CORELLIUM_INSTANCE_ID}" ] &&
+            log_error "No instance id" &&
+            exit 1
+          [ -z "${DEVICE_FARM_INSTANCE_IDS}" ] &&
+            log_error "No instance IDs array." &&
+            exit 1
+          read -r -a DEVICE_FARM_INSTANCE_IDS <<< "${DEVICE_FARM_INSTANCE_IDS}"
+          connect_to_vpn_for_instance \
+            "${DEVICE_FARM_INSTANCE_IDS[0]}" \
+            "${{ env.VPN_CONFIG_PATH }}"
+      - name: Connect to device farm instances
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          [ -z "${DEVICE_FARM_INSTANCE_IDS}" ] &&
+            log_error "No instance IDs array." &&
+            exit 1
+          read -r -a DEVICE_FARM_INSTANCE_IDS <<< "${DEVICE_FARM_INSTANCE_IDS}"
+          for corellium_instance_id in ${DEVICE_FARM_INSTANCE_IDS[@]}; do
+            connect_to_instance "${corellium_instance_id}"
+          done
+      - name: Start Appium server
+        run: |
+          echo "TODO"
+          # appium --config data/config/appium_server &
+      - name: Start Appium server Create test sessions to prepare devices
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          [ -z "${DEVICE_FARM_INSTANCE_IDS}" ] &&
+            log_error "No instance IDs array." &&
+            exit 1
+          read -r -a DEVICE_FARM_INSTANCE_IDS <<< "${DEVICE_FARM_INSTANCE_IDS}"
+          for corellium_instance_id in ${DEVICE_FARM_INSTANCE_IDS[@]}; do
+            corellium_instance_services_ip="$(get_instance_services_ip "${corellium_instance_id})"
+            create_test_appium_session "${corellium_instance_services_ip}"
+          done
+      - name: Run Appuim scripts on devices
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          [ -z "${DEVICE_FARM_INSTANCE_IDS}" ] &&
+            log_error "No instance IDs array." &&
+            exit 1
+          read -r -a DEVICE_FARM_INSTANCE_IDS <<< "${DEVICE_FARM_INSTANCE_IDS}"
+          for corellium_instance_id in ${DEVICE_FARM_INSTANCE_IDS[@]}; do
+            corellium_instance_services_ip="$(get_instance_services_ip "${corellium_instance_id})"
+            connect_to_instance "${corellium_instance_id}"
+          done
+      - name: Disconnect from devices
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          [ -z "${DEVICE_FARM_INSTANCE_IDS}" ] &&
+            log_error "No instance IDs array." &&
+            exit 1
+          read -r -a DEVICE_FARM_INSTANCE_IDS <<< "${DEVICE_FARM_INSTANCE_IDS}"
+          for corellium_instance_id in ${DEVICE_FARM_INSTANCE_IDS[@]}; do
+            connect_to_instance "${corellium_instance_id}"
+          done
+      - name: Delete instances
+        run: |
+          source ./src/functions.sh && set -euo pipefail
+          [ -z "${DEVICE_FARM_INSTANCE_IDS}" ] &&
+            log_error "No instance IDs array." &&
+            exit 1
+          read -r -a DEVICE_FARM_INSTANCE_IDS <<< "${DEVICE_FARM_INSTANCE_IDS}"
+          for corellium_instance_id in ${DEVICE_FARM_INSTANCE_IDS[@]}; do
+            delete_instance "${corellium_instance_id}"
+          done
+      - name: Clean up runner environment
+        run: |
+          echo 'TODO kill processes and delete the vpn and such'
